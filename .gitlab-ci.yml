@@ -22,21 +22,27 @@ variables:
   REACT_APP_ONADATA_CLIENT_ID: "hunter2"
 
 stages:
-  - build
-  - test
+  - build_dependencies
+  - lint_test
+  - unit_test
 
 cache:
   paths:
     - node_modules/
 
 install_dependencies:
-  stage: build
+  stage: build_dependencies
   script:
     - npm install
   artifacts:
     paths:
       - node_modules/
 
-testing_testing:
-  stage: test
-  script: npm run test
+lint_testing:
+  stage: lint_test
+  script: npm run lint-ts 
+
+unit_testing:
+  stage: unit_test
+  script: npm run test --verbose --coverage=true --forceExit --detectOpenHandles
+
