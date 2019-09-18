@@ -33,16 +33,16 @@ cache:
 install_dependencies:
   stage: build_dependencies
   script:
-    - npm install
+    - yarn
   artifacts:
     paths:
       - node_modules/
 
 lint_testing:
   stage: lint_test
-  script: npm run lint-ts 
+  script: yarn lint-ts 
 
 unit_testing:
   stage: unit_test
-  script: npm run test --verbose --coverage=true --forceExit --detectOpenHandles
+  script: yarn test --verbose --coverage=true --forceExit --detectOpenHandles
 
