@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { Col, Row } from 'reactstrap';
 import './Home.css';
+import Thing from 'odkformrenderer';
 declare global {
   interface Window {
     require: any;
@@ -31,6 +32,7 @@ class Home extends React.Component<{}, HomeState> {
             <h3>Welcome to OpenSRp {this.state.test}</h3>
           </Col>
         </Row>
+        <Thing />
       </div>
     );
   }

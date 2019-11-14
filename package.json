@@ -41,6 +41,8 @@
     "history": "^4.9.0",
     "jest-fetch-mock": "^2.1.2",
     "lodash": "^4.17.15",
+    "lodash-es": "^4.17.15",
+    "odkformrenderer": "git+http://192.168.19.42/nafiz/test_package.git",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

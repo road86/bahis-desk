@@ -3,11 +3,24 @@ const electron = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const Database = require('better-sqlite3');
+const os = require('os');
 
 // eslint-disable-next-line no-unused-vars
 const { app, BrowserWindow, ipcMain, ipcRenderer, remote, fs } = electron;
 let mainWindow;
 function createWindow() {
+  BrowserWindow.addDevToolsExtension(
+    path.join(
+      os.homedir(),
+      '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.2.0_0'
+    )
+  );
+  BrowserWindow.addDevToolsExtension(
+    path.join(
+      os.homedir(),
+      '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0'
+    )
+  );
   mainWindow = new BrowserWindow({
     width: 900,
     height: 680,
