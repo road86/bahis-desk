@@ -30,6 +30,7 @@
     "@types/react-router-dom": "^4.3.4",
     "@types/reactstrap": "^8.0.1",
     "@types/seamless-immutable": "^7.1.10",
+    "better-sqlite3": "^5.4.3",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.6",
     "client-oauth2": "^4.2.5",
@@ -63,7 +64,8 @@
     "build": "yarn react-build && yarn electron-build",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
-    "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'"
+    "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
+    "electron-rebuild": "electron-rebuild"
   },
   "husky": {
     "hooks": {
@@ -99,6 +101,7 @@
     "concurrently": "^4.1.2",
     "electron": "^6.0.9",
     "electron-builder": "^21.2.0",
+    "electron-rebuild": "^1.8.6",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
