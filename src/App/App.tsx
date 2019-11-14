@@ -3,7 +3,7 @@ import { faUser } from '@fortawesome/free-regular-svg-icons';
 import ConnectedPrivateRoute from '@onaio/connected-private-route';
 import { ConnectedLogout, ConnectedOauthCallback, OauthLogin } from '@onaio/gatekeeper';
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router';
 import { Col, Container, Row } from 'reactstrap';
 import Loading from '../components/page/Loading';
 import { DISABLE_LOGIN_PROTECTION } from '../configs/env';
@@ -27,6 +27,8 @@ class App extends Component {
         <ConnectedHeader />
         <Row id="main-page-row">
           <Col>
+            {/* Production hack. Sets the router to home url on app startup */}
+            <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
             <Switch>
               <ConnectedPrivateRoute
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}
@@ -40,7 +42,6 @@ class App extends Component {
                 path={CLIENT_URL}
                 component={ConnectedClientList}
               />
-
               {/* tslint:disable jsx-no-lambda */}
               <Route
                 exact={true}
@@ -59,7 +60,6 @@ class App extends Component {
                   />
                 )}
               />
-              {/* tslint:enable jsx-no-lambda */}
               <ConnectedPrivateRoute
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}
                 exact={true}
