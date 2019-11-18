@@ -22,3 +22,12 @@ export interface FormMenu {
   img_id: number;
   form_id: number;
 }
+
+/** interface for List menu */
+export interface ListMenu {
+  type: LIST_TYPE;
+  name: string;
+  label: Label;
+  img_id: number;
+  list_id: number;
+}
