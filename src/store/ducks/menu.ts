@@ -67,7 +67,7 @@ export type MenuActionTypes = SetMenuItemAction | AnyAction;
  * @param {ModuleMenu | FormMenu | ListMenu} menuItem - menuItem add to store
  * @return {SetMenuItemAction} - an action to add menuItem to store
  */
-export const SetMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
+export const setMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
   menuItem,
   type: SET_MENU_ITEM,
 });
