@@ -51,6 +51,7 @@ export type MenuItem = ModuleMenu | FormMenu | ListMenu;
 
 /** SET_MENU_ITEM action type */
 export const SET_MENU_ITEM = 'opensrp/reducer/menu/SET_MENU_ITEM';
+export const SET_PREV_MENU = 'opensrp/reducer/menu/SET_PREV_MENU';
 
 /** interface for SET_MENU_ITEM action */
 export interface SetMenuItemAction extends AnyAction {
@@ -58,8 +59,13 @@ export interface SetMenuItemAction extends AnyAction {
   type: typeof SET_MENU_ITEM;
 }
 
+/** interface for SET_PREV_MENU action */
+export interface SetPrevMenuAction extends AnyAction {
+  type: typeof SET_PREV_MENU;
+}
+
 /** Create type for menu reducer actions */
-export type MenuActionTypes = SetMenuItemAction | AnyAction;
+export type MenuActionTypes = SetMenuItemAction | SetPrevMenuAction | AnyAction;
 
 // action creators
 
@@ -72,12 +78,19 @@ export const setMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
   type: SET_MENU_ITEM,
 });
 
+/** set prev menu action creator
+ * @return {SetPrevMenuAction} - an action to set prev menu
+ */
+export const setPrevMenu = (): SetPrevMenuAction => ({
+  type: SET_PREV_MENU,
+});
+
 // The reducer
 
 /** interface for menu state in redux store */
 interface MenuState {
   currentMenu: MenuItem | null;
-  prevMenu: MenuItem | null;
+  prevMenu: MenuItem[];
 }
 
 /** Create an immutable menu state */
@@ -86,7 +99,7 @@ export type ImmutableMenuState = SeamlessImmutable.ImmutableObject<MenuState>;
 /** initial menu-state state */
 const initialState: ImmutableMenuState = SeamlessImmutable({
   currentMenu: null,
-  prevMenu: null,
+  prevMenu: [],
 });
 
 /** the menu reducer function */
@@ -100,8 +113,18 @@ export default function reducer(
       return SeamlessImmutable({
         ...state,
         currentMenu: action.menuItem,
-        prevMenu: prev,
+        prevMenu: prev ? state.prevMenu.concat(prev) : state.prevMenu,
       });
+    case SET_PREV_MENU:
+      const tmpPrev = state.getIn(['prevMenu']);
+      if (tmpPrev.length > 0) {
+        return SeamlessImmutable({
+          ...state,
+          currentMenu: tmpPrev.slice(-1)[0],
+          prevMenu: tmpPrev.slice(0, tmpPrev.length - 1),
+        });
+      }
+      return state;
     default:
       return state;
   }
@@ -122,5 +145,5 @@ export function getCurrentMenu(state: Partial<Store>): MenuItem | null {
  * @return { boolean } - returns true if empty; otherwise false
  */
 export function isPrevMenuEmpty(state: Partial<Store>): boolean {
-  return (state as any)[reducerName].prevMenu ? false : true;
+  return (state as any)[reducerName].prevMenu.length ? false : true;
 }
