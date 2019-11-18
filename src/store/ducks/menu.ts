@@ -116,3 +116,11 @@ export default function reducer(
 export function getCurrentMenu(state: Partial<Store>): MenuItem | null {
   return (state as any)[reducerName].currentMenu;
 }
+
+/** checks the prevMenu of the store
+ * @param {Partial<Store>} state - the redux store
+ * @return { boolean } - returns true if empty; otherwise false
+ */
+export function isPrevMenuEmpty(state: Partial<Store>): boolean {
+  return (state as any)[reducerName].prevMenu ? false : true;
+}
