@@ -31,3 +31,12 @@ export interface ListMenu {
   img_id: number;
   list_id: number;
 }
+
+/** interface for Module menu */
+export interface ModuleMenu {
+  type: MODULE_TYPE;
+  name: string;
+  label: Label;
+  img_id: number;
+  children: Array<ModuleMenu | ListMenu | FormMenu>;
+}
