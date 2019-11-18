@@ -11,6 +11,7 @@ import { providers } from '../configs/settings';
 import { LOGIN_URL, LOGOUT_URL } from '../constants';
 import { CLIENT_URL } from '../constants';
 import ConnectedClientList from '../containers/Clients/List';
+import Form from '../containers/Form';
 import Menu from '../containers/Menu';
 import { oAuthUserInfoGetter } from '../helpers/utils';
 import './App.css';
@@ -32,6 +33,12 @@ class App extends Component {
                 exact={true}
                 path="/"
                 component={Menu}
+              />
+              <ConnectedPrivateRoute
+                disableLoginProtection={DISABLE_LOGIN_PROTECTION}
+                exact={true}
+                path="/form/:id"
+                component={Form}
               />
               <ConnectedPrivateRoute
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}

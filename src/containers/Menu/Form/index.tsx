@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import { FormMenu } from '../../../store/ducks/menu';
 
@@ -12,9 +13,11 @@ class FormMenuItem extends React.Component<FormMenuItemProps> {
     return (
       <div>
         <Card>
-          <CardBody>
-            <CardTitle>{menuItem.name}</CardTitle>
-          </CardBody>
+          <Link to={`/form/${menuItem.form_id}/`}>
+            <CardBody>
+              <CardTitle>{menuItem.name}</CardTitle>
+            </CardBody>
+          </Link>
         </Card>
       </div>
     );
