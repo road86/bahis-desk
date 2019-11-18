@@ -13,6 +13,7 @@ import ConnectedHeader from '../containers/ConnectedHeader';
 
 import { CLIENT_URL } from '../constants';
 import ConnectedClientList from '../containers/Clients/List';
+import Menu from '../containers/Menu';
 import Home from '../containers/pages/Home/Home';
 import { oAuthUserInfoGetter } from '../helpers/utils';
 import './App.css';
@@ -34,7 +35,7 @@ class App extends Component {
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}
                 exact={true}
                 path="/"
-                component={Home}
+                component={Menu}
               />
               <ConnectedPrivateRoute
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}
