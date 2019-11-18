@@ -1,4 +1,5 @@
-import { AnyAction } from 'redux';
+import { AnyAction, Store } from 'redux';
+import SeamlessImmutable from 'seamless-immutable';
 
 /** The reducer name */
 export const reducerName = 'menu';
@@ -43,6 +44,9 @@ export interface ModuleMenu {
   children: Array<ModuleMenu | ListMenu | FormMenu>;
 }
 
+/** interface for MenuItem */
+export type MenuItem = ModuleMenu | FormMenu | ListMenu;
+
 // actions
 
 /** SET_MENU_ITEM action type */
@@ -50,7 +54,7 @@ export const SET_MENU_ITEM = 'opensrp/reducer/menu/SET_MENU_ITEM';
 
 /** interface for SET_MENU_ITEM action */
 export interface SetMenuItemAction extends AnyAction {
-  menuItem: FormMenu | ListMenu | ModuleMenu | null;
+  menuItem: MenuItem;
   type: typeof SET_MENU_ITEM;
 }
 
@@ -63,7 +67,52 @@ export type MenuActionTypes = SetMenuItemAction | AnyAction;
  * @param {ModuleMenu | FormMenu | ListMenu} menuItem - menuItem add to store
  * @return {SetMenuItemAction} - an action to add menuItem to store
  */
-export const SetMenuItem = (menuItem: ModuleMenu | FormMenu | ListMenu): SetMenuItemAction => ({
+export const SetMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
   menuItem,
   type: SET_MENU_ITEM,
 });
+
+// The reducer
+
+/** interface for menu state in redux store */
+interface MenuState {
+  currentMenu: MenuItem | null;
+  prevMenu: MenuItem | null;
+}
+
+/** Create an immutable menu state */
+export type ImmutableMenuState = SeamlessImmutable.ImmutableObject<MenuState>;
+
+/** initial menu-state state */
+const initialState: ImmutableMenuState = SeamlessImmutable({
+  currentMenu: null,
+  prevMenu: null,
+});
+
+/** the menu reducer function */
+export default function reducer(
+  state: ImmutableMenuState = initialState,
+  action: MenuActionTypes
+): ImmutableMenuState {
+  switch (action.type) {
+    case SET_MENU_ITEM:
+      const prev = state.getIn(['currentMenu']);
+      return SeamlessImmutable({
+        ...state,
+        currentMenu: action.menuItem,
+        prevMenu: prev,
+      });
+    default:
+      return state;
+  }
+}
+
+// selectors
+
+/** returns the current menu item
+ * @param {Partial<Store>} state - the redux store
+ * @return { MenuItem } - the current Menu Item
+ */
+export function getCurrentMenu(state: Partial<Store>): MenuItem | null {
+  return (state as any)[reducerName].currentMenu;
+}
