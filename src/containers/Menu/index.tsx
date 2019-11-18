@@ -5,12 +5,17 @@ import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
+  FORM_TYPE,
   getCurrentMenu,
+  LIST_TYPE,
   MenuItem,
   MODULE_TYPE,
   reducerName as menuReducerName,
   setMenuItem,
 } from '../../store/ducks/menu';
+import FormMenuItem from './Form';
+import ListMenuItem from './List';
+import ModuleMenuItem from './Module';
 
 /** register the clients reducer */
 reducerRegistry.register(menuReducerName, menuReducer);
@@ -31,18 +36,31 @@ class Menu extends React.Component<MenuProps> {
   public render() {
     const { currentMenu } = this.props;
     return (
-      <div className="text-center">
-        <Row className="welcome-box">
-          <Col>
-            {currentMenu &&
-              currentMenu.type === MODULE_TYPE &&
-              currentMenu.children.map((menuItem, index) => <h3 key={index}>{menuItem.name}</h3>)}
-            <h3>Welcome to OpenSRp </h3>
-          </Col>
+      <div className="menu-container">
+        <Row>
+          {currentMenu &&
+            currentMenu.type === MODULE_TYPE &&
+            currentMenu.children.map((menuItem, index) => (
+              <Col key={'menu-' + index} md={4}>
+                {this.typeEvalutor(menuItem)}
+              </Col>
+            ))}
         </Row>
       </div>
     );
   }
+  private typeEvalutor = (menuItem: MenuItem) => {
+    if (menuItem.type === MODULE_TYPE) {
+      return <ModuleMenuItem menuItem={menuItem} />;
+    }
+    if (menuItem.type === FORM_TYPE) {
+      return <FormMenuItem menuItem={menuItem} />;
+    }
+    if (menuItem.type === LIST_TYPE) {
+      return <ListMenuItem menuItem={menuItem} />;
+    }
+    return null;
+  };
 }
 
 /** connect the component to the store */
