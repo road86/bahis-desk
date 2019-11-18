@@ -9,12 +9,9 @@ import Loading from '../components/page/Loading';
 import { DISABLE_LOGIN_PROTECTION } from '../configs/env';
 import { providers } from '../configs/settings';
 import { LOGIN_URL, LOGOUT_URL } from '../constants';
-import ConnectedHeader from '../containers/ConnectedHeader';
-
 import { CLIENT_URL } from '../constants';
 import ConnectedClientList from '../containers/Clients/List';
 import Menu from '../containers/Menu';
-import Home from '../containers/pages/Home/Home';
 import { oAuthUserInfoGetter } from '../helpers/utils';
 import './App.css';
 
@@ -25,8 +22,7 @@ class App extends Component {
   public render() {
     return (
       <Container>
-        <ConnectedHeader />
-        <Row id="main-page-row">
+        <Row id="main-page-container">
           <Col>
             {/* Production hack. Sets the router to home url on app startup */}
             <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
