@@ -1,8 +1,9 @@
 // this is the home page component
+import OdkFormRenderer from 'odkformrenderer';
 import * as React from 'react';
 import { Col, Row } from 'reactstrap';
+import { DEMO_FORM_JSON, sampleUserInput } from '../../../constants';
 import './Home.css';
-import Thing from 'odkformrenderer';
 declare global {
   interface Window {
     require: any;
@@ -10,21 +11,30 @@ declare global {
 }
 const ipcRenderer = window.require('electron').ipcRenderer;
 
-export interface HomeState{
+export interface HomeState {
   test: string;
 }
 
 class Home extends React.Component<{}, HomeState> {
   constructor(props: Readonly<{}>) {
     super(props);
-    this.state = {test: ""};
+    this.state = { test: '' };
   }
   public async componentDidMount() {
-    let test = await ipcRenderer.sendSync('synchronous-message', 'ping');
+    const test = await ipcRenderer.sendSync('fetch-app-definition', 'ping');
     this.setState({ test });
-    console.log('front-end', test);
   }
   public render() {
+    const handleSubmit = (userInput: any) => {
+      // tslint:disable-next-line: no-console
+      console.log(JSON.stringify(userInput));
+    };
+    const props = {
+      defaultLanguage: 'English',
+      formDefinitionJson: DEMO_FORM_JSON,
+      handleSubmit,
+      userInputJson: sampleUserInput,
+    };
     return (
       <div className="text-center">
         <Row className="welcome-box">
@@ -32,7 +42,7 @@ class Home extends React.Component<{}, HomeState> {
             <h3>Welcome to OpenSRp {this.state.test}</h3>
           </Col>
         </Row>
-        <Thing />
+        <OdkFormRenderer {...props} />
       </div>
     );
   }
