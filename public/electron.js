@@ -91,6 +91,29 @@ ipcMain.on('fetch-app-definition', event => {
   }
 });
 
+ipcMain.on('submit-form-response', (event, response) => {
+  // eslint-disable-next-line no-console
+  console.log('data', response);
+  const db = new Database('foobar.db', { fileMustExist: true });
+  const insert = db.prepare('INSERT INTO data (form_id, data) VALUES (@formId, @data)');
+  insert.run(response);
+  db.close();
+});
+
+ipcMain.on('fetch-form-definition', (event, arg) => {
+  try {
+    const db = new Database('foobar.db', { fileMustExist: true });
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = db
+      .prepare('SELECT definition from forms where form_id = ? limit 1')
+      .get(arg).definition;
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+});
+
 ipcMain.on('synchronous-message', event => {
   const tableCreationSQL =
     'CREATE TABLE if not exists contacts( contact_id INTEGER PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, phone TEXT NOT NULL UNIQUE);';

@@ -2,22 +2,42 @@ import OdkFormRenderer from 'odkformrenderer';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
-import { DEMO_FORM_JSON } from '../../constants';
+import { ipcRenderer } from '../../services/ipcRenderer';
 
 /** interface for Form URL params */
 interface FormURLParams {
   id: string;
 }
 
-class Form extends React.Component<RouteComponentProps<FormURLParams>> {
+interface FormState {
+  formDefinition: any;
+}
+
+class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState> {
+  constructor(props: any) {
+    super(props);
+    this.state = { formDefinition: null };
+  }
+  public async componentDidMount() {
+    const { match } = this.props;
+    const formId = match.params.id || '';
+    const formDefinition = await ipcRenderer.sendSync('fetch-form-definition', formId);
+    this.setState({ formDefinition });
+  }
   public render() {
     const handleSubmit = (userInput: any) => {
       // tslint:disable-next-line: no-console
-      console.log(JSON.stringify(userInput));
+      if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
+        const { match } = this.props;
+        const formId = match.params.id || '';
+        ipcRenderer.send('submit-form-response', { formId, data: JSON.stringify(userInput) });
+        window.location.reload();
+      }
     };
+    const { formDefinition } = this.state;
     const props = {
       defaultLanguage: 'English',
-      formDefinitionJson: DEMO_FORM_JSON,
+      formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
       handleSubmit,
       userInputJson: {},
     };
@@ -26,7 +46,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>> {
         <Link to="/">
           <h1>Back</h1>
         </Link>
-        <OdkFormRenderer {...props} />
+        {formDefinition && <OdkFormRenderer {...props} />}
       </div>
     );
   }
