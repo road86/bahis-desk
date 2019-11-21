@@ -40,6 +40,7 @@ class App extends Component {
                 path="/form/:id"
                 component={Form}
               />
+              {/* Not related to Bahis project */}
               <ConnectedPrivateRoute
                 disableLoginProtection={DISABLE_LOGIN_PROTECTION}
                 exact={true}
