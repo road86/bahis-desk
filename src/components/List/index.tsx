@@ -7,7 +7,12 @@ interface ListURLParams {
   id: string;
 }
 
-class List extends React.Component<RouteComponentProps<ListURLParams>> {
+interface ListState {
+  filterDefinition: any;
+  tableDefinition: any;
+}
+
+class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
   public render() {
     return (
       <div>
