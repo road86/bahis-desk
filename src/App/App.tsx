@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { Col, Container, Row } from 'reactstrap';
 import Form from '../components/Form';
+import List from '../components/List';
 import Menu from '../containers/Menu';
 import './App.css';
 
@@ -24,6 +25,9 @@ class App extends Component {
               </Route>
               <Route exact={true} path="/form/:id">
                 <Form />
+              </Route>
+              <Route exact={true} path="/list/:id">
+                <List />
               </Route>
             </Switch>
           </Col>
