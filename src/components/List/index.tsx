@@ -1,8 +1,13 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import Filter from '../../containers/Filter';
 
-class List extends React.Component {
+/** interface for Form URL params */
+interface ListURLParams {
+  id: string;
+}
+
+class List extends React.Component<RouteComponentProps<ListURLParams>> {
   public render() {
     return (
       <div>
@@ -15,4 +20,4 @@ class List extends React.Component {
   }
 }
 
-export default List;
+export default withRouter(List);
