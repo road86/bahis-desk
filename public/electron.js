@@ -6,37 +6,40 @@ const Database = require('better-sqlite3');
 const os = require('os');
 const fs = require('fs');
 
-// eslint-disable-next-line no-unused-vars
-const { app, BrowserWindow, ipcMain, ipcRenderer, remote } = electron;
+const { app, BrowserWindow, ipcMain } = electron;
+const DB_NAME = 'foobar.db';
 let mainWindow;
+
+// DEV EXTENSIONS
+
+// extension paths
+const REACT_EXTENSION_PATH =
+  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.2.0_0';
+const REDUX_EXTENSION_PATH =
+  '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
 /** add the react and redux devtools to electron */
 function addDevToolsExt() {
-  BrowserWindow.addDevToolsExtension(
-    path.join(
-      os.homedir(),
-      '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.2.0_0'
-    )
-  );
-  BrowserWindow.addDevToolsExtension(
-    path.join(
-      os.homedir(),
-      '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0'
-    )
-  );
+  BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
+  BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
+
+// App
+
+// DB utils
 
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
-  const db = new Database('foobar.db');
+  const db = new Database(DB_NAME);
   const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
   db.exec(setUpQueries);
   db.close();
 }
+
 /** set up new db if not exists */
 function prepareDb() {
   try {
-    const db = new Database('foobar.db', { fileMustExist: true });
+    const db = new Database(DB_NAME, { fileMustExist: true });
     db.close();
   } catch (err) {
     setUpNewDB();
@@ -45,8 +48,11 @@ function prepareDb() {
   }
 }
 
-/** creats the db and sets up the window in electron */
+// processes
+
+/** creates the db and sets up the window in electron */
 function createWindow() {
+  // comment next line if react and redux dev extensions not installed
   addDevToolsExt();
   prepareDb();
   mainWindow = new BrowserWindow({
@@ -65,23 +71,46 @@ function createWindow() {
   });
 }
 
-app.on('ready', createWindow);
+// types of App states
+const APP_READY_STATE = 'ready';
+const APP_CLOSE_STATE = 'window-all-closed';
+const APP_ACTIVATE_STATE = 'activate';
 
-app.on('window-all-closed', () => {
+// subscribes the App states with related processes
+
+/** creates window on app ready */
+app.on(APP_READY_STATE, createWindow);
+
+/** removes window on app close */
+app.on(APP_CLOSE_STATE, () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on('activate', () => {
+/** adds window on app if window null */
+app.on(APP_ACTIVATE_STATE, () => {
   if (mainWindow === null) {
     createWindow();
   }
 });
 
-ipcMain.on('fetch-app-definition', event => {
+// Endpoint processes
+
+// types of channels
+const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
+const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
+const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
+
+// listeners
+
+/** fetches the app menu definition
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @returns - the app definition json
+ */
+const fetchAppDefinition = event => {
   try {
-    const db = new Database('foobar.db', { fileMustExist: true });
+    const db = new Database(DB_NAME, { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = db.prepare('SELECT definition from app limit 1').get().definition;
     db.close();
@@ -89,47 +118,41 @@ ipcMain.on('fetch-app-definition', event => {
     // eslint-disable-next-line no-console
     console.log(err);
   }
-});
+};
 
-ipcMain.on('submit-form-response', (event, response) => {
+/** saves the form response to db
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @param {Object} response - an object containing formId and data (user's response)
+ */
+const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   console.log('data', response);
-  const db = new Database('foobar.db', { fileMustExist: true });
+  const db = new Database(DB_NAME, { fileMustExist: true });
   const insert = db.prepare('INSERT INTO data (form_id, data) VALUES (@formId, @data)');
   insert.run(response);
   db.close();
-});
+};
 
-ipcMain.on('fetch-form-definition', (event, arg) => {
+/** saves the form response to db
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @param {number} formId- the form id
+ * @returns - the definition of form respective to form id
+ */
+const fetchFormDefinition = (event, formId) => {
   try {
-    const db = new Database('foobar.db', { fileMustExist: true });
+    const db = new Database(DB_NAME, { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = db
       .prepare('SELECT definition from forms where form_id = ? limit 1')
-      .get(arg).definition;
+      .get(formId).definition;
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
   }
-});
+};
 
-ipcMain.on('synchronous-message', event => {
-  const tableCreationSQL =
-    'CREATE TABLE if not exists contacts( contact_id INTEGER PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, phone TEXT NOT NULL UNIQUE);';
-  const insertTableSQL =
-    "INSERT INTO contacts(contact_id, first_name, last_name, email, phone) VALUES(0, 'nafiz', 'ahmed', 'nafiz@2bc.com', '0192'); ";
-  const db = new Database('foobar.db');
-  db.exec(tableCreationSQL);
-  try {
-    db.exec(insertTableSQL);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log('Already Present');
-  }
-  // eslint-disable-next-line no-param-reassign
-  event.returnValue = db
-    .prepare('SELECT first_name from contacts where contact_id=0')
-    .get().first_name;
-  db.close();
-});
+// subscribes the listeners to channels
+ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
+ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
+ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
