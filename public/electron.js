@@ -101,6 +101,7 @@ app.on(APP_ACTIVATE_STATE, () => {
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
+const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 
 // listeners
 
@@ -133,9 +134,9 @@ const submitFormResponse = (event, response) => {
   db.close();
 };
 
-/** saves the form response to db
+/** fetches the form definition
  * @param {IpcMainEvent} event - the default ipc main event
- * @param {number} formId- the form id
+ * @param {string} formId- the form id
  * @returns - the definition of form respective to form id
  */
 const fetchFormDefinition = (event, formId) => {
@@ -152,7 +153,31 @@ const fetchFormDefinition = (event, formId) => {
   }
 };
 
+/** fetches the list definition
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @param {string} listId- the list id
+ * @returns - the definition of list respective to list id
+ */
+const fetchListDefinition = (event, listId) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const fetchedRows = db
+      .prepare('SELECT filter_definition, table_definition from lists where list_id = ? limit 1')
+      .get(listId);
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = {
+      filterDefinition: fetchedRows.filter_definition,
+      tableDefinition: fetchedRows.table_definition,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
+ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
