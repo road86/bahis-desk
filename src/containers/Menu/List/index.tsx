@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import { ListMenu } from '../../../store/ducks/menu';
 
@@ -12,9 +13,11 @@ class ListMenuItem extends React.Component<ListMenuItemProps> {
     return (
       <div>
         <Card>
-          <CardBody>
-            <CardTitle>{menuItem.name}</CardTitle>
-          </CardBody>
+          <Link to={`/list/${menuItem.list_id}/`}>
+            <CardBody>
+              <CardTitle>{menuItem.name}</CardTitle>
+            </CardBody>
+          </Link>
         </Card>
       </div>
     );
