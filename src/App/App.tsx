@@ -3,7 +3,7 @@ import { faUser } from '@fortawesome/free-regular-svg-icons';
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { Col, Container, Row } from 'reactstrap';
-import Form from '../containers/Form';
+import Form from '../components/Form';
 import Menu from '../containers/Menu';
 import './App.css';
 
