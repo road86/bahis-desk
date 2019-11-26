@@ -8,6 +8,7 @@ interface ListURLParams {
   id: string;
 }
 
+/** interface for List state */
 interface ListState {
   filterDefinition: any;
   tableDefinition: any;
@@ -34,8 +35,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
         <Link to="/">
           <h1>Back</h1>
         </Link>
-        <div> {filterDefinition || ''} </div>
-        <Filter />
+        {filterDefinition && <Filter />}
       </div>
     );
   }
