@@ -3,7 +3,7 @@ import { FormGroup, Input, Label } from 'reactstrap';
 import { FilterItem } from '..';
 import { FILTER_TEXT_TYPE } from '../constants';
 
-interface FilterTextItem extends FilterItem {
+export interface FilterTextItem extends FilterItem {
   type: FILTER_TEXT_TYPE;
 }
 
@@ -11,7 +11,7 @@ export interface TextProps {
   filterItem: FilterTextItem;
 }
 
-class Text extends React.Component<TextProps> {
+class FilterText extends React.Component<TextProps> {
   public render() {
     const { filterItem } = this.props;
     return (
@@ -23,4 +23,4 @@ class Text extends React.Component<TextProps> {
   }
 }
 
-export default Text;
+export default FilterText;
