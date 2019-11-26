@@ -1469,6 +1469,8 @@ export const sampleUserInput = {
     "c"
   ]
 }
+
+export const FILTER_CHOICES = {"sample_select_one":[{"name":"Dhaka"},{"name":"Chatrogram"}],"sample_select_one_v1":[{"name":"Dhaka","sample_select_one":"Dhaka"},{"name":"Chatrogram","sample_select_one":"Chatrogram"}],"sample_select_multiple":[{"name":"Dhaka"},{"name":"Chatrogram"}],"sample_select_multiple_v1":[{"name":"Dhaka","sample_select_multiple":"Dhaka"},{"name":"Chatrogram","sample_select_multiple":"Chatrogram"}]};
 // tslint: enable
 export type DEMO_FORM_JSON = typeof DEMO_FORM_JSON;
-
+export type FILTER_CHOICES = typeof FILTER_CHOICES
