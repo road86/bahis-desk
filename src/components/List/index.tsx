@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
 import { ipcRenderer } from '../../services/ipcRenderer';
 
@@ -35,7 +36,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
         <Link to="/">
           <h1>Back</h1>
         </Link>
-        {filterDefinition && <Filter />}
+        {filterDefinition && <Filter definition={filterDefinition} choices={FILTER_CHOICES} />}
       </div>
     );
   }
