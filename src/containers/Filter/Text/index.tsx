@@ -1,9 +1,14 @@
 import * as React from 'react';
 import { FormGroup, Input, Label } from 'reactstrap';
 import { FilterItem } from '..';
+import { FILTER_TEXT_TYPE } from '../constants';
+
+interface FilterTextItem extends FilterItem {
+  type: FILTER_TEXT_TYPE;
+}
 
 export interface TextProps {
-  filterItem: FilterItem;
+  filterItem: FilterTextItem;
 }
 
 class Text extends React.Component<TextProps> {
