@@ -31,8 +31,17 @@ export interface SetFilterValueAction extends AnyAction {
   type: typeof SET_FILTER_VALUE;
 }
 
+/** interface for RESET_FILTERS action */
+export interface ResetFiltersAction extends AnyAction {
+  type: typeof RESET_FILTERS;
+}
+
 /** Create type for filter reducer actions */
-export type FilterActionTypes = SetConditionValueAction | SetFilterValueAction | AnyAction;
+export type FilterActionTypes =
+  | SetConditionValueAction
+  | SetFilterValueAction
+  | ResetFiltersAction
+  | AnyAction;
 
 // action creators
 
@@ -56,6 +65,13 @@ export const setFilterValue = (name: string, value: string[] | null): SetFilterV
   name,
   type: SET_FILTER_VALUE,
   value,
+});
+
+/** reset the filter dux to initial state
+ * @return {ResetFiltersAction} - an action to reset the state of the store
+ */
+export const resetFilters = (): ResetFiltersAction => ({
+  type: RESET_FILTERS,
 });
 
 // The reducer
@@ -94,6 +110,8 @@ export default function reducer(
         ...state.asMutable({ deep: true }),
         filters: { ...filters, [action.name]: { condition, value: action.value } },
       });
+    case RESET_FILTERS:
+      return initialState;
     default:
       return state;
   }
