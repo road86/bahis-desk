@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { FILTER_TEXT_TYPE } from './constants';
+import { FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
+import FilterNumber, { FilterNumberItem } from './Number';
 import FilterText, { FilterTextItem } from './Text';
 
 interface LabelObj {
@@ -30,20 +30,16 @@ interface FilterProps {
 class Filter extends React.Component<FilterProps> {
   public render() {
     const { definition } = this.props;
-    return (
-      <div>
-        <Link to="/">
-          <h1>Back</h1>
-        </Link>
-        {definition.map(filterItem => this.renderTypeEvaluator(filterItem))}
-      </div>
-    );
+    return <div>{definition.map(filterItem => this.renderTypeEvaluator(filterItem))}</div>;
   }
 
   private renderTypeEvaluator = (filterItem: FilterItem) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
         return <FilterText filterItem={filterItem as FilterTextItem} />;
+      }
+      case FILTER_NUMBER_TYPE: {
+        return <FilterNumber filterItem={filterItem as FilterNumberItem} />;
       }
       default:
         return null;
