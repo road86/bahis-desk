@@ -42,10 +42,6 @@ export const NUMBER_FILTER_OPERATORS = [
     value: LESS_THAN_EQUAL_TYPE,
   },
   {
-    label: LESS_THAN_EQUAL_LABEL,
-    value: LESS_THAN_EQUAL_TYPE,
-  },
-  {
     label: EQUAL_LABEL,
     value: EQUAL_TYPE,
   },
