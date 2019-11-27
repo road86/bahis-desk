@@ -7,7 +7,7 @@ export const reducerName = 'filter';
 /** interface for filter value */
 export interface FilterValueObj {
   condition: string | null;
-  value: string | null;
+  value: string[] | null;
 }
 
 // actions
@@ -27,7 +27,7 @@ export interface SetConditionValueAction extends AnyAction {
 /** interface for SET_FILTER_VALUE action */
 export interface SetFilterValueAction extends AnyAction {
   name: string;
-  value: string | null;
+  value: string[] | null;
   type: typeof SET_FILTER_VALUE;
 }
 
@@ -49,10 +49,10 @@ export const setConditionValue = (name: string, value: string | null): SetCondit
 
 /** set filter  value action creator
  * @param {string } name - filter name where value will be added
- * @param {string | null} value - filter value to add store
+ * @param {string[] | null} value - filter value to add store
  * @return {SetFilterValueAction} - an action to add filter value to store
  */
-export const setFilterValue = (name: string, value: string | null): SetFilterValueAction => ({
+export const setFilterValue = (name: string, value: string[] | null): SetFilterValueAction => ({
   name,
   type: SET_FILTER_VALUE,
   value,
@@ -113,9 +113,9 @@ export function getFilterValueObj(state: Partial<Store>, name: string): FilterVa
 /** returns the filter value respect to the filter name
  * @param {Partial<Store>} state - the redux store
  * @param {string} name - the filter name
- * @return { string | null } - the filter Value respect to name
+ * @return { string[] | null } - the filter Value respect to name
  */
-export function getFilterValue(state: Partial<Store>, name: string): string | null {
+export function getFilterValue(state: Partial<Store>, name: string): string[] | null {
   if (name in (state as any)[reducerName].filters) {
     return (state as any)[reducerName].filters[name].value;
   }
