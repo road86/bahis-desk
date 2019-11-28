@@ -151,3 +151,11 @@ export function getFilterCondition(state: Partial<Store>, name: string): string 
   }
   return null;
 }
+
+/** returns all the filter value objects
+ * @param {Partial<Store>} state - the redux store
+ * @return { {[key:string]:FilterValueObj} } - a dict containing all filter value objects
+ */
+export function getAllFilterValueObjs(state: Partial<Store>): { [key: string]: FilterValueObj } {
+  return (state as any)[reducerName].filters;
+}
