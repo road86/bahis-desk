@@ -23,6 +23,10 @@ export const EQUAL_LABEL = '=';
 export const NOT_EQUAL_TYPE = 'not_equals';
 export const NOT_EQUAL_LABEL = '!=';
 
+// In Between option
+export const IN_BETWEEN_TYPE = 'in_between';
+export const IN_BETWEEN_LABEL = 'in between';
+
 // text filter operators
 export const NUMBER_FILTER_OPERATORS = [
   {
@@ -48,5 +52,9 @@ export const NUMBER_FILTER_OPERATORS = [
   {
     label: NOT_EQUAL_LABEL,
     value: NOT_EQUAL_TYPE,
+  },
+  {
+    label: IN_BETWEEN_LABEL,
+    value: IN_BETWEEN_TYPE,
   },
 ];
