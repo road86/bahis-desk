@@ -13,7 +13,7 @@ import {
   setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_NUMBER_TYPE } from '../constants';
-import { NUMBER_FILTER_OPERATORS } from './constants';
+import { IN_BETWEEN_TYPE, NUMBER_FILTER_OPERATORS } from './constants';
 
 export interface FilterNumberItem extends FilterItem {
   type: FILTER_NUMBER_TYPE;
@@ -29,19 +29,33 @@ export interface NumberProps {
 
 class FilterNumber extends React.Component<NumberProps> {
   public render() {
-    const { filterItem } = this.props;
+    const { filterItem, condition, value } = this.props;
+    if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
+      this.props.setFilterValueActionCreator(filterItem.name, [value[0]]);
+    }
     return (
       <FormGroup>
         <Label>Number</Label>
         <Select options={NUMBER_FILTER_OPERATORS} onChange={this.handleConditionChange} />
         <Input type="number" name={filterItem.name} onChange={this.handleValueChange} />
+        {condition === IN_BETWEEN_TYPE && <span>and</span>}
+        {condition === IN_BETWEEN_TYPE && (
+          <Input type="number" name={filterItem.name + '_v2'} onChange={this.handleValueChange} />
+        )}
       </FormGroup>
     );
   }
 
   private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const { filterItem } = this.props;
-    this.props.setFilterValueActionCreator(filterItem.name, [event.currentTarget.value]);
+    const { filterItem, value } = this.props;
+    let tmpVal;
+    if (event.currentTarget.name === filterItem.name + '_v2') {
+      tmpVal = [value && value[0] ? value[0] : '', event.currentTarget.value];
+    } else {
+      tmpVal =
+        value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
+    }
+    this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
   };
 
   private handleConditionChange = (selectedOption: any) => {
