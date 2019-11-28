@@ -1,4 +1,6 @@
+import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
+import filterReducer, { reducerName as filterReducerName } from '../../store/ducks/filter';
 import { FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
 import FilterNumber, { FilterNumberItem } from './Number';
 import FilterText, { FilterTextItem } from './Text';
@@ -26,6 +28,9 @@ interface FilterProps {
   definition: FilterItem[];
   choices: ChoiceItems;
 }
+
+/** register the filter reducer */
+reducerRegistry.register(filterReducerName, filterReducer);
 
 class Filter extends React.Component<FilterProps> {
   public render() {
