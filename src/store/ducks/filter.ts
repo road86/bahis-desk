@@ -4,10 +4,13 @@ import SeamlessImmutable from 'seamless-immutable';
 /** The reducer name */
 export const reducerName = 'filter';
 
+export type FilterCondition = string | null;
+export type FilterValue = string[] | null;
+
 /** interface for filter value */
 export interface FilterValueObj {
-  condition: string | null;
-  value: string[] | null;
+  condition: FilterCondition;
+  value: FilterValue;
 }
 
 // actions
