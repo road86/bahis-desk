@@ -1,7 +1,8 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import filterReducer, { reducerName as filterReducerName } from '../../store/ducks/filter';
-import { FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
+import { FILTER_DATE_TYPE, FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
+import FilterDate, { FilterDateItem } from './Date';
 import FilterNumber, { FilterNumberItem } from './Number';
 import FilterText, { FilterTextItem } from './Text';
 
@@ -45,6 +46,9 @@ class Filter extends React.Component<FilterProps> {
       }
       case FILTER_NUMBER_TYPE: {
         return <FilterNumber filterItem={filterItem as FilterNumberItem} />;
+      }
+      case FILTER_DATE_TYPE: {
+        return <FilterDate filterItem={filterItem as FilterDateItem} />;
       }
       default:
         return null;
