@@ -8920,7 +8920,7 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 "odkformrenderer@git+http://192.168.19.42/nafiz/test_package.git":
   version "0.1.0"
-  resolved "git+http://192.168.19.42/nafiz/test_package.git#77f6d6de7608c79024ee8e588b9ca63655f9ab1e"
+  resolved "git+http://192.168.19.42/nafiz/test_package.git#b8678abf56b3b4197f49915e62301fbb5acd8382"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-brands-svg-icons" "^5.11.2"
@@ -8932,7 +8932,9 @@ obuf@^1.0.0, obuf@^1.1.2:
     jest-fetch-mock "^2.1.2"
     jquery "1.9.1 - 3"
     lodash "^4.17.15"
+    lodash-es "^4.17.15"
     popper.js "^1.14.7"
+    react-datepicker "^2.10.1"
     react-redux "^7.1.1"
     react-select "^3.0.8"
     reactstrap "^8.0.1"
