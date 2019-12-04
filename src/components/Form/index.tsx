@@ -36,6 +36,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     };
     const { formDefinition } = this.state;
     const props = {
+      csvList: {},
       defaultLanguage: 'English',
       formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
       handleSubmit,
