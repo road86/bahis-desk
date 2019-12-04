@@ -14,7 +14,7 @@ let mainWindow;
 
 // extension paths
 const REACT_EXTENSION_PATH =
-  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.2.0_0';
+  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.2.1_0';
 const REDUX_EXTENSION_PATH =
   '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
