@@ -1,9 +1,9 @@
 import * as React from 'react';
-// import DatePicker from 'react-datepicker';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { FormGroup, Input, Label } from 'reactstrap';
+import { FormGroup, Label } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import {
@@ -35,36 +35,43 @@ class FilterDate extends React.Component<DateProps> {
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
       this.props.setFilterValueActionCreator(filterItem.name, [value[0]]);
     }
-    // const startDate = new Date();
+    const startDate = value && value[0] ? new Date(value[0]) : null;
+    const endDate = value && value[1] ? new Date(value[1]) : null;
+    if (startDate && endDate && endDate < startDate) {
+      this.props.setFilterValueActionCreator(filterItem.name, [startDate.toString()]);
+    }
     return (
       <FormGroup>
-        <Label>Number</Label>
+        <Label>Date</Label>
         <Select options={DATE_FILTER_OPERATORS} onChange={this.handleConditionChange} />
-        {/* <DatePicker selected={startDate} onChange={this.handleConditionChange} /> */}
-        <Input type="number" name={filterItem.name} onChange={this.handleValueChange} />
+        <DatePicker selected={startDate} onChange={this.handleStartDate} /> <br />
         {condition === IN_BETWEEN_TYPE && <span>and</span>}
+        {condition === IN_BETWEEN_TYPE && <br />}
         {condition === IN_BETWEEN_TYPE && (
-          <Input type="number" name={filterItem.name + '_v2'} onChange={this.handleValueChange} />
+          <DatePicker selected={endDate} onChange={this.handleEndDate} minDate={startDate} />
         )}
+        {condition === IN_BETWEEN_TYPE && <br />}
       </FormGroup>
     );
   }
 
-  private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
+  private handleStartDate = (selectedDate: any) => {
     const { filterItem, value } = this.props;
-    let tmpVal;
-    if (event.currentTarget.name === filterItem.name + '_v2') {
-      tmpVal = [value && value[0] ? value[0] : '', event.currentTarget.value];
-    } else {
-      tmpVal =
-        value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
-    }
+    const selectedDateString = selectedDate.toString();
+    const tmpVal = value && value[1] ? [selectedDateString, value[1]] : [selectedDateString];
+    this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
+  };
+
+  private handleEndDate = (selectedDate: any) => {
+    const { filterItem, value } = this.props;
+    const selectedDateString = selectedDate.toString();
+    const tmpVal = [value && value[0] ? value[0] : '', selectedDateString];
     this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
   };
 
   private handleConditionChange = (selectedOption: any) => {
     const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption);
+    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value);
   };
 }
 
