@@ -11,18 +11,20 @@ interface FormURLParams {
 
 interface FormState {
   formDefinition: any;
+  formChoices: any;
 }
 
 class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState> {
   constructor(props: any) {
     super(props);
-    this.state = { formDefinition: null };
+    this.state = { formDefinition: null, formChoices: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
     const formId = match.params.id || '';
-    const formDefinition = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    this.setState({ formDefinition });
+    const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
+    const { definition, formChoices } = formDefinitionObj;
+    this.setState({ formDefinition: definition, formChoices });
   }
   public render() {
     const handleSubmit = (userInput: any) => {
@@ -37,9 +39,9 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
         window.location.reload();
       }
     };
-    const { formDefinition } = this.state;
+    const { formDefinition, formChoices } = this.state;
     const props = {
-      csvList: {},
+      csvList: formChoices ? JSON.parse(formChoices) : {},
       defaultLanguage: 'English',
       formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
       handleSubmit,
