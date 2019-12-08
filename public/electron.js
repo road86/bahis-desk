@@ -221,10 +221,19 @@ const submitFormResponse = (event, response) => {
 const fetchFormDefinition = (event, formId) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
+    const formDefinitionObj = db
+      .prepare('SELECT * from forms where form_id = ? limit 1')
+      .get(formId);
+    const choiceDefinition = formDefinitionObj.choice_definition
+      ? JSON.parse(formDefinitionObj.choice_definition)
+      : {};
+    const choices = {};
+    Object.keys(choiceDefinition).forEach(key => {
+      const { query } = choiceDefinition[key];
+      choices[key] = db.prepare(query).all();
+    });
     // eslint-disable-next-line no-param-reassign
-    event.returnValue = db
-      .prepare('SELECT definition from forms where form_id = ? limit 1')
-      .get(formId).definition;
+    event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
