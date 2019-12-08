@@ -30,7 +30,10 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const { match } = this.props;
         const formId = match.params.id || '';
-        ipcRenderer.send('submit-form-response', { formId, data: JSON.stringify(userInput) });
+        ipcRenderer.send('submit-form-response', {
+          data: JSON.stringify({ ...userInput, 'meta/instanceID': this.generateUid() }),
+          formId,
+        });
         window.location.reload();
       }
     };
@@ -51,6 +54,29 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       </div>
     );
   }
+  private s4 = () => {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  };
+
+  private generateUid = () => {
+    return (
+      'uuid:' +
+      this.s4() +
+      this.s4() +
+      '-' +
+      this.s4() +
+      '-' +
+      this.s4() +
+      '-' +
+      this.s4() +
+      '-' +
+      this.s4() +
+      this.s4() +
+      this.s4()
+    );
+  };
 }
 
 export default withRouter(Form);
