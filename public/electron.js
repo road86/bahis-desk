@@ -97,6 +97,84 @@ app.on(APP_ACTIVATE_STATE, () => {
 
 // Endpoint processes
 
+// utils
+/** recursively generates insert query and saves to flat table
+ * @param {any} dbCon - the better sqlite3 database query
+ * @param {Text} tableName - the table name to be inserted
+ * @param {Text} parentTableName - the parent table name if exists
+ * @param {Object} tableObj - the tableObj containing table values needed to be stored
+ * @param {Text} instanceId - the meta instance id generated with each response
+ * @param {Number} parentId - the parent id needed to reference in sub repeat tables
+ */
+const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, parentId) => {
+  let columnNames = '';
+  let fieldValues = '';
+  const repeatKeys = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in tableObj) {
+    if (Array.isArray(tableObj[key])) {
+      repeatKeys.push(key);
+    } else {
+      columnNames = `${columnNames + key.replace('/', '_')}, `;
+      fieldValues = `${fieldValues}"${tableObj[key]}", `;
+    }
+  }
+  let newParentId = null;
+  if (columnNames !== '' || repeatKeys.length > 0) {
+    if (instanceId) {
+      columnNames += 'instanceid, ';
+      fieldValues += `"${instanceId}", `;
+    }
+    if (parentId) {
+      columnNames += `${parentTableName}_id, `;
+      fieldValues += `"${parentId}", `;
+    }
+    const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
+      0,
+      columnNames.length - 2
+    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;
+    try {
+      const successfulInsert = dbCon.prepare(query).run();
+      newParentId = successfulInsert.lastInsertRowid;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Insert failed !!!', err, query);
+    }
+  }
+  repeatKeys.forEach(key => {
+    tableObj[key].forEach(elm => {
+      objToTable(
+        dbCon,
+        `${tableName}_${key.replace('/', '_')}`,
+        tableName,
+        elm,
+        instanceId,
+        newParentId
+      );
+    });
+  });
+};
+
+/** parses and saves the user response to flat tables
+ * @param {any} dbConnection - the better sqlite 3 db connection
+ * @param {Number} formId - the formId of the form that is filled out
+ * @param {Object} userInput - the user response object following odk format
+ */
+const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
+  const formDefinition = JSON.parse(
+    dbConnection.prepare('SELECT definition from forms where form_id = ? limit 1').get(formId)
+      .definition
+  );
+  const userInputObj = JSON.parse(userInput);
+  objToTable(
+    dbConnection,
+    `bahis_${formDefinition.id_string}`,
+    '',
+    userInputObj,
+    userInputObj['meta/instanceID']
+  );
+};
+
 // types of channels
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
@@ -131,6 +209,7 @@ const submitFormResponse = (event, response) => {
   const db = new Database(DB_NAME, { fileMustExist: true });
   const insert = db.prepare('INSERT INTO data (form_id, data) VALUES (@formId, @data)');
   insert.run(response);
+  parseAndSaveToFlatTables(db, response.formId, response.data);
   db.close();
 };
 
