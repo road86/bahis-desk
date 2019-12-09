@@ -36,19 +36,29 @@ reducerRegistry.register(filterReducerName, filterReducer);
 class Filter extends React.Component<FilterProps> {
   public render() {
     const { definition } = this.props;
-    return <div>{definition.map(filterItem => this.renderTypeEvaluator(filterItem))}</div>;
+    return (
+      <div>
+        {definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index))}
+      </div>
+    );
   }
 
-  private renderTypeEvaluator = (filterItem: FilterItem) => {
+  private renderTypeEvaluator = (filterItem: FilterItem, filterIndex: number) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
-        return <FilterText filterItem={filterItem as FilterTextItem} />;
+        return (
+          <FilterText key={'filter-' + filterIndex} filterItem={filterItem as FilterTextItem} />
+        );
       }
       case FILTER_NUMBER_TYPE: {
-        return <FilterNumber filterItem={filterItem as FilterNumberItem} />;
+        return (
+          <FilterNumber key={'filter-' + filterIndex} filterItem={filterItem as FilterNumberItem} />
+        );
       }
       case FILTER_DATE_TYPE: {
-        return <FilterDate filterItem={filterItem as FilterDateItem} />;
+        return (
+          <FilterDate key={'filter-' + filterIndex} filterItem={filterItem as FilterDateItem} />
+        );
       }
       default:
         return null;
