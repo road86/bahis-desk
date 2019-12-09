@@ -21,8 +21,8 @@ class ListTable extends React.Component<ListTableProps> {
       <Table>
         <thead>
           <tr>
-            {columnDefinition.map((singleCol: ColumnObj) => (
-              <th key={singleCol.field_name}> {singleCol.label[appLanguage]} </th>
+            {columnDefinition.map((singleCol: ColumnObj, index: number) => (
+              <th key={'col-label-' + index}> {singleCol.label[appLanguage]} </th>
             ))}
           </tr>
         </thead>
