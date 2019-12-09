@@ -3,6 +3,7 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
 import { ipcRenderer } from '../../services/ipcRenderer';
+import ListTable from '../ListTable';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -23,20 +24,25 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
   public async componentDidMount() {
     const { match } = this.props;
     const listId = match.params.id || '';
-    const { filterDefinition } = await ipcRenderer.sendSync('fetch-list-definition', listId);
+    const { columnDefinition, filterDefinition } = await ipcRenderer.sendSync(
+      'fetch-list-definition',
+      listId
+    );
     this.setState({
       ...this.state,
+      columnDefinition: columnDefinition ? JSON.parse(columnDefinition) : null,
       filterDefinition: filterDefinition ? JSON.parse(filterDefinition) : null,
     });
   }
   public render() {
-    const { filterDefinition } = this.state;
+    const { columnDefinition, filterDefinition } = this.state;
     return (
       <div>
         <Link to="/">
           <h1>Back</h1>
         </Link>
         {filterDefinition && <Filter definition={filterDefinition} choices={FILTER_CHOICES} />}
+        {columnDefinition && <ListTable />}
       </div>
     );
   }
