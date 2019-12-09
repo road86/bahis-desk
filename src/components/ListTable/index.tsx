@@ -1,7 +1,19 @@
 import * as React from 'react';
 import { Table } from 'reactstrap';
 
-class ListTable extends React.Component {
+interface ColumnObj {
+  sortable: true | false;
+  label: { [key: string]: string };
+  field_name: string;
+  format: string;
+  data_type: string;
+}
+
+export interface ListTableProps {
+  columnDefinition: ColumnObj[];
+}
+
+class ListTable extends React.Component<ListTableProps> {
   public render() {
     return (
       <Table>
