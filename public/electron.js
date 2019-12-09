@@ -180,6 +180,7 @@ const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
+const QUERY_DATA_CHANNEL = 'fetch-query-data';
 
 // listeners
 
@@ -265,8 +266,27 @@ const fetchListDefinition = (event, listId) => {
   }
 };
 
+/** fetches the data based on query
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @param {string} queryString- the query string
+ * @returns - the returned dataset from the query
+ */
+const fetchQueryData = (event, queryString) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const fetchedRows = db.prepare(queryString).all();
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = fetchedRows;
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
+ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
