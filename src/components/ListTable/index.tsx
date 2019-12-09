@@ -9,8 +9,15 @@ interface ColumnObj {
   data_type: string;
 }
 
+interface DataSourceObj {
+  type: string;
+  query: string;
+  config_json: any;
+}
+
 export interface ListTableProps {
   columnDefinition: ColumnObj[];
+  datasource: DataSourceObj;
 }
 
 class ListTable extends React.Component<ListTableProps> {
