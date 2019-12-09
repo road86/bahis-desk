@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Table } from 'reactstrap';
+import { ipcRenderer } from '../../services/ipcRenderer';
 
 interface ColumnObj {
   sortable: true | false;
@@ -21,6 +22,14 @@ export interface ListTableProps {
 }
 
 class ListTable extends React.Component<ListTableProps> {
+  public async componentDidMount() {
+    const { datasource } = this.props;
+    const response = await ipcRenderer.sendSync(
+      'fetch-query-data',
+      'select * from ' + datasource.query
+    );
+  }
+
   public render() {
     const { columnDefinition } = this.props;
     const appLanguage = 'English';
