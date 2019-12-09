@@ -21,6 +21,11 @@ export interface ListTableProps {
   datasource: DataSourceObj;
 }
 
+/** state inteface for ListTable */
+export interface ListTableState {
+  tableData: Array<{ [key: string]: any }>;
+}
+
 class ListTable extends React.Component<ListTableProps> {
   public async componentDidMount() {
     const { datasource } = this.props;
