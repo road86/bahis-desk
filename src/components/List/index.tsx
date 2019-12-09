@@ -14,35 +14,39 @@ interface ListURLParams {
 interface ListState {
   filterDefinition: any;
   columnDefinition: any;
+  datasource: any;
 }
 
 class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
   constructor(props: any) {
     super(props);
-    this.state = { filterDefinition: null, columnDefinition: null };
+    this.state = { filterDefinition: null, columnDefinition: null, datasource: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
     const listId = match.params.id || '';
-    const { columnDefinition, filterDefinition } = await ipcRenderer.sendSync(
+    const { columnDefinition, filterDefinition, datasource } = await ipcRenderer.sendSync(
       'fetch-list-definition',
       listId
     );
     this.setState({
       ...this.state,
       columnDefinition: columnDefinition ? JSON.parse(columnDefinition) : null,
+      datasource: datasource || null,
       filterDefinition: filterDefinition ? JSON.parse(filterDefinition) : null,
     });
   }
   public render() {
-    const { columnDefinition, filterDefinition } = this.state;
+    const { columnDefinition, datasource, filterDefinition } = this.state;
     return (
       <div>
         <Link to="/">
           <h1>Back</h1>
         </Link>
         {filterDefinition && <Filter definition={filterDefinition} choices={FILTER_CHOICES} />}
-        {columnDefinition && <ListTable columnDefinition={columnDefinition} />}
+        {columnDefinition && datasource && (
+          <ListTable columnDefinition={columnDefinition} datasource={datasource} />
+        )}
       </div>
     );
   }
