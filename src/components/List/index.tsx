@@ -42,7 +42,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
           <h1>Back</h1>
         </Link>
         {filterDefinition && <Filter definition={filterDefinition} choices={FILTER_CHOICES} />}
-        {columnDefinition && <ListTable />}
+        {columnDefinition && <ListTable columnDefinition={columnDefinition} />}
       </div>
     );
   }
