@@ -32,7 +32,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
     this.setState({
       ...this.state,
       columnDefinition: columnDefinition ? JSON.parse(columnDefinition) : null,
-      datasource: datasource || null,
+      datasource: datasource ? JSON.parse(datasource) : null,
       filterDefinition: filterDefinition ? JSON.parse(filterDefinition) : null,
     });
   }
