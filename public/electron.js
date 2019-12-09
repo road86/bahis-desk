@@ -249,13 +249,14 @@ const fetchFormDefinition = (event, formId) => {
 const fetchListDefinition = (event, listId) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
-    const fetchedRows = db
-      .prepare('SELECT filter_definition, table_definition from lists where list_id = ? limit 1')
-      .get(listId);
+    const fetchedRows = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
     // eslint-disable-next-line no-param-reassign
     event.returnValue = {
       filterDefinition: fetchedRows.filter_definition,
-      tableDefinition: fetchedRows.table_definition,
+      columnDefinition: fetchedRows.column_definition,
+      datasource: fetchedRows.datasource,
+      listName: fetchedRows.list_name,
+      listHeader: fetchedRows.list_header,
     };
     db.close();
   } catch (err) {
