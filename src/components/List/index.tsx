@@ -12,13 +12,13 @@ interface ListURLParams {
 /** interface for List state */
 interface ListState {
   filterDefinition: any;
-  tableDefinition: any;
+  columnDefinition: any;
 }
 
 class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
   constructor(props: any) {
     super(props);
-    this.state = { filterDefinition: null, tableDefinition: null };
+    this.state = { filterDefinition: null, columnDefinition: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
