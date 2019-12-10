@@ -15,12 +15,18 @@ interface ListState {
   filterDefinition: any;
   columnDefinition: any;
   datasource: any;
+  filtersValue: any;
 }
 
 class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
   constructor(props: any) {
     super(props);
-    this.state = { filterDefinition: null, columnDefinition: null, datasource: null };
+    this.state = {
+      columnDefinition: null,
+      datasource: null,
+      filterDefinition: null,
+      filtersValue: {},
+    };
   }
   public async componentDidMount() {
     const { match } = this.props;
@@ -43,13 +49,23 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
         <Link to="/">
           <h1>Back</h1>
         </Link>
-        {filterDefinition && <Filter definition={filterDefinition} choices={FILTER_CHOICES} />}
+        {filterDefinition && (
+          <Filter
+            definition={filterDefinition}
+            choices={FILTER_CHOICES}
+            onSubmitHandler={this.setFiltersValue}
+          />
+        )}
         {columnDefinition && datasource && (
           <ListTable columnDefinition={columnDefinition} datasource={datasource} />
         )}
       </div>
     );
   }
+
+  private setFiltersValue = (filtersValue: any) => {
+    this.setState({ ...this.state, filtersValue });
+  };
 }
 
 export default withRouter(List);
