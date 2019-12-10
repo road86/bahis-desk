@@ -1,6 +1,7 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { Button } from 'reactstrap';
 import { Store } from 'redux';
 import filterReducer, {
   getAllFilterValueObjs,
@@ -33,7 +34,8 @@ interface ChoiceItems {
 interface FilterProps {
   definition: FilterItem[];
   choices: ChoiceItems;
-  filterHandler: any;
+  filterValue: any;
+  onSubmitHandler: any;
 }
 
 /** register the filter reducer */
@@ -45,6 +47,7 @@ class Filter extends React.Component<FilterProps> {
     return (
       <div>
         {definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index))}
+        <Button>Submit</Button>
       </div>
     );
   }
@@ -76,13 +79,13 @@ class Filter extends React.Component<FilterProps> {
 
 /** Interface to describe props from mapStateToProps */
 interface DispatchedStateProps {
-  filterHandler: any;
+  filterValue: any;
 }
 
 /** Map props to state  */
 const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
   const result = {
-    filterHandler: getAllFilterValueObjs(state),
+    filterValue: getAllFilterValueObjs(state),
   };
   return result;
 };
