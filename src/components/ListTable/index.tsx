@@ -26,13 +26,19 @@ export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
 }
 
-class ListTable extends React.Component<ListTableProps> {
+class ListTable extends React.Component<ListTableProps, ListTableState> {
+  constructor(props: ListTableProps) {
+    super(props);
+    this.state = { tableData: [] };
+  }
+
   public async componentDidMount() {
     const { datasource } = this.props;
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       'select * from ' + datasource.query
     );
+    this.setState({ ...this.state, tableData: response || [] });
   }
 
   public render() {
@@ -48,18 +54,15 @@ class ListTable extends React.Component<ListTableProps> {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-          </tr>
+          {this.state &&
+            this.state.tableData &&
+            this.state.tableData.map((rowObj, rowIndex: number) => (
+              <tr key={'table-row-' + rowIndex}>
+                {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
+                  <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                ))}
+              </tr>
+            ))}
         </tbody>
       </Table>
     );
