@@ -11,6 +11,7 @@ export type FilterValue = string[] | null;
 export interface FilterValueObj {
   condition: FilterCondition;
   value: FilterValue;
+  sql: string;
 }
 
 // actions
@@ -24,6 +25,7 @@ export const RESET_FILTERS = 'bahis/reducer/filter/RESET_FILTERS';
 export interface SetConditionValueAction extends AnyAction {
   name: string;
   value: string | null;
+  sql: string;
   type: typeof SET_CONDITION_VALUE;
 }
 
@@ -31,6 +33,7 @@ export interface SetConditionValueAction extends AnyAction {
 export interface SetFilterValueAction extends AnyAction {
   name: string;
   value: string[] | null;
+  sql: string;
   type: typeof SET_FILTER_VALUE;
 }
 
@@ -51,10 +54,16 @@ export type FilterActionTypes =
 /** set filter condition value action creator
  * @param {string } name - filter name where value will be added
  * @param {string | null} value - filter condition value to add store
+ * @param {string} sql - sql condition text to add store
  * @return {SetConditionValueAction} - an action to add condition value to store
  */
-export const setConditionValue = (name: string, value: string | null): SetConditionValueAction => ({
+export const setConditionValue = (
+  name: string,
+  value: string | null,
+  sql: string
+): SetConditionValueAction => ({
   name,
+  sql,
   type: SET_CONDITION_VALUE,
   value,
 });
@@ -62,10 +71,16 @@ export const setConditionValue = (name: string, value: string | null): SetCondit
 /** set filter  value action creator
  * @param {string } name - filter name where value will be added
  * @param {string[] | null} value - filter value to add store
+ * @param {string} sql - sql condition text to add store
  * @return {SetFilterValueAction} - an action to add filter value to store
  */
-export const setFilterValue = (name: string, value: string[] | null): SetFilterValueAction => ({
+export const setFilterValue = (
+  name: string,
+  value: string[] | null,
+  sql: string
+): SetFilterValueAction => ({
   name,
+  sql,
   type: SET_FILTER_VALUE,
   value,
 });
@@ -108,14 +123,14 @@ export default function reducer(
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
         ...state.asMutable({ deep: true }),
-        filters: { ...filters, [action.name]: { value, condition: action.value } },
+        filters: { ...filters, [action.name]: { value, condition: action.value, sql: action.sql } },
       });
     case SET_FILTER_VALUE:
       const condition = state.getIn(['filters', action.name, 'condition']) || null;
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
         ...state.asMutable({ deep: true }),
-        filters: { ...filters, [action.name]: { condition, value: action.value } },
+        filters: { ...filters, [action.name]: { condition, value: action.value, sql: action.sql } },
       });
     case RESET_FILTERS:
       return initialState;

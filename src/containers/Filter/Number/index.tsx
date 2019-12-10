@@ -31,7 +31,7 @@ class FilterNumber extends React.Component<NumberProps> {
   public render() {
     const { filterItem, condition, value } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
-      this.props.setFilterValueActionCreator(filterItem.name, [value[0]]);
+      this.props.setFilterValueActionCreator(filterItem.name, [value[0]], '');
     }
     return (
       <FormGroup>
@@ -55,12 +55,12 @@ class FilterNumber extends React.Component<NumberProps> {
       tmpVal =
         value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
     }
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
+    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
   };
 
   private handleConditionChange = (selectedOption: any) => {
     const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value);
+    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
   };
 }
 

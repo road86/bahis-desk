@@ -33,12 +33,12 @@ class FilterDate extends React.Component<DateProps> {
   public render() {
     const { filterItem, condition, value } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
-      this.props.setFilterValueActionCreator(filterItem.name, [value[0]]);
+      this.props.setFilterValueActionCreator(filterItem.name, [value[0]], '');
     }
     const startDate = value && value[0] ? new Date(value[0]) : null;
     const endDate = value && value[1] ? new Date(value[1]) : null;
     if (startDate && endDate && endDate < startDate) {
-      this.props.setFilterValueActionCreator(filterItem.name, [startDate.toString()]);
+      this.props.setFilterValueActionCreator(filterItem.name, [startDate.toString()], '');
     }
     return (
       <FormGroup>
@@ -59,19 +59,19 @@ class FilterDate extends React.Component<DateProps> {
     const { filterItem, value } = this.props;
     const selectedDateString = selectedDate.toString();
     const tmpVal = value && value[1] ? [selectedDateString, value[1]] : [selectedDateString];
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
+    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
   };
 
   private handleEndDate = (selectedDate: any) => {
     const { filterItem, value } = this.props;
     const selectedDateString = selectedDate.toString();
     const tmpVal = [value && value[0] ? value[0] : '', selectedDateString];
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal);
+    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
   };
 
   private handleConditionChange = (selectedOption: any) => {
     const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value);
+    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
   };
 }
 

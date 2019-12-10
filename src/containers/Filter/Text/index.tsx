@@ -41,12 +41,12 @@ class FilterText extends React.Component<TextProps> {
 
   private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
     const { filterItem } = this.props;
-    this.props.setFilterValueActionCreator(filterItem.name, [event.currentTarget.value]);
+    this.props.setFilterValueActionCreator(filterItem.name, [event.currentTarget.value], '');
   };
 
   private handleConditionChange = (selectedOption: any) => {
     const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value);
+    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
   };
 }
 
