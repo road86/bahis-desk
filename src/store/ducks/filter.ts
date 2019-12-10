@@ -78,10 +78,14 @@ export const resetFilters = (): ResetFiltersAction => ({
 });
 
 // The reducer
+/** interface for filters values object */
+export interface FiltersValueObj {
+  [key: string]: FilterValueObj;
+}
 
 /** interface for filter state in redux store */
 interface FilterState {
-  filters: { [key: string]: FilterValueObj };
+  filters: FiltersValueObj;
 }
 
 /** Create an immutable filter state */
