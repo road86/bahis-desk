@@ -1,6 +1,11 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
-import filterReducer, { reducerName as filterReducerName } from '../../store/ducks/filter';
+import { connect } from 'react-redux';
+import { Store } from 'redux';
+import filterReducer, {
+  getAllFilterValueObjs,
+  reducerName as filterReducerName,
+} from '../../store/ducks/filter';
 import { FILTER_DATE_TYPE, FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
 import FilterDate, { FilterDateItem } from './Date';
 import FilterNumber, { FilterNumberItem } from './Number';
@@ -28,6 +33,7 @@ interface ChoiceItems {
 interface FilterProps {
   definition: FilterItem[];
   choices: ChoiceItems;
+  filterHandler: any;
 }
 
 /** register the filter reducer */
@@ -66,4 +72,28 @@ class Filter extends React.Component<FilterProps> {
   };
 }
 
-export default Filter;
+/** connect the component to the store */
+
+/** Interface to describe props from mapStateToProps */
+interface DispatchedStateProps {
+  filterHandler: any;
+}
+
+/** Map props to state  */
+const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
+  const result = {
+    filterHandler: getAllFilterValueObjs(state),
+  };
+  return result;
+};
+
+/** map props to actions */
+const mapDispatchToProps = {};
+
+/** connect clientsList to the redux store */
+const ConnectedFilter = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Filter);
+
+export default ConnectedFilter;
