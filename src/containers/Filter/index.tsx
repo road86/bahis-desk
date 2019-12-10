@@ -47,7 +47,7 @@ class Filter extends React.Component<FilterProps> {
     return (
       <div>
         {definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index))}
-        <Button>Submit</Button>
+        <Button onClick={this.filterHandler}>Submit</Button>
       </div>
     );
   }
@@ -72,6 +72,11 @@ class Filter extends React.Component<FilterProps> {
       default:
         return null;
     }
+  };
+
+  // tslint:disable-next-line: variable-name
+  private filterHandler = (_event: React.MouseEvent<Button>) => {
+    this.props.onSubmitHandler(this.props.filterValue);
   };
 }
 
