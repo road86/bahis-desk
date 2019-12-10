@@ -57,7 +57,11 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
           />
         )}
         {columnDefinition && datasource && (
-          <ListTable columnDefinition={columnDefinition} datasource={datasource} />
+          <ListTable
+            columnDefinition={columnDefinition}
+            datasource={datasource}
+            filters={this.state.filtersValue}
+          />
         )}
       </div>
     );
