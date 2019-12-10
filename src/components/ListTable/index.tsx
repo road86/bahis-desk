@@ -19,26 +19,28 @@ interface DataSourceObj {
 export interface ListTableProps {
   columnDefinition: ColumnObj[];
   datasource: DataSourceObj;
+  filters: any;
 }
 
 /** state inteface for ListTable */
 export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
+  filters: any;
 }
 
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [] };
+    this.state = { tableData: [], filters: [] };
   }
 
   public async componentDidMount() {
-    const { datasource } = this.props;
+    const { datasource, filters } = this.props;
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       'select * from ' + datasource.query
     );
-    this.setState({ ...this.state, tableData: response || [] });
+    this.setState({ ...this.state, tableData: response || [], filters });
   }
 
   public render() {
