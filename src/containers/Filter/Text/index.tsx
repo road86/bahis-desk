@@ -66,7 +66,7 @@ class FilterText extends React.Component<TextProps> {
   };
 
   /** generates the SQL where text relative to filter condition, value
-   * @param {FilterTextItem} filterTextItem - the filter text item
+   * @param {FilterTextItem} filterItem - the filter text item
    * @param {FilterCondition} condition - the filter condition
    * @param {FilterValue} value - the filter value
    * @returns {string} - the relevant WHERE SQL text
