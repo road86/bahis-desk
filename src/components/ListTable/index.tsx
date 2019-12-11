@@ -31,7 +31,7 @@ export interface ListTableState {
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: [] };
+    this.state = { tableData: [], filters: {} };
   }
 
   public async componentDidMount() {
