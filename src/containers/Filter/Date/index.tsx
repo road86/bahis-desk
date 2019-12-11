@@ -15,7 +15,16 @@ import {
   setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_DATE_TYPE } from '../constants';
-import { DATE_FILTER_OPERATORS, IN_BETWEEN_TYPE } from './constants';
+import {
+  DATE_FILTER_OPERATORS,
+  EQUAL_TYPE,
+  GREATER_THAN_EQUAL_TYPE,
+  GREATER_THAN_TYPE,
+  IN_BETWEEN_TYPE,
+  LESS_THAN_EQUAL_TYPE,
+  LESS_THAN_TYPE,
+  NOT_EQUAL_TYPE,
+} from './constants';
 
 export interface FilterDateItem extends FilterItem {
   type: FILTER_DATE_TYPE;
@@ -33,12 +42,20 @@ class FilterDate extends React.Component<DateProps> {
   public render() {
     const { filterItem, condition, value } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
-      this.props.setFilterValueActionCreator(filterItem.name, [value[0]], '');
+      this.props.setFilterValueActionCreator(
+        filterItem.name,
+        [value[0]],
+        this.generateSqlText(filterItem, condition, [value[0]])
+      );
     }
     const startDate = value && value[0] ? new Date(value[0]) : null;
     const endDate = value && value[1] ? new Date(value[1]) : null;
     if (startDate && endDate && endDate < startDate) {
-      this.props.setFilterValueActionCreator(filterItem.name, [startDate.toString()], '');
+      this.props.setFilterValueActionCreator(
+        filterItem.name,
+        [startDate ? startDate.toISOString() : ''],
+        this.generateSqlText(filterItem, condition, [startDate ? startDate.toISOString() : ''])
+      );
     }
     return (
       <FormGroup>
@@ -56,22 +73,69 @@ class FilterDate extends React.Component<DateProps> {
   }
 
   private handleStartDate = (selectedDate: any) => {
-    const { filterItem, value } = this.props;
-    const selectedDateString = selectedDate.toString();
+    const { filterItem, condition, value } = this.props;
+    const selectedDateString = selectedDate ? selectedDate.toISOString() : '';
     const tmpVal = value && value[1] ? [selectedDateString, value[1]] : [selectedDateString];
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
+    this.props.setFilterValueActionCreator(
+      filterItem.name,
+      tmpVal,
+      this.generateSqlText(filterItem, condition, tmpVal)
+    );
   };
 
   private handleEndDate = (selectedDate: any) => {
-    const { filterItem, value } = this.props;
-    const selectedDateString = selectedDate.toString();
+    const { filterItem, condition, value } = this.props;
+    const selectedDateString = selectedDate ? selectedDate.toISOString() : '';
     const tmpVal = [value && value[0] ? value[0] : '', selectedDateString];
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
+    this.props.setFilterValueActionCreator(
+      filterItem.name,
+      tmpVal,
+      this.generateSqlText(filterItem, condition, tmpVal)
+    );
   };
 
   private handleConditionChange = (selectedOption: any) => {
-    const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
+    const { filterItem, value } = this.props;
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      selectedOption.value,
+      this.generateSqlText(filterItem, selectedOption.value, value)
+    );
+  };
+
+  /** generates the SQL where text relative to filter condition, value
+   * @param {FilterDateItem} filterItem - the filter text item
+   * @param {FilterCondition} condition - the filter condition
+   * @param {FilterValue} value - the filter value
+   * @returns {string} - the relevant WHERE SQL text
+   */
+  private generateSqlText = (
+    filterItem: FilterDateItem,
+    condition: FilterCondition,
+    value: FilterValue
+  ): string => {
+    if (condition && value && value.length > 0 && value[0] !== '') {
+      switch (condition) {
+        case GREATER_THAN_TYPE:
+          return `date(${filterItem.name}) > '${value[0]}'`;
+        case GREATER_THAN_EQUAL_TYPE:
+          return `date(${filterItem.name}) >= '${value[0]}'`;
+        case LESS_THAN_TYPE:
+          return `date(${filterItem.name}) < '${value[0]}'`;
+        case LESS_THAN_EQUAL_TYPE:
+          return `date(${filterItem.name}) <= '${value[0]}'`;
+        case EQUAL_TYPE:
+          return `date(${filterItem.name}) = '${value[0]}'`;
+        case NOT_EQUAL_TYPE:
+          return `date(${filterItem.name}) != '${value[0]}'`;
+        case IN_BETWEEN_TYPE:
+          if (value.length > 1 && value[1] !== '') {
+            return `date(${filterItem.name}) >= '${value[0]}' and date(${filterItem.name}) <= '${value[1]}'`;
+          }
+          return '';
+      }
+    }
+    return '';
   };
 }
 
