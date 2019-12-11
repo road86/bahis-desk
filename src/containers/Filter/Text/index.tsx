@@ -13,7 +13,15 @@ import {
   setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_TEXT_TYPE } from '../constants';
-import { TEXT_FILTER_OPERATORS } from './constants';
+import {
+  CONTAINS_TYPE,
+  ENDS_WITH_TYPE,
+  EQUAL_TYPE,
+  NOT_CONTAINS_TYPE,
+  NOT_EQUAL_TYPE,
+  STARTS_WITH_TYPE,
+  TEXT_FILTER_OPERATORS,
+} from './constants';
 
 export interface FilterTextItem extends FilterItem {
   type: FILTER_TEXT_TYPE;
@@ -41,12 +49,44 @@ class FilterText extends React.Component<TextProps> {
 
   private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
     const { filterItem } = this.props;
-    this.props.setFilterValueActionCreator(filterItem.name, [event.currentTarget.value], '');
+    this.props.setFilterValueActionCreator(
+      filterItem.name,
+      [event.currentTarget.value],
+      this.generateSqlText()
+    );
   };
 
   private handleConditionChange = (selectedOption: any) => {
     const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      selectedOption.value,
+      this.generateSqlText()
+    );
+  };
+
+  /** generates the SQL where text relative to filter condition, value
+   * @returns {string} - the relevant WHERE SQL text
+   */
+  private generateSqlText = (): string => {
+    const { filterItem, condition, value } = this.props;
+    if (condition && value && value.length > 0 && value[0] !== '') {
+      switch (condition) {
+        case CONTAINS_TYPE:
+          return `instr("${filterItem.name}", "${value}") > 0`;
+        case NOT_CONTAINS_TYPE:
+          return `instr("${filterItem.name}", "${value}") < 1`;
+        case STARTS_WITH_TYPE:
+          return `${filterItem.name} like "${value}%"`;
+        case ENDS_WITH_TYPE:
+          return `${filterItem.name} like "%${value}"`;
+        case EQUAL_TYPE:
+          return `${filterItem.name} = "${value}"`;
+        case NOT_EQUAL_TYPE:
+          return `${filterItem.name} != "${value}"`;
+      }
+    }
+    return '';
   };
 }
 
