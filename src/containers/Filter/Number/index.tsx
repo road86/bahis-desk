@@ -13,7 +13,16 @@ import {
   setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_NUMBER_TYPE } from '../constants';
-import { IN_BETWEEN_TYPE, NUMBER_FILTER_OPERATORS } from './constants';
+import {
+  EQUAL_TYPE,
+  GREATER_THAN_EQUAL_TYPE,
+  GREATER_THAN_TYPE,
+  IN_BETWEEN_TYPE,
+  LESS_THAN_EQUAL_TYPE,
+  LESS_THAN_TYPE,
+  NOT_EQUAL_TYPE,
+  NUMBER_FILTER_OPERATORS,
+} from './constants';
 
 export interface FilterNumberItem extends FilterItem {
   type: FILTER_NUMBER_TYPE;
@@ -31,7 +40,11 @@ class FilterNumber extends React.Component<NumberProps> {
   public render() {
     const { filterItem, condition, value } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
-      this.props.setFilterValueActionCreator(filterItem.name, [value[0]], '');
+      this.props.setFilterValueActionCreator(
+        filterItem.name,
+        [value[0]],
+        this.generateSqlText(filterItem, condition, [value[0]])
+      );
     }
     return (
       <FormGroup>
@@ -47,7 +60,7 @@ class FilterNumber extends React.Component<NumberProps> {
   }
 
   private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const { filterItem, value } = this.props;
+    const { filterItem, condition, value } = this.props;
     let tmpVal;
     if (event.currentTarget.name === filterItem.name + '_v2') {
       tmpVal = [value && value[0] ? value[0] : '', event.currentTarget.value];
@@ -55,12 +68,55 @@ class FilterNumber extends React.Component<NumberProps> {
       tmpVal =
         value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
     }
-    this.props.setFilterValueActionCreator(filterItem.name, tmpVal, '');
+    this.props.setFilterValueActionCreator(
+      filterItem.name,
+      tmpVal,
+      this.generateSqlText(filterItem, condition, tmpVal)
+    );
   };
 
   private handleConditionChange = (selectedOption: any) => {
-    const { filterItem } = this.props;
-    this.props.setConditionValueActionCreator(filterItem.name, selectedOption.value, '');
+    const { filterItem, value } = this.props;
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      selectedOption.value,
+      this.generateSqlText(filterItem, selectedOption.value, value)
+    );
+  };
+
+  /** generates the SQL where text relative to filter condition, value
+   * @param {FilterNumberItem} filterItem - the filter text item
+   * @param {FilterCondition} condition - the filter condition
+   * @param {FilterValue} value - the filter value
+   * @returns {string} - the relevant WHERE SQL text
+   */
+  private generateSqlText = (
+    filterItem: FilterNumberItem,
+    condition: FilterCondition,
+    value: FilterValue
+  ): string => {
+    if (condition && value && value.length > 0 && value[0] !== '') {
+      switch (condition) {
+        case GREATER_THAN_TYPE:
+          return `cast("${filterItem.name}" as float) > ${value[0]}`;
+        case GREATER_THAN_EQUAL_TYPE:
+          return `cast("${filterItem.name}" as float) >= ${value[0]}`;
+        case LESS_THAN_TYPE:
+          return `cast("${filterItem.name}" as float) < ${value[0]}`;
+        case LESS_THAN_EQUAL_TYPE:
+          return `cast("${filterItem.name}" as float) <= ${value[0]}`;
+        case EQUAL_TYPE:
+          return `cast("${filterItem.name}" as float) = ${value[0]}`;
+        case NOT_EQUAL_TYPE:
+          return `cast("${filterItem.name}" as float) != ${value[0]}`;
+        case IN_BETWEEN_TYPE:
+          if (value.length > 1 && value[1] !== '') {
+            return `cast("${filterItem.name}" as float) >= ${value[0]} and cast("${filterItem.name}" as float) <= ${value[1]}`;
+          }
+          return '';
+      }
+    }
+    return '';
   };
 }
 
