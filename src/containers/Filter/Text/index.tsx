@@ -48,42 +48,48 @@ class FilterText extends React.Component<TextProps> {
   }
 
   private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const { filterItem } = this.props;
+    const { filterItem, condition } = this.props;
     this.props.setFilterValueActionCreator(
       filterItem.name,
       [event.currentTarget.value],
-      this.generateSqlText()
+      this.generateSqlText(filterItem, condition, [event.currentTarget.value])
     );
   };
 
   private handleConditionChange = (selectedOption: any) => {
-    const { filterItem } = this.props;
+    const { filterItem, value } = this.props;
     this.props.setConditionValueActionCreator(
       filterItem.name,
       selectedOption.value,
-      this.generateSqlText()
+      this.generateSqlText(filterItem, selectedOption.value, value)
     );
   };
 
   /** generates the SQL where text relative to filter condition, value
+   * @param {FilterTextItem} filterTextItem - the filter text item
+   * @param {FilterCondition} condition - the filter condition
+   * @param {FilterValue} value - the filter value
    * @returns {string} - the relevant WHERE SQL text
    */
-  private generateSqlText = (): string => {
-    const { filterItem, condition, value } = this.props;
+  private generateSqlText = (
+    filterItem: FilterTextItem,
+    condition: FilterCondition,
+    value: FilterValue
+  ): string => {
     if (condition && value && value.length > 0 && value[0] !== '') {
       switch (condition) {
         case CONTAINS_TYPE:
-          return `instr("${filterItem.name}", "${value}") > 0`;
+          return `instr("${filterItem.name}", "${value[0]}") > 0`;
         case NOT_CONTAINS_TYPE:
-          return `instr("${filterItem.name}", "${value}") < 1`;
+          return `instr("${filterItem.name}", "${value[0]}") < 1`;
         case STARTS_WITH_TYPE:
-          return `${filterItem.name} like "${value}%"`;
+          return `${filterItem.name} like "${value[0]}%"`;
         case ENDS_WITH_TYPE:
-          return `${filterItem.name} like "%${value}"`;
+          return `${filterItem.name} like "%${value[0]}"`;
         case EQUAL_TYPE:
-          return `${filterItem.name} = "${value}"`;
+          return `${filterItem.name} = "${value[0]}"`;
         case NOT_EQUAL_TYPE:
-          return `${filterItem.name} != "${value}"`;
+          return `${filterItem.name} != "${value[0]}"`;
       }
     }
     return '';
