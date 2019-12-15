@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardBody, CardTitle } from 'reactstrap';
@@ -14,6 +15,9 @@ class ListMenuItem extends React.Component<ListMenuItemProps> {
       <div>
         <Card>
           <Link to={`/list/${menuItem.list_id}/`}>
+            <div className="card-image">
+              <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
+            </div>
             <CardBody>
               <CardTitle>{menuItem.name}</CardTitle>
             </CardBody>

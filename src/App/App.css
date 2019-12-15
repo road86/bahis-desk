@@ -65,3 +65,20 @@ fieldset[disabled] .gatekeeper-btn.active {
   color: #28a745;
   background-color: #ffffff;
 }
+
+.navbar .navbar-brand {
+  margin-left: 2%;
+  letter-spacing: 4px;
+  font-family: roboto;
+  color: #59821e !important;
+}
+
+.navbar {
+  border-bottom: 1px solid #d3d6cd;
+  box-shadow: 0 1px 3px 0 #eff7ea;
+  background: white !important;
+}
+
+.main-container{
+  margin-top: 8%;
+}

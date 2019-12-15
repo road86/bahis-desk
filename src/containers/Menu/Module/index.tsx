@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Card, CardBody, CardTitle } from 'reactstrap';
@@ -15,6 +16,9 @@ class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
       <div>
         <Card>
           <CardBody onClick={this.onClickHandler}>
+            <div className="card-image">
+              <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
+            </div>
             <CardTitle>{menuItem.name}</CardTitle>
           </CardBody>
         </Card>

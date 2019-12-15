@@ -1,7 +1,8 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Button, Col, Row } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
@@ -17,6 +18,7 @@ import menuReducer, {
 } from '../../store/ducks/menu';
 import FormMenuItem from './Form';
 import ListMenuItem from './List';
+import './Menu.css';
 import ModuleMenuItem from './Module';
 
 /** register the clients reducer */
@@ -41,8 +43,21 @@ class Menu extends React.Component<MenuProps> {
     const { currentMenu, isBackPossible } = this.props;
     return (
       <div className="menu-container">
-        {isBackPossible && <Button onClick={this.onBackHandler}>Back</Button>}
-        <Row>
+        <Row id="menu-title-container">
+          <Col>
+            {isBackPossible && (
+              <div onClick={this.onBackHandler}>
+                <h6 className="menu-back">
+                  <span className="bg-menu-back">
+                    <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+                  </span>
+                </h6>
+              </div>
+            )}
+            <h3 className="menu-title"> {currentMenu ? currentMenu.name : ''} </h3>
+          </Col>
+        </Row>
+        <Row id="menu-body">
           {currentMenu &&
             currentMenu.type === MODULE_TYPE &&
             currentMenu.children.map((menuItem, index) => (
@@ -67,7 +82,7 @@ class Menu extends React.Component<MenuProps> {
     return null;
   };
   // tslint:disable-next-line: variable-name
-  private onBackHandler = (_event: React.MouseEvent<Button>) => {
+  private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
     this.props.setPrevMenuActionCreator();
   };
 }
