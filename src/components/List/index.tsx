@@ -1,9 +1,12 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTable from '../ListTable';
+import './List.css';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -45,23 +48,42 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
   public render() {
     const { columnDefinition, datasource, filterDefinition } = this.state;
     return (
-      <div>
-        <Link to="/">
-          <h1>Back</h1>
-        </Link>
+      <div className="list-container">
+        <Row id="bg-list-title-container">
+          <Col>
+            <div className="list-title-container">
+              <Link to="/">
+                <h6 className="menu-back">
+                  <span className="bg-menu-back">
+                    <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+                  </span>
+                </h6>
+              </Link>
+              <h3 className="list-title"> List Name </h3>
+            </div>
+          </Col>
+        </Row>
         {filterDefinition && (
-          <Filter
-            definition={filterDefinition}
-            choices={FILTER_CHOICES}
-            onSubmitHandler={this.setFiltersValue}
-          />
+          <Row>
+            <Col>
+              <Filter
+                definition={filterDefinition}
+                choices={FILTER_CHOICES}
+                onSubmitHandler={this.setFiltersValue}
+              />
+            </Col>
+          </Row>
         )}
         {columnDefinition && datasource && (
-          <ListTable
-            columnDefinition={columnDefinition}
-            datasource={datasource}
-            filters={this.state.filtersValue}
-          />
+          <Row>
+            <Col>
+              <ListTable
+                columnDefinition={columnDefinition}
+                datasource={datasource}
+                filters={this.state.filtersValue}
+              />
+            </Col>
+          </Row>
         )}
       </div>
     );

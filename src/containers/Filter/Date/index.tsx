@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { FormGroup, Label } from 'reactstrap';
+import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import {
@@ -25,6 +25,7 @@ import {
   LESS_THAN_TYPE,
   NOT_EQUAL_TYPE,
 } from './constants';
+import './Date.css';
 
 export interface FilterDateItem extends FilterItem {
   type: FILTER_DATE_TYPE;
@@ -59,15 +60,32 @@ class FilterDate extends React.Component<DateProps> {
     }
     return (
       <FormGroup>
-        <Label>Date</Label>
-        <Select options={DATE_FILTER_OPERATORS} onChange={this.handleConditionChange} />
-        <DatePicker selected={startDate} onChange={this.handleStartDate} /> <br />
-        {condition === IN_BETWEEN_TYPE && <span>and</span>}
-        {condition === IN_BETWEEN_TYPE && <br />}
-        {condition === IN_BETWEEN_TYPE && (
-          <DatePicker selected={endDate} onChange={this.handleEndDate} minDate={startDate} />
-        )}
-        {condition === IN_BETWEEN_TYPE && <br />}
+        <Row>
+          <Col md={3}>
+            <Label>Date</Label>
+          </Col>
+          <Col md={3}>
+            <Select options={DATE_FILTER_OPERATORS} onChange={this.handleConditionChange} />
+          </Col>
+          <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
+            <DatePicker
+              className="form-control"
+              selected={startDate}
+              onChange={this.handleStartDate}
+            />{' '}
+            <br />
+          </Col>
+          {condition === IN_BETWEEN_TYPE && (
+            <Col md={3}>
+              <DatePicker
+                className="form-control"
+                selected={endDate}
+                onChange={this.handleEndDate}
+                minDate={startDate}
+              />
+            </Col>
+          )}
+        </Row>
       </FormGroup>
     );
   }

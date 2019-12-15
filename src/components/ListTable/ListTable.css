@@ -1,0 +1,25 @@
+.table-container {
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 4px 0 #b4be60;
+  border-radius: 5px;
+  margin: 5px;
+  color: #687459;
+  border: 1px solid rgb(220, 224, 218);
+  padding:5px;
+  text-align: center;
+}
+
+td {
+  color: #687459;
+}
+
+thead {
+  background: #686868;
+  border-radius: 5px;
+  color: white
+}
+
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color:#f9fcf2;
+ }

@@ -9,6 +9,7 @@ import filterReducer, {
 } from '../../store/ducks/filter';
 import { FILTER_DATE_TYPE, FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
 import FilterDate, { FilterDateItem } from './Date';
+import './Filter.css';
 import FilterNumber, { FilterNumberItem } from './Number';
 import FilterText, { FilterTextItem } from './Text';
 
@@ -45,9 +46,11 @@ class Filter extends React.Component<FilterProps> {
   public render() {
     const { definition } = this.props;
     return (
-      <div>
+      <div className="filter-container">
         {definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index))}
-        <Button onClick={this.filterHandler}>Submit</Button>
+        <Button color="success" size="sm" onClick={this.filterHandler}>
+          Submit
+        </Button>
       </div>
     );
   }

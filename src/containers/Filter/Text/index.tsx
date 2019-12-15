@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { FormGroup, Input, Label } from 'reactstrap';
+import { Col, FormGroup, Input, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import {
@@ -40,9 +40,17 @@ class FilterText extends React.Component<TextProps> {
     const { filterItem } = this.props;
     return (
       <FormGroup>
-        <Label>Text</Label>
-        <Select options={TEXT_FILTER_OPERATORS} onChange={this.handleConditionChange} />
-        <Input type="text" name={filterItem.name} onChange={this.handleValueChange} />
+        <Row>
+          <Col md={3}>
+            <Label>Text</Label>
+          </Col>
+          <Col md={3}>
+            <Select options={TEXT_FILTER_OPERATORS} onChange={this.handleConditionChange} />
+          </Col>
+          <Col md={6}>
+            <Input type="text" name={filterItem.name} onChange={this.handleValueChange} />
+          </Col>
+        </Row>
       </FormGroup>
     );
   }

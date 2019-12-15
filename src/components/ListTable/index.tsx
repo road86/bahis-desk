@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Table } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
+import './ListTable.css';
 
 interface ColumnObj {
   sortable: true | false;
@@ -59,26 +60,28 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const { columnDefinition } = this.props;
     const appLanguage = 'English';
     return (
-      <Table>
-        <thead>
-          <tr>
-            {columnDefinition.map((singleCol: ColumnObj, index: number) => (
-              <th key={'col-label-' + index}> {singleCol.label[appLanguage]} </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {this.state &&
-            this.state.tableData &&
-            this.state.tableData.map((rowObj, rowIndex: number) => (
-              <tr key={'table-row-' + rowIndex}>
-                {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
-                  <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
-                ))}
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+      <div className="table-container">
+        <Table striped={true} borderless={true}>
+          <thead>
+            <tr>
+              {columnDefinition.map((singleCol: ColumnObj, index: number) => (
+                <th key={'col-label-' + index}> {singleCol.label[appLanguage]} </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {this.state &&
+              this.state.tableData &&
+              this.state.tableData.map((rowObj, rowIndex: number) => (
+                <tr key={'table-row-' + rowIndex}>
+                  {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
+                    <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                  ))}
+                </tr>
+              ))}
+          </tbody>
+        </Table>
+      </div>
     );
   }
 

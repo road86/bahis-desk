@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { FormGroup, Input, Label } from 'reactstrap';
+import { Col, FormGroup, Input, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import {
@@ -48,13 +48,26 @@ class FilterNumber extends React.Component<NumberProps> {
     }
     return (
       <FormGroup>
-        <Label>Number</Label>
-        <Select options={NUMBER_FILTER_OPERATORS} onChange={this.handleConditionChange} />
-        <Input type="number" name={filterItem.name} onChange={this.handleValueChange} />
-        {condition === IN_BETWEEN_TYPE && <span>and</span>}
-        {condition === IN_BETWEEN_TYPE && (
-          <Input type="number" name={filterItem.name + '_v2'} onChange={this.handleValueChange} />
-        )}
+        <Row>
+          <Col md={3}>
+            <Label>Number</Label>
+          </Col>
+          <Col md={3}>
+            <Select options={NUMBER_FILTER_OPERATORS} onChange={this.handleConditionChange} />
+          </Col>
+          <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
+            <Input type="number" name={filterItem.name} onChange={this.handleValueChange} />
+          </Col>
+          {condition === IN_BETWEEN_TYPE && (
+            <Col md={3}>
+              <Input
+                type="number"
+                name={filterItem.name + '_v2'}
+                onChange={this.handleValueChange}
+              />
+            </Col>
+          )}
+        </Row>
       </FormGroup>
     );
   }
