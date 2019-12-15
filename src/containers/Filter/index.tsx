@@ -45,6 +45,10 @@ interface FilterProps {
 reducerRegistry.register(filterReducerName, filterReducer);
 
 class Filter extends React.Component<FilterProps> {
+  public componentDidMount() {
+    this.props.resetFiltersActionCreator();
+  }
+
   public render() {
     const { definition } = this.props;
     return (
