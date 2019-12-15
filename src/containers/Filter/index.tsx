@@ -6,6 +6,7 @@ import { Store } from 'redux';
 import filterReducer, {
   getAllFilterValueObjs,
   reducerName as filterReducerName,
+  resetFilters,
 } from '../../store/ducks/filter';
 import { FILTER_DATE_TYPE, FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
 import FilterDate, { FilterDateItem } from './Date';
@@ -37,6 +38,7 @@ interface FilterProps {
   choices: ChoiceItems;
   filterValue: any;
   onSubmitHandler: any;
+  resetFiltersActionCreator: typeof resetFilters;
 }
 
 /** register the filter reducer */
@@ -99,7 +101,9 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
 };
 
 /** map props to actions */
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  resetFiltersActionCreator: resetFilters,
+};
 
 /** connect clientsList to the redux store */
 const ConnectedFilter = connect(
