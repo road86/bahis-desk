@@ -57,6 +57,14 @@ class Filter extends React.Component<FilterProps> {
         <Button color="success" size="sm" onClick={this.filterHandler}>
           Submit
         </Button>
+        <Button
+          className="reset-button"
+          color="secondary"
+          size="sm"
+          onClick={this.resetFilterHandler}
+        >
+          Reset
+        </Button>
       </div>
     );
   }
@@ -86,6 +94,12 @@ class Filter extends React.Component<FilterProps> {
   // tslint:disable-next-line: variable-name
   private filterHandler = (_event: React.MouseEvent<Button>) => {
     this.props.onSubmitHandler(this.props.filterValue);
+  };
+
+  // tslint:disable-next-line: variable-name
+  private resetFilterHandler = (_event: React.MouseEvent<Button>) => {
+    this.props.resetFiltersActionCreator();
+    this.props.onSubmitHandler({});
   };
 }
 
