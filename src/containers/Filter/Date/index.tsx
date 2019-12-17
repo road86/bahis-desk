@@ -65,7 +65,11 @@ class FilterDate extends React.Component<DateProps> {
             <Label>Date</Label>
           </Col>
           <Col md={3}>
-            <Select options={DATE_FILTER_OPERATORS} onChange={this.handleConditionChange} />
+            <Select
+              options={DATE_FILTER_OPERATORS}
+              value={DATE_FILTER_OPERATORS.filter(filterObj => filterObj.value === condition)}
+              onChange={this.handleConditionChange}
+            />
           </Col>
           <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
             <DatePicker
