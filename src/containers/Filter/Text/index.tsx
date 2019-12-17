@@ -37,7 +37,7 @@ export interface TextProps {
 
 class FilterText extends React.Component<TextProps> {
   public render() {
-    const { filterItem } = this.props;
+    const { filterItem, value, condition } = this.props;
     return (
       <FormGroup>
         <Row>
@@ -45,10 +45,19 @@ class FilterText extends React.Component<TextProps> {
             <Label>Text</Label>
           </Col>
           <Col md={3}>
-            <Select options={TEXT_FILTER_OPERATORS} onChange={this.handleConditionChange} />
+            <Select
+              options={TEXT_FILTER_OPERATORS}
+              value={TEXT_FILTER_OPERATORS.filter(filterObj => filterObj.value === condition)}
+              onChange={this.handleConditionChange}
+            />
           </Col>
           <Col md={6}>
-            <Input type="text" name={filterItem.name} onChange={this.handleValueChange} />
+            <Input
+              type="text"
+              name={filterItem.name}
+              value={value || ''}
+              onChange={this.handleValueChange}
+            />
           </Col>
         </Row>
       </FormGroup>
