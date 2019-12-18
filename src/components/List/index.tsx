@@ -52,7 +52,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
         <Row id="bg-list-title-container">
           <Col>
             <div className="list-title-container">
-              <Link to="/">
+              <Link to="/menu/">
                 <h6 className="menu-back">
                   <span className="bg-menu-back">
                     <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>

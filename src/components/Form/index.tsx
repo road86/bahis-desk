@@ -49,7 +49,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     };
     return (
       <div>
-        <Link to="/">
+        <Link to="/menu/">
           <h1>Back</h1>
         </Link>
         {formDefinition && <OdkFormRenderer {...props} />}

@@ -6,6 +6,7 @@ import { Redirect, Route, Switch } from 'react-router';
 import { Col, Container, Navbar, NavbarBrand, Row } from 'reactstrap';
 import Form from '../components/Form';
 import List from '../components/List';
+import Loading from '../components/Loading';
 import Menu from '../containers/Menu';
 import './App.css';
 
@@ -26,6 +27,9 @@ class App extends Component {
               <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
               <Switch>
                 <Route exact={true} path="/">
+                  <Loading />
+                </Route>
+                <Route exact={true} path="/menu/">
                   <Menu />
                 </Route>
                 <Route exact={true} path="/form/:id">
