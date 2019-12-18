@@ -181,6 +181,7 @@ const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
+const START_APP_CHANNEL = 'start-app-sync';
 
 // listeners
 
@@ -284,9 +285,27 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
+/** sync and updates app on start up
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @returns - success if sync successful
+ */
+const startAppSync = event => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    // const fetchedRows = db.prepare(queryString).all();
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = 'done';
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
+ipcMain.on(START_APP_CHANNEL, startAppSync);
