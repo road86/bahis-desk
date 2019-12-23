@@ -14,7 +14,7 @@ class FormMenuItem extends React.Component<FormMenuItemProps> {
     return (
       <div>
         <Card>
-          <Link to={`/form/${menuItem.form_id}/`}>
+          <Link to={`/form/${menuItem.xform_id}/`}>
             <div className="card-image">
               <FontAwesomeIcon icon={['far', 'file-alt']} size="4x" />
             </div>

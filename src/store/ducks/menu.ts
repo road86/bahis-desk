@@ -23,7 +23,7 @@ export interface FormMenu {
   name: string;
   label: Label;
   img_id: number;
-  form_id: number;
+  xform_id: number;
 }
 
 /** interface for List menu */
