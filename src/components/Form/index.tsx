@@ -45,6 +45,16 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       defaultLanguage: 'English',
       formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
       handleSubmit,
+      languageOptions: [
+        {
+          label: 'English',
+          value: 'English',
+        },
+        {
+          label: 'Bangla',
+          value: 'Bangla',
+        },
+      ],
       userInputJson: {},
     };
     return (
