@@ -5,10 +5,18 @@ const isDev = require('electron-is-dev');
 const Database = require('better-sqlite3');
 const os = require('os');
 const fs = require('fs');
+const axios = require('axios');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
 let mainWindow;
+
+// SERVER URLS
+const SERVER_URL = 'http://192.168.19.16:8009';
+const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/`;
+const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
+const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
+const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
 
 // DEV EXTENSIONS
 
@@ -98,6 +106,20 @@ app.on(APP_ACTIVATE_STATE, () => {
 // Endpoint processes
 
 // utils
+/** checks the array of strings i.e. value not from repeat but from select multiple
+ * @param {Array} testArray - the array to check if object presents
+ * @returns {Boolean} - true if array not of string; otherwise, false
+ */
+const isNotArrayOfString = testArray => {
+  let isObjectFound = false;
+  testArray.forEach(arrElm => {
+    if (typeof arrElm === 'object') {
+      isObjectFound = true;
+    }
+  });
+  return isObjectFound;
+};
+
 /** recursively generates insert query and saves to flat table
  * @param {any} dbCon - the better sqlite3 database query
  * @param {Text} tableName - the table name to be inserted
@@ -112,7 +134,11 @@ const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, par
   const repeatKeys = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const key in tableObj) {
-    if (Array.isArray(tableObj[key])) {
+    if (
+      Array.isArray(tableObj[key]) &&
+      tableObj[key].length > 0 &&
+      isNotArrayOfString(tableObj[key])
+    ) {
       repeatKeys.push(key);
     } else {
       columnNames = `${columnNames + key.replace('/', '_')}, `;
@@ -293,9 +319,72 @@ const startAppSync = event => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     // const fetchedRows = db.prepare(queryString).all();
-    // eslint-disable-next-line no-param-reassign
-    event.returnValue = 'done';
-    db.close();
+    axios
+      .all([
+        axios.get(DB_TABLES_ENDPOINT),
+        axios.get(APP_DEFINITION_ENDPOINT),
+        axios.get(FORMS_ENDPOINT),
+        axios.get(LISTS_ENDPOINT),
+      ])
+      .then(
+        axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
+          if (formConfigRes.data) {
+            formConfigRes.data.forEach(sqlObj => {
+              try {
+                db.exec(sqlObj.sql_script);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.log('db data table creation failed !!!', err);
+              }
+            });
+          }
+          if (moduleListRes.data) {
+            const newLayoutQuery = db.prepare('INSERT INTO app(app_name, definition) VALUES(?,?)');
+            newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
+          }
+          if (formListRes.data) {
+            const newFormInsertionQuery = db.prepare(
+              'INSERT INTO forms(form_id, form_name, definition, choice_definition) VALUES(?,?,?,?)'
+            );
+            formListRes.data.forEach(formObj => {
+              try {
+                newFormInsertionQuery.run(
+                  formObj.id,
+                  formObj.name,
+                  JSON.stringify(formObj.form_definition),
+                  JSON.stringify(formObj.choice_list)
+                );
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.log('db form insertion failed !!!', err);
+              }
+            });
+            if (listRes.data) {
+              const newListInsertQuery = db.prepare(
+                'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)'
+              );
+              listRes.data.forEach(listObj => {
+                try {
+                  newListInsertQuery.run(
+                    listObj.id,
+                    listObj.list_name,
+                    JSON.stringify(listObj.list_header),
+                    JSON.stringify(listObj.datasource),
+                    JSON.stringify(listObj.filter_definition),
+                    JSON.stringify(listObj.column_definition)
+                  );
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.log('db list insertion failed', err);
+                }
+              });
+            }
+          }
+          // eslint-disable-next-line no-param-reassign
+          event.returnValue = 'done';
+          db.close();
+        })
+      );
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
