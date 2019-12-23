@@ -39,7 +39,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const { datasource, filters } = this.props;
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
-      'select * from ' + datasource.query
+      datasource.type === '0' ? 'select * from ' + datasource.query : datasource.query
     );
     this.setState({ ...this.state, tableData: response || [], filters });
   }
@@ -50,7 +50,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     if (filters !== stateFilters) {
       const response = await ipcRenderer.sendSync(
         'fetch-query-data',
-        'select * from ' + datasource.query + this.generateSqlWhereClause(filters)
+        datasource.type === '0'
+          ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters)
+          : datasource.query + this.generateSqlWhereClause(filters)
       );
       this.setState({ ...this.state, tableData: response || [], filters });
     }
