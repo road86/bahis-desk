@@ -1,8 +1,11 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import OdkFormRenderer from 'odkformrenderer';
+import 'odkformrenderer/example/index.css';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
+import './Form.css';
 
 /** interface for Form URL params */
 interface FormURLParams {
@@ -36,7 +39,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
           data: JSON.stringify({ ...userInput, 'meta/instanceID': this.generateUid() }),
           formId,
         });
-        window.location.reload();
+        this.props.history.push('/menu/');
       }
     };
     const { formDefinition, formChoices } = this.state;
@@ -58,9 +61,13 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       userInputJson: {},
     };
     return (
-      <div>
+      <div className="form-container">
         <Link to="/menu/">
-          <h1>Back</h1>
+          <h6 className="menu-back">
+            <span className="bg-menu-back">
+              <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+            </span>
+          </h6>
         </Link>
         {formDefinition && <OdkFormRenderer {...props} />}
       </div>
