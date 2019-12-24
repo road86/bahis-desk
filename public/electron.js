@@ -61,7 +61,9 @@ function prepareDb() {
 /** creates the db and sets up the window in electron */
 function createWindow() {
   // comment next line if react and redux dev extensions not installed
-  addDevToolsExt();
+  if (isDev) {
+    addDevToolsExt();
+  }
   prepareDb();
   mainWindow = new BrowserWindow({
     width: 900,
@@ -70,7 +72,9 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-  mainWindow.webContents.openDevTools();
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
   mainWindow.loadURL(
     isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`
   );
