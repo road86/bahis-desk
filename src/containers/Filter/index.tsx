@@ -39,6 +39,7 @@ interface FilterProps {
   filterValue: any;
   onSubmitHandler: any;
   resetFiltersActionCreator: typeof resetFilters;
+  appLanguage: string;
 }
 
 /** register the filter reducer */
