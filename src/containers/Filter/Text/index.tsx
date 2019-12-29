@@ -33,6 +33,7 @@ export interface TextProps {
   condition: FilterCondition;
   setConditionValueActionCreator: typeof setConditionValue;
   setFilterValueActionCreator: typeof setFilterValue;
+  appLanguage: string;
 }
 
 class FilterText extends React.Component<TextProps> {
