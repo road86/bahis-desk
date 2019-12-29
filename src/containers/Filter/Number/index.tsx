@@ -34,6 +34,7 @@ export interface NumberProps {
   condition: FilterCondition;
   setConditionValueActionCreator: typeof setConditionValue;
   setFilterValueActionCreator: typeof setFilterValue;
+  appLanguage: string;
 }
 
 class FilterNumber extends React.Component<NumberProps> {
