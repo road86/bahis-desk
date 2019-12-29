@@ -6,6 +6,7 @@ import { FormMenu } from '../../../store/ducks/menu';
 
 export interface FormMenuItemProps {
   menuItem: FormMenu;
+  appLanguage: string;
 }
 
 class FormMenuItem extends React.Component<FormMenuItemProps> {
