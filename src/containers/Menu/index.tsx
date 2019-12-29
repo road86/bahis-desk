@@ -4,6 +4,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
+import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
   FORM_TYPE,
@@ -55,7 +56,9 @@ class Menu extends React.Component<MenuProps> {
                 </h6>
               </div>
             )}
-            <h3 className="menu-title"> {currentMenu ? currentMenu.name : ''} </h3>
+            <h3 className="menu-title">
+              {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
+            </h3>
           </Col>
         </Row>
         <Row id="menu-body">
