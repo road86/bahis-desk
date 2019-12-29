@@ -7,6 +7,7 @@ import { ModuleMenu, setMenuItem } from '../../../store/ducks/menu';
 export interface ModuleMenuItemProps {
   menuItem: ModuleMenu;
   setMenuItemActionCreator: any;
+  appLanguage: string;
 }
 
 class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
