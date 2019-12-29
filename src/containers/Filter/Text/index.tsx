@@ -4,6 +4,7 @@ import Select from 'react-select';
 import { Col, FormGroup, Input, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
+import { getNativeLanguageText } from '../../../helpers/utils';
 import {
   FilterCondition,
   FilterValue,
@@ -38,12 +39,12 @@ export interface TextProps {
 
 class FilterText extends React.Component<TextProps> {
   public render() {
-    const { filterItem, value, condition } = this.props;
+    const { filterItem, value, condition, appLanguage } = this.props;
     return (
       <FormGroup>
         <Row>
           <Col md={3}>
-            <Label>Text</Label>
+            <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
           </Col>
           <Col md={3}>
             <Select
