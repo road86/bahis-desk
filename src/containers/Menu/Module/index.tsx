@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Card, CardBody, CardTitle } from 'reactstrap';
+import { getNativeLanguageText } from '../../../helpers/utils';
 import { ModuleMenu, setMenuItem } from '../../../store/ducks/menu';
 
 export interface ModuleMenuItemProps {
@@ -12,7 +13,7 @@ export interface ModuleMenuItemProps {
 
 class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
   public render() {
-    const { menuItem } = this.props;
+    const { menuItem, appLanguage } = this.props;
     return (
       <div>
         <Card>
@@ -20,7 +21,7 @@ class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
             <div className="card-image">
               <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
             </div>
-            <CardTitle>{menuItem.name}</CardTitle>
+            <CardTitle>{getNativeLanguageText(menuItem.label, appLanguage)}</CardTitle>
           </CardBody>
         </Card>
       </div>
