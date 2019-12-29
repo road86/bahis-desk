@@ -19,6 +19,7 @@ interface ListState {
   columnDefinition: any;
   datasource: any;
   filtersValue: any;
+  appLanguage: string;
 }
 
 class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
@@ -46,7 +47,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
     });
   }
   public render() {
-    const { columnDefinition, datasource, filterDefinition } = this.state;
+    const { columnDefinition, datasource, filterDefinition, appLanguage } = this.state;
     return (
       <div className="list-container">
         <Row id="bg-list-title-container">
@@ -70,6 +71,7 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
                 definition={filterDefinition}
                 choices={FILTER_CHOICES}
                 onSubmitHandler={this.setFiltersValue}
+                appLanguage={appLanguage}
               />
             </Col>
           </Row>
