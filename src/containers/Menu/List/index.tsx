@@ -6,6 +6,7 @@ import { ListMenu } from '../../../store/ducks/menu';
 
 export interface ListMenuItemProps {
   menuItem: ListMenu;
+  appLanguage: string;
 }
 
 class ListMenuItem extends React.Component<ListMenuItemProps> {
