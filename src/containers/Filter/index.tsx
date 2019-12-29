@@ -51,10 +51,12 @@ class Filter extends React.Component<FilterProps> {
   }
 
   public render() {
-    const { definition } = this.props;
+    const { definition, appLanguage } = this.props;
     return (
       <div className="filter-container">
-        {definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index))}
+        {definition.map((filterItem, index) =>
+          this.renderTypeEvaluator(filterItem, index, appLanguage)
+        )}
         <Button color="success" size="sm" onClick={this.filterHandler}>
           Submit
         </Button>
@@ -70,21 +72,37 @@ class Filter extends React.Component<FilterProps> {
     );
   }
 
-  private renderTypeEvaluator = (filterItem: FilterItem, filterIndex: number) => {
+  private renderTypeEvaluator = (
+    filterItem: FilterItem,
+    filterIndex: number,
+    appLanguage: string
+  ) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
         return (
-          <FilterText key={'filter-' + filterIndex} filterItem={filterItem as FilterTextItem} />
+          <FilterText
+            key={'filter-' + filterIndex}
+            filterItem={filterItem as FilterTextItem}
+            appLanguage={appLanguage}
+          />
         );
       }
       case FILTER_NUMBER_TYPE: {
         return (
-          <FilterNumber key={'filter-' + filterIndex} filterItem={filterItem as FilterNumberItem} />
+          <FilterNumber
+            key={'filter-' + filterIndex}
+            filterItem={filterItem as FilterNumberItem}
+            appLanguage={appLanguage}
+          />
         );
       }
       case FILTER_DATE_TYPE: {
         return (
-          <FilterDate key={'filter-' + filterIndex} filterItem={filterItem as FilterDateItem} />
+          <FilterDate
+            key={'filter-' + filterIndex}
+            filterItem={filterItem as FilterDateItem}
+            appLanguage={appLanguage}
+          />
         );
       }
       default:
