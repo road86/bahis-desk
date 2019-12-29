@@ -30,7 +30,7 @@ class App extends Component {
                   <Loading />
                 </Route>
                 <Route exact={true} path="/menu/">
-                  <Menu />
+                  <Menu appLanguage={'English'} />
                 </Route>
                 <Route exact={true} path="/form/:id">
                   <Form />
