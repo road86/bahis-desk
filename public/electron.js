@@ -343,14 +343,30 @@ const startAppSync = event => {
             });
           }
           if (moduleListRes.data) {
-            const newLayoutQuery = db.prepare('INSERT INTO app(app_name, definition) VALUES(?,?)');
+            const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 1');
+            try {
+              layoutDeleteQuery.run();
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.log('Previous Layout does not exist');
+            }
+            const newLayoutQuery = db.prepare(
+              'INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)'
+            );
             newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
           }
           if (formListRes.data) {
+            const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
               'INSERT INTO forms(form_id, form_name, definition, choice_definition) VALUES(?,?,?,?)'
             );
             formListRes.data.forEach(formObj => {
+              try {
+                previousFormDeletionQuery.run(formObj.id);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.log('Deletion Failed ! Previous form not exists!!');
+              }
               try {
                 newFormInsertionQuery.run(
                   formObj.id,
@@ -364,10 +380,17 @@ const startAppSync = event => {
               }
             });
             if (listRes.data) {
+              const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
               const newListInsertQuery = db.prepare(
                 'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)'
               );
               listRes.data.forEach(listObj => {
+                try {
+                  previousListDeletionQuery.run(listObj.id);
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.log('Deletion Failed ! Previous list not exists!!');
+                }
                 try {
                   newListInsertQuery.run(
                     listObj.id,
