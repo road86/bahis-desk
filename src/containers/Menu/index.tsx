@@ -29,6 +29,7 @@ export interface MenuProps {
   setPrevMenuActionCreator: any;
   currentMenu: MenuItem | null;
   isBackPossible: boolean;
+  appLanguage: string;
 }
 
 class Menu extends React.Component<MenuProps> {
@@ -40,7 +41,7 @@ class Menu extends React.Component<MenuProps> {
     }
   }
   public render() {
-    const { currentMenu, isBackPossible } = this.props;
+    const { currentMenu, isBackPossible, appLanguage } = this.props;
     return (
       <div className="menu-container">
         <Row id="menu-title-container">
@@ -62,22 +63,22 @@ class Menu extends React.Component<MenuProps> {
             currentMenu.type === MODULE_TYPE &&
             currentMenu.children.map((menuItem, index) => (
               <Col key={'menu-' + index} md={4}>
-                {this.typeEvalutor(menuItem)}
+                {this.typeEvalutor(menuItem, appLanguage)}
               </Col>
             ))}
         </Row>
       </div>
     );
   }
-  private typeEvalutor = (menuItem: MenuItem) => {
+  private typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
     if (menuItem.type === MODULE_TYPE) {
-      return <ModuleMenuItem menuItem={menuItem} />;
+      return <ModuleMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
     }
     if (menuItem.type === FORM_TYPE) {
-      return <FormMenuItem menuItem={menuItem} />;
+      return <FormMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
     }
     if (menuItem.type === LIST_TYPE) {
-      return <ListMenuItem menuItem={menuItem} />;
+      return <ListMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
     }
     return null;
   };
