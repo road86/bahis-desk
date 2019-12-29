@@ -6,6 +6,7 @@ import Select from 'react-select';
 import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
+import { getNativeLanguageText } from '../../../helpers/utils';
 import {
   FilterCondition,
   FilterValue,
@@ -42,7 +43,7 @@ export interface DateProps {
 
 class FilterDate extends React.Component<DateProps> {
   public render() {
-    const { filterItem, condition, value } = this.props;
+    const { filterItem, condition, value, appLanguage } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
       this.props.setFilterValueActionCreator(
         filterItem.name,
@@ -63,7 +64,7 @@ class FilterDate extends React.Component<DateProps> {
       <FormGroup>
         <Row>
           <Col md={3}>
-            <Label>Date</Label>
+            <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
           </Col>
           <Col md={3}>
             <Select
