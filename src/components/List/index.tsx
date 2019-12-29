@@ -13,16 +13,20 @@ interface ListURLParams {
   id: string;
 }
 
+/** interface for List props */
+interface ListProps extends RouteComponentProps<ListURLParams> {
+  appLanguage: string;
+}
+
 /** interface for List state */
 interface ListState {
   filterDefinition: any;
   columnDefinition: any;
   datasource: any;
   filtersValue: any;
-  appLanguage: string;
 }
 
-class List extends React.Component<RouteComponentProps<ListURLParams>, ListState> {
+class List extends React.Component<ListProps, ListState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -47,7 +51,8 @@ class List extends React.Component<RouteComponentProps<ListURLParams>, ListState
     });
   }
   public render() {
-    const { columnDefinition, datasource, filterDefinition, appLanguage } = this.state;
+    const { appLanguage } = this.props;
+    const { columnDefinition, datasource, filterDefinition } = this.state;
     return (
       <div className="list-container">
         <Row id="bg-list-title-container">
