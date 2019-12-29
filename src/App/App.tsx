@@ -36,7 +36,7 @@ class App extends Component {
                   <Form />
                 </Route>
                 <Route exact={true} path="/list/:id">
-                  <List />
+                  <List appLanguage={'English'} />
                 </Route>
               </Switch>
             </Col>
