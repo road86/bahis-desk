@@ -4,6 +4,7 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
+import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTable from '../ListTable';
 import './List.css';
@@ -24,6 +25,7 @@ interface ListState {
   columnDefinition: any;
   datasource: any;
   filtersValue: any;
+  listHeader: { [key: string]: string };
 }
 
 class List extends React.Component<ListProps, ListState> {
@@ -34,25 +36,29 @@ class List extends React.Component<ListProps, ListState> {
       datasource: null,
       filterDefinition: null,
       filtersValue: {},
+      listHeader: {},
     };
   }
   public async componentDidMount() {
     const { match } = this.props;
     const listId = match.params.id || '';
-    const { columnDefinition, filterDefinition, datasource } = await ipcRenderer.sendSync(
-      'fetch-list-definition',
-      listId
-    );
+    const {
+      columnDefinition,
+      filterDefinition,
+      datasource,
+      listHeader,
+    } = await ipcRenderer.sendSync('fetch-list-definition', listId);
     this.setState({
       ...this.state,
       columnDefinition: columnDefinition ? JSON.parse(columnDefinition) : null,
       datasource: datasource ? JSON.parse(datasource) : null,
       filterDefinition: filterDefinition ? JSON.parse(filterDefinition) : null,
+      listHeader: listHeader ? JSON.parse(listHeader) : {},
     });
   }
   public render() {
     const { appLanguage } = this.props;
-    const { columnDefinition, datasource, filterDefinition } = this.state;
+    const { columnDefinition, datasource, filterDefinition, listHeader } = this.state;
     return (
       <div className="list-container">
         <Row id="bg-list-title-container">
@@ -65,7 +71,7 @@ class List extends React.Component<ListProps, ListState> {
                   </span>
                 </h6>
               </Link>
-              <h3 className="list-title"> List Name </h3>
+              <h3 className="list-title"> {getNativeLanguageText(listHeader, appLanguage)} </h3>
             </div>
           </Col>
         </Row>
