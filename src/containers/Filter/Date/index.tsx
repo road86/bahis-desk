@@ -37,6 +37,7 @@ export interface DateProps {
   condition: FilterCondition;
   setConditionValueActionCreator: typeof setConditionValue;
   setFilterValueActionCreator: typeof setFilterValue;
+  appLanguage: string;
 }
 
 class FilterDate extends React.Component<DateProps> {
