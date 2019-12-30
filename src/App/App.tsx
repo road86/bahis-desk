@@ -1,6 +1,6 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { Col, Container, Navbar, NavbarBrand, Row } from 'reactstrap';
@@ -10,7 +10,7 @@ import Loading from '../components/Loading';
 import Menu from '../containers/Menu';
 import './App.css';
 
-library.add(faUser, faFolder, faListAlt, faFileAlt, faArrowLeft);
+library.add(faUser, faFolder, faListAlt, faFileAlt, faArrowLeft, faSync);
 
 /** Main App component */
 class App extends Component {
