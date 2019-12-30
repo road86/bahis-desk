@@ -239,7 +239,7 @@ const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   console.log('data', response);
   const db = new Database(DB_NAME, { fileMustExist: true });
-  const insert = db.prepare('INSERT INTO data (form_id, data) VALUES (@formId, @data)');
+  const insert = db.prepare('INSERT INTO data (form_id, data, status) VALUES (@formId, @data, 0)');
   insert.run(response);
   parseAndSaveToFlatTables(db, response.formId, response.data);
   db.close();
