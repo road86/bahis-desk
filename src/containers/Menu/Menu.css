@@ -78,3 +78,7 @@ a .card-body {
   padding: 5px;
   border-radius: 3px;
 }
+
+.floating-btn {
+  background: #407000 !important;
+}

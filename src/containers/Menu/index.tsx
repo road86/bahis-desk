@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
+import { Button, Container } from 'react-floating-action-button';
 import { connect } from 'react-redux';
 import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
@@ -70,6 +71,11 @@ class Menu extends React.Component<MenuProps> {
               </Col>
             ))}
         </Row>
+        <Container>
+          <Button tooltip="Sync Now" className="floating-btn" disabled={true}>
+            <FontAwesomeIcon icon={['fas', 'sync']} />
+          </Button>
+        </Container>
       </div>
     );
   }
