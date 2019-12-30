@@ -212,6 +212,7 @@ const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
+const DATA_SYNC_CHANNEL = 'request-data-sync';
 
 // listeners
 
@@ -358,7 +359,7 @@ const startAppSync = event => {
           if (formListRes.data) {
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
-              'INSERT INTO forms(form_id, form_name, definition, choice_definition) VALUES(?,?,?,?)'
+              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid) VALUES(?,?,?,?,?)'
             );
             formListRes.data.forEach(formObj => {
               try {
@@ -372,7 +373,8 @@ const startAppSync = event => {
                   formObj.id,
                   formObj.name,
                   JSON.stringify(formObj.form_definition),
-                  JSON.stringify(formObj.choice_list)
+                  JSON.stringify(formObj.choice_list),
+                  formObj.form_uuid
                 );
               } catch (err) {
                 // eslint-disable-next-line no-console
@@ -418,6 +420,30 @@ const startAppSync = event => {
   }
 };
 
+const requestDataSync = event => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
+    try {
+      const notSyncRows = notSyncRowsQuery.all() || [];
+      notSyncRows.forEach(rowObj => {
+        // eslint-disable-next-line no-console
+        console.log(rowObj);
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err);
+    }
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = 'success';
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = 'failed';
+  }
+};
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
@@ -425,3 +451,4 @@ ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
+ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
