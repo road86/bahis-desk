@@ -1,9 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
+import { delay } from 'q';
 import * as React from 'react';
 import { Button, Container } from 'react-floating-action-button';
 import { connect } from 'react-redux';
-import { Col, Row } from 'reactstrap';
+import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -34,18 +35,30 @@ export interface MenuProps {
   appLanguage: string;
 }
 
-class Menu extends React.Component<MenuProps> {
+export interface MenuState {
+  shouldAlertOpen: boolean;
+}
+
+class Menu extends React.Component<MenuProps, MenuState> {
+  constructor(props: MenuProps) {
+    super(props);
+    this.state = { shouldAlertOpen: false };
+  }
+
   public async componentDidMount() {
     const { currentMenu, setMenuItemActionCreator } = this.props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
       setMenuItemActionCreator(JSON.parse(newMenuItem));
     }
+    this.setState({ shouldAlertOpen: false });
   }
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
+    const { shouldAlertOpen } = this.state;
     return (
       <div className="menu-container">
+        {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
         <Row id="menu-title-container">
           <Col>
             {isBackPossible && (
@@ -72,7 +85,7 @@ class Menu extends React.Component<MenuProps> {
             ))}
         </Row>
         <Container>
-          <Button tooltip="Sync Now" className="floating-btn" disabled={true}>
+          <Button tooltip="Sync Now" className="floating-btn" onClick={this.onSyncHandler}>
             <FontAwesomeIcon icon={['fas', 'sync']} />
           </Button>
         </Container>
@@ -94,6 +107,13 @@ class Menu extends React.Component<MenuProps> {
   // tslint:disable-next-line: variable-name
   private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
     this.props.setPrevMenuActionCreator();
+  };
+
+  // tslint:disable-next-line: variable-name
+  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    this.setState({ shouldAlertOpen: true });
+    await delay(1000);
+    this.setState({ shouldAlertOpen: false });
   };
 }
 
