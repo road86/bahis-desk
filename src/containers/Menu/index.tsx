@@ -111,6 +111,7 @@ class Menu extends React.Component<MenuProps, MenuState> {
 
   // tslint:disable-next-line: variable-name
   private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    await ipcRenderer.sendSync('request-data-sync');
     this.setState({ shouldAlertOpen: true });
     await delay(1000);
     this.setState({ shouldAlertOpen: false });
