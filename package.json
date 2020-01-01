@@ -36,10 +36,12 @@
     "classnames": "^2.2.6",
     "client-oauth2": "^4.2.5",
     "connected-react-router": "^6.5.2",
+    "cross-blob": "^1.2.0",
     "cross-env": "^6.0.0",
     "electron-is-dev": "^1.1.0",
     "eslint": "5.16.0",
     "fetch-mock": "^7.3.9",
+    "form-data": "^3.0.0",
     "history": "^4.9.0",
     "jest-fetch-mock": "^2.1.2",
     "lodash": "^4.17.15",
@@ -59,6 +61,7 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "seamless-immutable": "^7.1.4",
+    "to-array-buffer": "^3.2.0",
     "typescript": "^3.5.3"
   },
   "scripts": {
