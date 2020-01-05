@@ -6,3 +6,6 @@ export type FILTER_NUMBER_TYPE = typeof FILTER_NUMBER_TYPE;
 
 export const FILTER_DATE_TYPE = 'date';
 export type FILTER_DATE_TYPE = typeof FILTER_DATE_TYPE;
+
+export const FILTER_SINGLE_SELECT_TYPE = 'single_select';
+export type FILTER_SINGLE_SELECT_TYPE = typeof FILTER_SINGLE_SELECT_TYPE;
