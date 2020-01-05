@@ -8,10 +8,16 @@ import filterReducer, {
   reducerName as filterReducerName,
   resetFilters,
 } from '../../store/ducks/filter';
-import { FILTER_DATE_TYPE, FILTER_NUMBER_TYPE, FILTER_TEXT_TYPE } from './constants';
+import {
+  FILTER_DATE_TYPE,
+  FILTER_NUMBER_TYPE,
+  FILTER_SINGLE_SELECT_TYPE,
+  FILTER_TEXT_TYPE,
+} from './constants';
 import FilterDate, { FilterDateItem } from './Date';
 import './Filter.css';
 import FilterNumber, { FilterNumberItem } from './Number';
+import FilterSingleSelect, { FilterSingleSelectItem } from './Single Select';
 import FilterText, { FilterTextItem } from './Text';
 
 interface LabelObj {
@@ -101,6 +107,15 @@ class Filter extends React.Component<FilterProps> {
           <FilterDate
             key={'filter-' + filterIndex}
             filterItem={filterItem as FilterDateItem}
+            appLanguage={appLanguage}
+          />
+        );
+      }
+      case FILTER_SINGLE_SELECT_TYPE: {
+        return (
+          <FilterSingleSelect
+            key={'filter-' + filterIndex}
+            filterItem={filterItem as FilterSingleSelectItem}
             appLanguage={appLanguage}
           />
         );
