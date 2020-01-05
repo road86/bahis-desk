@@ -518,7 +518,11 @@ const startAppSync = event => {
           event.returnValue = 'done';
           db.close();
         })
-      );
+      )
+      .catch(err => {
+        // eslint-disable-next-line no-console
+        console.log('Axios FAILED', err);
+      });
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
