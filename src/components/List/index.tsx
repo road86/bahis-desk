@@ -86,6 +86,7 @@ class List extends React.Component<ListProps, ListState> {
                 choices={FILTER_CHOICES}
                 onSubmitHandler={this.setFiltersValue}
                 appLanguage={appLanguage}
+                listId={this.state.listId}
               />
             </Col>
           </Row>
