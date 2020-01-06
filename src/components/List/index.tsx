@@ -78,7 +78,7 @@ class List extends React.Component<ListProps, ListState> {
             </div>
           </Col>
         </Row>
-        {filterDefinition && (
+        {filterDefinition && this.state.listId !== '' && (
           <Row>
             <Col>
               <Filter
