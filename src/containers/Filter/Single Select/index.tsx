@@ -30,10 +30,11 @@ export interface SingleSelectProps {
 
 export interface SingleSelectState {
   filterOptions: Array<{ label: string; value: string }>;
+  filterDataset: any[];
 }
 
 class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelectState> {
-  public state = { filterOptions: [] };
+  public state = { filterOptions: [], filterDataset: [] };
   public render() {
     const { filterItem, appLanguage, value } = this.props;
     const { filterOptions } = this.state;
