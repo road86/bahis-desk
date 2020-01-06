@@ -1,3 +1,4 @@
+import lodash from 'lodash';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
@@ -8,7 +9,9 @@ import { getNativeLanguageText } from '../../../helpers/utils';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import {
   FilterCondition,
+  FiltersValueObj,
   FilterValue,
+  getAllFilterValueObjs,
   getFilterCondition,
   getFilterValue,
   setConditionValue,
@@ -28,22 +31,27 @@ export interface SingleSelectProps {
   setFilterValueActionCreator: typeof setFilterValue;
   appLanguage: string;
   listId: string;
+  filtersValueObj: FiltersValueObj;
 }
 
+export type FilterOptions = Array<{ label: string; value: string }>;
+export type FilterDataset = any[];
+
 export interface SingleSelectState {
-  filterOptions: Array<{ label: string; value: string }>;
-  filterDataset: any[];
+  filterOptions: FilterOptions;
+  filterDataset: FilterDataset;
 }
 
 class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelectState> {
   public state = { filterOptions: [], filterDataset: [] };
 
   public async componentDidMount() {
-    const { filterItem, listId } = this.props;
+    const { filterItem, filtersValueObj, listId } = this.props;
     let dependency = filterItem.dependency || [];
     dependency = [...dependency, filterItem.name];
     const response = await ipcRenderer.sendSync('fetch-filter-dataset', listId, dependency);
-    this.setState({ ...this.state, filterDataset: response });
+    const options = this.fetchOptionsFromDataset(filterItem, response, filtersValueObj);
+    this.setState({ ...this.state, filterDataset: response, filterOptions: options });
   }
 
   public render() {
@@ -59,7 +67,9 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
           <Col md={6}>
             <Select
               options={filterOptions}
-              value={filterOptions.filter((filterObj: any) => filterObj.value === value)}
+              value={filterOptions.filter(
+                (filterObj: any) => value && (value as any[]).includes(filterObj.value)
+              )}
               onChange={this.handleValueChange}
             />
           </Col>
@@ -69,11 +79,11 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
   }
 
   private handleValueChange = (selectedOption: any) => {
-    const { filterItem, condition } = this.props;
+    const { filterItem } = this.props;
     this.props.setFilterValueActionCreator(
       filterItem.name,
       [selectedOption.value],
-      this.generateSqlText(filterItem, condition, [selectedOption.value])
+      this.generateSqlText(filterItem, 'single select', [selectedOption.value])
     );
   };
 
@@ -93,6 +103,35 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     }
     return '';
   };
+
+  private fetchOptionsFromDataset = (
+    filterItem: FilterItem,
+    filterDataset: FilterDataset,
+    filtersValueObj: FiltersValueObj
+  ): FilterOptions => {
+    const options: FilterOptions = [];
+    const filterItems = lodash.filter(filterDataset, row => {
+      if (filterItem.dependency && filterItem.dependency.length > 0) {
+        let flag = true;
+        filterItem.dependency.forEach(conditionKey => {
+          flag =
+            flag &&
+            filtersValueObj[conditionKey] &&
+            filtersValueObj[conditionKey].value &&
+            row[conditionKey] &&
+            (filtersValueObj[conditionKey].value as string[]).includes(row[conditionKey] as string);
+        });
+        return flag;
+      }
+      return true;
+    });
+    filterItems.forEach(item => {
+      if (filterItem.name in item) {
+        options.push({ label: item[filterItem.name], value: item[filterItem.name] });
+      }
+    });
+    return options;
+  };
 }
 
 /** connect the component to the store */
@@ -101,6 +140,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
 interface DispatchedStateProps {
   value: FilterValue;
   condition: FilterCondition;
+  filtersValueObj: FiltersValueObj;
 }
 
 /** Interface to describe props from parent */
@@ -113,6 +153,7 @@ const mapStateToProps = (state: Partial<Store>, parentProps: ParentProps): Dispa
   const { filterItem } = parentProps;
   const result = {
     condition: getFilterCondition(state, filterItem.name),
+    filtersValueObj: getAllFilterValueObjs(state),
     value: getFilterValue(state, filterItem.name),
   };
   return result;
