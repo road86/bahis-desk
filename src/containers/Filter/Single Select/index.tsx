@@ -26,6 +26,7 @@ export interface SingleSelectProps {
   setConditionValueActionCreator: typeof setConditionValue;
   setFilterValueActionCreator: typeof setFilterValue;
   appLanguage: string;
+  listId: string;
 }
 
 export interface SingleSelectState {
