@@ -58,11 +58,11 @@ class Filter extends React.Component<FilterProps> {
   }
 
   public render() {
-    const { definition, appLanguage } = this.props;
+    const { definition, appLanguage, listId } = this.props;
     return (
       <div className="filter-container">
         {definition.map((filterItem, index) =>
-          this.renderTypeEvaluator(filterItem, index, appLanguage)
+          this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
         )}
         <Button color="success" size="sm" onClick={this.filterHandler}>
           Submit
@@ -82,7 +82,8 @@ class Filter extends React.Component<FilterProps> {
   private renderTypeEvaluator = (
     filterItem: FilterItem,
     filterIndex: number,
-    appLanguage: string
+    appLanguage: string,
+    listId: string
   ) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
@@ -118,6 +119,7 @@ class Filter extends React.Component<FilterProps> {
             key={'filter-' + filterIndex}
             filterItem={filterItem as FilterSingleSelectItem}
             appLanguage={appLanguage}
+            listId={listId}
           />
         );
       }
