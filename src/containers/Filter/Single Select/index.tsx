@@ -5,6 +5,7 @@ import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import { getNativeLanguageText } from '../../../helpers/utils';
+import { ipcRenderer } from '../../../services/ipcRenderer';
 import {
   FilterCondition,
   FilterValue,
@@ -36,6 +37,15 @@ export interface SingleSelectState {
 
 class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelectState> {
   public state = { filterOptions: [], filterDataset: [] };
+
+  public async componentDidMount() {
+    const { filterItem, listId } = this.props;
+    let dependency = filterItem.dependency || [];
+    dependency = [...dependency, filterItem.name];
+    const response = await ipcRenderer.sendSync('fetch-filter-dataset', listId, dependency);
+    this.setState({ ...this.state, filterDataset: response });
+  }
+
   public render() {
     const { filterItem, appLanguage, value } = this.props;
     const { filterOptions } = this.state;
