@@ -26,6 +26,7 @@ interface ListState {
   datasource: any;
   filtersValue: any;
   listHeader: { [key: string]: string };
+  listId: string;
 }
 
 class List extends React.Component<ListProps, ListState> {
@@ -37,6 +38,7 @@ class List extends React.Component<ListProps, ListState> {
       filterDefinition: null,
       filtersValue: {},
       listHeader: {},
+      listId: '',
     };
   }
   public async componentDidMount() {
@@ -54,6 +56,7 @@ class List extends React.Component<ListProps, ListState> {
       datasource: datasource ? JSON.parse(datasource) : null,
       filterDefinition: filterDefinition ? JSON.parse(filterDefinition) : null,
       listHeader: listHeader ? JSON.parse(listHeader) : {},
+      listId,
     });
   }
   public render() {
