@@ -318,8 +318,36 @@ const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
+const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
 
 // listeners
+
+/** fetches the filter dataset needed to render single select and multiple select options
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @param {string} listId - the list id of the lists table
+ * @param {string[]} filterColumns - the list of columns needed in the dataset
+ * @returns {Object[]} - the filter dataset containing unique combinations of columns
+ */
+const fetchFilterDataset = (event, listId, filterColumns) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
+    const datasource = JSON.parse(listDefinition.datasource);
+    const datasourceQuery =
+      datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
+    const filterDatasetQuery = db.prepare(
+      `with t as (${datasourceQuery}) select ${filterColumns.toString()} from t group by ${filterColumns.toString()}`
+    );
+    const returnedRows = filterDatasetQuery.all();
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = returnedRows;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    // eslint-disable-next-line no-param-reassign
+    event.returnValue = [];
+  }
+};
 
 /** fetches the app menu definition
  * @param {IpcMainEvent} event - the default ipc main event
@@ -592,3 +620,4 @@ ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
+ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
