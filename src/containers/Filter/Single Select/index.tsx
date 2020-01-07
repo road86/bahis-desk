@@ -34,7 +34,11 @@ export interface SingleSelectProps {
   filtersValueObj: FiltersValueObj;
 }
 
-export type FilterOptions = Array<{ label: string; value: string }>;
+export interface FilterOption {
+  label: string;
+  value: string;
+}
+export type FilterOptions = FilterOption[];
 export type FilterDataset = any[];
 
 export interface SingleSelectState {
@@ -63,15 +67,16 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     const { filterOptions, filterDataset } = this.state;
     const options = this.fetchOptionsFromDataset(filterItem, filterDataset, filtersValueObj);
     if (JSON.stringify(options) !== JSON.stringify(filterOptions)) {
-      this.setState({ ...this.state, filterOptions: options });
-      const newValue = filterOptions.filter(
-        (filterObj: any) => value && (value as any[]).includes(filterObj.value)
+      const optionValues = options.map((option: FilterOption) => option.value);
+      const newValues = (value || []).filter(
+        valueItem => valueItem && valueItem !== '' && optionValues.includes(valueItem)
       );
       this.props.setFilterValueActionCreator(
         filterItem.name,
-        newValue,
-        this.generateSqlText(filterItem, 'single select', newValue)
+        newValues,
+        this.generateSqlText(filterItem, 'single select', newValues)
       );
+      this.setState({ ...this.state, filterOptions: options });
     }
   }
 
