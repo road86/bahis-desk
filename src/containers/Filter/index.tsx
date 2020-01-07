@@ -10,12 +10,14 @@ import filterReducer, {
 } from '../../store/ducks/filter';
 import {
   FILTER_DATE_TYPE,
+  FILTER_MULTIPLE_SELECT_TYPE,
   FILTER_NUMBER_TYPE,
   FILTER_SINGLE_SELECT_TYPE,
   FILTER_TEXT_TYPE,
 } from './constants';
 import FilterDate, { FilterDateItem } from './Date';
 import './Filter.css';
+import FilterMultipleSelect, { FilterMultipleSelectItem } from './Multiple Select';
 import FilterNumber, { FilterNumberItem } from './Number';
 import FilterSingleSelect, { FilterSingleSelectItem } from './Single Select';
 import FilterText, { FilterTextItem } from './Text';
@@ -118,6 +120,16 @@ class Filter extends React.Component<FilterProps> {
           <FilterSingleSelect
             key={'filter-' + filterIndex}
             filterItem={filterItem as FilterSingleSelectItem}
+            appLanguage={appLanguage}
+            listId={listId}
+          />
+        );
+      }
+      case FILTER_MULTIPLE_SELECT_TYPE: {
+        return (
+          <FilterMultipleSelect
+            key={'filter-' + filterIndex}
+            filterItem={filterItem as FilterMultipleSelectItem}
             appLanguage={appLanguage}
             listId={listId}
           />
