@@ -47,11 +47,32 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
 
   public async componentDidMount() {
     const { filterItem, filtersValueObj, listId } = this.props;
-    let dependency = filterItem.dependency || [];
+    let dependency = filterItem.dependency
+      ? typeof filterItem.dependency === 'string'
+        ? [filterItem.dependency]
+        : filterItem.dependency
+      : [];
     dependency = [...dependency, filterItem.name];
     const response = await ipcRenderer.sendSync('fetch-filter-dataset', listId, dependency);
     const options = this.fetchOptionsFromDataset(filterItem, response, filtersValueObj);
     this.setState({ ...this.state, filterDataset: response, filterOptions: options });
+  }
+
+  public componentDidUpdate() {
+    const { filterItem, filtersValueObj, value } = this.props;
+    const { filterOptions, filterDataset } = this.state;
+    const options = this.fetchOptionsFromDataset(filterItem, filterDataset, filtersValueObj);
+    if (JSON.stringify(options) !== JSON.stringify(filterOptions)) {
+      this.setState({ ...this.state, filterOptions: options });
+      const newValue = filterOptions.filter(
+        (filterObj: any) => value && (value as any[]).includes(filterObj.value)
+      );
+      this.props.setFilterValueActionCreator(
+        filterItem.name,
+        newValue,
+        this.generateSqlText(filterItem, 'single select', newValue)
+      );
+    }
   }
 
   public render() {
@@ -111,9 +132,14 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
   ): FilterOptions => {
     const options: FilterOptions = [];
     const filterItems = lodash.filter(filterDataset, row => {
-      if (filterItem.dependency && filterItem.dependency.length > 0) {
+      const dependency = filterItem.dependency
+        ? typeof filterItem.dependency === 'string'
+          ? [filterItem.dependency]
+          : filterItem.dependency
+        : [];
+      if (dependency && dependency.length > 0) {
         let flag = true;
-        filterItem.dependency.forEach(conditionKey => {
+        dependency.forEach(conditionKey => {
           flag =
             flag &&
             filtersValueObj[conditionKey] &&
