@@ -72,6 +72,7 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
+  mainWindow.maximize();
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
