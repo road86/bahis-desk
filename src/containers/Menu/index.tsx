@@ -33,6 +33,7 @@ export interface MenuProps {
   currentMenu: MenuItem | null;
   isBackPossible: boolean;
   appLanguage: string;
+  setSyncOverlayHandler: any;
 }
 
 export interface MenuState {
@@ -111,7 +112,10 @@ class Menu extends React.Component<MenuProps, MenuState> {
 
   // tslint:disable-next-line: variable-name
   private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    this.props.setSyncOverlayHandler(true);
     await ipcRenderer.sendSync('request-data-sync');
+    this.props.setSyncOverlayHandler(false);
+    await delay(200);
     this.setState({ shouldAlertOpen: true });
     await delay(1000);
     this.setState({ shouldAlertOpen: false });
