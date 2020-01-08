@@ -4,9 +4,9 @@ import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
+import ListTable from '../../containers/ListTable';
 import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
-import ListTable from '../ListTable';
 import './List.css';
 
 /** interface for Form URL params */
