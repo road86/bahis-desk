@@ -114,6 +114,7 @@ class Menu extends React.Component<MenuProps, MenuState> {
   private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
     this.props.setSyncOverlayHandler(true);
     await ipcRenderer.sendSync('request-data-sync');
+    await delay(500);
     this.props.setSyncOverlayHandler(false);
     await delay(200);
     this.setState({ shouldAlertOpen: true });
