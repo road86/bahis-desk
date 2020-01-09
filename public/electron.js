@@ -22,7 +22,7 @@ const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission`;
 
 // extension paths
 const REACT_EXTENSION_PATH =
-  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.3.0_0';
+  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.4.0_0';
 const REDUX_EXTENSION_PATH =
   '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
