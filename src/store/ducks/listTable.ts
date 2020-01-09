@@ -17,6 +17,7 @@ export interface ColumnPropertyObj {
 // actions
 /** action types */
 export const SET_ORDER_VALUE = 'bahis/reducer/listTable/SET_ORDER_VALUE';
+export const RESET_COLUMNS = 'bahis/reducer/listTable/RESET_COLUMNS';
 
 /** interface for SET_ORDER_VALUE action */
 export interface SetOrderValueAction extends AnyAction {
@@ -26,8 +27,13 @@ export interface SetOrderValueAction extends AnyAction {
   type: typeof SET_ORDER_VALUE;
 }
 
+/** interface for RESET_COLUMNS action */
+export interface ResetColumnsAction extends AnyAction {
+  type: typeof RESET_COLUMNS;
+}
+
 /** Create type for listTable reducer actions */
-export type ListTableActionTypes = SetOrderValueAction | AnyAction;
+export type ListTableActionTypes = SetOrderValueAction | ResetColumnsAction | AnyAction;
 
 // action creators
 
