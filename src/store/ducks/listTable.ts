@@ -11,7 +11,7 @@ export type OrderProperty = OrderAscProperty | OrderDescProperty;
 /** interface for column value */
 export interface ColumnPropertyObj {
   order: OrderProperty;
-  orederSql: string;
+  orderSql: string;
 }
 
 // actions
@@ -85,13 +85,13 @@ export default function reducer(
   state: ImmutableListTableState = initialState,
   action: ListTableActionTypes
 ): ImmutableListTableState {
-  let columns;
   switch (action.type) {
     case SET_ORDER_VALUE:
-      columns = state.getIn(['columns']).asMutable({ deep: true });
       return SeamlessImmutable({
         ...state.asMutable({ deep: true }),
-        columns: { ...columns, [action.name]: { order: action.value, orderSql: action.sql } },
+        columns: {
+          [action.name]: { order: action.value, orderSql: action.sql },
+        },
       });
     case RESET_LIST_TABLE:
       return initialState;
