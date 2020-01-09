@@ -17,7 +17,7 @@ export interface ColumnPropertyObj {
 // actions
 /** action types */
 export const SET_ORDER_VALUE = 'bahis/reducer/listTable/SET_ORDER_VALUE';
-export const RESET_COLUMNS = 'bahis/reducer/listTable/RESET_COLUMNS';
+export const RESET_LIST_TABLE = 'bahis/reducer/listTable/RESET_COLUMNS';
 
 /** interface for SET_ORDER_VALUE action */
 export interface SetOrderValueAction extends AnyAction {
@@ -28,12 +28,12 @@ export interface SetOrderValueAction extends AnyAction {
 }
 
 /** interface for RESET_COLUMNS action */
-export interface ResetColumnsAction extends AnyAction {
-  type: typeof RESET_COLUMNS;
+export interface ResetListTableAction extends AnyAction {
+  type: typeof RESET_LIST_TABLE;
 }
 
 /** Create type for listTable reducer actions */
-export type ListTableActionTypes = SetOrderValueAction | ResetColumnsAction | AnyAction;
+export type ListTableActionTypes = SetOrderValueAction | ResetListTableAction | AnyAction;
 
 // action creators
 
@@ -52,6 +52,13 @@ export const setOrderValue = (
   sql,
   type: SET_ORDER_VALUE,
   value,
+});
+
+/** reset the listTable dux to initial state
+ * @return {ResetListTableAction} - an action to reset the state of the store
+ */
+export const resetListTable = (): ResetListTableAction => ({
+  type: RESET_LIST_TABLE,
 });
 
 // the reducer
@@ -86,6 +93,8 @@ export default function reducer(
         ...state.asMutable({ deep: true }),
         columns: { ...columns, [action.name]: { order: action.value, orderSql: action.sql } },
       });
+    case RESET_LIST_TABLE:
+      return initialState;
     default:
       return state;
   }
