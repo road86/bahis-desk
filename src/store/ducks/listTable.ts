@@ -4,13 +4,13 @@ import SeamlessImmutable from 'seamless-immutable';
 /** The reducer name */
 export const reducerName = 'listTable';
 
-export type ORDER_ASC_PROPERTY = 'ASC';
-export type ORDER_DESC_PROPERTY = 'DESC';
-export type ORDER_PROPERTY = ORDER_ASC_PROPERTY | ORDER_DESC_PROPERTY;
+export type OrderAscProperty = 'ASC';
+export type OrderDescProperty = 'DESC';
+export type OrderProperty = OrderAscProperty | OrderDescProperty;
 
 /** interface for column value */
 export interface ColumnPropertyObj {
-  order: ORDER_PROPERTY;
+  order: OrderProperty;
   orederSql: string;
 }
 
@@ -33,13 +33,13 @@ export type ListTableActionTypes = SetOrderValueAction | AnyAction;
 
 /** set order value action creator
  * @param {string} name - column name where order property will be set
- * @param {ORDER_PROPERTY} value - order value to set
+ * @param {OrderProperty} value - order value to set
  * @param {string} sql - the sql string related to order property
  * @returns {SetOrderValueAction} - an action to set order value in store
  */
 export const setOrderValue = (
   name: string,
-  value: ORDER_PROPERTY,
+  value: OrderProperty,
   sql: string
 ): SetOrderValueAction => ({
   name,
