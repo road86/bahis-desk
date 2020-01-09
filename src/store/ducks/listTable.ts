@@ -98,3 +98,15 @@ export function getColumnPropertyObj(
 ): ColumnPropertyObj | null {
   return (state as any)[reducerName].columns[name] || null;
 }
+
+/** returns the order value respect to the column name
+ * @param {Partial<Store>} state - the redux store
+ * @param {string} name - the column name
+ * @return { OrderProperty | null } - the order value respect to column name; otherwise, null
+ */
+export function getOrderValue(state: Partial<Store>, name: string): OrderProperty | null {
+  if (name in (state as any)[reducerName].columns) {
+    return (state as any)[reducerName].columns[name].order;
+  }
+  return null;
+}
