@@ -4,7 +4,7 @@ import { ipcRenderer } from '../../services/ipcRenderer';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
 
-interface ColumnObj {
+export interface ColumnObj {
   sortable: true | false;
   label: { [key: string]: string };
   field_name: string;
