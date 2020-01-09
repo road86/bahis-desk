@@ -110,3 +110,11 @@ export function getOrderValue(state: Partial<Store>, name: string): OrderPropert
   }
   return null;
 }
+
+/** returns all the column value objects
+ * @param {Partial<Store>} state - the redux store
+ * @return { {ColumnsValueObj} } - a dict containing all column value objects
+ */
+export function getAllColumnsValueObj(state: Partial<Store>): ColumnsValueObj {
+  return (state as any)[reducerName].columns;
+}
