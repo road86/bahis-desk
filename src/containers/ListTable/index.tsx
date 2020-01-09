@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Table } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './ListTable.css';
+import OrderBy from './OrderBy.tsx';
 
 interface ColumnObj {
   sortable: true | false;
@@ -67,7 +68,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           <thead>
             <tr>
               {columnDefinition.map((singleCol: ColumnObj, index: number) => (
-                <th key={'col-label-' + index}> {singleCol.label[appLanguage]} </th>
+                <th key={'col-label-' + index}>
+                  {singleCol.label[appLanguage]} {singleCol.sortable && <OrderBy />}
+                </th>
               ))}
             </tr>
           </thead>
