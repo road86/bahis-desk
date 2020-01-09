@@ -1,6 +1,8 @@
+import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { Table } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
+import ListTableReducer, { reducerName as ListTableReducerName } from '../../store/ducks/listTable';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
 
@@ -29,6 +31,9 @@ export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
   filters: any;
 }
+
+/** register the filter reducer */
+reducerRegistry.register(ListTableReducerName, ListTableReducer);
 
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
@@ -69,7 +74,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             <tr>
               {columnDefinition.map((singleCol: ColumnObj, index: number) => (
                 <th key={'col-label-' + index}>
-                  {singleCol.label[appLanguage]} {singleCol.sortable && <OrderBy />}
+                  {singleCol.sortable && (
+                    <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                  )}
                 </th>
               ))}
             </tr>

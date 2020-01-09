@@ -10,12 +10,42 @@ export interface OrderByProps {
   order: OrderProperty | null;
   setOrderValueActionCreator: typeof setOrderValue;
   colDefifinitionObj: ColumnObj;
+  appLanguage: string;
 }
 
-class OrderBy extends React.Component {
+class OrderBy extends React.Component<OrderByProps> {
   public render() {
-    return <FontAwesomeIcon icon={['fas', 'arrow-up']} />;
+    const { order, colDefifinitionObj, appLanguage } = this.props;
+    return (
+      <div onClick={this.onClickHandler}>
+        {colDefifinitionObj.label[appLanguage]}{' '}
+        {order &&
+          (order === 'ASC' ? (
+            <FontAwesomeIcon icon={['fas', 'arrow-up']} />
+          ) : (
+            <FontAwesomeIcon icon={['fas', 'arrow-down']} />
+          ))}
+      </div>
+    );
   }
+
+  // tslint:disable-next-line: variable-name
+  private onClickHandler = (_event: React.MouseEvent<HTMLDivElement>) => {
+    const { colDefifinitionObj, order } = this.props;
+    if (order && order === 'ASC') {
+      this.props.setOrderValueActionCreator(
+        colDefifinitionObj.field_name,
+        'DESC',
+        `${colDefifinitionObj.field_name} DESC`
+      );
+    } else {
+      this.props.setOrderValueActionCreator(
+        colDefifinitionObj.field_name,
+        'ASC',
+        `${colDefifinitionObj.field_name} ASC`
+      );
+    }
+  };
 }
 
 /** connect the component to the store */
