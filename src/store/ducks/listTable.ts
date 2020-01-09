@@ -1,4 +1,4 @@
-import { AnyAction } from 'redux';
+import { AnyAction, Store } from 'redux';
 import SeamlessImmutable from 'seamless-immutable';
 
 /** The reducer name */
@@ -83,4 +83,18 @@ export default function reducer(
     default:
       return state;
   }
+}
+
+// selectors
+
+/** returns the column property object respect to the column name
+ * @param {Partial<Store>} state - the redux store
+ * @param {string} name - the column name
+ * @return { ColumnPropertyObj | null } - the column property obj respect to name
+ */
+export function getColumnPropertyObj(
+  state: Partial<Store>,
+  name: string
+): ColumnPropertyObj | null {
+  return (state as any)[reducerName].columns[name] || null;
 }
