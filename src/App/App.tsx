@@ -1,10 +1,10 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons';
 import {
-  faArrowDown,
   faArrowLeft,
-  faArrowUp,
-  faFilter,
+  faLongArrowAltDown,
+  faLongArrowAltUp,
+  faSort,
   faSync,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
@@ -25,9 +25,9 @@ library.add(
   faFileAlt,
   faArrowLeft,
   faSync,
-  faArrowDown,
-  faArrowUp,
-  faFilter
+  faSort,
+  faLongArrowAltDown,
+  faLongArrowAltUp
 );
 
 /** interface for App state */
