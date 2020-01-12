@@ -16,18 +16,22 @@ export interface OrderByProps {
 class OrderBy extends React.Component<OrderByProps> {
   public render() {
     const { order, colDefifinitionObj, appLanguage } = this.props;
-    return (
-      <div onClick={this.onClickHandler}>
-        {colDefifinitionObj.label[appLanguage]}{' '}
-        {order &&
-          (order === 'ASC' ? (
-            <FontAwesomeIcon icon={['fas', 'long-arrow-alt-up']} />
-          ) : (
-            <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']} />
-          ))}
-        {!order && <FontAwesomeIcon icon={['fas', 'sort']} />}
-      </div>
-    );
+    if (colDefifinitionObj.sortable) {
+      return (
+        <div onClick={this.onClickHandler}>
+          {colDefifinitionObj.label[appLanguage]}{' '}
+          {order &&
+            (order === 'ASC' ? (
+              <FontAwesomeIcon icon={['fas', 'long-arrow-alt-up']} />
+            ) : (
+              <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']} />
+            ))}
+          {!order && <FontAwesomeIcon icon={['fas', 'sort']} />}
+        </div>
+      );
+    } else {
+      return <div>{colDefifinitionObj.label[appLanguage]}</div>;
+    }
   }
 
   // tslint:disable-next-line: variable-name
