@@ -50,9 +50,16 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   public async componentDidMount() {
     const { datasource, filters } = this.props;
+    const randomTableName =
+      'tab' +
+      Math.random()
+        .toString(36)
+        .substring(2, 12);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
-      datasource.type === '0' ? 'select * from ' + datasource.query : datasource.query
+      datasource.type === '0'
+        ? 'select * from ' + datasource.query
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}`
     );
     this.setState({ ...this.state, tableData: response || [], filters });
   }
@@ -62,12 +69,19 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const stateFilters = this.state.filters;
     const stateOrderSql = this.state.orderSql;
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
+    const randomTableName =
+      'tab' +
+      Math.random()
+        .toString(36)
+        .substring(2, 12);
     if (filters !== stateFilters || orderSql !== stateOrderSql) {
       const response = await ipcRenderer.sendSync(
         'fetch-query-data',
         datasource.type === '0'
           ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
-          : datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
+          : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
+              this.generateSqlWhereClause(filters) +
+              orderSqlTxt
       );
       this.setState({ ...this.state, tableData: response || [], filters, orderSql });
     }
