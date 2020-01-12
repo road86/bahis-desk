@@ -1,6 +1,12 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons';
-import { faArrowDown, faArrowLeft, faArrowUp, faSync } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowDown,
+  faArrowLeft,
+  faArrowUp,
+  faFilter,
+  faSync,
+} from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
@@ -12,7 +18,17 @@ import Loading from '../components/Loading';
 import Menu from '../containers/Menu';
 import './App.css';
 
-library.add(faUser, faFolder, faListAlt, faFileAlt, faArrowLeft, faSync, faArrowDown, faArrowUp);
+library.add(
+  faUser,
+  faFolder,
+  faListAlt,
+  faFileAlt,
+  faArrowLeft,
+  faSync,
+  faArrowDown,
+  faArrowUp,
+  faFilter
+);
 
 /** interface for App state */
 export interface AppState {
