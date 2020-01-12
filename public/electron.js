@@ -336,8 +336,11 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery =
       datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
+    const randomTableName = `tab${Math.random()
+      .toString(36)
+      .substring(2, 12)}`;
     const filterDatasetQuery = db.prepare(
-      `with t as (${datasourceQuery}) select ${filterColumns.toString()} from t group by ${filterColumns.toString()}`
+      `with ${randomTableName} as (${datasourceQuery}) select ${filterColumns.toString()} from ${randomTableName} group by ${filterColumns.toString()}`
     );
     const returnedRows = filterDatasetQuery.all();
     // eslint-disable-next-line no-param-reassign
