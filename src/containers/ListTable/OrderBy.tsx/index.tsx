@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Store } from 'redux';
 import { ColumnObj } from '..';
 import { getOrderValue, OrderProperty, setOrderValue } from '../../../store/ducks/listTable';
+import './OrderBy.css';
 
 /** props interface for OrderBy component */
 export interface OrderByProps {
@@ -18,7 +19,7 @@ class OrderBy extends React.Component<OrderByProps> {
     const { order, colDefifinitionObj, appLanguage } = this.props;
     if (colDefifinitionObj.sortable) {
       return (
-        <div onClick={this.onClickHandler}>
+        <div className="sortable-column" onClick={this.onClickHandler}>
           {colDefifinitionObj.label[appLanguage]}{' '}
           {order &&
             (order === 'ASC' ? (
