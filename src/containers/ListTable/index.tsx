@@ -1,8 +1,13 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
+import { connect } from 'react-redux';
 import { Table } from 'reactstrap';
+import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
-import ListTableReducer, { reducerName as ListTableReducerName } from '../../store/ducks/listTable';
+import ListTableReducer, {
+  getAllColumnsValueObj,
+  reducerName as ListTableReducerName,
+} from '../../store/ducks/listTable';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
 
@@ -24,12 +29,14 @@ export interface ListTableProps {
   columnDefinition: ColumnObj[];
   datasource: DataSourceObj;
   filters: any;
+  orderSql: string;
 }
 
 /** state inteface for ListTable */
 export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
   filters: any;
+  orderSql: string;
 }
 
 /** register the filter reducer */
@@ -38,7 +45,7 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {} };
+    this.state = { tableData: [], filters: {}, orderSql: '' };
   }
 
   public async componentDidMount() {
@@ -51,16 +58,18 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public async componentDidUpdate() {
-    const { datasource, filters } = this.props;
+    const { datasource, filters, orderSql } = this.props;
     const stateFilters = this.state.filters;
-    if (filters !== stateFilters) {
+    const stateOrderSql = this.state.orderSql;
+    const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
+    if (filters !== stateFilters || orderSql !== stateOrderSql) {
       const response = await ipcRenderer.sendSync(
         'fetch-query-data',
         datasource.type === '0'
-          ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters)
-          : datasource.query + this.generateSqlWhereClause(filters)
+          ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
+          : datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
       );
-      this.setState({ ...this.state, tableData: response || [], filters });
+      this.setState({ ...this.state, tableData: response || [], filters, orderSql });
     }
   }
 
@@ -108,4 +117,30 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   };
 }
 
-export default ListTable;
+/** connect the component to the store */
+
+/** Interface to describe props from mapStateToProps */
+interface DispatchedStateProps {
+  orderSql: string;
+}
+
+/** Map props to state  */
+const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
+  const columnsValue = getAllColumnsValueObj(state);
+  const firstColumnName = Object.keys(columnsValue)[0] || null;
+  const result = {
+    orderSql: firstColumnName ? columnsValue[firstColumnName].orderSql : '',
+  };
+  return result;
+};
+
+/** map props to actions */
+const mapDispatchToProps = {};
+
+/** connect ListTable to the redux store */
+const ConnectedListTable = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ListTable);
+
+export default ConnectedListTable;
