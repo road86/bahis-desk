@@ -192,3 +192,11 @@ export function getAllColumnsValueObj(state: Partial<Store>): ColumnsValueObj {
 export function getPageSize(state: Partial<Store>): number {
   return (state as any)[reducerName].pageSize;
 }
+
+/** returns the page number
+ * @param {Partial<Store>} state - the redux store
+ * @return {number} - the page number value stored in store
+ */
+export function getPageNumber(state: Partial<Store>): number {
+  return (state as any)[reducerName].pageNumber;
+}
