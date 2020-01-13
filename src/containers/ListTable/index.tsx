@@ -6,6 +6,7 @@ import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
   getAllColumnsValueObj,
+  getPageNumber,
   getPageSize,
   reducerName as ListTableReducerName,
   resetListTable,
@@ -143,6 +144,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 interface DispatchedStateProps {
   orderSql: string;
   pageSize: number;
+  pageNumber: number;
 }
 
 /** Map props to state  */
@@ -151,6 +153,7 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
   const firstColumnName = Object.keys(columnsValue)[0] || null;
   const result = {
     orderSql: firstColumnName ? columnsValue[firstColumnName].orderSql : '',
+    pageNumber: getPageNumber(state),
     pageSize: getPageSize(state),
   };
   return result;
