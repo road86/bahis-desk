@@ -106,6 +106,15 @@ export const setPageNumber = (pageNumber: number): SetPageNumberAction => ({
   type: SET_PAGE_NUMBER,
 });
 
+/** sets the total records of listTable dux
+ * @param {number} totalRecords - the totalRecords value to set
+ * @returns {SetTotalRecordsAction} - an action to set total records in store
+ */
+export const setTotalRecords = (totalRecords: number): SetTotalRecordsAction => ({
+  totalRecords,
+  type: SET_TOTAL_RECORDS,
+});
+
 // the reducer
 /** interface for columns value object */
 export interface ColumnsValueObj {
