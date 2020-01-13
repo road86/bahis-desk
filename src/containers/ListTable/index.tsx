@@ -7,6 +7,7 @@ import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
   getAllColumnsValueObj,
   reducerName as ListTableReducerName,
+  resetListTable,
 } from '../../store/ducks/listTable';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
@@ -30,6 +31,7 @@ export interface ListTableProps {
   datasource: DataSourceObj;
   filters: any;
   orderSql: string;
+  resetListTableActionCreator: typeof resetListTable;
 }
 
 /** state inteface for ListTable */
@@ -149,7 +151,9 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
 };
 
 /** map props to actions */
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  resetListTableActionCreator: resetListTable,
+};
 
 /** connect ListTable to the redux store */
 const ConnectedListTable = connect(
