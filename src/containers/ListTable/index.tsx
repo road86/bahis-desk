@@ -51,7 +51,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public async componentDidMount() {
-    const { datasource, filters } = this.props;
+    const { datasource, filters, resetListTableActionCreator } = this.props;
+    resetListTableActionCreator();
     const randomTableName =
       'tab' +
       Math.random()
