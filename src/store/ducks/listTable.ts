@@ -119,6 +119,11 @@ export default function reducer(
       });
     case RESET_LIST_TABLE:
       return initialState;
+    case SET_PAGE_SIZE:
+      return SeamlessImmutable({
+        ...state.asMutable({ deep: true }),
+        pageSize: action.pageSize,
+      });
     default:
       return state;
   }
