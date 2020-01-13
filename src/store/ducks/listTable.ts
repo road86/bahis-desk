@@ -165,6 +165,11 @@ export default function reducer(
         ...state.asMutable({ deep: true }),
         pageNumber: action.pageNumber,
       });
+    case SET_TOTAL_RECORDS:
+      return SeamlessImmutable({
+        ...state.asMutable({ deep: true }),
+        totalRecords: action.totalRecords,
+      });
     default:
       return state;
   }
