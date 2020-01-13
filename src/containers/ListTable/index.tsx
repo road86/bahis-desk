@@ -65,9 +65,11 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       filters,
       resetListTableActionCreator,
       setPageSizeActionCreator,
+      setPageNumberActionCreator,
     } = this.props;
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
+    setPageNumberActionCreator(1);
     const randomTableName =
       'tab' +
       Math.random()
