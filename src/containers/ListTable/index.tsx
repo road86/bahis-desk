@@ -52,6 +52,7 @@ export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
   filters: any;
   orderSql: string;
+  pageNumber: number;
 }
 
 /** register the filter reducer */
@@ -60,7 +61,7 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {}, orderSql: '' };
+    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1 };
   }
 
   public async componentDidMount() {
