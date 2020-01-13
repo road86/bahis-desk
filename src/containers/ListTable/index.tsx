@@ -34,6 +34,7 @@ export interface ListTableProps {
   orderSql: string;
   resetListTableActionCreator: typeof resetListTable;
   pageSize: number;
+  pageNumber: number;
 }
 
 /** state inteface for ListTable */
