@@ -1,5 +1,6 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
+import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
 import { Table } from 'reactstrap';
 import { Store } from 'redux';
@@ -121,34 +122,46 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public render() {
-    const { columnDefinition } = this.props;
+    const { columnDefinition, pageNumber, totalRecords, pageSize } = this.props;
     const appLanguage = 'English';
     return (
-      <div className="table-container">
-        <Table striped={true} borderless={true}>
-          <thead>
-            <tr>
-              {columnDefinition.map((singleCol: ColumnObj, index: number) => (
-                <th key={'col-label-' + index}>
-                  {singleCol.sortable && (
-                    <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {this.state &&
-              this.state.tableData &&
-              this.state.tableData.map((rowObj, rowIndex: number) => (
-                <tr key={'table-row-' + rowIndex}>
-                  {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
-                    <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
-                  ))}
-                </tr>
-              ))}
-          </tbody>
-        </Table>
+      <div>
+        <div className="table-container">
+          <Table striped={true} borderless={true}>
+            <thead>
+              <tr>
+                {columnDefinition.map((singleCol: ColumnObj, index: number) => (
+                  <th key={'col-label-' + index}>
+                    {singleCol.sortable && (
+                      <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {this.state &&
+                this.state.tableData &&
+                this.state.tableData.map((rowObj, rowIndex: number) => (
+                  <tr key={'table-row-' + rowIndex}>
+                    {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
+                      <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                    ))}
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </div>
+        <div className="pagination-container">
+          <Pagination
+            activePage={pageNumber}
+            itemsCountPerPage={pageSize}
+            totalItemsCount={totalRecords}
+            onChange={this.onPageChange}
+            itemClass="page-item"
+            linkClass="page-link"
+          />
+        </div>
       </div>
     );
   }
@@ -161,6 +174,10 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       }
     });
     return sqlWhereClause !== '' ? ' where ' + sqlWhereClause.substring(4) : '';
+  };
+
+  private onPageChange = (pageNumber: number) => {
+    this.props.setPageNumberActionCreator(pageNumber);
   };
 }
 
