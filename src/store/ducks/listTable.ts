@@ -184,3 +184,11 @@ export function getOrderValue(state: Partial<Store>, name: string): OrderPropert
 export function getAllColumnsValueObj(state: Partial<Store>): ColumnsValueObj {
   return (state as any)[reducerName].columns;
 }
+
+/** returns the page size
+ * @param {Partial<Store>} state - the redux store
+ * @return {number} - the page size value stored in store
+ */
+export function getPageSize(state: Partial<Store>): number {
+  return (state as any)[reducerName].pageSize;
+}
