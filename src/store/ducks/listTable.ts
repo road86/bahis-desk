@@ -109,6 +109,7 @@ interface ListTableState {
   columns: ColumnsValueObj;
   pageNumber: number; // page number
   pageSize: number; // pagination size
+  totalRecords: number;
 }
 
 /** Create an immutable listTable state */
@@ -119,6 +120,7 @@ const initialState: ImmutableListTableState = SeamlessImmutable({
   columns: {},
   pageNumber: 0,
   pageSize: 0,
+  totalRecords: 0,
 });
 
 /** the listTable reducer function */
