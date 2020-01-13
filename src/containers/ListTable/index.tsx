@@ -39,6 +39,7 @@ export interface ListTableProps {
   resetListTableActionCreator: typeof resetListTable;
   pageSize: number;
   pageNumber: number;
+  totalRecords: number;
   setPageSizeActionCreator: typeof setPageSize;
   setPageNumberActionCreator: typeof setPageNumber;
 }
