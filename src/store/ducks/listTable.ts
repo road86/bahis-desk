@@ -20,6 +20,7 @@ export const SET_ORDER_VALUE = 'bahis/reducer/listTable/SET_ORDER_VALUE';
 export const RESET_LIST_TABLE = 'bahis/reducer/listTable/RESET_COLUMNS';
 export const SET_PAGE_SIZE = 'bahis/reducer/listTable/SET_PAGE_SIZE';
 export const SET_PAGE_NUMBER = 'bahis/reducer/listTable/SET_PAGE_NUMBER';
+export const SET_TOTAL_RECORDS = 'bahis/reducer/listTable/SET_TOTAL_RECORDS';
 
 /** interface for SET_ORDER_VALUE action */
 export interface SetOrderValueAction extends AnyAction {
@@ -40,10 +41,16 @@ export interface SetPageSizeAction extends AnyAction {
   type: typeof SET_PAGE_SIZE;
 }
 
-/** interface for SET_PAGE_NUMBER */
+/** interface for SET_PAGE_NUMBER action */
 export interface SetPageNumberAction extends AnyAction {
   pageNumber: number;
   type: typeof SET_PAGE_NUMBER;
+}
+
+/** interface for SET_TOTAL_RECORDS action */
+export interface SetTotalRecordsAction extends AnyAction {
+  totalRecords: number;
+  type: typeof SET_TOTAL_RECORDS;
 }
 
 /** Create type for listTable reducer actions */
@@ -52,6 +59,7 @@ export type ListTableActionTypes =
   | ResetListTableAction
   | SetPageSizeAction
   | SetPageNumberAction
+  | SetTotalRecordsAction
   | AnyAction;
 
 // action creators
