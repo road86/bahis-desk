@@ -8,6 +8,7 @@ import ListTableReducer, {
   getAllColumnsValueObj,
   getPageNumber,
   getPageSize,
+  getTotalRecords,
   reducerName as ListTableReducerName,
   resetListTable,
   setPageNumber,
@@ -159,6 +160,7 @@ interface DispatchedStateProps {
   orderSql: string;
   pageSize: number;
   pageNumber: number;
+  totalRecords: number;
 }
 
 /** Map props to state  */
@@ -169,6 +171,7 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
     orderSql: firstColumnName ? columnsValue[firstColumnName].orderSql : '',
     pageNumber: getPageNumber(state),
     pageSize: getPageSize(state),
+    totalRecords: getTotalRecords(state),
   };
   return result;
 };
