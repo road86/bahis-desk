@@ -13,6 +13,7 @@ import ListTableReducer, {
   resetListTable,
   setPageNumber,
   setPageSize,
+  setTotalRecords,
 } from '../../store/ducks/listTable';
 import { PAGINATION_SIZE } from './constants';
 import './ListTable.css';
@@ -43,6 +44,7 @@ export interface ListTableProps {
   totalRecords: number;
   setPageSizeActionCreator: typeof setPageSize;
   setPageNumberActionCreator: typeof setPageNumber;
+  setTotalRecordsActionCreator: typeof setTotalRecords;
 }
 
 /** state inteface for ListTable */
@@ -181,6 +183,7 @@ const mapDispatchToProps = {
   resetListTableActionCreator: resetListTable,
   setPageNumberActionCreator: setPageNumber,
   setPageSizeActionCreator: setPageSize,
+  setTotalRecordsActionCreator: setTotalRecords,
 };
 
 /** connect ListTable to the redux store */
