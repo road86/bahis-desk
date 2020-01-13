@@ -19,6 +19,7 @@ export interface ColumnPropertyObj {
 export const SET_ORDER_VALUE = 'bahis/reducer/listTable/SET_ORDER_VALUE';
 export const RESET_LIST_TABLE = 'bahis/reducer/listTable/RESET_COLUMNS';
 export const SET_PAGE_SIZE = 'bahis/reducer/listTable/SET_PAGE_SIZE';
+export const SET_PAGE_NUMBER = 'bahis/reducer/listTable/SET_PAGE_NUMBER';
 
 /** interface for SET_ORDER_VALUE action */
 export interface SetOrderValueAction extends AnyAction {
@@ -39,11 +40,18 @@ export interface SetPageSize extends AnyAction {
   type: typeof SET_PAGE_SIZE;
 }
 
+/** interface for SET_PAGE_NUMBER */
+export interface SetPageNumberAction extends AnyAction {
+  pageNumber: number;
+  type: typeof SET_PAGE_NUMBER;
+}
+
 /** Create type for listTable reducer actions */
 export type ListTableActionTypes =
   | SetOrderValueAction
   | ResetListTableAction
   | SetPageSize
+  | SetPageNumberAction
   | AnyAction;
 
 // action creators
@@ -79,6 +87,15 @@ export const resetListTable = (): ResetListTableAction => ({
 export const setPageSize = (pageSize: number): SetPageSize => ({
   pageSize,
   type: SET_PAGE_SIZE,
+});
+
+/** sets the page number of listTable dux
+ * @param {number} pageNumber - the page number to set
+ * @returns {SetPageNumberAction} - an action to set page number in store
+ */
+export const setPageNumber = (pageNumber: number): SetPageNumberAction => ({
+  pageNumber,
+  type: SET_PAGE_NUMBER,
 });
 
 // the reducer
