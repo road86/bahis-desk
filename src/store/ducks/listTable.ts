@@ -70,6 +70,8 @@ export interface ColumnsValueObj {
 /** interface for listTable state in redux store */
 interface ListTableState {
   columns: ColumnsValueObj;
+  pageNumber: number; // page number
+  pageSize: number; // pagination size
 }
 
 /** Create an immutable listTable state */
@@ -78,6 +80,8 @@ export type ImmutableListTableState = SeamlessImmutable.ImmutableObject<ListTabl
 /** initial listTable-state state */
 const initialState: ImmutableListTableState = SeamlessImmutable({
   columns: {},
+  pageNumber: 0,
+  pageSize: 0,
 });
 
 /** the listTable reducer function */
