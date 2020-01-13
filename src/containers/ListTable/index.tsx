@@ -32,6 +32,7 @@ export interface ListTableProps {
   filters: any;
   orderSql: string;
   resetListTableActionCreator: typeof resetListTable;
+  pageSize: number;
 }
 
 /** state inteface for ListTable */
