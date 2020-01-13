@@ -35,7 +35,7 @@ export interface ResetListTableAction extends AnyAction {
 }
 
 /** interface for SET_PAGE_SIZE action */
-export interface SetPageSize extends AnyAction {
+export interface SetPageSizeAction extends AnyAction {
   pageSize: number;
   type: typeof SET_PAGE_SIZE;
 }
@@ -50,7 +50,7 @@ export interface SetPageNumberAction extends AnyAction {
 export type ListTableActionTypes =
   | SetOrderValueAction
   | ResetListTableAction
-  | SetPageSize
+  | SetPageSizeAction
   | SetPageNumberAction
   | AnyAction;
 
@@ -84,7 +84,7 @@ export const resetListTable = (): ResetListTableAction => ({
  * @param {number} pageSize - the pagination size to set
  * @returns {SetPageSize} - an action to set page size in store
  */
-export const setPageSize = (pageSize: number): SetPageSize => ({
+export const setPageSize = (pageSize: number): SetPageSizeAction => ({
   pageSize,
   type: SET_PAGE_SIZE,
 });
