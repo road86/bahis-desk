@@ -70,6 +70,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       resetListTableActionCreator,
       setPageSizeActionCreator,
       setPageNumberActionCreator,
+      setTotalRecordsActionCreator,
     } = this.props;
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
@@ -79,6 +80,13 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       Math.random()
         .toString(36)
         .substring(2, 12);
+    const totalRecordsResponse = await ipcRenderer.sendSync(
+      'fetch-query-data',
+      datasource.type === '0'
+        ? 'select count(*) as count from ' + datasource.query
+        : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`
+    );
+    setTotalRecordsActionCreator(totalRecordsResponse[0].count);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
