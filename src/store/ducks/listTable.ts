@@ -141,6 +141,11 @@ export default function reducer(
         ...state.asMutable({ deep: true }),
         pageSize: action.pageSize,
       });
+    case SET_PAGE_NUMBER:
+      return SeamlessImmutable({
+        ...state.asMutable({ deep: true }),
+        pageNumber: action.pageNumber,
+      });
     default:
       return state;
   }
