@@ -224,3 +224,11 @@ export function getPageSize(state: Partial<Store>): number {
 export function getPageNumber(state: Partial<Store>): number {
   return (state as any)[reducerName].pageNumber;
 }
+
+/** returns the total records
+ * @param {Partial<Store>} state - the redux store
+ * @return {number} - the total records value stored in store
+ */
+export function getTotalRecords(state: Partial<Store>): number {
+  return (state as any)[reducerName].totalRecords;
+}
