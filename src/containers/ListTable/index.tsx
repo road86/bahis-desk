@@ -10,6 +10,7 @@ import ListTableReducer, {
   getPageSize,
   reducerName as ListTableReducerName,
   resetListTable,
+  setPageSize,
 } from '../../store/ducks/listTable';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
@@ -36,6 +37,7 @@ export interface ListTableProps {
   resetListTableActionCreator: typeof resetListTable;
   pageSize: number;
   pageNumber: number;
+  setPageSizeActionCreator: typeof setPageSize;
 }
 
 /** state inteface for ListTable */
@@ -162,6 +164,7 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
 /** map props to actions */
 const mapDispatchToProps = {
   resetListTableActionCreator: resetListTable,
+  setPageSizeActionCreator: setPageSize,
 };
 
 /** connect ListTable to the redux store */
