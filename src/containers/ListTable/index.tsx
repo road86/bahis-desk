@@ -13,6 +13,7 @@ import ListTableReducer, {
   setPageNumber,
   setPageSize,
 } from '../../store/ducks/listTable';
+import { PAGINATION_SIZE } from './constants';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
 
@@ -59,8 +60,14 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public async componentDidMount() {
-    const { datasource, filters, resetListTableActionCreator } = this.props;
+    const {
+      datasource,
+      filters,
+      resetListTableActionCreator,
+      setPageSizeActionCreator,
+    } = this.props;
     resetListTableActionCreator();
+    setPageSizeActionCreator(PAGINATION_SIZE);
     const randomTableName =
       'tab' +
       Math.random()
