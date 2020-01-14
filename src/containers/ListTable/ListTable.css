@@ -23,3 +23,7 @@ thead {
 .table-striped>tbody>tr:nth-child(odd)>th {
    background-color:#f9fcf2;
  }
+
+ .pagination {
+   justify-content: center;
+ }
