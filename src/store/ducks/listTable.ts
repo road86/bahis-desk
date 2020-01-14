@@ -136,7 +136,7 @@ export type ImmutableListTableState = SeamlessImmutable.ImmutableObject<ListTabl
 const initialState: ImmutableListTableState = SeamlessImmutable({
   columns: {},
   pageNumber: 0,
-  pageSize: 0,
+  pageSize: 1,
   totalRecords: 0,
 });
 
