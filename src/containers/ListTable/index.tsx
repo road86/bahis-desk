@@ -2,7 +2,7 @@ import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
-import { Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
@@ -19,6 +19,7 @@ import ListTableReducer, {
 import { PAGINATION_SIZE } from './constants';
 import './ListTable.css';
 import OrderBy from './OrderBy.tsx';
+import { Link } from 'react-router-dom';
 
 export interface ColumnObj {
   sortable: true | false;
@@ -28,6 +29,23 @@ export interface ColumnObj {
   data_type: string;
 }
 
+export interface ActionDefinition {
+  xform_id: number;
+  data_mapping: [];
+  action_type: string;
+}
+
+export interface ActionColumnObj {
+  action_definition: ActionDefinition;
+  data_type: 'action';
+  label: { [key: string]: string };
+}
+
+/** typeguard to differentiate between ColumnObj and ActionColumnObj */
+export const isColumnObj = (obj: ColumnObj | ActionColumnObj): obj is ColumnObj => {
+  return 'sortable' in obj;
+};
+
 interface DataSourceObj {
   type: string;
   query: string;
@@ -35,7 +53,7 @@ interface DataSourceObj {
 }
 
 export interface ListTableProps {
-  columnDefinition: ColumnObj[];
+  columnDefinition: Array<ColumnObj | ActionColumnObj>;
   datasource: DataSourceObj;
   filters: any;
   orderSql: string;
@@ -164,13 +182,19 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           <Table striped={true} borderless={true}>
             <thead>
               <tr>
-                {columnDefinition.map((singleCol: ColumnObj, index: number) => (
-                  <th key={'col-label-' + index}>
-                    {singleCol.sortable && (
-                      <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                    )}
-                  </th>
-                ))}
+                {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                  if (isColumnObj(singleCol)) {
+                    return (
+                      <th key={'col-label-' + index}>
+                        {singleCol.sortable && (
+                          <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                        )}
+                      </th>
+                    );
+                  } else {
+                    return <th key={'col-label-' + index}>{singleCol.label[appLanguage]}</th>;
+                  }
+                })}
               </tr>
             </thead>
             <tbody>
@@ -178,9 +202,17 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                 this.state.tableData &&
                 this.state.tableData.map((rowObj, rowIndex: number) => (
                   <tr key={'table-row-' + rowIndex}>
-                    {columnDefinition.map((colObj: ColumnObj, colIndex: number) => (
-                      <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
-                    ))}
+                    {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                      isColumnObj(colObj) ? (
+                        <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                      ) : (
+                        <td key={'data-field-' + colIndex}>
+                          <Link to={`/form/${colObj.action_definition.xform_id}/`}>
+                            <Button> Entry </Button>
+                          </Link>
+                        </td>
+                      )
+                    )}
                   </tr>
                 ))}
             </tbody>
