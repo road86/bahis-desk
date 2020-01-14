@@ -2,6 +2,7 @@ import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -17,9 +18,9 @@ import ListTableReducer, {
   setTotalRecords,
 } from '../../store/ducks/listTable';
 import { PAGINATION_SIZE } from './constants';
+import Export from './Export';
 import './ListTable.css';
-import OrderBy from './OrderBy.tsx';
-import { Link } from 'react-router-dom';
+import OrderBy from './OrderBy';
 
 export interface ColumnObj {
   sortable: true | false;
@@ -174,11 +175,32 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public render() {
-    const { columnDefinition, pageNumber, totalRecords, pageSize } = this.props;
+    const {
+      columnDefinition,
+      pageNumber,
+      totalRecords,
+      pageSize,
+      datasource,
+      filters,
+      orderSql,
+    } = this.props;
     const appLanguage = 'English';
+    const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
+    const randomTableName =
+      'tab' +
+      Math.random()
+        .toString(36)
+        .substring(2, 12);
+    const query =
+      datasource.type === '0'
+        ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
+          this.generateSqlWhereClause(filters) +
+          orderSqlTxt;
     return (
       <div>
         <div className="table-container">
+          <Export query={query} appLanguage={appLanguage} colDefifinition={columnDefinition} />
           <Table striped={true} borderless={true}>
             <thead>
               <tr>
