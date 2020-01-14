@@ -51,6 +51,7 @@
     "react": "^16.8.6",
     "react-datepicker": "^2.10.1",
     "react-dom": "^16.8.6",
+    "react-export-excel": "^0.5.3",
     "react-floating-action-button": "^1.0.5",
     "react-js-pagination": "^3.0.2",
     "react-loading-overlay": "^1.0.1",
