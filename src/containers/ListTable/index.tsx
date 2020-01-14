@@ -85,39 +85,73 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const totalRecordsResponse = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
-        ? 'select count(*) as count from ' + datasource.query
+        ? `select count(*) as count from ${datasource.query}`
         : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`
     );
     setTotalRecordsActionCreator(totalRecordsResponse[0].count);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
-        ? 'select * from ' + datasource.query
-        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}`
+        ? `select count(*) as count from ${datasource.query} limit ${PAGINATION_SIZE} offset 0`
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${PAGINATION_SIZE} offset 0`
     );
     this.setState({ ...this.state, tableData: response || [], filters });
   }
 
   public async componentDidUpdate() {
-    const { datasource, filters, orderSql } = this.props;
+    const {
+      datasource,
+      filters,
+      orderSql,
+      pageNumber,
+      pageSize,
+      setTotalRecordsActionCreator,
+      setPageNumberActionCreator,
+    } = this.props;
     const stateFilters = this.state.filters;
     const stateOrderSql = this.state.orderSql;
+    const statePageNumber = this.state.pageNumber;
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
     const randomTableName =
       'tab' +
       Math.random()
         .toString(36)
         .substring(2, 12);
-    if (filters !== stateFilters || orderSql !== stateOrderSql) {
+    if (filters !== stateFilters || orderSql !== stateOrderSql || pageNumber !== statePageNumber) {
+      const newPageNumber = filters !== stateFilters || orderSql !== stateOrderSql ? 1 : pageNumber;
+      if (filters !== stateFilters) {
+        const totalRecordsResponse = await ipcRenderer.sendSync(
+          'fetch-query-data',
+          datasource.type === '0'
+            ? 'select count(*) as count from ' +
+                datasource.query +
+                this.generateSqlWhereClause(filters)
+            : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}` +
+                this.generateSqlWhereClause(filters)
+        );
+        setTotalRecordsActionCreator(totalRecordsResponse[0].count);
+      }
       const response = await ipcRenderer.sendSync(
         'fetch-query-data',
         datasource.type === '0'
-          ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
+          ? 'select * from ' +
+              datasource.query +
+              this.generateSqlWhereClause(filters) +
+              orderSqlTxt +
+              ` limit ${pageSize} offset ${newPageNumber - 1}`
           : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
               this.generateSqlWhereClause(filters) +
-              orderSqlTxt
+              orderSqlTxt +
+              ` limit ${pageSize} offset ${newPageNumber - 1}`
       );
-      this.setState({ ...this.state, tableData: response || [], filters, orderSql });
+      setPageNumberActionCreator(newPageNumber);
+      this.setState({
+        ...this.state,
+        filters,
+        orderSql,
+        pageNumber: newPageNumber,
+        tableData: response || [],
+      });
     }
   }
 
