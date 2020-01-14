@@ -417,7 +417,7 @@ const fetchFormDefinition = (event, formId) => {
     const choices = {};
     Object.keys(choiceDefinition).forEach(key => {
       const { query } = choiceDefinition[key];
-      choices[key] = db.prepare(query).all();
+      choices[`${key}.csv`] = db.prepare(query).all();
     });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
