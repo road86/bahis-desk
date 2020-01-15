@@ -44,7 +44,7 @@ export interface ActionColumnObj {
 
 /** typeguard to differentiate between ColumnObj and ActionColumnObj */
 export const isColumnObj = (obj: ColumnObj | ActionColumnObj): obj is ColumnObj => {
-  return 'sortable' in obj;
+  return obj.data_type !== 'action';
 };
 
 interface DataSourceObj {
