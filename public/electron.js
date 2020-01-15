@@ -418,7 +418,7 @@ const fetchFormDefinition = (event, formId) => {
     Object.keys(choiceDefinition).forEach(key => {
       try {
         const { query } = choiceDefinition[key];
-        choices[key] = db.prepare(query).all();
+        choices[`${key}.csv`] = db.prepare(query).all();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err);
