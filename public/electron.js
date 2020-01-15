@@ -17,7 +17,7 @@ const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
 const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
-const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission`;
+const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 // DEV EXTENSIONS
 
 // extension paths
@@ -416,8 +416,13 @@ const fetchFormDefinition = (event, formId) => {
       : {};
     const choices = {};
     Object.keys(choiceDefinition).forEach(key => {
-      const { query } = choiceDefinition[key];
-      choices[`${key}.csv`] = db.prepare(query).all();
+      try {
+        const { query } = choiceDefinition[key];
+        choices[key] = db.prepare(query).all();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log(err);
+      }
     });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
