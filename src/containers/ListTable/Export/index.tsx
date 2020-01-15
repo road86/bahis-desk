@@ -1,5 +1,7 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import ReactExport from 'react-export-excel';
+import { Button } from 'reactstrap';
 import { ActionColumnObj, ColumnObj, isColumnObj } from '..';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 
@@ -32,7 +34,13 @@ class Export extends React.Component<ExportProps, ExportState> {
     const filterColumns = colDefifinition.filter(tmp => isColumnObj(tmp));
     if (dataset) {
       return (
-        <ExcelFile>
+        <ExcelFile
+          element={
+            <Button color="success" size="sm">
+              <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']} /> Export to XLSX
+            </Button>
+          }
+        >
           <ExcelSheet data={dataset} name="test">
             {filterColumns.map(
               colObj =>

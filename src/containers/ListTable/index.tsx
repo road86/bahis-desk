@@ -3,7 +3,7 @@ import * as React from 'react';
 import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button, Table } from 'reactstrap';
+import { Button, Col, Row, Table } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
@@ -199,47 +199,60 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           orderSqlTxt;
     return (
       <div>
-        <div className="table-container">
-          <Export query={query} appLanguage={appLanguage} colDefifinition={columnDefinition} />
-          <Table striped={true} borderless={true}>
-            <thead>
-              <tr>
-                {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                  if (isColumnObj(singleCol)) {
-                    return (
-                      <th key={'col-label-' + index}>
-                        {singleCol.sortable && (
-                          <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                        )}
-                      </th>
-                    );
-                  } else {
-                    return <th key={'col-label-' + index}>{singleCol.label[appLanguage]}</th>;
-                  }
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {this.state &&
-                this.state.tableData &&
-                this.state.tableData.map((rowObj, rowIndex: number) => (
-                  <tr key={'table-row-' + rowIndex}>
-                    {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                      isColumnObj(colObj) ? (
-                        <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
-                      ) : (
-                        <td key={'data-field-' + colIndex}>
-                          <Link to={`/form/${colObj.action_definition.xform_id}/`}>
-                            <Button> Entry </Button>
-                          </Link>
-                        </td>
-                      )
+        <Row>
+          <Col>
+            <span className="float-right csv-export">
+              <Export query={query} appLanguage={appLanguage} colDefifinition={columnDefinition} />
+            </span>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <div className="table-container">
+              <Table striped={true} borderless={true}>
+                <thead>
+                  <tr>
+                    {columnDefinition.map(
+                      (singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                        if (isColumnObj(singleCol)) {
+                          return (
+                            <th key={'col-label-' + index}>
+                              {singleCol.sortable && (
+                                <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                              )}
+                            </th>
+                          );
+                        } else {
+                          return <th key={'col-label-' + index}>{singleCol.label[appLanguage]}</th>;
+                        }
+                      }
                     )}
                   </tr>
-                ))}
-            </tbody>
-          </Table>
-        </div>
+                </thead>
+                <tbody>
+                  {this.state &&
+                    this.state.tableData &&
+                    this.state.tableData.map((rowObj, rowIndex: number) => (
+                      <tr key={'table-row-' + rowIndex}>
+                        {columnDefinition.map(
+                          (colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                            isColumnObj(colObj) ? (
+                              <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                            ) : (
+                              <td key={'data-field-' + colIndex}>
+                                <Link to={`/form/${colObj.action_definition.xform_id}/`}>
+                                  <Button> Entry </Button>
+                                </Link>
+                              </td>
+                            )
+                        )}
+                      </tr>
+                    ))}
+                </tbody>
+              </Table>
+            </div>
+          </Col>
+        </Row>
         <div className="pagination-container">
           <Pagination
             activePage={pageNumber}

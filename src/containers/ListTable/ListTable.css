@@ -28,3 +28,8 @@ thead {
  .pagination {
    justify-content: center;
  }
+
+ .csv-export {
+   justify-content: right;
+   margin-right: 2%;
+ }
