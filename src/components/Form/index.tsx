@@ -4,7 +4,6 @@ import 'odkformrenderer/example/index.css';
 import queryString from 'query-string';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
 
@@ -40,7 +39,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
           data: JSON.stringify({ ...userInput, 'meta/instanceID': this.generateUid() }),
           formId,
         });
-        this.props.history.push('/menu/');
+        this.props.history.goBack();
       }
     };
     const { formDefinition, formChoices } = this.state;
@@ -62,15 +61,16 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       ],
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
+    const goBack = () => this.props.history.goBack();
     return (
       <div className="form-container">
-        <Link to="/menu/">
+        <div onClick={goBack}>
           <h6 className="menu-back">
             <span className="bg-menu-back">
               <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
             </span>
           </h6>
-        </Link>
+        </div>
         {formDefinition && <OdkFormRenderer {...props} />}
       </div>
     );
