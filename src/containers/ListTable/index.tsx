@@ -30,9 +30,14 @@ export interface ColumnObj {
   data_type: string;
 }
 
+export interface MappingObj {
+  column: string;
+  form_field: string;
+}
+
 export interface ActionDefinition {
   xform_id: number;
-  data_mapping: [];
+  data_mapping: MappingObj[];
   action_type: string;
 }
 
@@ -240,7 +245,14 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                               <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
                             ) : (
                               <td key={'data-field-' + colIndex}>
-                                <Link to={`/form/${colObj.action_definition.xform_id}/`}>
+                                <Link
+                                  to={`/form/${
+                                    colObj.action_definition.xform_id
+                                  }/?dataJson=${this.mapListToFormData(
+                                    colObj.action_definition.data_mapping,
+                                    rowObj
+                                  )}`}
+                                >
                                   <Button> Entry </Button>
                                 </Link>
                               </td>
@@ -279,6 +291,14 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   private onPageChange = (pageNumber: number) => {
     this.props.setPageNumberActionCreator(pageNumber);
+  };
+
+  private mapListToFormData = (mapping: MappingObj[], listRowData: { [key: string]: any }): any => {
+    const preFormJsn: any = {};
+    mapping.forEach((item: MappingObj) => {
+      preFormJsn[item.form_field] = listRowData[item.column];
+    });
+    return btoa(JSON.stringify(preFormJsn));
   };
 }
 
