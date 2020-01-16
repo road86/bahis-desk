@@ -17,15 +17,25 @@ interface ExportProps {
 
 interface ExportState {
   dataset: any;
+  query: string;
 }
 
 class Export extends React.Component<ExportProps, ExportState> {
-  public state = { dataset: null };
+  public state = { dataset: null, query: '' };
 
   public async componentDidMount() {
     const { query } = this.props;
     const response = await ipcRenderer.sendSync('fetch-query-data', query);
-    this.setState({ ...this.state, dataset: response });
+    this.setState({ ...this.state, dataset: response, query });
+  }
+
+  public async componentDidUpdate() {
+    const { query } = this.props;
+    const stateQuery = this.state.query;
+    if (query !== stateQuery) {
+      const response = await ipcRenderer.sendSync('fetch-query-data', query);
+      this.setState({ ...this.state, dataset: response, query });
+    }
   }
 
   public render() {
