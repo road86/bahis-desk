@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import OdkFormRenderer from 'odkformrenderer';
 import 'odkformrenderer/example/index.css';
+import queryString from 'query-string';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -43,6 +44,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       }
     };
     const { formDefinition, formChoices } = this.state;
+    const { dataJson } = queryString.parse(this.props.location.search);
     const props = {
       csvList: formChoices ? JSON.parse(formChoices) : {},
       defaultLanguage: 'English',
@@ -58,7 +60,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
           value: 'Bangla',
         },
       ],
-      userInputJson: {},
+      userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
     return (
       <div className="form-container">
