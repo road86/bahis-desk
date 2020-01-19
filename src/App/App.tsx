@@ -7,6 +7,7 @@ import {
   faPlus,
   faSort,
   faSync,
+  faTools,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
@@ -29,7 +30,8 @@ library.add(
   faSort,
   faLongArrowAltDown,
   faLongArrowAltUp,
-  faPlus
+  faPlus,
+  faTools
 );
 
 /** interface for App state */
