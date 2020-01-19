@@ -337,6 +337,7 @@ const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
 const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
+const APP_RESTART_CHANNEL = 'request-app-restart';
 
 // listeners
 
@@ -639,6 +640,15 @@ const requestDataSync = async event => {
   }
 };
 
+/** restarts the app
+ * @param {IpcMainEvent} _event - the default ipc main event
+ */
+// eslint-disable-next-line no-unused-vars
+const requestRestartApp = async _event => {
+  app.relaunch();
+  app.exit();
+};
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
@@ -648,3 +658,4 @@ ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
 ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
+ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
