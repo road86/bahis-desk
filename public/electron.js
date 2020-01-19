@@ -518,7 +518,7 @@ const startAppSync = event => {
           if (formListRes.data) {
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
-              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid) VALUES(?,?,?,?,?)'
+              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping) VALUES(?,?,?,?,?,?)'
             );
             formListRes.data.forEach(formObj => {
               try {
@@ -533,7 +533,8 @@ const startAppSync = event => {
                   formObj.name,
                   JSON.stringify(formObj.form_definition),
                   JSON.stringify(formObj.choice_list),
-                  formObj.form_uuid
+                  formObj.form_uuid,
+                  JSON.stringify(formObj.table_mapping)
                 );
               } catch (err) {
                 // eslint-disable-next-line no-console
