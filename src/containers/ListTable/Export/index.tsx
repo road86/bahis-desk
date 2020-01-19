@@ -53,9 +53,13 @@ class Export extends React.Component<ExportProps, ExportState> {
         >
           <ExcelSheet data={dataset} name="test">
             {filterColumns.map(
-              colObj =>
+              (colObj, index) =>
                 isColumnObj(colObj) && (
-                  <ExcelColumn label={colObj.label[appLanguage]} value={colObj.field_name} />
+                  <ExcelColumn
+                    key={'export-column-' + index}
+                    label={colObj.label[appLanguage]}
+                    value={colObj.field_name}
+                  />
                 )
             )}
           </ExcelSheet>
