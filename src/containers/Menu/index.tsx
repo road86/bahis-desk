@@ -86,8 +86,15 @@ class Menu extends React.Component<MenuProps, MenuState> {
             ))}
         </Row>
         <Container>
-          <Button tooltip="Sync Now" className="floating-btn" onClick={this.onSyncHandler}>
+          <Button
+            tooltip="Sync Data with Server"
+            className="floating-item"
+            onClick={this.onSyncHandler}
+          >
             <FontAwesomeIcon icon={['fas', 'sync']} />
+          </Button>
+          <Button tooltip="Actions" className="floating-btn" rotate={true}>
+            <FontAwesomeIcon icon={['fas', 'plus']} />
           </Button>
         </Container>
       </div>
