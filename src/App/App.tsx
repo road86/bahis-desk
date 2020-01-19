@@ -4,6 +4,7 @@ import {
   faArrowLeft,
   faLongArrowAltDown,
   faLongArrowAltUp,
+  faPlus,
   faSort,
   faSync,
 } from '@fortawesome/free-solid-svg-icons';
@@ -27,7 +28,8 @@ library.add(
   faSync,
   faSort,
   faLongArrowAltDown,
-  faLongArrowAltUp
+  faLongArrowAltUp,
+  faPlus
 );
 
 /** interface for App state */
