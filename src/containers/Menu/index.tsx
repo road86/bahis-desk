@@ -86,6 +86,9 @@ class Menu extends React.Component<MenuProps, MenuState> {
             ))}
         </Row>
         <Container>
+          <Button tooltip="Update App" className="floating-item" onClick={this.appUpdateHandler}>
+            <FontAwesomeIcon icon={['fas', 'tools']} />
+          </Button>
           <Button
             tooltip="Sync Data with Server"
             className="floating-item"
@@ -127,6 +130,11 @@ class Menu extends React.Component<MenuProps, MenuState> {
     this.setState({ shouldAlertOpen: true });
     await delay(1000);
     this.setState({ shouldAlertOpen: false });
+  };
+
+  // tslint:disable-next-line: variable-name
+  private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {
+    ipcRenderer.sendSync('request-app-restart');
   };
 }
 
