@@ -42,6 +42,15 @@ export interface DateProps {
 }
 
 class FilterDate extends React.Component<DateProps> {
+  public componentDidMount() {
+    const { filterItem, value } = this.props;
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      IN_BETWEEN_TYPE,
+      this.generateSqlText(filterItem, IN_BETWEEN_TYPE, value)
+    );
+  }
+
   public render() {
     const { filterItem, condition, value, appLanguage } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
