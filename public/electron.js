@@ -391,6 +391,28 @@ const sendDataToServer = async () => {
   }
 };
 
+const fetchDataFromServer = async () => {
+  try {
+    // const db = new Database(DB_NAME, { fileMustExist: true });
+    await axios
+      .get(`${DATA_FETCH_ENDPOINT}?last_modified=2018-04-23T10:26:00.996Z`)
+      .then(response => {
+        // eslint-disable-next-line no-console
+        console.log(response.data);
+      })
+      .catch(error => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+        return 'failed';
+      });
+    return 'success';
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    return 'failed';
+  }
+};
+
 // types of channels
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
@@ -653,6 +675,7 @@ const startAppSync = event => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const requestDataSync = async event => {
+  await fetchDataFromServer();
   const msg = await sendDataToServer();
   // eslint-disable-next-line no-param-reassign
   event.returnValue = msg;
