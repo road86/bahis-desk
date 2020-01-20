@@ -39,6 +39,15 @@ export interface NumberProps {
 }
 
 class FilterNumber extends React.Component<NumberProps> {
+  public componentDidMount() {
+    const { filterItem, value } = this.props;
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      EQUAL_TYPE,
+      this.generateSqlText(filterItem, EQUAL_TYPE, value)
+    );
+  }
+
   public render() {
     const { filterItem, condition, value, appLanguage } = this.props;
     if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
