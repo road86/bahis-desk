@@ -38,6 +38,15 @@ export interface TextProps {
 }
 
 class FilterText extends React.Component<TextProps> {
+  public componentDidMount() {
+    const { filterItem, value } = this.props;
+    this.props.setConditionValueActionCreator(
+      filterItem.name,
+      EQUAL_TYPE,
+      this.generateSqlText(filterItem, EQUAL_TYPE, value)
+    );
+  }
+
   public render() {
     const { filterItem, value, condition, appLanguage } = this.props;
     return (
