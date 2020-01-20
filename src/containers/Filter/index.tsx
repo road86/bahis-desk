@@ -51,21 +51,29 @@ interface FilterProps {
   listId: string;
 }
 
+interface FilterState {
+  isEnvSet: boolean;
+}
+
 /** register the filter reducer */
 reducerRegistry.register(filterReducerName, filterReducer);
 
-class Filter extends React.Component<FilterProps> {
+class Filter extends React.Component<FilterProps, FilterState> {
+  public state = { isEnvSet: false };
   public componentDidMount() {
     this.props.resetFiltersActionCreator();
+    this.setState({ ...this.state, isEnvSet: true });
   }
 
   public render() {
     const { definition, appLanguage, listId } = this.props;
+    const { isEnvSet } = this.state;
     return (
       <div className="filter-container">
-        {definition.map((filterItem, index) =>
-          this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
-        )}
+        {isEnvSet &&
+          definition.map((filterItem, index) =>
+            this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
+          )}
         <Button color="success" size="sm" onClick={this.filterHandler}>
           Submit
         </Button>
