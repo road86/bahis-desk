@@ -328,6 +328,67 @@ const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
   );
 };
 
+/** sends data to server
+ * @returns {string} - success if suceess; otherwise failed
+ */
+const sendDataToServer = async () => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
+    const updateStatusQuery = db.prepare('UPDATE data SET status = 1 WHERE data_id = ?');
+    try {
+      const notSyncRows = notSyncRowsQuery.all() || [];
+      await notSyncRows.forEach(async rowObj => {
+        const formDefinitionObj = db
+          .prepare('Select * from forms where form_id = ?')
+          .get(rowObj.form_id);
+        // eslint-disable-next-line no-unused-vars
+        let formData = JSON.parse(rowObj.data) || {};
+        formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
+        const apiFormData = {
+          xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
+          test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
+        };
+        await axios
+          .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': '*',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then(response => {
+            if (response.data.status === 201) {
+              updateStatusQuery.run(rowObj.data_id);
+              JSON.parse(formDefinitionObj.table_mapping).forEach(tableName => {
+                const updateDataIdQuery = db.prepare(
+                  `UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`
+                );
+                updateDataIdQuery.run(
+                  response.data.id.toString(),
+                  JSON.parse(rowObj.data)['meta/instanceID']
+                );
+              });
+            }
+          })
+          .catch(error => {
+            // eslint-disable-next-line no-console
+            console.log(error);
+          });
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err);
+    }
+    return 'success';
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    return 'failed';
+  }
+};
+
 // types of channels
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
@@ -590,63 +651,9 @@ const startAppSync = event => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const requestDataSync = async event => {
-  try {
-    const db = new Database(DB_NAME, { fileMustExist: true });
-    const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
-    const updateStatusQuery = db.prepare('UPDATE data SET status = 1 WHERE data_id = ?');
-    try {
-      const notSyncRows = notSyncRowsQuery.all() || [];
-      await notSyncRows.forEach(async rowObj => {
-        const formDefinitionObj = db
-          .prepare('Select * from forms where form_id = ?')
-          .get(rowObj.form_id);
-        // eslint-disable-next-line no-unused-vars
-        let formData = JSON.parse(rowObj.data) || {};
-        formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
-        const apiFormData = {
-          xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
-          test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-        };
-        await axios
-          .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(response => {
-            if (response.data.status === 201) {
-              updateStatusQuery.run(rowObj.data_id);
-              JSON.parse(formDefinitionObj.table_mapping).forEach(tableName => {
-                const updateDataIdQuery = db.prepare(
-                  `UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`
-                );
-                updateDataIdQuery.run(
-                  response.data.id.toString(),
-                  JSON.parse(rowObj.data)['meta/instanceID']
-                );
-              });
-            }
-          })
-          .catch(error => {
-            // eslint-disable-next-line no-console
-            console.log(error);
-          });
-      });
-      // eslint-disable-next-line no-param-reassign
-      event.returnValue = 'success';
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err);
-    }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    // eslint-disable-next-line no-param-reassign
-    event.returnValue = 'failed';
-  }
+  const msg = await sendDataToServer();
+  // eslint-disable-next-line no-param-reassign
+  event.returnValue = msg;
 };
 
 /** restarts the app
