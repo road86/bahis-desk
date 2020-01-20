@@ -619,6 +619,15 @@ const requestDataSync = async event => {
           .then(response => {
             if (response.data.status === 201) {
               updateStatusQuery.run(rowObj.data_id);
+              JSON.parse(formDefinitionObj.table_mapping).forEach(tableName => {
+                const updateDataIdQuery = db.prepare(
+                  `UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`
+                );
+                updateDataIdQuery.run(
+                  response.data.id.toString(),
+                  JSON.parse(rowObj.data)['meta/instanceID']
+                );
+              });
             }
           })
           .catch(error => {
