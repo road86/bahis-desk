@@ -51,7 +51,9 @@ class App extends Component<{}, AppState> {
         text="Syncing"
       >
         <Navbar color="light" light={true} fixed={'top'} expand="md">
-          <NavbarBrand> BAHIS </NavbarBrand>
+          <NavbarBrand>
+            <img style={{ width: '50px', height: '40px' }} src={'./icon.png'} className="rounded" />
+          </NavbarBrand>
         </Navbar>
         <Container className="main-container">
           <Row id="main-page-container">
