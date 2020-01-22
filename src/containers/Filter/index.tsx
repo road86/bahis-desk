@@ -1,7 +1,7 @@
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Button } from 'reactstrap';
+import { Button, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import filterReducer, {
   getAllFilterValueObjs,
@@ -70,10 +70,17 @@ class Filter extends React.Component<FilterProps, FilterState> {
     const { isEnvSet } = this.state;
     return (
       <div className="filter-container">
-        {isEnvSet &&
-          definition.map((filterItem, index) =>
-            this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
-          )}
+        <Row className="filter-title-underline">
+          <Col>
+            <h2 className="lead text-uppercase"> Filter By </h2>
+          </Col>
+        </Row>
+        <div className="bg-filter-title">
+          {isEnvSet &&
+            definition.map((filterItem, index) =>
+              this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
+            )}
+        </div>
         <Button color="success" size="sm" onClick={this.filterHandler}>
           Submit
         </Button>

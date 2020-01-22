@@ -71,7 +71,7 @@ class Menu extends React.Component<MenuProps, MenuState> {
                 </h6>
               </div>
             )}
-            <h3 className="menu-title">
+            <h3 className="menu-title lead">
               {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
             </h3>
           </Col>

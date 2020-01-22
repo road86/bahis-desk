@@ -21,7 +21,9 @@ class ListMenuItem extends React.Component<ListMenuItemProps> {
               <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
             </div>
             <CardBody>
-              <CardTitle>{getNativeLanguageText(menuItem.label, appLanguage)}</CardTitle>
+              <CardTitle className="text-nowrap initialism">
+                {getNativeLanguageText(menuItem.label, appLanguage)}
+              </CardTitle>
             </CardBody>
           </Link>
         </Card>

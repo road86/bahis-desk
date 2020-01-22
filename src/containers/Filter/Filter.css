@@ -11,3 +11,12 @@
 .reset-button {
   margin-left: 20px;
 }
+
+.filter-title-underline{
+  border-bottom: 1px solid #b0c7a6;
+}
+
+.bg-filter-title{
+  margin-top: 15px;
+  margin-bottom: 15px;
+}

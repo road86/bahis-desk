@@ -221,14 +221,24 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                       (singleCol: ColumnObj | ActionColumnObj, index: number) => {
                         if (isColumnObj(singleCol)) {
                           return (
-                            <th key={'col-label-' + index}>
+                            <th
+                              key={'col-label-' + index}
+                              className="initialism text-uppercase text-nowrap"
+                            >
                               {singleCol.sortable && (
                                 <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
                               )}
                             </th>
                           );
                         } else {
-                          return <th key={'col-label-' + index}>{singleCol.label[appLanguage]}</th>;
+                          return (
+                            <th
+                              key={'col-label-' + index}
+                              className="initialism text-uppercase text-nowrap"
+                            >
+                              {singleCol.label[appLanguage]}
+                            </th>
+                          );
                         }
                       }
                     )}

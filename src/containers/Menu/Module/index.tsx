@@ -21,7 +21,9 @@ class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
             <div className="card-image">
               <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
             </div>
-            <CardTitle>{getNativeLanguageText(menuItem.label, appLanguage)}</CardTitle>
+            <CardTitle className="text-nowrap initialism">
+              {getNativeLanguageText(menuItem.label, appLanguage)}
+            </CardTitle>
           </CardBody>
         </Card>
       </div>
