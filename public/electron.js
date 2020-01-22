@@ -257,8 +257,17 @@ const convertJsonToXml = (jsnObj, formIdString) => {
  * @param {Object} tableObj - the tableObj containing table values needed to be stored
  * @param {Text} instanceId - the meta instance id generated with each response
  * @param {Number} parentId - the parent id needed to reference in sub repeat tables
+ * @param {Text} lastRepeatKeyName - the last repeat key name
  */
-const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, parentId) => {
+const objToTable = (
+  dbCon,
+  tableName,
+  parentTableName,
+  tableObj,
+  instanceId,
+  parentId,
+  lastRepeatKeyName
+) => {
   let columnNames = '';
   let fieldValues = '';
   const repeatKeys = [];
@@ -271,7 +280,11 @@ const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, par
     ) {
       repeatKeys.push(key);
     } else {
-      columnNames = `${columnNames + key.replace('/', '_')}, `;
+      let tmpColumnName = key.substring(
+        lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0
+      );
+      tmpColumnName = tmpColumnName.replace('/', '_');
+      columnNames = `${columnNames + tmpColumnName}, `;
       fieldValues = `${fieldValues}"${tableObj[key]}", `;
     }
   }
@@ -282,7 +295,7 @@ const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, par
       fieldValues += `"${instanceId}", `;
     }
     if (parentId) {
-      columnNames += `${parentTableName}_id, `;
+      columnNames += `${parentTableName.substring(6)}_id, `;
       fieldValues += `"${parentId}", `;
     }
     const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
@@ -305,7 +318,8 @@ const objToTable = (dbCon, tableName, parentTableName, tableObj, instanceId, par
         tableName,
         elm,
         instanceId,
-        newParentId
+        newParentId,
+        key
       );
     });
   });
@@ -327,7 +341,9 @@ const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
     `bahis_${formDefinition.id_string}`,
     '',
     userInputObj,
-    userInputObj['meta/instanceID']
+    userInputObj['meta/instanceID'],
+    null,
+    ''
   );
 };
 
