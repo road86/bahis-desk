@@ -80,7 +80,7 @@ class Menu extends React.Component<MenuProps, MenuState> {
           {currentMenu &&
             currentMenu.type === MODULE_TYPE &&
             currentMenu.children.map((menuItem, index) => (
-              <Col key={'menu-' + index} md={4}>
+              <Col key={'menu-' + index} className="menu-item" md={4}>
                 {this.typeEvalutor(menuItem, appLanguage)}
               </Col>
             ))}

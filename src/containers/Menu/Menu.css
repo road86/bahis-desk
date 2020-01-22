@@ -86,3 +86,9 @@ a .card-body {
 .floating-item {
   background: #686868 !important;
 }
+
+.menu-item {
+  max-width: 200px;
+  margin: 8px;
+  padding: 5px;
+}
