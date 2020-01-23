@@ -9177,7 +9177,7 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 "odkformrenderer@git+http://192.168.19.42/nafiz/test_package.git":
   version "0.1.0"
-  resolved "git+http://192.168.19.42/nafiz/test_package.git#cb1e3c8ea0f62c12eb2c2a849dce785129c03b55"
+  resolved "git+http://192.168.19.42/nafiz/test_package.git#cf59d5bb394e270c537169cefaf812ca332bdcac"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-brands-svg-icons" "^5.11.2"
@@ -9764,9 +9764,9 @@ popper.js@^1.14.1, popper.js@^1.14.4:
   integrity sha512-w010cY1oCUmI+9KwwlWki+r5jxKfTFDVoadl7MSrIujHU5MJ5OR6HTDj6Xo8aoR/QsA56x8jKjA59qGH4ELtrA==
 
 popper.js@^1.14.7:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.0.tgz#2e1816bcbbaa518ea6c2e15a466f4cb9c6e2fbb3"
-  integrity sha512-+G+EkOPoE5S/zChTpmBSSDYmhXJ5PsW8eMhH8cP/CQHMFPBG/kC9Y5IIw6qNYgdJ+/COf0ddY2li28iHaZRSjw==
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1.tgz#2a223cb3dc7b6213d740e40372be40de43e65b1b"
+  integrity sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==
 
 popsicle-content-encoding@^1.0.0:
   version "1.0.0"
@@ -11710,9 +11710,9 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     inherits "^2.0.1"
 
 rollup-plugin-postcss@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-postcss/-/rollup-plugin-postcss-2.0.3.tgz#1fd5b7e1fc7545cb0084d9c99d11b259e41a05e6"
-  integrity sha512-d12oKl6za/GGXmlytzVPzzTdPCKgti/Kq2kNhtfm5vv9hkNbyrTvizMBm6zZ5rRWX/sIWl3znjIJ8xy6Hofoeg==
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-postcss/-/rollup-plugin-postcss-2.0.4.tgz#da4e8ff43f4e1f45222decd193020bb5b8d8e583"
+  integrity sha512-rYOa1eF4MzSig7L4lFtc1hGdcue1dX4yjFbRjC5hFpcYMjTnwsC8Atny3nDg6ynGYPZk2EAiZMTjixp5TfQOxA==
   dependencies:
     chalk "^2.4.2"
     concat-with-sourcemaps "^1.0.5"
