@@ -107,7 +107,15 @@ class FilterDate extends React.Component<DateProps> {
 
   private handleStartDate = (selectedDate: any) => {
     const { filterItem, condition, value } = this.props;
-    const selectedDateString = selectedDate ? selectedDate.toISOString() : '';
+    const selectedDateString = selectedDate
+      ? `${selectedDate.getFullYear()}-${
+          selectedDate.getMonth() + 1 < 10
+            ? '0' + (selectedDate.getMonth() + 1)
+            : selectedDate.getMonth() + 1
+        }-${
+          selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()
+        }T00:00:00.000Z`
+      : '';
     const tmpVal = value && value[1] ? [selectedDateString, value[1]] : [selectedDateString];
     this.props.setFilterValueActionCreator(
       filterItem.name,
@@ -118,7 +126,15 @@ class FilterDate extends React.Component<DateProps> {
 
   private handleEndDate = (selectedDate: any) => {
     const { filterItem, condition, value } = this.props;
-    const selectedDateString = selectedDate ? selectedDate.toISOString() : '';
+    const selectedDateString = selectedDate
+      ? `${selectedDate.getFullYear()}-${
+          selectedDate.getMonth() + 1 < 10
+            ? '0' + (selectedDate.getMonth() + 1)
+            : selectedDate.getMonth() + 1
+        }-${
+          selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()
+        }T00:00:00.000Z`
+      : '';
     const tmpVal = [value && value[0] ? value[0] : '', selectedDateString];
     this.props.setFilterValueActionCreator(
       filterItem.name,
@@ -150,20 +166,20 @@ class FilterDate extends React.Component<DateProps> {
     if (condition && value && value.length > 0 && value[0] !== '') {
       switch (condition) {
         case GREATER_THAN_TYPE:
-          return `date(${filterItem.name}) > '${value[0]}'`;
+          return `date(${filterItem.name}) > date('${value[0]}')`;
         case GREATER_THAN_EQUAL_TYPE:
-          return `date(${filterItem.name}) >= '${value[0]}'`;
+          return `date(${filterItem.name}) >= date('${value[0]}')`;
         case LESS_THAN_TYPE:
-          return `date(${filterItem.name}) < '${value[0]}'`;
+          return `date(${filterItem.name}) < date('${value[0]}')`;
         case LESS_THAN_EQUAL_TYPE:
-          return `date(${filterItem.name}) <= '${value[0]}'`;
+          return `date(${filterItem.name}) <= date('${value[0]}')`;
         case EQUAL_TYPE:
-          return `date(${filterItem.name}) = '${value[0]}'`;
+          return `date(${filterItem.name}) = date('${value[0]}')`;
         case NOT_EQUAL_TYPE:
-          return `date(${filterItem.name}) != '${value[0]}'`;
+          return `date(${filterItem.name}) != date('${value[0]}')`;
         case IN_BETWEEN_TYPE:
           if (value.length > 1 && value[1] !== '') {
-            return `date(${filterItem.name}) >= '${value[0]}' and date(${filterItem.name}) <= '${value[1]}'`;
+            return `date(${filterItem.name}) >= date('${value[0]}') and date(${filterItem.name}) <= date('${value[1]}')`;
           }
           return '';
       }
