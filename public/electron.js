@@ -114,6 +114,38 @@ app.on(APP_ACTIVATE_STATE, () => {
 // Endpoint processes
 
 // utils
+const parseFieldNames = (parentName, possibleNames, currentFormJsn) => {
+  currentFormJsn.forEach(currentElem => {
+    switch (currentElem.type) {
+      case 'group':
+      case 'repeat':
+        // eslint-disable-next-line no-param-reassign
+        possibleNames.push(parentName + currentElem.name);
+        parseFieldNames(`${parentName + currentElem.name}/`, possibleNames, currentElem.children);
+        break;
+      case 'time':
+      case 'decimal':
+      case 'note':
+      case 'select all that apply':
+      case 'calculate':
+      case 'text':
+      case 'date':
+      case 'select one':
+      case 'integer':
+        // eslint-disable-next-line no-param-reassign
+        possibleNames.push(parentName + currentElem.name);
+        break;
+      default:
+        break;
+    }
+  });
+};
+
+const extractPossibleFieldNames = xformJsn => {
+  const possibleNames = [];
+  parseFieldNames('', possibleNames, xformJsn.children);
+  return possibleNames;
+};
 
 /** Replaces invalid xml entries with special xml entries
  * @param {string} affectedString - the string containing invalid xml invalid entries
@@ -621,9 +653,9 @@ const startAppSync = event => {
           if (formListRes.data) {
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
-              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping) VALUES(?,?,?,?,?,?)'
+              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)'
             );
-            formListRes.data.forEach(formObj => {
+            formListRes.data.forEach(async formObj => {
               try {
                 previousFormDeletionQuery.run(formObj.id);
               } catch (err) {
@@ -631,13 +663,15 @@ const startAppSync = event => {
                 console.log('Deletion Failed ! Previous form not exists!!');
               }
               try {
+                const fieldNames = extractPossibleFieldNames(formObj.form_definition);
                 newFormInsertionQuery.run(
                   formObj.id,
                   formObj.name,
                   JSON.stringify(formObj.form_definition),
                   JSON.stringify(formObj.choice_list),
                   formObj.form_uuid,
-                  JSON.stringify(formObj.table_mapping)
+                  JSON.stringify(formObj.table_mapping),
+                  JSON.stringify(fieldNames)
                 );
               } catch (err) {
                 // eslint-disable-next-line no-console
