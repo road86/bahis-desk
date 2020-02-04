@@ -389,7 +389,9 @@ const sendDataToServer = async () => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
-    const updateStatusQuery = db.prepare('UPDATE data SET status = 1 WHERE data_id = ?');
+    const updateStatusQuery = db.prepare(
+      'UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?'
+    );
     try {
       const notSyncRows = notSyncRowsQuery.all() || [];
       await notSyncRows.forEach(async rowObj => {
@@ -414,7 +416,7 @@ const sendDataToServer = async () => {
           })
           .then(response => {
             if (response.data.status === 201) {
-              updateStatusQuery.run(rowObj.data_id);
+              updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
               JSON.parse(formDefinitionObj.table_mapping).forEach(tableName => {
                 const updateDataIdQuery = db.prepare(
                   `UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`
@@ -443,14 +445,52 @@ const sendDataToServer = async () => {
   }
 };
 
+/** deletes the entry from data table and related tables if exist
+ * @param {string} instanceId
+ * @param {string} formId
+ */
+const deleteDataWithInstanceId = (instanceId, formId) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const dataDeleteStmt = db.prepare(`delete from data where instanceid = ${instanceId}`);
+    const info = dataDeleteStmt.run();
+    if (info.changes > 0) {
+      const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(formId);
+      const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
+      tableMapping.forEach(tableName => {
+        try {
+          const deleteStmt = db.prepare(
+            `delete from ${tableName} where instanceid = ${instanceId}`
+          );
+          deleteStmt.run();
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err);
+        }
+      });
+    }
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
+/** fetches data from server to app
+ * @returns {string} - success if successful; otherwise, failed
+ */
 const fetchDataFromServer = async () => {
   try {
     // const db = new Database(DB_NAME, { fileMustExist: true });
     await axios
       .get(`${DATA_FETCH_ENDPOINT}?last_modified=2018-04-23T10:26:00.996Z`)
       .then(response => {
-        // eslint-disable-next-line no-console
-        console.log(response.data);
+        const newDataRows = response.data;
+        newDataRows.forEach(newDataRow => {
+          // eslint-disable-next-line no-console
+          console.log(newDataRow);
+          deleteDataWithInstanceId(newDataRow.id, newDataRow.xform_id);
+        });
       })
       .catch(error => {
         // eslint-disable-next-line no-console
