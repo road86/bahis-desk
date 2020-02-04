@@ -298,26 +298,29 @@ const objToTable = (
   tableObj,
   instanceId,
   parentId,
-  lastRepeatKeyName
+  lastRepeatKeyName,
+  possibleFieldNames
 ) => {
   let columnNames = '';
   let fieldValues = '';
   const repeatKeys = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const key in tableObj) {
-    if (
-      Array.isArray(tableObj[key]) &&
-      tableObj[key].length > 0 &&
-      isNotArrayOfString(tableObj[key])
-    ) {
-      repeatKeys.push(key);
-    } else {
-      let tmpColumnName = key.substring(
-        lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0
-      );
-      tmpColumnName = tmpColumnName.replace('/', '_');
-      columnNames = `${columnNames + tmpColumnName}, `;
-      fieldValues = `${fieldValues}"${tableObj[key]}", `;
+    if (possibleFieldNames.includes(key)) {
+      if (
+        Array.isArray(tableObj[key]) &&
+        tableObj[key].length > 0 &&
+        isNotArrayOfString(tableObj[key])
+      ) {
+        repeatKeys.push(key);
+      } else {
+        let tmpColumnName = key.substring(
+          lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0
+        );
+        tmpColumnName = tmpColumnName.replace('/', '_');
+        columnNames = `${columnNames + tmpColumnName}, `;
+        fieldValues = `${fieldValues}"${tableObj[key]}", `;
+      }
     }
   }
   let newParentId = null;
@@ -363,10 +366,9 @@ const objToTable = (
  * @param {Object} userInput - the user response object following odk format
  */
 const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
-  const formDefinition = JSON.parse(
-    dbConnection.prepare('SELECT definition from forms where form_id = ? limit 1').get(formId)
-      .definition
-  );
+  const formObj = dbConnection.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
+  const formDefinition = JSON.parse(formObj.definition);
+  const formFieldNames = JSON.parse(formObj.field_names);
   const userInputObj = JSON.parse(userInput);
   objToTable(
     dbConnection,
@@ -375,7 +377,8 @@ const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
     userInputObj,
     userInputObj['meta/instanceID'],
     null,
-    ''
+    '',
+    formFieldNames
   );
 };
 
