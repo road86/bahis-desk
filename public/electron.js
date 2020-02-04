@@ -354,7 +354,8 @@ const objToTable = (
         elm,
         instanceId,
         newParentId,
-        key
+        key,
+        possibleFieldNames
       );
     });
   });
@@ -364,8 +365,9 @@ const objToTable = (
  * @param {any} dbConnection - the better sqlite 3 db connection
  * @param {Number} formId - the formId of the form that is filled out
  * @param {Object} userInput - the user response object following odk format
+ * @param {string} instanceId - the instance id that will be saved
  */
-const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
+const parseAndSaveToFlatTables = (dbConnection, formId, userInput, instanceId) => {
   const formObj = dbConnection.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
   const formDefinition = JSON.parse(formObj.definition);
   const formFieldNames = JSON.parse(formObj.field_names);
@@ -375,7 +377,7 @@ const parseAndSaveToFlatTables = (dbConnection, formId, userInput) => {
     `bahis_${formDefinition.id_string}`,
     '',
     userInputObj,
-    userInputObj['meta/instanceID'],
+    instanceId !== null ? instanceId : userInputObj['meta/instanceID'],
     null,
     '',
     formFieldNames
@@ -476,6 +478,20 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
   }
 };
 
+const saveNewDataToTable = (instanceId, formId, userInput) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const insertStmt = db.prepare(
+      `INSERT INTO data (form_id, data, status, instanceid) VALUES (?, ?, 1, ?)`
+    );
+    insertStmt.run(formId, JSON.stringify(userInput), instanceId);
+    parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
@@ -489,7 +505,8 @@ const fetchDataFromServer = async () => {
         newDataRows.forEach(newDataRow => {
           // eslint-disable-next-line no-console
           console.log(newDataRow);
-          deleteDataWithInstanceId(newDataRow.id, newDataRow.xform_id);
+          deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
+          saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
         });
       })
       .catch(error => {
@@ -576,7 +593,7 @@ const submitFormResponse = (event, response) => {
     'INSERT INTO data (form_id, data, status, instanceid) VALUES (@formId, @data, 0, ?)'
   );
   insert.run(response, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
-  parseAndSaveToFlatTables(db, response.formId, response.data);
+  parseAndSaveToFlatTables(db, response.formId, response.data, null);
   db.close();
 };
 
