@@ -530,10 +530,12 @@ const fetchAppDefinition = event => {
  */
 const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
-  console.log('data', response);
+  console.log('data', response, JSON.parse(response.data)['meta/instanceID']);
   const db = new Database(DB_NAME, { fileMustExist: true });
-  const insert = db.prepare('INSERT INTO data (form_id, data, status) VALUES (@formId, @data, 0)');
-  insert.run(response);
+  const insert = db.prepare(
+    'INSERT INTO data (form_id, data, status, instanceid) VALUES (@formId, @data, 0, ?)'
+  );
+  insert.run(response, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
   parseAndSaveToFlatTables(db, response.formId, response.data);
   db.close();
 };
