@@ -478,6 +478,11 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
   }
 };
 
+/** saves new data to table
+ * @param {string} instanceId - the unique instance id
+ * @param {string} formId - the unique form id
+ * @param {object} userInput - the userinput object containing field values that need to be saved
+ */
 const saveNewDataToTable = (instanceId, formId, userInput) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
