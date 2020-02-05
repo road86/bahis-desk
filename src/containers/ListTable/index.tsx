@@ -22,12 +22,31 @@ import Export from './Export';
 import './ListTable.css';
 import OrderBy from './OrderBy';
 
+export interface LookupListCondition {
+  type: 'list';
+  name: string;
+  column: string;
+}
+
+export interface LookupStaticCondition {
+  type: 'static';
+  name: string;
+  value: string;
+}
+
+export interface LookupDefinition {
+  query: string;
+  return_column: string;
+  condition: Array<LookupListCondition | LookupStaticCondition>;
+}
+
 export interface ColumnObj {
   sortable: true | false;
   label: { [key: string]: string };
   field_name: string;
   format: string;
   data_type: string;
+  lookup_definition?: LookupDefinition;
 }
 
 export interface MappingObj {
@@ -75,6 +94,7 @@ export interface ListTableProps {
 /** state inteface for ListTable */
 export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
+  lookupTables: any;
   filters: any;
   orderSql: string;
   pageNumber: number;
@@ -86,7 +106,7 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1 };
+    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTables: {} };
   }
 
   public async componentDidMount() {
@@ -97,6 +117,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       setPageSizeActionCreator,
       setPageNumberActionCreator,
       setTotalRecordsActionCreator,
+      columnDefinition,
     } = this.props;
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
@@ -119,7 +140,20 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         ? `select count(*) as count from ${datasource.query} limit ${PAGINATION_SIZE} offset 0`
         : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${PAGINATION_SIZE} offset 0`
     );
-    this.setState({ ...this.state, tableData: response || [], filters });
+    const lookupTables: any = {};
+    await columnDefinition.forEach(async column => {
+      if (isColumnObj(column) && column.data_type === 'lookup') {
+        const resp = await ipcRenderer.sendSync(
+          'fetch-query-data',
+          'lookup_definition' in column && column.lookup_definition
+            ? 'with p as(select  district_label, id, district from bahis_district_table ), s as(select  id from bahis_district_table )select p. district_label,p.id,p. district,s. id as  Id from p  Inner Join s on cast(p.Id as text) = cast(s.id as text)' ||
+                column.lookup_definition.query
+            : ''
+        );
+        lookupTables[column.field_name] = resp;
+      }
+    });
+    this.setState({ ...this.state, tableData: response || [], filters, lookupTables });
   }
 
   public async componentDidUpdate() {
