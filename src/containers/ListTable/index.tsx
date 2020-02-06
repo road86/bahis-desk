@@ -20,6 +20,7 @@ import ListTableReducer, {
 import { PAGINATION_SIZE } from './constants';
 import Export from './Export';
 import './ListTable.css';
+import LookUp from './LookUp';
 import OrderBy from './OrderBy';
 
 export interface LookupListCondition {
@@ -223,6 +224,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       filters,
       orderSql,
     } = this.props;
+    const { lookupTables } = this.state;
     const appLanguage = 'English';
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
     const randomTableName =
@@ -286,7 +288,17 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                         {columnDefinition.map(
                           (colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
-                              <td key={'data-field-' + colIndex}>{rowObj[colObj.field_name]}</td>
+                              <td key={'data-field-' + colIndex}>
+                                {colObj.data_type === 'lookup' ? (
+                                  <LookUp
+                                    columnDef={colObj}
+                                    rowValues={rowObj}
+                                    lookupTable={lookupTables[colObj.field_name]}
+                                  />
+                                ) : (
+                                  rowObj[colObj.field_name]
+                                )}
+                              </td>
                             ) : (
                               <td key={'data-field-' + colIndex}>
                                 <Link
