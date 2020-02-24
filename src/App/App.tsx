@@ -13,10 +13,11 @@ import React, { Component } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
 import BounceLoader from 'react-spinners/BounceLoader';
-import { Col, Container, Navbar, NavbarBrand, Row } from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import Form from '../components/Form';
 import List from '../components/List';
 import Loading from '../components/Loading';
+import Header from '../components/page/Header';
 import Menu from '../containers/Menu';
 import './App.css';
 
@@ -50,11 +51,7 @@ class App extends Component<{}, AppState> {
         spinner={<BounceLoader />}
         text="Syncing"
       >
-        <Navbar color="light" light={true} fixed={'top'} expand="md">
-          <NavbarBrand>
-            <img style={{ width: '50px', height: '40px' }} src={'./icon.png'} className="rounded" />
-          </NavbarBrand>
-        </Navbar>
+        <Header />
         <Container className="main-container">
           <Row id="main-page-container">
             <Col>
