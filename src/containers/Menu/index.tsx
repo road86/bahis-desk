@@ -96,8 +96,8 @@ class Menu extends React.Component<MenuProps, MenuState> {
           >
             <FontAwesomeIcon icon={['fas', 'sync']} />
           </Button>
-          <Button tooltip="Actions" className="floating-btn" rotate={true}>
-            <FontAwesomeIcon icon={['fas', 'plus']} />
+          <Button tooltip="Menu" className="floating-btn">
+            <FontAwesomeIcon icon={['fas', 'bars']} />
           </Button>
         </Container>
       </div>

@@ -2,6 +2,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons';
 import {
   faArrowLeft,
+  faBars,
   faLongArrowAltDown,
   faLongArrowAltUp,
   faPlus,
@@ -32,7 +33,8 @@ library.add(
   faLongArrowAltDown,
   faLongArrowAltUp,
   faPlus,
-  faTools
+  faTools,
+  faBars
 );
 
 /** interface for App state */
