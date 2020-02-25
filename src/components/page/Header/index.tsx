@@ -8,7 +8,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import SyncIcon from '@material-ui/icons/Sync';
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import React from 'react';
@@ -82,14 +81,6 @@ export default function Header() {
         </IconButton>
         <Typography variant="inherit">Data Sync</Typography>
       </MenuItem>
-      <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={10} color="secondary">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <Typography variant="inherit">Notifications</Typography>
-      </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="account of current user"
@@ -124,11 +115,6 @@ export default function Header() {
             <IconButton aria-label="data sync icon" color="inherit">
               <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
                 <SyncIcon />
-              </Badge>
-            </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
-                <NotificationsIcon />
               </Badge>
             </IconButton>
             <IconButton
