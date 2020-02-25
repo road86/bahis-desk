@@ -9,10 +9,10 @@ import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import SyncIcon from '@material-ui/icons/Sync';
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import React from 'react';
 import { headerStyles } from './styles';
-import SyncIcon from '@material-ui/icons/Sync';
 
 export default function Header() {
   const classes = headerStyles();
@@ -68,7 +68,7 @@ export default function Header() {
     >
       <MenuItem>
         <IconButton aria-label="system update icon" color="inherit">
-          <Badge badgeContent={4} color="secondary">
+          <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
             <SystemUpdateAltIcon />
           </Badge>
         </IconButton>
@@ -117,7 +117,7 @@ export default function Header() {
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
             <IconButton aria-label="system update icon" color="inherit">
-              <Badge badgeContent={4} color="secondary">
+              <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
                 <SystemUpdateAltIcon />
               </Badge>
             </IconButton>
