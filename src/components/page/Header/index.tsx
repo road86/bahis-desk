@@ -12,6 +12,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import React from 'react';
 import { headerStyles } from './styles';
+import SyncIcon from '@material-ui/icons/Sync';
 
 export default function Header() {
   const classes = headerStyles();
@@ -74,6 +75,14 @@ export default function Header() {
         <Typography variant="inherit">App Update</Typography>
       </MenuItem>
       <MenuItem>
+        <IconButton aria-label="data sync icon" color="inherit">
+          <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
+            <SyncIcon />
+          </Badge>
+        </IconButton>
+        <Typography variant="inherit">Data Sync</Typography>
+      </MenuItem>
+      <MenuItem>
         <IconButton aria-label="show 11 new notifications" color="inherit">
           <Badge badgeContent={10} color="secondary">
             <NotificationsIcon />
@@ -110,6 +119,11 @@ export default function Header() {
             <IconButton aria-label="system update icon" color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <SystemUpdateAltIcon />
+              </Badge>
+            </IconButton>
+            <IconButton aria-label="data sync icon" color="inherit">
+              <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
+                <SyncIcon />
               </Badge>
             </IconButton>
             <IconButton aria-label="show 17 new notifications" color="inherit">
