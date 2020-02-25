@@ -7,9 +7,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import React from 'react';
 import { headerStyles } from './styles';
 
@@ -66,12 +66,12 @@ export default function Header() {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
+        <IconButton aria-label="system update icon" color="inherit">
           <Badge badgeContent={4} color="secondary">
-            <MailIcon />
+            <SystemUpdateAltIcon />
           </Badge>
         </IconButton>
-        <p>Messages</p>
+        <Typography variant="inherit">App Update</Typography>
       </MenuItem>
       <MenuItem>
         <IconButton aria-label="show 11 new notifications" color="inherit">
@@ -79,7 +79,7 @@ export default function Header() {
             <NotificationsIcon />
           </Badge>
         </IconButton>
-        <p>Notifications</p>
+        <Typography variant="inherit">Notifications</Typography>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -90,7 +90,7 @@ export default function Header() {
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        <Typography variant="inherit">Profile</Typography>
       </MenuItem>
     </Menu>
   );
@@ -107,9 +107,9 @@ export default function Header() {
           </Typography>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit">
+            <IconButton aria-label="system update icon" color="inherit">
               <Badge badgeContent={4} color="secondary">
-                <MailIcon />
+                <SystemUpdateAltIcon />
               </Badge>
             </IconButton>
             <IconButton aria-label="show 17 new notifications" color="inherit">
