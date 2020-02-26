@@ -10,7 +10,7 @@ import {
   faSync,
   faTools,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { Component } from 'react';
+import * as React from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -38,56 +38,42 @@ library.add(
   faBars
 );
 
-/** interface for App state */
-export interface AppState {
-  shouldSyncOverlay: boolean;
-}
-
 /** Main App component */
-class App extends Component<RouteComponentProps<{}>, AppState> {
-  public state = { shouldSyncOverlay: false };
-  public render() {
-    const { location } = this.props;
-    return (
-      <LoadingOverlay
-        className="sync-overlay"
-        active={this.state.shouldSyncOverlay}
-        spinner={<BounceLoader />}
-        text="Syncing"
-      >
-        {location.pathname !== '/' && <Header />}
-        <Container className="main-container">
-          <Row id="main-page-container">
-            <Col>
-              {/* Production hack. Sets the router to home url on app startup */}
-              <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
-              <Switch>
-                <Route exact={true} path="/">
-                  <Loading />
-                </Route>
-                <Route exact={true} path="/menu/">
-                  <Menu appLanguage={'English'} setSyncOverlayHandler={this.setSyncOverlay} />
-                </Route>
-                <Route exact={true} path="/form/:id">
-                  <Form />
-                </Route>
-                <Route exact={true} path="/list/:id">
-                  <List appLanguage={'English'} />
-                </Route>
-              </Switch>
-            </Col>
-          </Row>
-        </Container>
-      </LoadingOverlay>
-    );
-  }
-
-  /** sets the sync overlay flag
-   * @param {boolean} syncFlag - the syncFlag value to set
-   */
-  private setSyncOverlay = (syncFlag: boolean) => {
-    this.setState({ ...this.state, shouldSyncOverlay: syncFlag });
-  };
+function App(props: RouteComponentProps<{}>) {
+  const { location } = props;
+  const [isOverlayPresent, setSyncOverlay] = React.useState<boolean>(false);
+  return (
+    <LoadingOverlay
+      className="sync-overlay"
+      active={isOverlayPresent}
+      spinner={<BounceLoader />}
+      text="Syncing"
+    >
+      {location.pathname !== '/' && <Header />}
+      <Container>
+        <Row id="main-page-container">
+          <Col>
+            {/* Production hack. Sets the router to home url on app startup */}
+            <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
+            <Switch>
+              <Route exact={true} path="/">
+                <Loading />
+              </Route>
+              <Route exact={true} path="/menu/">
+                <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
+              </Route>
+              <Route exact={true} path="/form/:id">
+                <Form />
+              </Route>
+              <Route exact={true} path="/list/:id">
+                <List appLanguage={'English'} />
+              </Route>
+            </Switch>
+          </Col>
+        </Row>
+      </Container>
+    </LoadingOverlay>
+  );
 }
 
 export default withRouter(App);
