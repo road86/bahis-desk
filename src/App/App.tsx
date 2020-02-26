@@ -13,6 +13,7 @@ import {
 import React, { Component } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router';
 import BounceLoader from 'react-spinners/BounceLoader';
 import { Col, Container, Row } from 'reactstrap';
 import Form from '../components/Form';
@@ -43,9 +44,10 @@ export interface AppState {
 }
 
 /** Main App component */
-class App extends Component<{}, AppState> {
+class App extends Component<RouteComponentProps<{}>, AppState> {
   public state = { shouldSyncOverlay: false };
   public render() {
+    const { location } = this.props;
     return (
       <LoadingOverlay
         className="sync-overlay"
@@ -53,7 +55,7 @@ class App extends Component<{}, AppState> {
         spinner={<BounceLoader />}
         text="Syncing"
       >
-        <Header />
+        {location.pathname !== '/' && <Header />}
         <Container className="main-container">
           <Row id="main-page-container">
             <Col>
@@ -88,4 +90,4 @@ class App extends Component<{}, AppState> {
   };
 }
 
-export default App;
+export default withRouter(App);
