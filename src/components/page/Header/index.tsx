@@ -97,7 +97,7 @@ export default function Header() {
 
   return (
     <div className={classes.grow}>
-      <AppBar position="static" color="inherit">
+      <AppBar position="fixed" color="inherit">
         <Toolbar>
           <div className={classes.menuButton}>
             <Avatar variant="square" src="/icon.png" />

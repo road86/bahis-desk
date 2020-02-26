@@ -22,6 +22,7 @@ import Loading from '../components/Loading';
 import Header from '../components/page/Header';
 import Menu from '../containers/Menu';
 import './App.css';
+import { appStyles } from './styles';
 
 library.add(
   faUser,
@@ -40,6 +41,7 @@ library.add(
 
 /** Main App component */
 function App(props: RouteComponentProps<{}>) {
+  const classes = appStyles();
   const { location } = props;
   const [isOverlayPresent, setSyncOverlay] = React.useState<boolean>(false);
   return (
@@ -50,6 +52,7 @@ function App(props: RouteComponentProps<{}>) {
       text="Syncing"
     >
       {location.pathname !== '/' && <Header />}
+      <div className={classes.offset} />
       <Container>
         <Row id="main-page-container">
           <Col>
