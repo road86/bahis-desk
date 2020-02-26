@@ -16,6 +16,7 @@ import { Redirect, Route, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router';
 import BounceLoader from 'react-spinners/BounceLoader';
 import { Col, Container, Row } from 'reactstrap';
+import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
 import List from '../components/List';
 import Loading from '../components/Loading';
@@ -44,6 +45,7 @@ function App(props: RouteComponentProps<{}>) {
   const classes = appStyles();
   const { location } = props;
   const [isOverlayPresent, setSyncOverlay] = React.useState<boolean>(false);
+  const headerExcludedURLs = ['/', '/signup/'];
   return (
     <LoadingOverlay
       className="sync-overlay"
@@ -51,7 +53,7 @@ function App(props: RouteComponentProps<{}>) {
       spinner={<BounceLoader />}
       text="Syncing"
     >
-      {location.pathname !== '/' && <Header />}
+      {!headerExcludedURLs.includes(location.pathname) && <Header />}
       <div className={classes.offset} />
       <Container>
         <Row id="main-page-container">
@@ -61,6 +63,9 @@ function App(props: RouteComponentProps<{}>) {
             <Switch>
               <Route exact={true} path="/">
                 <Loading />
+              </Route>
+              <Route exact={true} path="/signup/">
+                <AppRegister />
               </Route>
               <Route exact={true} path="/menu/">
                 <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
