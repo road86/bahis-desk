@@ -7,6 +7,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
+import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
 
 function Copyright() {
@@ -27,7 +28,7 @@ const steps = ['Select App', 'Select Region', 'User Sign In'];
 function getStepContent(step: number) {
   switch (step) {
     case 0:
-      return <> First Page </>;
+      return <AppTypeForm />;
     case 1:
       return <> Second Page </>;
     case 2:
@@ -50,7 +51,7 @@ export default function AppRegister() {
   };
 
   return (
-    <React.Fragment>
+    <div className={classes.layout}>
       <Paper className={classes.paper} elevation={3}>
         <Grid container={true} direction="row" justify="center" alignItems="center">
           <Avatar variant="square" src="/icon.png" />
@@ -99,6 +100,6 @@ export default function AppRegister() {
         </React.Fragment>
       </Paper>
       <Copyright />
-    </React.Fragment>
+    </div>
   );
 }
