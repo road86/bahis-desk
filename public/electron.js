@@ -13,7 +13,8 @@ let mainWindow;
 
 // SERVER URLS
 const SERVER_URL = 'http://192.168.19.16:8009';
-const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/`;
+// TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
+const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/0/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
 const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
@@ -24,7 +25,7 @@ const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 
 // extension paths
 const REACT_EXTENSION_PATH =
-  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.4.0_0';
+  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.5.0_0';
 const REDUX_EXTENSION_PATH =
   '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
