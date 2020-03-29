@@ -7,6 +7,9 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
+import { withRouter } from 'react-router';
+import AppMetaForm from './AppMetaForm';
+import AppSignInForm from './AppSignInForm';
 import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
 
@@ -30,15 +33,16 @@ function getStepContent(step: number) {
     case 0:
       return <AppTypeForm />;
     case 1:
-      return <> Second Page </>;
+      return <AppMetaForm />;
     case 2:
-      return <> Third Page </>;
+      return <AppSignInForm />;
     default:
       throw new Error('Unknown step');
   }
 }
 
-export default function AppRegister() {
+function AppRegister(props: any) {
+  const { history } = props;
   const classes = registerStyles();
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -48,6 +52,10 @@ export default function AppRegister() {
 
   const handleBack = () => {
     setActiveStep(activeStep - 1);
+  };
+
+  const navigateToMenu = () => {
+    history.push('/menu/');
   };
 
   return (
@@ -70,11 +78,14 @@ export default function AppRegister() {
           {activeStep === steps.length ? (
             <React.Fragment>
               <Typography variant="h5" gutterBottom={true}>
-                Thank you for your order.
+                App Registration Successful.
               </Typography>
               <Typography variant="subtitle1">
-                Your order number is #2001539. We have emailed your order confirmation, and will
-                send you an update when your order has shipped.
+                Please click the following button to go to{' '}
+                <Button color="primary" onClick={navigateToMenu}>
+                  Menu
+                </Button>
+                .
               </Typography>
             </React.Fragment>
           ) : (
@@ -103,3 +114,5 @@ export default function AppRegister() {
     </div>
   );
 }
+
+export default withRouter(AppRegister);
