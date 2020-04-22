@@ -6,14 +6,19 @@ import React from 'react';
 import { FORM_TITLE } from './constants';
 import { appMetaFormStyles } from './styles';
 
-// export App type option interface
+// App type option interface
 export interface AppTypeOption {
   name: string;
   label: string;
 }
 
+// AppMetaForm props interface
+interface AppMetaFormProps {
+  setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+}
+
 // AppTypeForm component
-export default function AppMetaForm() {
+export default function AppMetaForm(props: AppMetaFormProps) {
   const classes = appMetaFormStyles();
   return (
     <div className={classes.layout}>
