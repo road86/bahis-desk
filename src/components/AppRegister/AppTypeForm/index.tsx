@@ -12,8 +12,13 @@ export interface AppTypeOption {
   label: string;
 }
 
+// AppTypeForm props interface
+interface AppTypeFormProps {
+  setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+}
+
 // AppTypeForm component
-export default function AppTypeForm() {
+export default function AppTypeForm(props: AppTypeFormProps) {
   const classes = appTypeFormStyles();
   return (
     <div className={classes.layout}>
