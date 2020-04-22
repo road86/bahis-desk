@@ -13,6 +13,10 @@ interface AppSignInFormProps {
 // AppSignInForm component
 export default function AppSignInForm(props: AppSignInFormProps) {
   const classes = appSignInFormStyles();
+  const { setFieldValueHandler } = props;
+  const onChangeHandler = (event: any) => {
+    setFieldValueHandler(event.target.name, event.target.value);
+  };
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -20,15 +24,24 @@ export default function AppSignInForm(props: AppSignInFormProps) {
       </Typography>
       <Grid container={true} spacing={3}>
         <Grid item={true} xs={12}>
-          <TextField required={true} id="username" label="Username" variant="outlined" />
+          <TextField
+            required={true}
+            id="username"
+            name="username"
+            label="Username"
+            variant="outlined"
+            onChange={onChangeHandler}
+          />
         </Grid>
         <Grid item={true} xs={12}>
           <TextField
             required={true}
             id="password"
+            name="password"
             type="password"
             label="Password"
             variant="outlined"
+            onChange={onChangeHandler}
           />
         </Grid>
       </Grid>
