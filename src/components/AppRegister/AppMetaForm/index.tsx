@@ -20,6 +20,10 @@ interface AppMetaFormProps {
 // AppTypeForm component
 export default function AppMetaForm(props: AppMetaFormProps) {
   const classes = appMetaFormStyles();
+  const { setFieldValueHandler } = props;
+  const onChangeHandler = (event: any) => {
+    setFieldValueHandler(event.target.name, event.target.value);
+  };
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -34,8 +38,10 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             select={true}
             required={true}
             id="division"
+            name="division"
             label="Division"
             variant="outlined"
+            onChange={onChangeHandler}
           >
             <MenuItem value="">
               <em>None</em>
@@ -50,8 +56,10 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             select={true}
             required={true}
             id="district"
+            name="district"
             label="District"
             variant="outlined"
+            onChange={onChangeHandler}
           >
             <MenuItem value="">
               <em>None</em>
@@ -62,7 +70,15 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           </TextField>
         </Grid>
         <Grid item={true} xs={12}>
-          <TextField select={true} required={true} id="upazila" label="Upazila" variant="outlined">
+          <TextField
+            select={true}
+            required={true}
+            id="upazila"
+            label="Upazila"
+            name="upazila"
+            variant="outlined"
+            onChange={onChangeHandler}
+          >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
