@@ -14,13 +14,14 @@ export interface AppTypeOption {
 
 // AppTypeForm props interface
 interface AppTypeFormProps {
+  userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
 }
 
 // AppTypeForm component
 export default function AppTypeForm(props: AppTypeFormProps) {
   const classes = appTypeFormStyles();
-  const { setFieldValueHandler } = props;
+  const { setFieldValueHandler, userInput } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
@@ -36,6 +37,7 @@ export default function AppTypeForm(props: AppTypeFormProps) {
               aria-label={APP_TYPE_FORM_NAME}
               name={APP_TYPE_FORM_NAME}
               onChange={onChangeHandler}
+              value={userInput[APP_TYPE_FORM_NAME] || ''}
             >
               {APP_TYPE_OPTIONS.map((option: AppTypeOption) => (
                 <FormControlLabel

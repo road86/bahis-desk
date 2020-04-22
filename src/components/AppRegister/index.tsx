@@ -28,10 +28,10 @@ function Copyright() {
 
 const steps = ['Select App', 'Select Region', 'User Sign In'];
 
-function getStepContent(step: number, setFieldValueHandler: any) {
+function getStepContent(step: number, userInput: any, setFieldValueHandler: any) {
   switch (step) {
     case 0:
-      return <AppTypeForm setFieldValueHandler={setFieldValueHandler} />;
+      return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
     case 1:
       return <AppMetaForm setFieldValueHandler={setFieldValueHandler} />;
     case 2:
@@ -95,7 +95,7 @@ function AppRegister(props: any) {
             </React.Fragment>
           ) : (
             <React.Fragment>
-              {getStepContent(activeStep, setFieldValue)}
+              {getStepContent(activeStep, userInput, setFieldValue)}
               <div className={classes.buttons}>
                 {activeStep !== 0 && (
                   <Button onClick={handleBack} className={classes.button}>
