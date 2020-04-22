@@ -5,8 +5,13 @@ import React from 'react';
 import { FORM_TITLE } from './constants';
 import { appSignInFormStyles } from './styles';
 
+// AppSignInForm props interface
+interface AppSignInFormProps {
+  setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+}
+
 // AppSignInForm component
-export default function AppSignInForm() {
+export default function AppSignInForm(props: AppSignInFormProps) {
   const classes = appSignInFormStyles();
   return (
     <div className={classes.layout}>
