@@ -28,14 +28,14 @@ function Copyright() {
 
 const steps = ['Select App', 'Select Region', 'User Sign In'];
 
-function getStepContent(step: number) {
+function getStepContent(step: number, setFieldValueHandler: any) {
   switch (step) {
     case 0:
-      return <AppTypeForm />;
+      return <AppTypeForm setFieldValueHandler={setFieldValueHandler} />;
     case 1:
-      return <AppMetaForm />;
+      return <AppMetaForm setFieldValueHandler={setFieldValueHandler} />;
     case 2:
-      return <AppSignInForm />;
+      return <AppSignInForm setFieldValueHandler={setFieldValueHandler} />;
     default:
       throw new Error('Unknown step');
   }
@@ -45,6 +45,11 @@ function AppRegister(props: any) {
   const { history } = props;
   const classes = registerStyles();
   const [activeStep, setActiveStep] = React.useState(0);
+  const [userInput, setUserInput] = React.useState({});
+
+  const setFieldValue = (fieldName: string, fieldValue: any) => {
+    setUserInput({ ...userInput, [fieldName]: fieldValue });
+  };
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -90,7 +95,7 @@ function AppRegister(props: any) {
             </React.Fragment>
           ) : (
             <React.Fragment>
-              {getStepContent(activeStep)}
+              {getStepContent(activeStep, setFieldValue)}
               <div className={classes.buttons}>
                 {activeStep !== 0 && (
                   <Button onClick={handleBack} className={classes.button}>
