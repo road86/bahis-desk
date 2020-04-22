@@ -20,6 +20,10 @@ interface AppTypeFormProps {
 // AppTypeForm component
 export default function AppTypeForm(props: AppTypeFormProps) {
   const classes = appTypeFormStyles();
+  const { setFieldValueHandler } = props;
+  const onChangeHandler = (event: any) => {
+    setFieldValueHandler(event.target.name, event.target.value);
+  };
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -28,7 +32,11 @@ export default function AppTypeForm(props: AppTypeFormProps) {
       <Grid container={true} spacing={3}>
         <Grid item={true} xs={12}>
           <FormControl component="fieldset" required={true} className={classes.layout}>
-            <RadioGroup aria-label={APP_TYPE_FORM_NAME} name={APP_TYPE_FORM_NAME}>
+            <RadioGroup
+              aria-label={APP_TYPE_FORM_NAME}
+              name={APP_TYPE_FORM_NAME}
+              onChange={onChangeHandler}
+            >
               {APP_TYPE_OPTIONS.map((option: AppTypeOption) => (
                 <FormControlLabel
                   key={option.name}
