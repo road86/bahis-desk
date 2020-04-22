@@ -14,16 +14,20 @@ export interface AppTypeOption {
 
 // AppMetaForm props interface
 interface AppMetaFormProps {
+  userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
 }
 
 // AppTypeForm component
 export default function AppMetaForm(props: AppMetaFormProps) {
   const classes = appMetaFormStyles();
-  const { setFieldValueHandler } = props;
+  const { userInput, setFieldValueHandler } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
+  const division = 'division';
+  const district = 'district';
+  const upazila = 'upazila';
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -37,11 +41,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id="division"
-            name="division"
+            id={division}
+            name={division}
             label="Division"
             variant="outlined"
             onChange={onChangeHandler}
+            value={userInput[division] || ''}
           >
             <MenuItem value="">
               <em>None</em>
@@ -55,11 +60,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id="district"
-            name="district"
+            id={district}
+            name={district}
             label="District"
             variant="outlined"
             onChange={onChangeHandler}
+            value={userInput[district] || ''}
           >
             <MenuItem value="">
               <em>None</em>
@@ -73,11 +79,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id="upazila"
+            id={upazila}
             label="Upazila"
-            name="upazila"
+            name={upazila}
             variant="outlined"
             onChange={onChangeHandler}
+            value={userInput[upazila] || ''}
           >
             <MenuItem value="">
               <em>None</em>

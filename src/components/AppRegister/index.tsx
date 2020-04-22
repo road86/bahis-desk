@@ -33,7 +33,7 @@ function getStepContent(step: number, userInput: any, setFieldValueHandler: any)
     case 0:
       return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
     case 1:
-      return <AppMetaForm setFieldValueHandler={setFieldValueHandler} />;
+      return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
     case 2:
       return <AppSignInForm setFieldValueHandler={setFieldValueHandler} />;
     default:
