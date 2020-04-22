@@ -35,7 +35,7 @@ function getStepContent(step: number, userInput: any, setFieldValueHandler: any)
     case 1:
       return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
     case 2:
-      return <AppSignInForm setFieldValueHandler={setFieldValueHandler} />;
+      return <AppSignInForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
     default:
       throw new Error('Unknown step');
   }
