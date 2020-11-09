@@ -107,13 +107,13 @@ interface FilterState {
 export type ImmutableFilterState = SeamlessImmutable.ImmutableObject<FilterState>;
 
 /** initial filter-state state */
-const initialState: ImmutableFilterState = SeamlessImmutable({
+const initialState: any = {
   filters: {},
-});
+};
 
 /** the filter reducer function */
 export default function reducer(
-  state: ImmutableFilterState = initialState,
+  state: any = initialState,
   action: FilterActionTypes
 ): ImmutableFilterState {
   let filters;

@@ -12,7 +12,7 @@ const DB_NAME = 'foobar.db';
 let mainWindow;
 
 // SERVER URLS
-const SERVER_URL = 'http://192.168.19.16:8009';
+const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/0/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
@@ -34,7 +34,11 @@ function addDevToolsExt() {
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
-
+const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY, username TEXT NOT NULL, pass TEXT NOT NULL);
+CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
+CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
+CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
+CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT);`
 // App
 
 // DB utils
@@ -42,8 +46,8 @@ function addDevToolsExt() {
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   const db = new Database(DB_NAME);
-  const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
-  db.exec(setUpQueries);
+  // const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
+  db.exec(queries);
   db.close();
 }
 
@@ -65,7 +69,7 @@ function prepareDb() {
 function createWindow() {
   // comment next line if react and redux dev extensions not installed
   if (isDev) {
-    addDevToolsExt();
+    // addDevToolsExt();
   }
   prepareDb();
   mainWindow = new BrowserWindow({
@@ -406,8 +410,9 @@ const sendDataToServer = async () => {
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
-          test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-        };
+          // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
+          test_file: queries
+         };
         await axios
           .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
             headers: {

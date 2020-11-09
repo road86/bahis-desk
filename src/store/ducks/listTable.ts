@@ -133,16 +133,16 @@ interface ListTableState {
 export type ImmutableListTableState = SeamlessImmutable.ImmutableObject<ListTableState>;
 
 /** initial listTable-state state */
-const initialState: ImmutableListTableState = SeamlessImmutable({
+const initialState: any = {
   columns: {},
   pageNumber: 0,
   pageSize: 1,
   totalRecords: 0,
-});
+};
 
 /** the listTable reducer function */
 export default function reducer(
-  state: ImmutableListTableState = initialState,
+  state: any = initialState,
   action: ListTableActionTypes
 ): ImmutableListTableState {
   switch (action.type) {

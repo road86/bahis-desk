@@ -123,14 +123,14 @@ interface ClientState {
 export type ImmutableClientsState = ClientState & SeamlessImmutable.ImmutableObject<ClientState>;
 
 /** initial clients-state state */
-const initialState: ImmutableClientsState = SeamlessImmutable({
+const initialState: any = {
   clientsById: {},
   householdsById: {},
-});
+};
 
 /** the clients reducer function */
 export default function reducer(
-  state: ImmutableClientsState = initialState,
+  state: any = initialState,
   action: ClientsActionTypes
 ): ImmutableClientsState {
   switch (action.type) {

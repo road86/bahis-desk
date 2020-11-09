@@ -81,14 +81,14 @@ class Filter extends React.Component<FilterProps, FilterState> {
               this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
             )}
         </div>
-        <Button color="success" size="sm" onClick={this.filterHandler}>
+        <Button color="success" size="sm" onClick={(e: any)=>this.filterHandler(e)}>
           Submit
         </Button>
         <Button
           className="reset-button"
           color="secondary"
           size="sm"
-          onClick={this.resetFilterHandler}
+          onClick={(e: any)=>this.resetFilterHandler(e)}
         >
           Reset
         </Button>
@@ -156,12 +156,12 @@ class Filter extends React.Component<FilterProps, FilterState> {
   };
 
   // tslint:disable-next-line: variable-name
-  private filterHandler = (_event: React.MouseEvent<Button>) => {
+  private filterHandler = (_event: any) => {
     this.props.onSubmitHandler(this.props.filterValue);
   };
 
   // tslint:disable-next-line: variable-name
-  private resetFilterHandler = (_event: React.MouseEvent<Button>) => {
+  private resetFilterHandler = (_event: any) => {
     this.props.resetFiltersActionCreator();
     this.props.onSubmitHandler({});
   };
