@@ -81,14 +81,14 @@ class Filter extends React.Component<FilterProps, FilterState> {
               this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
             )}
         </div>
-        <Button color="success" size="sm" onClick={(e: any)=>this.filterHandler(e)}>
+        <Button color="success" size="sm" onClick={(e: any) => this.filterHandler(e)}>
           Submit
         </Button>
         <Button
           className="reset-button"
           color="secondary"
           size="sm"
-          onClick={(e: any)=>this.resetFilterHandler(e)}
+          onClick={(e: any) => this.resetFilterHandler(e)}
         >
           Reset
         </Button>
@@ -102,6 +102,7 @@ class Filter extends React.Component<FilterProps, FilterState> {
     appLanguage: string,
     listId: string
   ) => {
+    console.log("filterItem", filterItem);
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
         return (
@@ -188,9 +189,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedFilter = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Filter);
+const ConnectedFilter = connect(mapStateToProps, mapDispatchToProps)(Filter);
 
 export default ConnectedFilter;

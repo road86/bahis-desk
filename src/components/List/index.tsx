@@ -62,6 +62,7 @@ class List extends React.Component<ListProps, ListState> {
   public render() {
     const { appLanguage } = this.props;
     const { columnDefinition, datasource, filterDefinition, listHeader } = this.state;
+    console.log(this.state.filterDefinition);
     return (
       <div className="list-container">
         <Row id="bg-list-title-container">

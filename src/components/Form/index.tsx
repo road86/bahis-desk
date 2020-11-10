@@ -62,6 +62,15 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
     const goBack = () => this.props.history.goBack();
+    console.log("props for odkform renderer", props);
+    const getOdkFormRenderer=()=>{
+      try {
+        return <OdkFormRenderer {...props} />
+      } catch(e) {
+        // console.log("dhorsi");
+        return null;
+      }
+    }
     return (
       <div className="form-container">
         <div onClick={goBack}>
@@ -71,7 +80,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
             </span>
           </h6>
         </div>
-        {formDefinition && <OdkFormRenderer {...props} />}
+        {formDefinition && getOdkFormRenderer() }
       </div>
     );
   }
