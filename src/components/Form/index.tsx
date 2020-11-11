@@ -3,10 +3,10 @@ import OdkFormRenderer from 'odkformrenderer';
 import 'odkformrenderer/example/index.css';
 import queryString from 'query-string';
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
-
+import ErrorBoundary from '../page/ErrorBoundary';
 /** interface for Form URL params */
 interface FormURLParams {
   id: string;
@@ -23,6 +23,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     this.state = { formDefinition: null, formChoices: null };
   }
   public async componentDidMount() {
+    console.log('this.props',this.props);
     const { match } = this.props;
     const formId = match.params.id || '';
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
@@ -31,15 +32,17 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
   }
   public render() {
     const handleSubmit = (userInput: any) => {
+      console.log('check call');
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
+        console.log(userInput);
         const { match } = this.props;
         const formId = match.params.id || '';
         ipcRenderer.send('submit-form-response', {
           data: JSON.stringify({ ...userInput, 'meta/instanceID': this.generateUid() }),
           formId,
         });
-        this.props.history.goBack();
+        this.props.history.push('/menu/');
       }
     };
     const { formDefinition, formChoices } = this.state;
@@ -61,27 +64,32 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       ],
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
-    const goBack = () => this.props.history.goBack();
-    console.log("props for odkform renderer", props);
-    const getOdkFormRenderer=()=>{
+    // const goBack = () => this.props.history.goBack();
+    console.log( this.context.history);
+    const getOdkFormRenderer = () => {
       try {
-        return <OdkFormRenderer {...props} />
-      } catch(e) {
+        return (
+        <ErrorBoundary>
+          <OdkFormRenderer {...props} />
+        </ErrorBoundary>) ;
+      } catch (e) {
         // console.log("dhorsi");
         return null;
       }
-    }
+    };
     return (
       <div className="form-container">
-        <div onClick={goBack}>
-          <h6 className="menu-back">
-            <span className="bg-menu-back">
-              <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
-            </span>
-          </h6>
+        <Link to="/menu/">
+          <div>
+            <h6 className="menu-back">
+              <span className="bg-menu-back">
+                <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+              </span>
+            </h6>
+          </div>
+          </Link>
+          {formDefinition && getOdkFormRenderer()}
         </div>
-        {formDefinition && getOdkFormRenderer() }
-      </div>
     );
   }
   private s4 = () => {

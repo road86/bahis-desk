@@ -102,7 +102,7 @@ class Filter extends React.Component<FilterProps, FilterState> {
     appLanguage: string,
     listId: string
   ) => {
-    console.log("filterItem", filterItem);
+    console.log('filterItem', filterItem);
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
         return (

@@ -122,14 +122,14 @@ export default function reducer(
       const value = state.getIn(['filters', action.name, 'value']) || null;
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
-        ...SeamlessImmutable.asMutable(state, {deep:true}),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         filters: { ...filters, [action.name]: { value, condition: action.value, sql: action.sql } },
       });
     case SET_FILTER_VALUE:
       const condition = state.getIn(['filters', action.name, 'condition']) || null;
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
-        ...SeamlessImmutable.asMutable(state, {deep:true}),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         filters: { ...filters, [action.name]: { condition, value: action.value, sql: action.sql } },
       });
     case RESET_FILTERS:
