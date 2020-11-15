@@ -133,22 +133,20 @@ interface ListTableState {
 export type ImmutableListTableState = SeamlessImmutable.ImmutableObject<ListTableState>;
 
 /** initial listTable-state state */
-const initialState: ImmutableListTableState = SeamlessImmutable({
+const initialState: any = {
   columns: {},
   pageNumber: 0,
   pageSize: 1,
   totalRecords: 0,
-});
+};
 
 /** the listTable reducer function */
-export default function reducer(
-  state: ImmutableListTableState = initialState,
-  action: ListTableActionTypes
-): ImmutableListTableState {
+export default function reducer(state: any = initialState, action: ListTableActionTypes): any {
   switch (action.type) {
     case SET_ORDER_VALUE:
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        // ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         columns: {
           [action.name]: { order: action.value, orderSql: action.sql },
         },
@@ -157,17 +155,20 @@ export default function reducer(
       return initialState;
     case SET_PAGE_SIZE:
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        // ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         pageSize: action.pageSize,
       });
     case SET_PAGE_NUMBER:
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        // ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         pageNumber: action.pageNumber,
       });
     case SET_TOTAL_RECORDS:
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        // ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         totalRecords: action.totalRecords,
       });
     default:

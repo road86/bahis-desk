@@ -107,13 +107,13 @@ interface FilterState {
 export type ImmutableFilterState = SeamlessImmutable.ImmutableObject<FilterState>;
 
 /** initial filter-state state */
-const initialState: ImmutableFilterState = SeamlessImmutable({
+const initialState: any = SeamlessImmutable({
   filters: {},
 });
 
 /** the filter reducer function */
 export default function reducer(
-  state: ImmutableFilterState = initialState,
+  state: any = initialState,
   action: FilterActionTypes
 ): ImmutableFilterState {
   let filters;
@@ -122,14 +122,14 @@ export default function reducer(
       const value = state.getIn(['filters', action.name, 'value']) || null;
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         filters: { ...filters, [action.name]: { value, condition: action.value, sql: action.sql } },
       });
     case SET_FILTER_VALUE:
       const condition = state.getIn(['filters', action.name, 'condition']) || null;
       filters = state.getIn(['filters']).asMutable({ deep: true });
       return SeamlessImmutable({
-        ...state.asMutable({ deep: true }),
+        ...SeamlessImmutable.asMutable(state, { deep: true }),
         filters: { ...filters, [action.name]: { condition, value: action.value, sql: action.sql } },
       });
     case RESET_FILTERS:

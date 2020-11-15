@@ -6,14 +6,17 @@ const Database = require('better-sqlite3');
 const os = require('os');
 const fs = require('fs');
 const axios = require('axios');
+const { replace } = require('lodash');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
 let mainWindow;
 
 // SERVER URLS
+// const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
 const SERVER_URL = 'http://192.168.19.16:8009';
-const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/`;
+// TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
+const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
 const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
@@ -24,7 +27,7 @@ const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 
 // extension paths
 const REACT_EXTENSION_PATH =
-  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.4.0_0';
+  '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.8.2_0';
 const REDUX_EXTENSION_PATH =
   '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
@@ -33,7 +36,12 @@ function addDevToolsExt() {
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
-
+const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY, username TEXT NOT NULL, pass TEXT NOT NULL);
+CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
+CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
+CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
+CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT);
+CREATE TABLE app_log( time TEXT);`
 // App
 
 // DB utils
@@ -41,8 +49,8 @@ function addDevToolsExt() {
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   const db = new Database(DB_NAME);
-  const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
-  db.exec(setUpQueries);
+  // const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
+  db.exec(queries);
   db.close();
 }
 
@@ -64,8 +72,9 @@ function prepareDb() {
 function createWindow() {
   // comment next line if react and redux dev extensions not installed
   if (isDev) {
-    addDevToolsExt();
+    // addDevToolsExt();
   }
+  console.log("create windo ");
   prepareDb();
   mainWindow = new BrowserWindow({
     width: 900,
@@ -405,8 +414,9 @@ const sendDataToServer = async () => {
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
-          test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-        };
+          // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
+          test_file: queries
+         };
         await axios
           .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
             headers: {
@@ -550,6 +560,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
+    console.log(listDefinition);
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery =
       datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
@@ -681,13 +692,30 @@ const fetchQueryData = (event, queryString) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns - success if sync successful
  */
+
+ const addAppLog =(db, time)=>{
+
+  console.log(db);
+  db.prepare('INSERT INTO app_log(time) VALUES(?)').run(time);
+
+ }
+
+ const getDBTablesEndpoint =(db)=> {
+   const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
+   const time = log === undefined ? 0 : Math.round(log.time);
+   const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
+   console.log(db_endpoint_url);
+   return db_endpoint_url; 
+ }
+
+ 
 const startAppSync = event => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     // const fetchedRows = db.prepare(queryString).all();
     axios
       .all([
-        axios.get(DB_TABLES_ENDPOINT),
+        axios.get(getDBTablesEndpoint(db)),
         axios.get(APP_DEFINITION_ENDPOINT),
         axios.get(FORMS_ENDPOINT),
         axios.get(LISTS_ENDPOINT),
@@ -695,6 +723,16 @@ const startAppSync = event => {
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
           if (formConfigRes.data) {
+            if(formConfigRes.data.length > 0) {
+              const newLayoutQuery = db.prepare(
+                'INSERT INTO app_log(time) VALUES(?)'
+              );
+              newLayoutQuery.run(formConfigRes.data[0].updated_at);
+              // db.prepare('INSERT INTO app_log(time) VALUES(?)').run(formConfigRes.data[0]);
+              // addAppLog(db, formConfigRes.data[0]);
+              console.log("app log data --> ", db.prepare('SELECT * from app_log order by time desc limit 1').get());
+            } 
+
             formConfigRes.data.forEach(sqlObj => {
               try {
                 db.exec(sqlObj.sql_script);
