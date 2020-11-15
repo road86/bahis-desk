@@ -21,6 +21,7 @@
 react-app-env.d.ts
 .env
 .vscode/
+.idea/
 
 npm-debug.log*
 yarn-debug.log*

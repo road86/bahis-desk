@@ -27,7 +27,7 @@ class Loading extends React.Component<{}, LoadingState> {
   public render() {
     return (
       <div className="menu-container">
-        {this.state.isLoadComplete && <Redirect to="/menu/" />}
+        {this.state.isLoadComplete && <Redirect to="/signup/" />}
         <div className="loader-container">
           <Typist cursor={{ hideWhenDone: true }}>
             <span className="loader-title"> BAHIS </span>
