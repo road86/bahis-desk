@@ -8,6 +8,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { withRouter } from 'react-router';
+import { ipcRenderer } from '../../services/ipcRenderer';
 import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
 import AppTypeForm from './AppTypeForm';
@@ -28,14 +29,20 @@ function Copyright() {
 
 const steps = ['Select App', 'Select Region', 'User Sign In'];
 
-function getStepContent(step: number, userInput: any, setFieldValueHandler: any) {
+interface stepperProps {
+  step: number, userInput: any, setFieldValueHandler: any, submitted: boolean;
+}
+
+const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
+  const { step, userInput, setFieldValueHandler, submitted } = props;
+  console.log(submitted);
   switch (step) {
     case 0:
-      return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
+      return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted}/>;
     case 1:
-      return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
+      return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted}/>;
     case 2:
-      return <AppSignInForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} />;
+      return <AppSignInForm userInput={userInput} setFieldValueHandler={setFieldValueHandler}  submitted={submitted}/>;
     default:
       throw new Error('Unknown step');
   }
@@ -46,14 +53,40 @@ function AppRegister(props: any) {
   const classes = registerStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [userInput, setUserInput] = React.useState({});
+  // const [formTypeSubmitted, setFormTypeSubmitted] = React.useState([false, false,false]);
+  const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
+    app_type: '',
+    division: '',
+    district: '',
+    upazila: '',
+    username: '',
+    password: '',
+    formTypeSubmitted: [false, false,false]
+  });
 
   const setFieldValue = (fieldName: string, fieldValue: any) => {
     setUserInput({ ...userInput, [fieldName]: fieldValue });
+    setUserEntry({...userEntry, [fieldName]: fieldValue })
   };
 
   const handleNext = () => {
-    setActiveStep(activeStep + 1);
+    let formTypeSubmitted = userEntry.formTypeSubmitted;
+    formTypeSubmitted[activeStep] = true;
+    setUserEntry({...userEntry, formTypeSubmitted });
+    if (activeStep == 0 && userEntry.app_type != '') {
+      setActiveStep(activeStep + 1);
+    } else if (activeStep == 1 && userEntry.division != '' && userEntry.district != '' && userEntry.upazilla != '') {
+      setActiveStep(activeStep + 1);
+    } else if (activeStep == 2 && userEntry.username != '' && userEntry.password != '') {
+      handleSignIn();
+    }
   };
+
+  const handleSignIn = () => {
+    console.log(userInput);
+    ipcRenderer.send('sign-in', userInput);
+    // this.props.history.push('/menu/');
+  }
 
   const handleBack = () => {
     setActiveStep(activeStep - 1);
@@ -95,7 +128,8 @@ function AppRegister(props: any) {
             </React.Fragment>
           ) : (
             <React.Fragment>
-              {getStepContent(activeStep, userInput, setFieldValue)}
+              <StepContent step={activeStep} userInput={userInput} setFieldValueHandler={setFieldValue} submitted={userEntry.formTypeSubmitted[activeStep]}></StepContent>    
+              {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
                 {activeStep !== 0 && (
                   <Button onClick={handleBack} className={classes.button}>

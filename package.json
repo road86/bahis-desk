@@ -50,6 +50,7 @@
     "jest-fetch-mock": "^2.1.2",
     "lodash": "^4.17.15",
     "lodash-es": "^4.17.15",
+    "macaddress": "^0.5.1",
     "odkformrenderer": "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",

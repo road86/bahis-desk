@@ -9,12 +9,13 @@ import { appSignInFormStyles } from './styles';
 interface AppSignInFormProps {
   userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+  submitted: boolean;
 }
 
 // AppSignInForm component
 export default function AppSignInForm(props: AppSignInFormProps) {
   const classes = appSignInFormStyles();
-  const { userInput, setFieldValueHandler } = props;
+  const { userInput, setFieldValueHandler, submitted } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
@@ -35,6 +36,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[username] || ''}
+            error={submitted && userInput[username] == undefined}
           />
         </Grid>
         <Grid item={true} xs={12}>
@@ -47,6 +49,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[password] || ''}
+            error={submitted && userInput[password] == undefined}
           />
         </Grid>
       </Grid>

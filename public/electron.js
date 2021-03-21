@@ -8,13 +8,16 @@ const fs = require('fs');
 const axios = require('axios');
 const { replace } = require('lodash');
 const { dialog } = require('electron')
+var macaddress = require('macaddress');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
 let mainWindow;
-const { autoUpdater } = require('electron-updater')
+const { autoUpdater } = require('electron-updater');
+const { func } = require('prop-types');
 let prevPercent = 0;
 let newPercent = 0;
+let mac;
 
 function sendStatusToWindow(text) {
   // log.info(text);
@@ -93,6 +96,7 @@ const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
 const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
+const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
 
 // DEV EXTENSIONS
 
@@ -107,7 +111,7 @@ function addDevToolsExt() {
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
-const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY, username TEXT NOT NULL, pass TEXT NOT NULL);
+const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
@@ -120,7 +124,17 @@ CREATE TABLE app_log( time TEXT);`
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   const db = new Database(DB_NAME);
+  // macaddress.one.then(function (mac) {
+  //   console.log(mac);
+  //   mac = mac;
+  // }).catch(function(error) {
+  //   console.log(error);
+  // });
+  macaddress.one(function (err, mac) {
+    mac = mac;  
+  });
   // const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
+  // console.log(macAddress);
   db.exec(queries);
   db.close();
 }
@@ -603,7 +617,7 @@ const fetchDataFromServer = async () => {
         const newDataRows = response.data;
         newDataRows.forEach(newDataRow => {
           // eslint-disable-next-line no-console
-          console.log(newDataRow);
+          // console.log(newDataRow);
           deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
           saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
         });
@@ -631,6 +645,7 @@ const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
 const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
 const APP_RESTART_CHANNEL = 'request-app-restart';
+const SIGN_IN = 'sign-in';
 
 // listeners
 
@@ -644,7 +659,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
-    console.log(listDefinition);
+    // console.log(listDefinition);
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery =
       datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
@@ -914,7 +929,7 @@ const startAppSync = event => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
-const requestDataSync = async event => {
+ const requestDataSync = async event => {
   await fetchDataFromServer();
   const msg = await sendDataToServer();
   // eslint-disable-next-line no-param-reassign
@@ -930,6 +945,53 @@ const requestRestartApp = async _event => {
   app.exit();
 };
 
+// eslint-disable-next-line no-unused-vars
+const signIn = async (event, response) => {
+  const db = new Database(DB_NAME, { fileMustExist: true });
+  const userExistQuery = db.prepare('SELECT * from users where username=? AND password=? AND macaddress=? AND upazila=?');
+  const id = userExistQuery.run(response.username, response.password, mac, response.upazila).get(user_id);
+  console.log(id);
+  if (id == null) {
+    const insertStmt = db.prepare(
+      `INSERT INTO users (username, password, macaddress, upazilla, lastlogin) VALUES (?, ?, ?, ?, ?)`
+    );
+    insertStmt.run(response.username, response.password, mac, response.upazila, new Date());
+    const data = {
+      'username': response.username,
+      'password': response.password,
+      'macaddress': mac,
+      'upazila': 'BAMNA',
+    };
+    console.log(data);
+    // await axios
+    //       .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+    //         headers: {
+    //           'Access-Control-Allow-Origin': '*',
+    //           'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+    //           'Access-Control-Allow-Headers': '*',
+    //           'Content-Type': 'application/json',
+    //         },
+    //       })
+    //       .then(response => {
+    //         console.log(response);
+    //         if (response.data.status === 201 || response.data.status === 200) {
+    //           console.log('successfully created', response);
+    //         }
+    //       })
+    //       .catch(error => {
+    //         // eslint-disable-next-line no-console
+    //         console.log(error);
+    //       });
+  } else {
+    const updateUserQuery = db.prepare(
+      'UPDATE users SET lastLogin = ? WHERE data_id = ?'
+    );
+    updateUserQuery.run(new Date(), id);
+  }
+};
+
+
+
 // subscribes the listeners to channels
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
@@ -940,3 +1002,4 @@ ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
 ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
 ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
+ipcMain.on(SIGN_IN, signIn);

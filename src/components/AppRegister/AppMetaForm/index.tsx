@@ -16,12 +16,13 @@ export interface AppTypeOption {
 interface AppMetaFormProps {
   userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+  submitted: boolean;
 }
 
 // AppTypeForm component
 export default function AppMetaForm(props: AppMetaFormProps) {
   const classes = appMetaFormStyles();
-  const { userInput, setFieldValueHandler } = props;
+  const { userInput, setFieldValueHandler, submitted } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
@@ -47,6 +48,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[division] || ''}
+            error={submitted && userInput[division] == undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -66,6 +68,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[district] || ''}
+            error={submitted && userInput[district] == undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -85,6 +88,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[upazila] || ''}
+            error={submitted && userInput[upazila] == undefined}
           >
             <MenuItem value="">
               <em>None</em>
