@@ -97,6 +97,7 @@ const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
+const GEOLOC_ENDPOINT = `${SERVER_URL}//bhmodule/catchment-data-sync/`;
 
 // DEV EXTENSIONS
 
@@ -124,20 +125,78 @@ CREATE TABLE app_log( time TEXT);`
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   const db = new Database(DB_NAME);
-  // macaddress.one.then(function (mac) {
-  //   console.log(mac);
-  //   mac = mac;
-  // }).catch(function(error) {
-  //   console.log(error);
-  // });
   macaddress.one(function (err, mac) {
     mac = mac;  
   });
-  // const setUpQueries = fs.readFileSync('set-up-queries.sql', 'utf8');
-  // console.log(macAddress);
   db.exec(queries);
+  // fetchGeoLocation();
   db.close();
 }
+
+// function fetchGeoLocation() {
+//   const JSZip = require('jszip');
+//   const JSZipUtils = require('jszip-utils');
+
+//   JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err, data) => {
+//     if (err) {
+//       dialog.showMessageBox({
+//         type: 'info',
+//         title: 'Download Error',
+//         message: 'An Error Occurred. Do you want to Restart App Again?',
+//         buttons: ['Sure', 'No']
+//       }, (buttonIndex) => {
+//         if (buttonIndex === 0) {
+//           requestRestartApp()
+//         }
+//       })
+//     } else {
+//       throw err;
+//     }
+
+//     JSZip.loadAsync(data).then((zip) => {
+//       const csvFiles = Object.keys(zip.files);
+//       this.writeCsvToObj(zip, csvFiles, 0, {});
+//     });
+//   });
+// }
+
+// const writeCsvToObj = (
+//   zip,
+//   csvFiles,
+//   i,
+//   tmpCsv
+// ) => {
+//   const self = this;
+//   zip
+//     .file(csvFiles[i])
+//     .async('text')
+//     .then(function success(txt) {
+//       const arr = txt.split('\n');
+//       const jsonObj = [];
+//       const headers = arr[0].split(',');
+//       for (let n = 1; n < arr.length - 1; n++) {
+//         const data = arr[n].split(',');
+//         const obj = {};
+//         for (let j = 0; j < data.length; j++) {
+//           const key = headers[j].trim();
+//           obj[key] = data[j].trim();
+//         }
+//         jsonObj.push(obj);
+//       }
+
+//       tmpCsv[csvFiles[i]] = jsonObj;
+
+//       i++;
+//       if (i < csvFiles.length) {
+//         return self.writeCsvToObj(zip, csvFiles, i, tmpCsv);
+//       } else {
+//         if (tmpCsv !== {}) {
+//           geoCsv = tmpCsv;
+//         }
+//       }
+//       return tmpCsv;
+//     });
+// };
 
 /** set up new db if not exists */
 function prepareDb() {
@@ -810,6 +869,7 @@ const fetchQueryData = (event, queryString) => {
  
 const startAppSync = event => {
   try {
+    // console.log(geoCsv);
     const db = new Database(DB_NAME, { fileMustExist: true });
     // const fetchedRows = db.prepare(queryString).all();
     axios
@@ -948,10 +1008,10 @@ const requestRestartApp = async _event => {
 // eslint-disable-next-line no-unused-vars
 const signIn = async (event, response) => {
   const db = new Database(DB_NAME, { fileMustExist: true });
-  const userExistQuery = db.prepare('SELECT * from users where username=? AND password=? AND macaddress=? AND upazila=?');
-  const id = userExistQuery.run(response.username, response.password, mac, response.upazila).get(user_id);
-  console.log(id);
-  if (id == null) {
+  const query = 'SELECT * from users where username=' + response.username + ' AND password=' + response.password + ' AND macaddress=' + mac + ' AND upazila=' + response.upazila;
+  const userInfo = db.prepare(query).get(user_id);
+  console.log(userInfo);
+  if (userInfo.user_id == null) {
     const insertStmt = db.prepare(
       `INSERT INTO users (username, password, macaddress, upazilla, lastlogin) VALUES (?, ?, ?, ?, ?)`
     );
@@ -963,25 +1023,25 @@ const signIn = async (event, response) => {
       'upazila': 'BAMNA',
     };
     console.log(data);
-    // await axios
-    //       .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
-    //         headers: {
-    //           'Access-Control-Allow-Origin': '*',
-    //           'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-    //           'Access-Control-Allow-Headers': '*',
-    //           'Content-Type': 'application/json',
-    //         },
-    //       })
-    //       .then(response => {
-    //         console.log(response);
-    //         if (response.data.status === 201 || response.data.status === 200) {
-    //           console.log('successfully created', response);
-    //         }
-    //       })
-    //       .catch(error => {
-    //         // eslint-disable-next-line no-console
-    //         console.log(error);
-    //       });
+    await axios
+          .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': '*',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then(response => {
+            console.log(response);
+            if (response.data.status === 201 || response.data.status === 200) {
+              console.log('successfully created', response);
+            }
+          })
+          .catch(error => {
+            // eslint-disable-next-line no-console
+            console.log(error);
+          });
   } else {
     const updateUserQuery = db.prepare(
       'UPDATE users SET lastLogin = ? WHERE data_id = ?'

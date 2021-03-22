@@ -48,6 +48,8 @@
     "form-data": "^3.0.0",
     "history": "^4.9.0",
     "jest-fetch-mock": "^2.1.2",
+    "jszip": "^3.6.0",
+    "jszip-utils": "^0.1.0",
     "lodash": "^4.17.15",
     "lodash-es": "^4.17.15",
     "macaddress": "^0.5.1",
