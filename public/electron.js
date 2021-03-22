@@ -112,12 +112,13 @@ function addDevToolsExt() {
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
-const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL);
+const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
 CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT);
-CREATE TABLE app_log( time TEXT);`
+CREATE TABLE app_log( time TEXT);
+CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`
 // App
 
 // DB utils
@@ -127,7 +128,9 @@ function setUpNewDB() {
   const db = new Database(DB_NAME);
   macaddress.one(function (err, mac) {
     mac = mac;  
+    console.log(mac);
   });
+  console.log('calllllllllllll');
   db.exec(queries);
   // fetchGeoLocation();
   db.close();
@@ -247,7 +250,7 @@ function createWindow() {
   mainWindow.loadURL(
     isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`
   );
-  autoUpdater.checkForUpdates();
+  // autoUpdater.checkForUpdates();
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -705,6 +708,10 @@ const DATA_SYNC_CHANNEL = 'request-data-sync';
 const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
 const APP_RESTART_CHANNEL = 'request-app-restart';
 const SIGN_IN = 'sign-in';
+const WRITE_GEO_OBJECT = 'write-geo-object';
+const FETCH_DISTRICT = 'fetch-district';
+const FETCH_DIVISION = 'fetch-division';
+const FETCH_UPAZILA = 'fetch-upazila';
 
 // listeners
 
@@ -1008,45 +1015,111 @@ const requestRestartApp = async _event => {
 // eslint-disable-next-line no-unused-vars
 const signIn = async (event, response) => {
   const db = new Database(DB_NAME, { fileMustExist: true });
-  const query = 'SELECT * from users where username=' + response.username + ' AND password=' + response.password + ' AND macaddress=' + mac + ' AND upazila=' + response.upazila;
-  const userInfo = db.prepare(query).get(user_id);
-  console.log(userInfo);
-  if (userInfo.user_id == null) {
+  const query = 'SELECT user_id from users where username="' + response.username + '" AND password="' + response.password + '" AND macaddress="' + mac + '" AND upazila="' + response.upazila + '"';
+  const userInfo = db.prepare(query).get();
+  // const info = userInfo.user_id;
+  console.log('macaddress', mac);
+  if (userInfo == undefined) {
     const insertStmt = db.prepare(
-      `INSERT INTO users (username, password, macaddress, upazilla, lastlogin) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO users (username, password, macaddress, upazila, lastlogin) VALUES (?, ?, ?, ?, ?)`
     );
-    insertStmt.run(response.username, response.password, mac, response.upazila, new Date());
+    insertStmt.run(response.username, response.password, mac, response.upazila, (new Date()).toString());
     const data = {
       'username': response.username,
       'password': response.password,
-      'macaddress': mac,
-      'upazila': 'BAMNA',
+      'mac_address': mac,
+      'upazila': response.upazila,
     };
-    console.log(data);
+    // console.log(data);
     await axios
-          .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(response => {
-            console.log(response);
-            if (response.data.status === 201 || response.data.status === 200) {
-              console.log('successfully created', response);
-            }
-          })
-          .catch(error => {
-            // eslint-disable-next-line no-console
-            console.log(error);
-          });
+      .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
+        console.log(response);
+        if (response.data.status === 201 || response.data.status === 200) {
+          console.log('successfully created', response);
+        }
+      })
+      .catch(error => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      });
   } else {
     const updateUserQuery = db.prepare(
-      'UPDATE users SET lastLogin = ? WHERE data_id = ?'
+      'UPDATE users SET lastLogin = ? WHERE user_id = ?'
     );
     updateUserQuery.run(new Date(), id);
+  }
+};
+
+const popuplateGeoTable = (event, geoList) => {
+  const db = new Database(DB_NAME, { fileMustExist: true });
+  const geoData = geoList ? geoList['catchment-area.csv'] : []
+  // console.log('call', geoData);
+  if (geoData.length) {
+    geoData.forEach(response => {
+      const insertStmt = db.prepare(
+        `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (?, ?, ?, ?, ?, ?)`
+      );
+      insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
+    });
+  }
+};
+
+
+const fetchDivision = (event) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const fetchedRows = db.prepare('SELECT DISTINCT	div_id, division FROM geo').all();
+    // eslint-disable-next-line no-param-reassign
+    console.log(fetchedRows);
+    event.returnValue = {
+      division: fetchedRows,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
+const fetchUpazila = (event, divisionId, districtId) => {
+  console.log(divisionId, districtId)
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const query = 'SELECT DISTINCT upz_id, upazila FROM geo WHERE div_id = "' + divisionId + '" AND dis_id = "' + districtId + '"';
+    const fetchedRows = db.prepare(query).all();
+    event.returnValue = {
+      upazila: fetchedRows,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
+const fetchDistrict = (event, divisionId) => {
+  // console.log(divisionId);
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const query = 'SELECT DISTINCT dis_id, district FROM geo WHERE div_id = "' + divisionId + '"';
+    const fetchedRows = db.prepare(query).all();
+    // eslint-disable-next-line no-param-reassign
+    // console.log(fetchedRows, query);
+    event.returnValue = {
+      district: fetchedRows,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
   }
 };
 
@@ -1063,3 +1136,8 @@ ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
 ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
 ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
 ipcMain.on(SIGN_IN, signIn);
+ipcMain.on(WRITE_GEO_OBJECT, popuplateGeoTable);
+ipcMain.on(FETCH_DIVISION, fetchDivision);
+ipcMain.on(FETCH_DISTRICT, fetchDistrict);
+ipcMain.on(FETCH_UPAZILA, fetchUpazila);
+

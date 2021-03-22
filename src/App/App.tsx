@@ -29,7 +29,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { GEOLOC_ENDPOINT } from './constant';
-import axios from 'axios';
+// import axios from 'axios';
 // import { dialog } from 'electron';
 // import { ipcRenderer } from '../services/ipcRenderer';
 
@@ -64,12 +64,11 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     i: number,
     tmpCsv: any
   ) => {
-   console.log('call', zip, csvFiles);
     zip
       .file(csvFiles[i])
       .async('text')
       .then(function success(txt: any) {
-        console.log(txt);
+        // console.log(txt);
         const arr = txt.split('\n');
         const jsonObj = [];
         const headers = arr[0].split(',');
@@ -93,7 +92,8 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
             setCsv({
               csv: tmpCsv,
             });
-            console.log(tmpCsv, csv);
+            console.log(tmpCsv);
+            ipcRenderer.send('write-geo-object', tmpCsv);
           }
         }
         return tmpCsv;
@@ -101,34 +101,18 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   };
 
   const fetchGeoLocation = async () => {
+    console.log(GEOLOC_ENDPOINT);
+
     const JSZip = require('jszip');
-    // const JSZipUtils = require('jszip-utils');
+    const JSZipUtils = require('jszip-utils');
 
-    const body = await axios.get(GEOLOC_ENDPOINT, {
-      responseType: 'arraybuffer',
+    JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
+      console.log(data, err);
+      JSZip.loadAsync(data).then((zip: any) => {
+        const csvFiles = Object.keys(zip.files);
+        writeCsvToObj(zip, csvFiles, 0, {});
+      });
     });
-
-    console.log(body);
-
-    JSZip.loadAsync(body.data).then((zip: any) => {
-      const csvFiles = Object.keys(zip.files);
-      writeCsvToObj(zip, csvFiles, 0, {});
-    });
-
-    // JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, async (err: any, data: any) => {
-    //   // if (err) {
-    //   //   await ipcRenderer.sendSync('request-app-restart');
-    //   // } else {
-    //   //   throw err;
-    //   // }
-
-    //   console.log(data, err);
-      
-    //   JSZip.loadAsync(data).then((zip: any) => {
-    //     const csvFiles = Object.keys(zip.files);
-    //     writeCsvToObj(zip, csvFiles, 0, {});
-    //   });
-    // });
   }
 
   const compUpdate = async () => {
@@ -201,7 +185,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
                     <Loading />
                   </Route>
                   <Route exact={true} path="/signup/">
-                    <AppRegister />
+                    <AppRegister csv={csv}/>
                   </Route>
                   <Route exact={true} path="/menu/">
                     <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />

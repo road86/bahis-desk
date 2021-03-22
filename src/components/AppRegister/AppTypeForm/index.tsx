@@ -26,7 +26,7 @@ export default function AppTypeForm(props: AppTypeFormProps) {
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
-  console.log('submitted', submitted, userInput[APP_TYPE_FORM_NAME])
+  console.log('submitted', submitted, userInput[APP_TYPE_FORM_NAME]);
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -50,7 +50,9 @@ export default function AppTypeForm(props: AppTypeFormProps) {
                 />
               ))}
             </RadioGroup>
-            <FormHelperText error={submitted && userInput[APP_TYPE_FORM_NAME] == undefined}>{submitted && userInput[APP_TYPE_FORM_NAME] == undefined ? 'Select an option' : '' }</FormHelperText>
+            <FormHelperText error={submitted && userInput[APP_TYPE_FORM_NAME] == undefined}>
+              {submitted && userInput[APP_TYPE_FORM_NAME] == undefined ? 'Select an option' : ''}
+            </FormHelperText>
           </FormControl>
         </Grid>
       </Grid>
