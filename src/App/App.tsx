@@ -10,9 +10,9 @@ import {
   faSync,
   faTools,
 } from '@fortawesome/free-solid-svg-icons';
-import Box from '@material-ui/core/Box';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
+// import Box from '@material-ui/core/Box';
+// import CircularProgress from '@material-ui/core/CircularProgress';
+// import Typography from '@material-ui/core/Typography';
 import * as React from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
@@ -52,10 +52,10 @@ library.add(
 const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   const classes = appStyles();
   const { location } = props;
-  const [loading, setLoading] = React.useState<boolean>(false);
+  // const [loading, setLoading] = React.useState<boolean>(false);
   const [isOverlayPresent, setSyncOverlay] = React.useState<boolean>(false);
   const headerExcludedURLs = ['/', '/signup/'];
-  const [percentage, setPercentage] = React.useState<number>(0);
+  // const [percentage, setPercentage] = React.useState<number>(0);
   const [csv, setCsv] = React.useState<any>({});
 
   const writeCsvToObj = (zip: any, csvFiles: any, i: number, tmpCsv: any) => {
@@ -111,7 +111,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   };
 
   const compUpdate = async () => {
-    setLoading(true); 
+    // setLoading(true); 
     if (navigator.onLine) {
       fetchGeoLocation();
     }
@@ -127,7 +127,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
       console.log('ipcRenderer on update_not_available');
       ipcRenderer.removeAllListeners('update_not_available');
       // message.innerText = 'NO update is available';
-      setLoading(false);
+      // setLoading(false);
       // notification.classList.remove('hidden');
     });
 
@@ -148,12 +148,12 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
       console.log('ipcRenderer on update_downloaded');
       ipcRenderer.removeAllListeners('update_downloaded');
       ipcRenderer.removeAllListeners('download_progress');
-      setLoading(false);
+      // setLoading(false);
     });
 
     ipcRenderer.on('download_progress', function(event: any, data: any) {
       console.log('ipcRenderer on download_progress', data, event);
-      setPercentage(data);
+      // setPercentage(data);
     });
   };
 
@@ -197,7 +197,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
           </Row>
         </Container>
       </LoadingOverlay>
-      {loading ? (
+      {/* {loading ? (
         <Box
           position="fixed"
           bottom={0}
@@ -234,7 +234,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
             </Box>
           </Box>
         </Box>
-      ) : null}
+      ) : null} */}
     </React.Fragment>
   );
 };

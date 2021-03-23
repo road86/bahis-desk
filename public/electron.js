@@ -89,15 +89,15 @@ autoUpdater.on('checking-for-update', () => {
 
 // SERVER URLS
 // const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
-// const SERVER_URL = 'http://192.168.19.16:8009';
-const SERVER_URL = 'http://192.168.19.16:8043';
+const SERVER_URL = 'http://192.168.19.16:8009';
+// const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
-const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get/form-config/?/`;
-const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/module-list/`;
-const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/form-list/`;
-const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/list-def/`;
-const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/submission/`;
-const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/bahis_ulo/data-sync/`;
+const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
+const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
+const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
+const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
+const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
+const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
 const GEOLOC_ENDPOINT = `${SERVER_URL}//bhmodule/catchment-data-sync/`;
 
@@ -815,18 +815,16 @@ const startAppSync = (event, name) => {
   try {
     // console.log(geoCsv);
     const db = new Database(DB_NAME, { fileMustExist: true });
-    console.log(name, getDBTablesEndpoint(db).replace("core_admin", name));
-    // const fetchedRows = db.prepare(queryString).all();
     axios
     .all([
-      axios.get(getDBTablesEndpoint(db)),
-      axios.get(APP_DEFINITION_ENDPOINT),
-      axios.get(FORMS_ENDPOINT),
-      axios.get(LISTS_ENDPOINT),
+      axios.get(getDBTablesEndpoint(db).replace("core_admin", name)),
+      axios.get(APP_DEFINITION_ENDPOINT.replace("core_admin", name)),
+      axios.get(FORMS_ENDPOINT.replace("core_admin", name)),
+      axios.get(LISTS_ENDPOINT.replace("core_admin", name)),
     ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
-          console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
+          // console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
           if (formConfigRes.data) {
             if(formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare(
@@ -1017,10 +1015,11 @@ const signIn = async (event, userData) => {
         mainWindow.send('formSubmissionResults', results);
       });
   } else {
-    // const updateUserQuery = db.prepare(
-    //   'UPDATE users SET lastLogin = ? WHERE user_id = ?'
-    // );
-    // updateUserQuery.run((new Date()).toString(), userInfo);
+    const updateUserQuery = db.prepare(
+      'UPDATE users SET lastlogin = ? WHERE user_id = ?'
+    );
+    const dateTime = (new Date()).toString()
+    updateUserQuery.run( dateTime, userInfo);
     results = {
       message: "",
       username: userData.username,

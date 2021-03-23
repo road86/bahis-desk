@@ -114,12 +114,12 @@ function AppRegister(props: any) {
 
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
-    setToastVisible(true);
     ipcRenderer.on('formSubmissionResults', function(event: any, args: any) {
       console.log(event, args);
       if (args != undefined) {
+        setToastVisible(true);
         if (args.message != '' && args.username == '') {
-          setToastContent({ severity: 'Error', msg: args.message });
+          setToastContent({ severity: 'Error', msg: "Un authenticated User" });
          } else {
             setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
             props.history.push({
@@ -127,7 +127,7 @@ function AppRegister(props: any) {
               state: { username: args.username }
             });
             // props.history.push('/menu/');
-          }
+         }
       }
    });
   };
@@ -159,8 +159,8 @@ function AppRegister(props: any) {
 
   return (
     <div className={classes.layout}>
-      {toast(toastContent)}
       <Paper className={classes.paper} elevation={3}>
+      {toast(toastContent)}
         <Grid container={true} direction="row" justify="center" alignItems="center">
           <Avatar variant="square" src="/icon.png" />
         </Grid>

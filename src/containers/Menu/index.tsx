@@ -66,7 +66,8 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
     let fix = this;
     ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
       console.log(event, args);
-      if (args != "done") {
+      if (args == "done") {
+        console.log('check');
         fix.setState({ isDataAvailable: true });
         const { currentMenu, setMenuItemActionCreator } = fix.props;
         if (!currentMenu) {
