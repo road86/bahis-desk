@@ -1,4 +1,4 @@
-import { Avatar, Grid } from '@material-ui/core';
+import { Avatar, Grid, Snackbar } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
@@ -6,8 +6,10 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
+// import { cpuUsage } from 'process';
 import React from 'react';
 import { withRouter } from 'react-router';
+import { Alert } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
@@ -74,6 +76,8 @@ function AppRegister(props: any) {
   const classes = registerStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [userInput, setUserInput] = React.useState({});
+  const [toastVisible, setToastVisible] = React.useState<boolean>(false);
+  const [toastContent, setToastContent] = React.useState<any>({});
   // const [formTypeSubmitted, setFormTypeSubmitted] = React.useState([false, false,false]);
   const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
     app_type: '',
@@ -108,10 +112,24 @@ function AppRegister(props: any) {
     }
   };
 
-  const handleSignIn = () => {
-    console.log(userInput);
-    ipcRenderer.send('sign-in', userInput);
-    // this.props.history.push('/menu/');
+  const handleSignIn = async () => {
+    await ipcRenderer.send('sign-in', userInput);
+    setToastVisible(true);
+    ipcRenderer.on('formSubmissionResults', function(event: any, args: any) {
+      console.log(event, args);
+      if (args != undefined) {
+        if (args.message != '' && args.username == '') {
+          setToastContent({ severity: 'Error', msg: args.message });
+         } else {
+            setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
+            props.history.push({
+              pathname: '/menu/',
+              state: { username: args.username }
+            });
+            // props.history.push('/menu/');
+          }
+      }
+   });
   };
 
   const handleBack = () => {
@@ -122,8 +140,26 @@ function AppRegister(props: any) {
     history.push('/menu/');
   };
 
+  const snackbarClose = () => {
+    setToastVisible(false);
+    // props.history.push('/branch');
+  };
+
+  const toast = (response: any) => (
+    <Snackbar
+      open={toastVisible}
+      autoHideDuration={3000}
+      onClose={snackbarClose}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      key={'top' + 'center'}
+    >
+      <Alert severity={response.severity}>{response.msg}</Alert>
+    </Snackbar>
+  );
+
   return (
     <div className={classes.layout}>
+      {toast(toastContent)}
       <Paper className={classes.paper} elevation={3}>
         <Grid container={true} direction="row" justify="center" alignItems="center">
           <Avatar variant="square" src="/icon.png" />

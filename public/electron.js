@@ -6,7 +6,7 @@ const Database = require('better-sqlite3');
 const os = require('os');
 const fs = require('fs');
 const axios = require('axios');
-const { replace } = require('lodash');
+const { replace, result } = require('lodash');
 const { dialog } = require('electron')
 var macaddress = require('macaddress');
 
@@ -15,9 +15,10 @@ const DB_NAME = 'foobar.db';
 let mainWindow;
 const { autoUpdater } = require('electron-updater');
 const { func } = require('prop-types');
+// const { catch } = require('fetch-mock');
 let prevPercent = 0;
 let newPercent = 0;
-let mac;
+// let mac;
 
 function sendStatusToWindow(text) {
   // log.info(text);
@@ -88,14 +89,15 @@ autoUpdater.on('checking-for-update', () => {
 
 // SERVER URLS
 // const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
-const SERVER_URL = 'http://192.168.19.16:8009';
+// const SERVER_URL = 'http://192.168.19.16:8009';
+const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
-const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
-const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
-const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
-const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
-const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
-const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
+const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get/form-config/?/`;
+const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/module-list/`;
+const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/form-list/`;
+const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/get-api/list-def/`;
+const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/bahis_ulo/submission/`;
+const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/bahis_ulo/data-sync/`;
 const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
 const GEOLOC_ENDPOINT = `${SERVER_URL}//bhmodule/catchment-data-sync/`;
 
@@ -112,7 +114,7 @@ function addDevToolsExt() {
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
   BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
 }
-const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL);
+const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL, role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
@@ -126,80 +128,15 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   const db = new Database(DB_NAME);
-  macaddress.one(function (err, mac) {
-    mac = mac;  
-    console.log(mac);
-  });
+  // macaddress.one(function (err, mac) {
+  //   mac = mac;  
+  //   console.log(mac);
+  // });
   console.log('calllllllllllll');
   db.exec(queries);
   // fetchGeoLocation();
   db.close();
 }
-
-// function fetchGeoLocation() {
-//   const JSZip = require('jszip');
-//   const JSZipUtils = require('jszip-utils');
-
-//   JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err, data) => {
-//     if (err) {
-//       dialog.showMessageBox({
-//         type: 'info',
-//         title: 'Download Error',
-//         message: 'An Error Occurred. Do you want to Restart App Again?',
-//         buttons: ['Sure', 'No']
-//       }, (buttonIndex) => {
-//         if (buttonIndex === 0) {
-//           requestRestartApp()
-//         }
-//       })
-//     } else {
-//       throw err;
-//     }
-
-//     JSZip.loadAsync(data).then((zip) => {
-//       const csvFiles = Object.keys(zip.files);
-//       this.writeCsvToObj(zip, csvFiles, 0, {});
-//     });
-//   });
-// }
-
-// const writeCsvToObj = (
-//   zip,
-//   csvFiles,
-//   i,
-//   tmpCsv
-// ) => {
-//   const self = this;
-//   zip
-//     .file(csvFiles[i])
-//     .async('text')
-//     .then(function success(txt) {
-//       const arr = txt.split('\n');
-//       const jsonObj = [];
-//       const headers = arr[0].split(',');
-//       for (let n = 1; n < arr.length - 1; n++) {
-//         const data = arr[n].split(',');
-//         const obj = {};
-//         for (let j = 0; j < data.length; j++) {
-//           const key = headers[j].trim();
-//           obj[key] = data[j].trim();
-//         }
-//         jsonObj.push(obj);
-//       }
-
-//       tmpCsv[csvFiles[i]] = jsonObj;
-
-//       i++;
-//       if (i < csvFiles.length) {
-//         return self.writeCsvToObj(zip, csvFiles, i, tmpCsv);
-//       } else {
-//         if (tmpCsv !== {}) {
-//           geoCsv = tmpCsv;
-//         }
-//       }
-//       return tmpCsv;
-//     });
-// };
 
 /** set up new db if not exists */
 function prepareDb() {
@@ -565,7 +502,7 @@ const sendDataToServer = async () => {
     );
     try {
       const notSyncRows = notSyncRowsQuery.all() || [];
-      await notSyncRows.forEach(async rowObj => {
+      notSyncRows.forEach(async (rowObj) => {
         const formDefinitionObj = db
           .prepare('Select * from forms where form_id = ?')
           .get(rowObj.form_id);
@@ -576,7 +513,7 @@ const sendDataToServer = async () => {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
           test_file: queries
-         };
+        };
         await axios
           .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
             headers: {
@@ -869,25 +806,27 @@ const fetchQueryData = (event, queryString) => {
    const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
    const time = log === undefined ? 0 : Math.round(log.time);
    const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
-   console.log(db_endpoint_url);
+  //  console.log(db_endpoint_url);
    return db_endpoint_url; 
  }
 
  
-const startAppSync = event => {
+const startAppSync = (event, name) => {
   try {
     // console.log(geoCsv);
     const db = new Database(DB_NAME, { fileMustExist: true });
+    console.log(name, getDBTablesEndpoint(db).replace("core_admin", name));
     // const fetchedRows = db.prepare(queryString).all();
     axios
-      .all([
-        axios.get(getDBTablesEndpoint(db)),
-        axios.get(APP_DEFINITION_ENDPOINT),
-        axios.get(FORMS_ENDPOINT),
-        axios.get(LISTS_ENDPOINT),
-      ])
+    .all([
+      axios.get(getDBTablesEndpoint(db)),
+      axios.get(APP_DEFINITION_ENDPOINT),
+      axios.get(FORMS_ENDPOINT),
+      axios.get(LISTS_ENDPOINT),
+    ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
+          console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
           if (formConfigRes.data) {
             if(formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare(
@@ -978,17 +917,20 @@ const startAppSync = event => {
             }
           }
           // eslint-disable-next-line no-param-reassign
-          event.returnValue = 'done';
+          let message = "done";
+          mainWindow.send('formSyncComplete', message);
           db.close();
         })
       )
       .catch(err => {
+        let message = "done";
+        mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
-        console.log('Axios FAILED', err);
+        // console.log('Axios FAILED', err);
       });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    // console.log(err);
   }
 };
 
@@ -1013,22 +955,23 @@ const requestRestartApp = async _event => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const signIn = async (event, response) => {
+const signIn = async (event, userData) => {
+  let mac;
+  macaddress.one(function (err, mac) {
+    mac = mac;  
+    console.log(mac);
+  });
   const db = new Database(DB_NAME, { fileMustExist: true });
-  const query = 'SELECT user_id from users where username="' + response.username + '" AND password="' + response.password + '" AND macaddress="' + mac + '" AND upazila="' + response.upazila + '"';
+  const query = 'SELECT user_id from users where username="' + userData.username + '" AND password="' + userData.password + '" AND upazila="' + userData.upazila + '"';
   const userInfo = db.prepare(query).get();
   // const info = userInfo.user_id;
-  console.log('macaddress', mac);
+  console.log('user input', userInfo);
   if (userInfo == undefined) {
-    const insertStmt = db.prepare(
-      `INSERT INTO users (username, password, macaddress, upazila, lastlogin) VALUES (?, ?, ?, ?, ?)`
-    );
-    insertStmt.run(response.username, response.password, mac, response.upazila, (new Date()).toString());
     const data = {
-      'username': response.username,
-      'password': response.password,
+      'username': userData.username,
+      'password': userData.password,
       'mac_address': mac,
-      'upazila': response.upazila,
+      'upazila': userData.upazila,
     };
     // console.log(data);
     await axios
@@ -1041,21 +984,50 @@ const signIn = async (event, response) => {
         },
       })
       .then(response => {
-        console.log(response);
-        if (response.data.status === 201 || response.data.status === 200) {
-          console.log('successfully created', response);
+        // console.log(response);
+        if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
+        // if (response.status == 200 || response.status == 201) {
+          console.log('successfull', userData);
+          const insertStmt = db.prepare(
+            `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          );
+          const data = response.data;
+          insertStmt.run(userData.username, userData.password, mac, userData.upazila, (new Date()).toString(), data.name, data.role, data.organization, data.branch, data.email);
+          results = {username: data.user_name, message: ""}
+              // event.sender.send('formSubmissionResults', results);
+          mainWindow.send('formSubmissionResults', results);
+          // event.returnValue = {
+          //   userInfo: data,
+          //   // message: ""
+          // };
+        } else if (response.status == 409) {
+          results = {
+            message: "Un-authenticated User",
+            username: "",
+          }
+          mainWindow.send('formSubmissionResults', results);
         }
       })
       .catch(error => {
         // eslint-disable-next-line no-console
-        console.log(error);
+        event.returnValue = {
+          message: error,
+          username: "",
+        }
+        mainWindow.send('formSubmissionResults', results);
       });
   } else {
-    const updateUserQuery = db.prepare(
-      'UPDATE users SET lastLogin = ? WHERE user_id = ?'
-    );
-    updateUserQuery.run(new Date(), id);
+    // const updateUserQuery = db.prepare(
+    //   'UPDATE users SET lastLogin = ? WHERE user_id = ?'
+    // );
+    // updateUserQuery.run((new Date()).toString(), userInfo);
+    results = {
+      message: "",
+      username: userData.username,
+    }
+    mainWindow.send('formSubmissionResults', results);
   }
+  db.close();
 };
 
 const popuplateGeoTable = (event, geoList) => {
@@ -1070,6 +1042,7 @@ const popuplateGeoTable = (event, geoList) => {
       insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
     });
   }
+  db.close();
 };
 
 
@@ -1086,6 +1059,7 @@ const fetchDivision = (event) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
+    db.close();
   }
 };
 
@@ -1102,6 +1076,7 @@ const fetchUpazila = (event, divisionId, districtId) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
+    db.close();
   }
 };
 
@@ -1120,6 +1095,7 @@ const fetchDistrict = (event, divisionId) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
+    db.close();
   }
 };
 

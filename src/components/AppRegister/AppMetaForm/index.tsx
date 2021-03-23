@@ -28,7 +28,6 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   const [districtList, setDistrictList] = React.useState<any[]>([]);
   const [upazilaList, setUpazilaList] = React.useState<any[]>([]);
 
-
   const onChangeHandler = async (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
     if (event.target.name == 'division') {
@@ -36,8 +35,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
-    } else if(event.target.name == 'district') {
-      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput['division'], event.target.value);
+    } else if (event.target.name == 'district') {
+      const upazilaList: any = await ipcRenderer.sendSync(
+        'fetch-upazila',
+        userInput.division,
+        event.target.value
+      );
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }
@@ -49,14 +52,18 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   const compUpdate = async () => {
     const divisionList: any = await ipcRenderer.sendSync('fetch-division');
     setDivisionList(divisionList.division);
-    if (userInput['division'] != '') {
-      const districtList: any = await ipcRenderer.sendSync('fetch-district', userInput['division']);
+    if (userInput.division != '') {
+      const districtList: any = await ipcRenderer.sendSync('fetch-district', userInput.division);
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
-    } 
-    if(userInput['district'] != '') {
-      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput['division'], userInput['district']);
+    }
+    if (userInput.district != '') {
+      const upazilaList: any = await ipcRenderer.sendSync(
+        'fetch-upazila',
+        userInput.division,
+        userInput.district
+      );
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }
@@ -90,7 +97,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            {divisionList.map((option: { div_id: number; division : string }) => (
+            {divisionList.map((option: { div_id: number; division: string }) => (
               <MenuItem key={option.div_id} value={option.div_id}>
                 {option.division}
               </MenuItem>
@@ -112,7 +119,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            {districtList.map((option: { dis_id: number; district : string }) => (
+            {districtList.map((option: { dis_id: number; district: string }) => (
               <MenuItem key={option.dis_id} value={option.dis_id}>
                 {option.district}
               </MenuItem>
@@ -134,7 +141,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
-            {upazilaList.map((option: { upz_id: number; upazila : string }) => (
+            {upazilaList.map((option: { upz_id: number; upazila: string }) => (
               <MenuItem key={option.upz_id} value={option.upz_id}>
                 {option.upazila}
               </MenuItem>

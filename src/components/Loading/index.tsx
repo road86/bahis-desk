@@ -3,7 +3,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Redirect } from 'react-router';
 import Typist from 'react-typist';
 import 'three-dots/dist/three-dots.css';
-import { ipcRenderer } from '../../services/ipcRenderer';
+// import { ipcRenderer } from '../../services/ipcRenderer';
 import './Loading.css';
 import Loader from 'react-loader-spinner';
 
@@ -21,12 +21,15 @@ class Loading extends React.Component<{}, LoadingState> {
     // autoUpdater.logger = log
   }
   public async componentDidMount() {
-    const response = await ipcRenderer.sendSync('start-app-sync');
-    if (response) {
-      await setTimeout(() => {
-        this.setState({ isLoadComplete: true });
-      }, 5000);
-    }
+    // const response = await ipcRenderer.sendSync('start-app-sync');
+    // if (response) {
+    //   await setTimeout(() => {
+    //     this.setState({ isLoadComplete: true });
+    //   }, 2000);
+    // }
+    setTimeout(() => {
+      this.setState({ isLoadComplete: true });
+    }, 2000);
   }
 
   public render() {

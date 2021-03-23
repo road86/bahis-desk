@@ -3,7 +3,11 @@ import reducerRegistry from '@onaio/redux-reducer-registry';
 import { delay } from 'q';
 import * as React from 'react';
 import { Button, Container } from 'react-floating-action-button';
+import Loader from 'react-loader-spinner';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
+import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { getNativeLanguageText } from '../../helpers/utils';
@@ -38,69 +42,122 @@ export interface MenuProps {
 
 export interface MenuState {
   shouldAlertOpen: boolean;
+  isLoadComplete: boolean;
+  isDataAvailable: boolean;
 }
 
-class Menu extends React.Component<MenuProps, MenuState> {
-  constructor(props: MenuProps) {
+interface MenuURLParams {
+  username: string;
+}
+
+class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
+  constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
     super(props);
-    this.state = { shouldAlertOpen: false };
+    this.state = { shouldAlertOpen: false, isLoadComplete: false, isDataAvailable: false };
   }
 
   public async componentDidMount() {
-    const { currentMenu, setMenuItemActionCreator } = this.props;
-    if (!currentMenu) {
-      const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-      setMenuItemActionCreator(JSON.parse(newMenuItem));
-    }
-    this.setState({ shouldAlertOpen: false });
+    // const response = await ipcRenderer.send('start-app-sync', this.props.location.state.username);
+    const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
+    await setTimeout(async () => {
+      this.setState({ isLoadComplete: true });
+    }, 5000);
+    console.log(response);
+    let fix = this;
+    ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+      console.log(event, args);
+      if (args != "done") {
+        fix.setState({ isDataAvailable: true });
+        const { currentMenu, setMenuItemActionCreator } = fix.props;
+        if (!currentMenu) {
+          const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+          console.log(newMenuItem);
+          setMenuItemActionCreator(JSON.parse(newMenuItem));
+        }
+        fix.setState({ shouldAlertOpen: false });
+      } else {  
+      fix.setState({ isDataAvailable: false });
+      }
+   });
   }
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
-    const { shouldAlertOpen } = this.state;
+    const { shouldAlertOpen, isLoadComplete, isDataAvailable } = this.state;
     return (
-      <div className="menu-container">
-        {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
-        <Row id="menu-title-container">
-          <Col>
-            {isBackPossible && (
-              <div onClick={this.onBackHandler}>
-                <h6 className="menu-back">
-                  <span className="bg-menu-back">
-                    <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
-                  </span>
-                </h6>
-              </div>
-            )}
-            <h3 className="menu-title lead">
-              {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
-            </h3>
-          </Col>
-        </Row>
-        <Row id="menu-body">
-          {currentMenu &&
-            currentMenu.type === MODULE_TYPE &&
-            currentMenu.children.map((menuItem, index) => (
-              <Col key={'menu-' + index} className="menu-item" md={4}>
-                {this.typeEvalutor(menuItem, appLanguage)}
+      <React.Fragment>
+        {isLoadComplete ? 
+        (
+          <div className="menu-container">
+            {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
+            {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
+            <Row id="menu-title-container">
+              <Col>
+                {isBackPossible && (
+                  <div onClick={this.onBackHandler}>
+                    <h6 className="menu-back">
+                      <span className="bg-menu-back">
+                        <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+                      </span>
+                    </h6>
+                  </div>
+                )}
+                <h3 className="menu-title lead">
+                  {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
+                </h3>
               </Col>
-            ))}
-        </Row>
-        <Container>
-          <Button tooltip="Update App" className="floating-item" onClick={this.appUpdateHandler}>
-            <FontAwesomeIcon icon={['fas', 'tools']} />
-          </Button>
-          <Button
-            tooltip="Sync Data with Server"
-            className="floating-item"
-            onClick={this.onSyncHandler}
-          >
-            <FontAwesomeIcon icon={['fas', 'sync']} />
-          </Button>
-          <Button tooltip="Menu" className="floating-btn">
-            <FontAwesomeIcon icon={['fas', 'bars']} />
-          </Button>
-        </Container>
-      </div>
+            </Row>
+            <Row id="menu-body">
+              {currentMenu &&
+                currentMenu.type === MODULE_TYPE &&
+                currentMenu.children.map((menuItem, index) => (
+                  <Col key={'menu-' + index} className="menu-item" md={4}>
+                    {this.typeEvalutor(menuItem, appLanguage)}
+                  </Col>
+                ))}
+            </Row>
+            <Container>
+              <Button tooltip="Update App" className="floating-item" onClick={this.appUpdateHandler}>
+                <FontAwesomeIcon icon={['fas', 'tools']} />
+              </Button>
+              <Button
+                tooltip="Sync Data with Server"
+                className="floating-item"
+                onClick={this.onSyncHandler}
+              >
+                <FontAwesomeIcon icon={['fas', 'sync']} />
+              </Button>
+              <Button tooltip="Menu" className="floating-btn">
+                <FontAwesomeIcon icon={['fas', 'bars']} />
+              </Button>
+            </Container>
+          </div>
+        ) : (
+          <div className="loader-container">  
+            <Loader
+              type="Puff"
+              color="#00BFFF"
+              height={100}
+              width={100}
+              timeout={3000} // 3 secs
+            />
+            <Typist cursor={{ hideWhenDone: true }}>
+              <span className="loader-title"> BAHIS </span>
+              <br />
+              <span className="loader-subtitle">
+                Welcome
+                <Typist.Backspace count={7} delay={500} />
+                Loading{' '}
+                <span className="blink-one">
+                  .
+                  <span className="blink-two">
+                    .<span className="blink-three">.</span>
+                  </span>
+                </span>
+              </span>
+            </Typist>
+          </div>
+        )}
+      </React.Fragment>
     );
   }
   private typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
@@ -167,4 +224,4 @@ const ConnectedMenu = connect(
   mapDispatchToProps
 )(Menu);
 
-export default ConnectedMenu;
+export default withRouter(ConnectedMenu);
