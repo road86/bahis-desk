@@ -118,7 +118,7 @@ const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
-CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT);
+CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
 CREATE TABLE app_log( time TEXT);
 CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`
 // App
@@ -596,9 +596,10 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const insertStmt = db.prepare(
-      `INSERT INTO data (form_id, data, status, instanceid) VALUES (?, ?, 1, ?)`
+      `INSERT INTO data (form_id, data, status, instanceid, last_updated) VALUES (?, ?, 1, ?, ?)`
     );
-    insertStmt.run(formId, JSON.stringify(userInput), instanceId);
+    console.log('(new Date()).getTime()', (new Date()).getTime());
+    insertStmt.run(formId, JSON.stringify(userInput), instanceId, (new Date()).getTime());
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -612,9 +613,13 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
 const fetchDataFromServer = async (username) => {
   console.log('fetch data', username);
   try {
-    // const db = new Database(DB_NAME, { fileMustExist: true });
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+    const updated = last_updated == undefined ? 0 : last_updated;
+    const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated.last_updated;
+    console.log(url);
     await axios
-      .get(`${DATA_FETCH_ENDPOINT.replace('core_admin', username)}?last_modified=2018-04-23T10:26:00.996Z`)
+      .get(url)
       .then(response => {
         const newDataRows = response.data;
         newDataRows.forEach(newDataRow => {
@@ -652,6 +657,7 @@ const WRITE_GEO_OBJECT = 'write-geo-object';
 const FETCH_DISTRICT = 'fetch-district';
 const FETCH_DIVISION = 'fetch-division';
 const FETCH_UPAZILA = 'fetch-upazila';
+const FETCH_USERNAME = 'fetch-username';
 
 // listeners
 
@@ -785,6 +791,7 @@ const fetchQueryData = (event, queryString) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const fetchedRows = db.prepare(queryString).all();
+    console.log(queryString);
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
     db.close();
@@ -1054,6 +1061,24 @@ const popuplateGeoTable = (event, geoList) => {
   db.close();
 };
 
+const fetchUsername = (event) => {
+  console.log('check call');
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
+    // eslint-disable-next-line no-param-reassign
+    console.log(fetchedRows);
+    event.returnValue = {
+      username: fetchedUsername,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    db.close();
+  }
+};
+
 
 const fetchDivision = (event) => {
   try {
@@ -1125,4 +1150,5 @@ ipcMain.on(WRITE_GEO_OBJECT, popuplateGeoTable);
 ipcMain.on(FETCH_DIVISION, fetchDivision);
 ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);
+ipcMain.on(FETCH_USERNAME, fetchUsername);
 

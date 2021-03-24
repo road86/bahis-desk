@@ -58,21 +58,24 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
   }
 
   public async componentDidMount() {
+    // const user: any = await ipcRenderer.sendSync('fetch-username');
+    // this.setState({username: user.username});
+    // console.log(user.username);
+    const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
     this.setState({
-      username : this.props.location.state.username,
+      username : 'bahis_ulo',
     })
-    const response = await ipcRenderer.send('start-app-sync', this.props.location.state.username);
     // const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
     await setTimeout(async () => {
       let fix = this;
-        ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
-          console.log('check', event, args);
-          if (args == "done") {
-            console.log('check');
-            fix.setState({ isDataAvailable: true });
-          } else {  
+      ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+        console.log('check', event, args);
+        if (args == "done") {
+          console.log('check');
+          fix.setState({ isDataAvailable: true });
+        } else {  
           fix.setState({ isDataAvailable: false });
-          }
+        }
       });
       const { currentMenu, setMenuItemActionCreator } = fix.props;
       if (!currentMenu) {
