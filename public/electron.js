@@ -89,8 +89,8 @@ autoUpdater.on('checking-for-update', () => {
 
 // SERVER URLS
 // const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
-const SERVER_URL = 'http://192.168.19.16:8009';
-// const SERVER_URL = 'http://192.168.19.16:8043';
+// const SERVER_URL = 'http://192.168.19.16:8009';
+const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
@@ -493,7 +493,8 @@ const parseAndSaveToFlatTables = (dbConnection, formId, userInput, instanceId) =
 /** sends data to server
  * @returns {string} - success if suceess; otherwise failed
  */
-const sendDataToServer = async () => {
+const sendDataToServer = async (username) => {
+  console.log('send data', username);
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
@@ -514,8 +515,9 @@ const sendDataToServer = async () => {
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
           test_file: queries
         };
+        console.log(apiFormData)
         await axios
-          .post(SUBMISSION_ENDPOINT, JSON.stringify(apiFormData), {
+          .post(SUBMISSION_ENDPOINT.replace('core_admin', username), JSON.stringify(apiFormData), {
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
@@ -607,11 +609,12 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
-const fetchDataFromServer = async () => {
+const fetchDataFromServer = async (username) => {
+  console.log('fetch data', username);
   try {
     // const db = new Database(DB_NAME, { fileMustExist: true });
     await axios
-      .get(`${DATA_FETCH_ENDPOINT}?last_modified=2018-04-23T10:26:00.996Z`)
+      .get(`${DATA_FETCH_ENDPOINT.replace('core_admin', username)}?last_modified=2018-04-23T10:26:00.996Z`)
       .then(response => {
         const newDataRows = response.data;
         newDataRows.forEach(newDataRow => {
@@ -692,6 +695,7 @@ const fetchAppDefinition = event => {
     const db = new Database(DB_NAME, { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = db.prepare('SELECT definition from app limit 1').get().definition;
+    console.log('definition', event.returnValue);
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -806,7 +810,7 @@ const fetchQueryData = (event, queryString) => {
    const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
    const time = log === undefined ? 0 : Math.round(log.time);
    const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
-  //  console.log(db_endpoint_url);
+   console.log(db_endpoint_url);
    return db_endpoint_url; 
  }
 
@@ -824,6 +828,9 @@ const startAppSync = (event, name) => {
     ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
+          let message = "done";
+          mainWindow.send('formSyncComplete', message);
+          console.log(message);
           // console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
           if (formConfigRes.data) {
             if(formConfigRes.data.length > 0) {
@@ -915,8 +922,8 @@ const startAppSync = (event, name) => {
             }
           }
           // eslint-disable-next-line no-param-reassign
-          let message = "done";
-          mainWindow.send('formSyncComplete', message);
+          // let message = "done";
+          // mainWindow.send('formSyncComplete', message);
           db.close();
         })
       )
@@ -927,6 +934,8 @@ const startAppSync = (event, name) => {
         // console.log('Axios FAILED', err);
       });
   } catch (err) {
+    let message = "done";
+    mainWindow.send('formSyncComplete', message);
     // eslint-disable-next-line no-console
     // console.log(err);
   }
@@ -936,9 +945,10 @@ const startAppSync = (event, name) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
- const requestDataSync = async event => {
-  await fetchDataFromServer();
-  const msg = await sendDataToServer();
+ const requestDataSync = async (event, username) => {
+   console.log(username);
+  await fetchDataFromServer(username);
+  const msg = await sendDataToServer(username);
   // eslint-disable-next-line no-param-reassign
   event.returnValue = msg;
 };
@@ -1008,18 +1018,18 @@ const signIn = async (event, userData) => {
       })
       .catch(error => {
         // eslint-disable-next-line no-console
-        event.returnValue = {
-          message: error,
+        results = {
+          message: "Un-authenticated User",
           username: "",
         }
         mainWindow.send('formSubmissionResults', results);
       });
   } else {
-    const updateUserQuery = db.prepare(
-      'UPDATE users SET lastlogin = ? WHERE user_id = ?'
-    );
-    const dateTime = (new Date()).toString()
-    updateUserQuery.run( dateTime, userInfo);
+    // const updateUserQuery = db.prepare(
+    //   'UPDATE users SET lastlogin = ? WHERE user_id = ?'
+    // );
+    // const dateTime = (new Date()).toString()
+    // updateUserQuery.run( dateTime, userInfo);
     results = {
       message: "",
       username: userData.username,

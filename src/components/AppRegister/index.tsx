@@ -159,6 +159,7 @@ function AppRegister(props: any) {
 
   return (
     <div className={classes.layout}>
+      {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
       <Paper className={classes.paper} elevation={3}>
       {toast(toastContent)}
         <Grid container={true} direction="row" justify="center" alignItems="center">

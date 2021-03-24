@@ -44,6 +44,7 @@ export interface MenuState {
   shouldAlertOpen: boolean;
   isLoadComplete: boolean;
   isDataAvailable: boolean;
+  username: string;
 }
 
 interface MenuURLParams {
@@ -53,37 +54,40 @@ interface MenuURLParams {
 class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
     super(props);
-    this.state = { shouldAlertOpen: false, isLoadComplete: false, isDataAvailable: false };
+    this.state = { shouldAlertOpen: false, isLoadComplete: false, isDataAvailable: false, username: '' };
   }
 
   public async componentDidMount() {
-    // const response = await ipcRenderer.send('start-app-sync', this.props.location.state.username);
-    const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
+    this.setState({
+      username : this.props.location.state.username,
+    })
+    const response = await ipcRenderer.send('start-app-sync', this.props.location.state.username);
+    // const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
     await setTimeout(async () => {
+      let fix = this;
+        ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+          console.log('check', event, args);
+          if (args == "done") {
+            console.log('check');
+            fix.setState({ isDataAvailable: true });
+          } else {  
+          fix.setState({ isDataAvailable: false });
+          }
+      });
+      const { currentMenu, setMenuItemActionCreator } = fix.props;
+      if (!currentMenu) {
+        const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+        // console.log(newMenuItem);
+        setMenuItemActionCreator(JSON.parse(newMenuItem));
+      }
+      fix.setState({ shouldAlertOpen: false });
       this.setState({ isLoadComplete: true });
     }, 5000);
     console.log(response);
-    let fix = this;
-    ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
-      console.log(event, args);
-      if (args == "done") {
-        console.log('check');
-        fix.setState({ isDataAvailable: true });
-        const { currentMenu, setMenuItemActionCreator } = fix.props;
-        if (!currentMenu) {
-          const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-          console.log(newMenuItem);
-          setMenuItemActionCreator(JSON.parse(newMenuItem));
-        }
-        fix.setState({ shouldAlertOpen: false });
-      } else {  
-      fix.setState({ isDataAvailable: false });
-      }
-   });
   }
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
-    const { shouldAlertOpen, isLoadComplete, isDataAvailable } = this.state;
+    const { shouldAlertOpen, isLoadComplete, isDataAvailable, username } = this.state;
     return (
       <React.Fragment>
         {isLoadComplete ? 
@@ -123,7 +127,10 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
               <Button
                 tooltip="Sync Data with Server"
                 className="floating-item"
-                onClick={this.onSyncHandler}
+                onClick={(e: any) => {
+                  console.log(username);
+                  this.onSyncHandler(e, username)
+                }}
               >
                 <FontAwesomeIcon icon={['fas', 'sync']} />
               </Button>
@@ -179,10 +186,11 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
   };
 
   // tslint:disable-next-line: variable-name
-  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>, userName: string) => {
+    // console.log(userName);
     this.props.setSyncOverlayHandler(true);
     await delay(500);
-    await ipcRenderer.sendSync('request-data-sync');
+    await ipcRenderer.sendSync('request-data-sync', userName);
     this.props.setSyncOverlayHandler(false);
     await delay(200);
     this.setState({ shouldAlertOpen: true });
