@@ -599,7 +599,7 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
       `INSERT INTO data (form_id, data, status, instanceid, last_updated) VALUES (?, ?, 1, ?, ?)`
     );
     console.log('(new Date()).getTime()', (new Date()).getTime());
-    insertStmt.run(formId, JSON.stringify(userInput), instanceId, (new Date()).getTime());
+    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round((new Date()).getTime()));
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -1007,7 +1007,7 @@ const signIn = async (event, userData) => {
             `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           );
           const data = response.data;
-          insertStmt.run(userData.username, userData.password, mac, userData.upazila, (new Date()).toString(), data.name, data.role, data.organization, data.branch, data.email);
+          insertStmt.run(userData.username, userData.password, mac, userData.upazila, Math.round((new Date()).getTime()), data.name, data.role, data.organization, data.branch, data.email);
           results = {username: data.user_name, message: ""}
               // event.sender.send('formSubmissionResults', results);
           mainWindow.send('formSubmissionResults', results);
@@ -1067,7 +1067,7 @@ const fetchUsername = (event) => {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
-    console.log(fetchedRows);
+    console.log(fetchedUsername);
     event.returnValue = {
       username: fetchedUsername,
     };
@@ -1075,7 +1075,7 @@ const fetchUsername = (event) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    db.close();
+    // db.close();
   }
 };
 

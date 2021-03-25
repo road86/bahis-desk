@@ -51,29 +51,32 @@ interface MenuURLParams {
   username: string;
 }
 
-class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
+class Menu extends React.Component<
+  RouteComponentProps<{}, {}, MenuURLParams> & MenuProps,
+  MenuState
+> {
   constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
     super(props);
-    this.state = { shouldAlertOpen: false, isLoadComplete: false, isDataAvailable: false, username: '' };
+    this.state = {
+      shouldAlertOpen: false,
+      isLoadComplete: false,
+      isDataAvailable: false,
+      username: '',
+    };
   }
 
   public async componentDidMount() {
-    // const user: any = await ipcRenderer.sendSync('fetch-username');
-    // this.setState({username: user.username});
+    const user: any = await ipcRenderer.sendSync('fetch-username');
+    this.setState({username: user.username});
     // console.log(user.username);
-    const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
-    this.setState({
-      username : 'bahis_ulo',
-    })
-    // const response = await ipcRenderer.send('start-app-sync', 'bahis_ulo');
+    const response = await ipcRenderer.send('start-app-sync', user.userName);
     await setTimeout(async () => {
-      let fix = this;
+      const fix = this;
       ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
         console.log('check', event, args);
-        if (args == "done") {
-          console.log('check');
+        if (args == 'done') {
           fix.setState({ isDataAvailable: true });
-        } else {  
+        } else {
           fix.setState({ isDataAvailable: false });
         }
       });
@@ -85,7 +88,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
       }
       fix.setState({ shouldAlertOpen: false });
       this.setState({ isLoadComplete: true });
-    }, 5000);
+    }, 2000);
     console.log(response);
   }
   public render() {
@@ -93,8 +96,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
     const { shouldAlertOpen, isLoadComplete, isDataAvailable, username } = this.state;
     return (
       <React.Fragment>
-        {isLoadComplete ? 
-        (
+        {isLoadComplete ? (
           <div className="menu-container">
             {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
             {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
@@ -124,7 +126,11 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
                 ))}
             </Row>
             <Container>
-              <Button tooltip="Update App" className="floating-item" onClick={this.appUpdateHandler}>
+              <Button
+                tooltip="Update App"
+                className="floating-item"
+                onClick={this.appUpdateHandler}
+              >
                 <FontAwesomeIcon icon={['fas', 'tools']} />
               </Button>
               <Button
@@ -132,7 +138,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
                 className="floating-item"
                 onClick={(e: any) => {
                   console.log(username);
-                  this.onSyncHandler(e, username)
+                  this.onSyncHandler(e, username);
                 }}
               >
                 <FontAwesomeIcon icon={['fas', 'sync']} />
@@ -143,7 +149,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
             </Container>
           </div>
         ) : (
-          <div className="loader-container">  
+          <div className="loader-container">
             <Loader
               type="Puff"
               color="#00BFFF"
@@ -231,9 +237,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedMenu = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Menu);
+const ConnectedMenu = connect(mapStateToProps, mapDispatchToProps)(Menu);
 
 export default withRouter(ConnectedMenu);
