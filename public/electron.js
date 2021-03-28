@@ -1051,12 +1051,24 @@ const popuplateGeoTable = (event, geoList) => {
   const geoData = geoList ? geoList['catchment-area.csv'] : []
   // console.log('call', geoData);
   if (geoData.length) {
-    geoData.forEach(response => {
-      const insertStmt = db.prepare(
-        `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (?, ?, ?, ?, ?, ?)`
-      );
-      insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
+    const insertStmt = db.prepare(
+      `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (@div_id, @division, @dis_id, @district, @upz_id, @upazila)`
+    );
+ 
+    const insertMany = db.transaction((geos) => {
+      // console.log(geos);
+      for (const geo of geos) insertStmt.run({
+        div_id: geo.division, division: geo.division_label, dis_id: geo.district, district: geo.dist_label, upz_id: geo.upazila, upazila: geo.upazila_label
+      });
     });
+ 
+    insertMany(geoData);
+    // geoData.forEach(response => {
+    //   const insertStmt = db.prepare(
+    //     `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (?, ?, ?, ?, ?, ?)`
+    //   );
+    //   insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
+    // });
   }
   db.close();
 };
