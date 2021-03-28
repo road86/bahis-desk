@@ -115,22 +115,42 @@ function AppRegister(props: any) {
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('formSubmissionResults', function(event: any, args: any) {
-      console.log(event, args);
+      console.log('args', event, args);
       if (args != undefined) {
         setToastVisible(true);
         if (args.message != '' && args.username == '') {
+          console.log('login failed');
           setToastContent({ severity: 'Error', msg: "Un authenticated User" });
          } else {
+           console.log('login successful');
             setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-            props.history.push({
-              pathname: '/menu/',
-              state: { username: args.username }
-            });
+            // props.history.push({
+            //   pathname: '/menu/',
+            //   state: { username: args.username }
+            // });
+            appSync();
             // props.history.push('/menu/');
          }
       }
    });
   };
+
+  const appSync = async () => {
+    console.log('response', userEntry.username);
+    const response = await ipcRenderer.send('start-app-sync', userEntry.username);
+    console.log(response, userEntry.username);
+      ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+        console.log('check', event, args);
+        if (args == 'done') {
+          props.history.push({
+            pathname: '/menu/',
+            state: { username: args.username }
+          });
+        } else {
+          setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
+        }
+      });
+  }
 
   const handleBack = () => {
     setActiveStep(activeStep - 1);

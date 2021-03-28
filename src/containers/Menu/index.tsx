@@ -69,17 +69,17 @@ class Menu extends React.Component<
     const user: any = await ipcRenderer.sendSync('fetch-username');
     this.setState({username: user.username});
     // console.log(user.username);
-    const response = await ipcRenderer.send('start-app-sync', user.userName);
+    // const response = await ipcRenderer.send('start-app-sync', user.userName);
     await setTimeout(async () => {
       const fix = this;
-      ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
-        console.log('check', event, args);
-        if (args == 'done') {
-          fix.setState({ isDataAvailable: true });
-        } else {
-          fix.setState({ isDataAvailable: false });
-        }
-      });
+      // ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+      //   console.log('check', event, args);
+      //   if (args == 'done') {
+      //     fix.setState({ isDataAvailable: true });
+      //   } else {
+      //     fix.setState({ isDataAvailable: false });
+      //   }
+      // });
       const { currentMenu, setMenuItemActionCreator } = fix.props;
       if (!currentMenu) {
         const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
@@ -89,7 +89,7 @@ class Menu extends React.Component<
       fix.setState({ shouldAlertOpen: false });
       this.setState({ isLoadComplete: true });
     }, 2000);
-    console.log(response);
+    // console.log(response);
   }
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;

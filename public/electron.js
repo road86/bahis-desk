@@ -824,7 +824,7 @@ const fetchQueryData = (event, queryString) => {
  
 const startAppSync = (event, name) => {
   try {
-    // console.log(geoCsv);
+    console.log('name', name);
     const db = new Database(DB_NAME, { fileMustExist: true });
     axios
     .all([
@@ -835,10 +835,10 @@ const startAppSync = (event, name) => {
     ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
+          // console.log(formConfigRes, moduleListRes);
           let message = "done";
           mainWindow.send('formSyncComplete', message);
-          console.log(message);
-          // console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
+          console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
           if (formConfigRes.data) {
             if(formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare(
@@ -935,13 +935,14 @@ const startAppSync = (event, name) => {
         })
       )
       .catch(err => {
-        let message = "done";
+        let message = "nope";
         mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
-        // console.log('Axios FAILED', err);
+        console.log('Axios FAILED', err);
       });
   } catch (err) {
-    let message = "done";
+    console.log('try catch', err)
+    let message = "nope";
     mainWindow.send('formSyncComplete', message);
     // eslint-disable-next-line no-console
     // console.log(err);
