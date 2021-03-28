@@ -516,8 +516,10 @@ const sendDataToServer = async (username) => {
           test_file: queries
         };
         console.log(apiFormData)
+        const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
+        console.log(url);
         await axios
-          .post(SUBMISSION_ENDPOINT.replace('core_admin', username), JSON.stringify(apiFormData), {
+          .post(url, JSON.stringify(apiFormData), {
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
@@ -541,17 +543,17 @@ const sendDataToServer = async (username) => {
           })
           .catch(error => {
             // eslint-disable-next-line no-console
-            console.log(error);
+            // console.log(error);
           });
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(err);
+      // console.log(err);
     }
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    // console.log(err);
     return 'failed';
   }
 };
@@ -598,7 +600,6 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
     const insertStmt = db.prepare(
       `INSERT INTO data (form_id, data, status, instanceid, last_updated) VALUES (?, ?, 1, ?, ?)`
     );
-    console.log('(new Date()).getTime()', (new Date()).getTime());
     insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round((new Date()).getTime()));
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
@@ -615,9 +616,10 @@ const fetchDataFromServer = async (username) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    const updated = last_updated == undefined ? 0 : last_updated;
-    const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated.last_updated;
-    console.log(url);
+    console.log(last_updated);
+    const updated = last_updated.last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
+    const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
+    console.log('url', url);
     await axios
       .get(url)
       .then(response => {
@@ -631,13 +633,13 @@ const fetchDataFromServer = async (username) => {
       })
       .catch(error => {
         // eslint-disable-next-line no-console
-        console.log(error);
+        // console.log(error);
         return 'failed';
       });
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    // console.log(err);
     return 'failed';
   }
 };
@@ -1082,7 +1084,7 @@ const fetchUsername = (event) => {
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedUsername);
     event.returnValue = {
-      username: fetchedUsername,
+      username: fetchedUsername.username,
     };
     db.close();
   } catch (err) {
