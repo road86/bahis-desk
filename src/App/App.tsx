@@ -9,6 +9,7 @@ import {
   faSort,
   faSync,
   faTools,
+  faPenNib
 } from '@fortawesome/free-solid-svg-icons';
 // import Box from '@material-ui/core/Box';
 // import CircularProgress from '@material-ui/core/CircularProgress';
@@ -45,7 +46,8 @@ library.add(
   faLongArrowAltUp,
   faPlus,
   faTools,
-  faBars
+  faBars,
+  faPenNib
 );
 
 /** Main App component */
@@ -157,6 +159,14 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     });
   };
 
+  const logout = () => {
+    props.history.push('/signup/');
+  }
+
+  const setSync = (data: boolean) => {
+    setSyncOverlay(data);
+  }
+
   React.useEffect(() => {
     compUpdate();
   }, []);
@@ -169,7 +179,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
         spinner={<BounceLoader />}
         text="Syncing"
       >
-        {!headerExcludedURLs.includes(location.pathname) && <Header />}
+        {!headerExcludedURLs.includes(location.pathname) && <Header handleLogout={logout} setSyncOverlayHandler={setSync} />}
         <div className={classes.offset} />
         <Container>
           <Row id="main-page-container">

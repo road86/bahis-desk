@@ -132,7 +132,7 @@ function setUpNewDB() {
   //   mac = mac;  
   //   console.log(mac);
   // });
-  console.log('calllllllllllll');
+  console.log('new db setup call');
   db.exec(queries);
   // fetchGeoLocation();
   db.close();
@@ -515,7 +515,6 @@ const sendDataToServer = async (username) => {
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
           test_file: queries
         };
-        console.log(apiFormData)
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
         console.log(url);
         await axios
@@ -660,6 +659,7 @@ const FETCH_DISTRICT = 'fetch-district';
 const FETCH_DIVISION = 'fetch-division';
 const FETCH_UPAZILA = 'fetch-upazila';
 const FETCH_USERNAME = 'fetch-username';
+const AUTO_UPDATE = 'auto-update';
 
 // listeners
 
@@ -840,7 +840,6 @@ const startAppSync = (event, name) => {
           // console.log(formConfigRes, moduleListRes);
           let message = "done";
           mainWindow.send('formSyncComplete', message);
-          console.log(formConfigRes.data, moduleListRes.data, formListRes.data, listRes.data);
           if (formConfigRes.data) {
             if(formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare(
@@ -959,7 +958,7 @@ const startAppSync = (event, name) => {
    console.log(username);
   await fetchDataFromServer(username);
   const msg = await sendDataToServer(username);
-  // eslint-disable-next-line no-param-reassign
+  mainWindow.send('dataSyncComplete', msg);
   event.returnValue = msg;
 };
 
@@ -1148,6 +1147,11 @@ const fetchDistrict = (event, divisionId) => {
   }
 };
 
+const autoUpdate = (event) => {
+  console.log('check update call');
+  autoUpdater.checkForUpdates();
+};
+
 
 
 // subscribes the listeners to channels
@@ -1166,4 +1170,5 @@ ipcMain.on(FETCH_DIVISION, fetchDivision);
 ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);
 ipcMain.on(FETCH_USERNAME, fetchUsername);
+ipcMain.on(AUTO_UPDATE, autoUpdate);
 

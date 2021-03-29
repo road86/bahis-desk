@@ -10,10 +10,19 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SyncIcon from '@material-ui/icons/Sync';
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
+import { delay } from 'q';
 import React from 'react';
+import { dataSync } from '../../../helpers/utils';
+import { ipcRenderer } from '../../../services/ipcRenderer';
 import { headerStyles } from './styles';
 
-export default function Header() {
+export interface HeaderProps {
+  handleLogout: any;
+  setSyncOverlayHandler: any
+}
+
+export default function Header(props: HeaderProps) {
+  const { handleLogout, setSyncOverlayHandler } = props;
   const classes = headerStyles();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -38,6 +47,15 @@ export default function Header() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const handleAppSync = async () => {
+    setSyncOverlayHandler(true);
+    await delay(500);
+    const response = await dataSync();
+    console.log('check response', response);
+    await delay(1000);
+    setSyncOverlayHandler(false);
+  }
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -50,7 +68,7 @@ export default function Header() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleLogout}>Logout</MenuItem>
     </Menu>
   );
 
@@ -112,7 +130,7 @@ export default function Header() {
                 <SystemUpdateAltIcon />
               </Badge>
             </IconButton>
-            <IconButton aria-label="data sync icon" color="inherit">
+            <IconButton aria-label="data sync icon" color="inherit" onClick={handleAppSync}>
               <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
                 <SyncIcon />
               </Badge>

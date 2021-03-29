@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
-import { getNativeLanguageText } from '../../helpers/utils';
+import { appSync, dataSync, getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
   FORM_TYPE,
@@ -68,18 +68,8 @@ class Menu extends React.Component<
   public async componentDidMount() {
     const user: any = await ipcRenderer.sendSync('fetch-username');
     this.setState({username: user.username});
-    // console.log(user.username);
-    // const response = await ipcRenderer.send('start-app-sync', user.userName);
     await setTimeout(async () => {
       const fix = this;
-      // ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
-      //   console.log('check', event, args);
-      //   if (args == 'done') {
-      //     fix.setState({ isDataAvailable: true });
-      //   } else {
-      //     fix.setState({ isDataAvailable: false });
-      //   }
-      // });
       const { currentMenu, setMenuItemActionCreator } = fix.props;
       if (!currentMenu) {
         const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
@@ -91,6 +81,7 @@ class Menu extends React.Component<
     }, 2000);
     // console.log(response);
   }
+
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
     const { shouldAlertOpen, isLoadComplete, isDataAvailable, username } = this.state;
@@ -127,19 +118,23 @@ class Menu extends React.Component<
             </Row>
             <Container>
               <Button
-                tooltip="Update App"
+                tooltip="Sync App with Server"
                 className="floating-item"
-                onClick={this.appUpdateHandler}
+                onClick={this.onAppSyncHandler}
               >
                 <FontAwesomeIcon icon={['fas', 'tools']} />
               </Button>
               <Button
+                tooltip="Fetch Latest Update"
+                className="floating-item"
+                onClick={this.appUpdateHandler}
+              >
+                <FontAwesomeIcon icon={['fas', 'pen-nib']} />
+              </Button>
+              <Button
                 tooltip="Sync Data with Server"
                 className="floating-item"
-                onClick={(e: any) => {
-                  console.log(username);
-                  this.onSyncHandler(e, username);
-                }}
+                onClick={this.onSyncHandler}
               >
                 <FontAwesomeIcon icon={['fas', 'sync']} />
               </Button>
@@ -195,11 +190,24 @@ class Menu extends React.Component<
   };
 
   // tslint:disable-next-line: variable-name
-  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>, userName: string) => {
+  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
     // console.log(userName);
     this.props.setSyncOverlayHandler(true);
     await delay(500);
-    await ipcRenderer.sendSync('request-data-sync', userName);
+    await dataSync();
+    this.props.setSyncOverlayHandler(false);
+    await delay(200);
+    this.setState({ shouldAlertOpen: true });
+    await delay(1000);
+    this.setState({ shouldAlertOpen: false });
+  };
+
+  // tslint:disable-next-line: variable-name
+  private onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    // console.log(userName);
+    this.props.setSyncOverlayHandler(true);
+    await delay(500);
+    await appSync();
     this.props.setSyncOverlayHandler(false);
     await delay(200);
     this.setState({ shouldAlertOpen: true });
@@ -209,7 +217,8 @@ class Menu extends React.Component<
 
   // tslint:disable-next-line: variable-name
   private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {
-    ipcRenderer.sendSync('request-app-restart');
+    // ipcRenderer.sendSync('request-app-restart');
+    ipcRenderer.sendSync('auto-update');
   };
 }
 
