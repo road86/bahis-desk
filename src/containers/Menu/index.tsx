@@ -67,7 +67,7 @@ class Menu extends React.Component<
 
   public async componentDidMount() {
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    this.setState({username: user.username});
+    this.setState({ username: user.username });
     await setTimeout(async () => {
       const fix = this;
       const { currentMenu, setMenuItemActionCreator } = fix.props;

@@ -5,11 +5,11 @@ import {
   faBars,
   faLongArrowAltDown,
   faLongArrowAltUp,
+  faPenNib,
   faPlus,
   faSort,
   faSync,
   faTools,
-  faPenNib
 } from '@fortawesome/free-solid-svg-icons';
 // import Box from '@material-ui/core/Box';
 // import CircularProgress from '@material-ui/core/CircularProgress';
@@ -113,7 +113,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   };
 
   const compUpdate = async () => {
-    // setLoading(true); 
+    // setLoading(true);
     if (navigator.onLine) {
       fetchGeoLocation();
     }
@@ -161,11 +161,11 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
 
   const logout = () => {
     props.history.push('/signup/');
-  }
+  };
 
   const setSync = (data: boolean) => {
     setSyncOverlay(data);
-  }
+  };
 
   React.useEffect(() => {
     compUpdate();
@@ -179,7 +179,9 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
         spinner={<BounceLoader />}
         text="Syncing"
       >
-        {!headerExcludedURLs.includes(location.pathname) && <Header handleLogout={logout} setSyncOverlayHandler={setSync} />}
+        {!headerExcludedURLs.includes(location.pathname) && (
+          <Header handleLogout={logout} setSyncOverlayHandler={setSync} />
+        )}
         <div className={classes.offset} />
         <Container>
           <Row id="main-page-container">

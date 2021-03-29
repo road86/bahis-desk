@@ -121,19 +121,19 @@ function AppRegister(props: any) {
         setToastVisible(true);
         if (args.message != '' && args.username == '') {
           console.log('login failed');
-          setToastContent({ severity: 'Error', msg: "Un authenticated User" });
-         } else {
-           console.log('login successful');
-            setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-            // props.history.push({
-            //   pathname: '/menu/',
-            //   state: { username: args.username }
-            // });
-            syncAppModule()
-            // props.history.push('/menu/');
-         }
+          setToastContent({ severity: 'Error', msg: 'Un authenticated User' });
+        } else {
+          console.log('login successful');
+          setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
+          // props.history.push({
+          //   pathname: '/menu/',
+          //   state: { username: args.username }
+          // });
+          syncAppModule();
+          // props.history.push('/menu/');
+        }
       }
-   });
+    });
   };
 
   const syncAppModule = async () => {
@@ -142,12 +142,12 @@ function AppRegister(props: any) {
     if (args == 'done') {
       props.history.push({
         pathname: '/menu/',
-        state: { username: args.username }
+        state: { username: args.username },
       });
     } else {
       setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
     }
-  }
+  };
 
   const handleBack = () => {
     setActiveStep(activeStep - 1);
@@ -178,7 +178,7 @@ function AppRegister(props: any) {
     <div className={classes.layout}>
       {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
       <Paper className={classes.paper} elevation={3}>
-      {toast(toastContent)}
+        {toast(toastContent)}
         <Grid container={true} direction="row" justify="center" alignItems="center">
           <Avatar variant="square" src="/icon.png" />
         </Grid>

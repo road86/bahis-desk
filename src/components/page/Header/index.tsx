@@ -18,7 +18,7 @@ import { headerStyles } from './styles';
 
 export interface HeaderProps {
   handleLogout: any;
-  setSyncOverlayHandler: any
+  setSyncOverlayHandler: any;
 }
 
 export default function Header(props: HeaderProps) {
@@ -54,7 +54,7 @@ export default function Header(props: HeaderProps) {
     console.log('check response', response);
     await delay(1000);
     setSyncOverlayHandler(false);
-  }
+  };
 
   const menuId = 'primary-search-account-menu';
   const renderMenu = (

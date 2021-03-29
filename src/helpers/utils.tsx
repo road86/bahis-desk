@@ -1,4 +1,4 @@
-import { ipcRenderer } from "../services/ipcRenderer";
+import { ipcRenderer } from '../services/ipcRenderer';
 
 /** Interface for an object that is allowed to have any property */
 export interface FlexObject {
@@ -27,14 +27,13 @@ export const appSync = async () => {
     //   return false;
     // }
   });
-}
+};
 
 export const dataSync = async () => {
   const user: any = await ipcRenderer.sendSync('fetch-username');
   await ipcRenderer.send('request-data-sync', user.username);
   ipcRenderer.on('dataSyncComplete', async function(event: any, args: any) {
     console.log('check', event, args);
-    return args
+    return args;
   });
-}
-
+};
