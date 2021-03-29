@@ -617,7 +617,7 @@ const fetchDataFromServer = async (username) => {
     const db = new Database(DB_NAME, { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     console.log(last_updated);
-    const updated = last_updated.last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
+    const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
     const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
     console.log('url', url);
     await axios
