@@ -137,16 +137,19 @@ function AppRegister(props: any) {
   };
 
   const syncAppModule = async () => {
-    const args: any = await appSync();
-    console.log('check args', args);
-    if (args == 'done') {
-      props.history.push({
-        pathname: '/menu/',
-        state: { username: args.username },
-      });
-    } else {
-      setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
-    }
+    const user: any = await ipcRenderer.sendSync('fetch-username');
+    await ipcRenderer.send('start-app-sync', user.username);
+    ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+      console.log('check', event, args);
+      if (args === 'done') {
+        props.history.push({
+          pathname: '/menu/',
+          state: { username: args.username },
+        });
+      } else {
+        setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
+      }
+    });
   };
 
   const handleBack = () => {

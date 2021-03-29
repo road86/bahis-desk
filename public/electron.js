@@ -129,7 +129,7 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
 function setUpNewDB() {
   const db = new Database(DB_NAME);
   // macaddress.one(function (err, mac) {
-  //   mac = mac;  
+  //   mac = mac;
   //   console.log(mac);
   // });
   console.log('new db setup call');
@@ -808,33 +808,33 @@ const fetchQueryData = (event, queryString) => {
  * @returns - success if sync successful
  */
 
- const addAppLog =(db, time)=>{
+const addAppLog =(db, time)=>{
 
   console.log(db);
   db.prepare('INSERT INTO app_log(time) VALUES(?)').run(time);
 
- }
+}
 
- const getDBTablesEndpoint =(db)=> {
-   const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
-   const time = log === undefined ? 0 : Math.round(log.time);
-   const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
-   console.log(db_endpoint_url);
-   return db_endpoint_url; 
- }
+const getDBTablesEndpoint =(db)=> {
+  const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
+  const time = log === undefined ? 0 : Math.round(log.time);
+  const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
+  console.log(db_endpoint_url);
+  return db_endpoint_url;
+}
 
- 
+
 const startAppSync = (event, name) => {
   try {
     console.log('name', name);
     const db = new Database(DB_NAME, { fileMustExist: true });
     axios
-    .all([
-      axios.get(getDBTablesEndpoint(db).replace("core_admin", name)),
-      axios.get(APP_DEFINITION_ENDPOINT.replace("core_admin", name)),
-      axios.get(FORMS_ENDPOINT.replace("core_admin", name)),
-      axios.get(LISTS_ENDPOINT.replace("core_admin", name)),
-    ])
+      .all([
+        axios.get(getDBTablesEndpoint(db).replace("core_admin", name)),
+        axios.get(APP_DEFINITION_ENDPOINT.replace("core_admin", name)),
+        axios.get(FORMS_ENDPOINT.replace("core_admin", name)),
+        axios.get(LISTS_ENDPOINT.replace("core_admin", name)),
+      ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
           // console.log(formConfigRes, moduleListRes);
@@ -849,7 +849,7 @@ const startAppSync = (event, name) => {
               // db.prepare('INSERT INTO app_log(time) VALUES(?)').run(formConfigRes.data[0]);
               // addAppLog(db, formConfigRes.data[0]);
               console.log("app log data --> ", db.prepare('SELECT * from app_log order by time desc limit 1').get());
-            } 
+            }
 
             formConfigRes.data.forEach(sqlObj => {
               try {
@@ -954,8 +954,8 @@ const startAppSync = (event, name) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
- const requestDataSync = async (event, username) => {
-   console.log(username);
+const requestDataSync = async (event, username) => {
+  console.log(username);
   await fetchDataFromServer(username);
   const msg = await sendDataToServer(username);
   mainWindow.send('dataSyncComplete', msg);
@@ -975,7 +975,7 @@ const requestRestartApp = async _event => {
 const signIn = async (event, userData) => {
   let mac;
   macaddress.one(function (err, mac) {
-    mac = mac;  
+    mac = mac;
     console.log(mac);
   });
   const db = new Database(DB_NAME, { fileMustExist: true });
@@ -1003,7 +1003,7 @@ const signIn = async (event, userData) => {
       .then(response => {
         // console.log(response);
         if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
-        // if (response.status == 200 || response.status == 201) {
+          // if (response.status == 200 || response.status == 201) {
           console.log('successfull', userData);
           const insertStmt = db.prepare(
             `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -1011,7 +1011,7 @@ const signIn = async (event, userData) => {
           const data = response.data;
           insertStmt.run(userData.username, userData.password, mac, userData.upazila, Math.round((new Date()).getTime()), data.name, data.role, data.organization, data.branch, data.email);
           results = {username: data.user_name, message: ""}
-              // event.sender.send('formSubmissionResults', results);
+          // event.sender.send('formSubmissionResults', results);
           mainWindow.send('formSubmissionResults', results);
           // event.returnValue = {
           //   userInfo: data,
@@ -1056,14 +1056,14 @@ const popuplateGeoTable = (event, geoList) => {
     const insertStmt = db.prepare(
       `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (@div_id, @division, @dis_id, @district, @upz_id, @upazila)`
     );
- 
+
     const insertMany = db.transaction((geos) => {
       // console.log(geos);
       for (const geo of geos) insertStmt.run({
         div_id: geo.division, division: geo.division_label, dis_id: geo.district, district: geo.dist_label, upz_id: geo.upazila, upazila: geo.upazila_label
       });
     });
- 
+
     insertMany(geoData);
     // geoData.forEach(response => {
     //   const insertStmt = db.prepare(

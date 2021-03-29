@@ -1,11 +1,11 @@
 import * as React from 'react';
+import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Redirect } from 'react-router';
 import Typist from 'react-typist';
 import 'three-dots/dist/three-dots.css';
 // import { ipcRenderer } from '../../services/ipcRenderer';
 import './Loading.css';
-import Loader from 'react-loader-spinner';
 
 /** interface for Loading State */
 interface LoadingState {
@@ -36,7 +36,7 @@ class Loading extends React.Component<{}, LoadingState> {
     return (
       <div className="menu-container">
         {this.state.isLoadComplete && <Redirect to="/signup/" />}
-        <div className="loader-container">  
+        <div className="loader-container">
           <Loader
             type="Puff"
             color="#00BFFF"
