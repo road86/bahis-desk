@@ -37,10 +37,11 @@ interface stepperProps {
   userInput: any;
   setFieldValueHandler: any;
   submitted: boolean;
+  handleSignin: any;
 }
 
 const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
-  const { step, userInput, setFieldValueHandler, submitted } = props;
+  const { step, userInput, setFieldValueHandler, submitted, handleSignin } = props;
   console.log(submitted);
   switch (step) {
     case 0:
@@ -65,6 +66,7 @@ const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
           userInput={userInput}
           setFieldValueHandler={setFieldValueHandler}
           submitted={submitted}
+          handleSignin={handleSignin}
         />
       );
     default:
@@ -216,6 +218,7 @@ function AppRegister(props: any) {
                 userInput={userInput}
                 setFieldValueHandler={setFieldValue}
                 submitted={userEntry.formTypeSubmitted[activeStep]}
+                handleSignin={handleNext}
               />
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
