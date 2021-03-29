@@ -120,6 +120,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       setTotalRecordsActionCreator,
       columnDefinition,
     } = this.props;
+    console.log(columnDefinition);
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
     setPageNumberActionCreator(1);
@@ -261,9 +262,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                               key={'col-label-' + index}
                               className="initialism text-uppercase text-nowrap"
                             >
-                              {singleCol.sortable && (
+                              {singleCol.sortable ? (
                                 <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                              )}
+                              ) : singleCol.label[appLanguage]}
                             </th>
                           );
                         } else {
