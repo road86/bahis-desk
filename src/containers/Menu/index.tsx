@@ -58,9 +58,9 @@ class Menu extends React.Component<
   constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
     super(props);
     this.state = {
-      shouldAlertOpen: false,
-      isLoadComplete: false,
       isDataAvailable: false,
+      isLoadComplete: false,
+      shouldAlertOpen: false,
       username: '',
     };
   }
@@ -124,13 +124,13 @@ class Menu extends React.Component<
               >
                 <FontAwesomeIcon icon={['fas', 'tools']} />
               </Button>
-              <Button
-                tooltip="Fetch Latest Update"
-                className="floating-item"
-                onClick={this.appUpdateHandler}
-              >
-                <FontAwesomeIcon icon={['fas', 'pen-nib']} />
-              </Button>
+              {/*<Button*/}
+              {/*  tooltip="Fetch Latest Update"*/}
+              {/*  className="floating-item"*/}
+              {/*  onClick={this.appUpdateHandler}*/}
+              {/*>*/}
+              {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
+              {/*</Button>*/}
               <Button
                 tooltip="Sync Data with Server"
                 className="floating-item"
@@ -216,10 +216,10 @@ class Menu extends React.Component<
   };
 
   // tslint:disable-next-line: variable-name
-  private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {
-    // ipcRenderer.sendSync('request-app-restart');
-    ipcRenderer.sendSync('auto-update');
-  };
+  // private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {
+  //   // ipcRenderer.sendSync('request-app-restart');
+  //   ipcRenderer.sendSync('auto-update');
+  // };
 }
 
 /** connect the component to the store */
