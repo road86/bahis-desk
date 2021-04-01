@@ -1605,10 +1605,10 @@
     client-oauth2 "^4.2.3"
     query-string "^6.4.2"
 
-"@onaio/loaders@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@onaio/loaders/-/loaders-0.0.1.tgz#bccf621fd1e2842f962220a570d0898965765db9"
-  integrity sha512-EJZQ9dXnKI2dATXtRnEIe/zzAvrtXhT0DTIylLLT5ihq/kyM2PxjjFcNgrlsBHhxVs/7+OkKg2IoXfSUzfA4ng==
+"@onaio/loaders@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@onaio/loaders/-/loaders-0.0.2.tgz#7d72da6b445810af9ce395d4a4e4eda5ea585806"
+  integrity sha512-TP34P2z5oo2vwghAR/wLDBiD4phg63yVvFB7xMovlTLWyrxZau+GBroH9vH3Su7z0yfH2Cp0WoGQM4YjxJdrNQ==
 
 "@onaio/redux-reducer-registry@^0.0.8":
   version "0.0.8"

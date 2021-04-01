@@ -84,7 +84,7 @@ class Menu extends React.Component<
 
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
-    const { shouldAlertOpen, isLoadComplete, isDataAvailable, username } = this.state;
+    const { shouldAlertOpen, isLoadComplete, isDataAvailable } = this.state;
     return (
       <React.Fragment>
         {isLoadComplete ? (

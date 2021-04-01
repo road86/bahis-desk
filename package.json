@@ -15,7 +15,7 @@
     "@onaio/connected-private-route": "^0.0.8",
     "@onaio/connected-reducer-registry": "^0.0.1",
     "@onaio/gatekeeper": "^0.0.14",
-    "@onaio/loaders": "^0.0.1",
+    "@onaio/loaders": "^0.0.2",
     "@onaio/redux-reducer-registry": "^0.0.8",
     "@onaio/session-reducer": "^0.0.10",
     "@onaio/superset-connector": "^0.0.13",
@@ -87,24 +87,11 @@
     "electron-build": "electron-builder",
     "release": "yarn react-build && electron-builder --publish=always",
     "build": "yarn react-build && yarn electron-build",
-    "win-build": "yarn react-build && yarn electron-build && yarn build --p always --win",
+    "win-build": "yarn react-build && yarn electron-build --win",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
     "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "electron-rebuild": "electron-rebuild"
-  },
-  "build": {
-    "appId": "com.electron.bahis",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "ShahnazKabir",
-        "repo": "electron-update",
-        "private": true,
-        "token": "25c46e4f125abf8e27f4a7f4b6aba76cb80e1bfb",
-        "releaseType": "release"
-      }
-    ]
   },
   "husky": {
     "hooks": {

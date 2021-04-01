@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
-import { appSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
