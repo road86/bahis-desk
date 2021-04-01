@@ -13,9 +13,9 @@ const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, queries
 
 
 // SERVER URLS
-// const SERVER_URL = 'http://bahis.dynamic.mpower-social.com:8999';
+const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
 // const SERVER_URL = 'http://192.168.19.16:8009';
-const SERVER_URL = 'http://192.168.19.16:8043';
+// const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
 const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;

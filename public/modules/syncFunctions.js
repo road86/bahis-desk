@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
-const SERVER_URL = 'http://192.168.19.16:8043';
+const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 

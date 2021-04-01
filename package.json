@@ -40,13 +40,10 @@
     "connected-react-router": "^6.5.2",
     "cross-blob": "^1.2.0",
     "cross-env": "^6.0.0",
-    "electron": "^12.0.2",
-    "electron-builder": "^22.10.5",
     "electron-is-dev": "^1.1.0",
     "electron-log": "^4.3.2",
-    "electron-rebuild": "^2.3.5",
     "electron-updater": "^4.3.5",
-    "eslint": "5.16.0",
+    "eslint": "^7.23.0",
     "fetch-mock": "^7.3.9",
     "form-data": "^3.0.0",
     "history": "^4.9.0",
@@ -94,7 +91,8 @@
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
     "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
-    "electron-rebuild": "electron-rebuild"
+    "electron-rebuild": "electron-rebuild",
+    "lint": "eslint */**/*.{js,ts,tsx} --quiet --fix"
   },
   "husky": {
     "hooks": {
@@ -102,16 +100,8 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "tslint --fix -c tslint.json",
-      "git add"
-    ],
-    "*.{js,jsx}": [
-      "eslint"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write",
-      "git add"
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
     ]
   },
   "browserslist": [
@@ -128,26 +118,24 @@
     "@types/react-datepicker": "^2.9.5",
     "@types/react-select": "^3.0.8",
     "@types/redux-testkit": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
     "concurrently": "^4.1.2",
+    "electron": "^12.0.2",
+    "electron-builder": "^22.10.5",
+    "electron-rebuild": "^2.3.5",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jest": "^22.14.1",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
-    "husky": "^3.0.2",
-    "lint-staged": "^9.2.1",
-    "prettier": "^1.18.2",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.23.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1",
     "react-test-renderer": "^16.8.6",
     "redux-testkit": "^1.0.6",
-    "tslint": "^5.18.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "tslint-react": "^4.0.0",
     "wait-on": "^3.3.0"
   }
 }
