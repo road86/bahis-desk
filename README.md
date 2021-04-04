@@ -56,13 +56,19 @@ yarn test
 ### build setup file
 
 for windows
+```sh
 yarn win-build
+```
 
 for linux
+```sh
 yarn linux-build
+```
 
 for git release 
+```sh
 yarn release
+```
 
 ## Configuration
 
