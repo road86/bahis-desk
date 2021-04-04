@@ -16,7 +16,7 @@ ReactDOM.render(
       <App />
     </ConnectedRouter>
   </Provider>,
-  document.getElementById('openSRP-root')
+  document.getElementById('openSRP-root'),
 );
 
 // If you want your app to work offline and load faster, you can change

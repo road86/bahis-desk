@@ -120,36 +120,33 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       setTotalRecordsActionCreator,
       columnDefinition,
     } = this.props;
+    console.log(columnDefinition);
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
     setPageNumberActionCreator(1);
-    const randomTableName =
-      'tab' +
-      Math.random()
-        .toString(36)
-        .substring(2, 12);
+    const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
     const totalRecordsResponse = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
         ? `select count(*) as count from ${datasource.query}`
-        : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`
+        : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`,
     );
     setTotalRecordsActionCreator(totalRecordsResponse[0].count);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
         ? `select count(*) as count from ${datasource.query} limit ${PAGINATION_SIZE} offset 0`
-        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${PAGINATION_SIZE} offset 0`
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${PAGINATION_SIZE} offset 0`,
     );
     const lookupTables: any = {};
-    await columnDefinition.forEach(async column => {
+    await columnDefinition.forEach(async (column) => {
       if (isColumnObj(column) && column.data_type === 'lookup') {
         const resp = await ipcRenderer.sendSync(
           'fetch-query-data',
           'lookup_definition' in column && column.lookup_definition
             ? 'with p as(select  district_label, id, district from bahis_district_table ), s as(select  id from bahis_district_table )select p. district_label,p.id,p. district,s. id as  Id from p  Inner Join s on cast(p.Id as text) = cast(s.id as text)' ||
                 column.lookup_definition.query
-            : ''
+            : '',
         );
         lookupTables[column.field_name] = resp;
       }
@@ -171,22 +168,16 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const stateOrderSql = this.state.orderSql;
     const statePageNumber = this.state.pageNumber;
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
-    const randomTableName =
-      'tab' +
-      Math.random()
-        .toString(36)
-        .substring(2, 12);
+    const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
     if (filters !== stateFilters || orderSql !== stateOrderSql || pageNumber !== statePageNumber) {
       const newPageNumber = filters !== stateFilters || orderSql !== stateOrderSql ? 1 : pageNumber;
       if (filters !== stateFilters) {
         const totalRecordsResponse = await ipcRenderer.sendSync(
           'fetch-query-data',
           datasource.type === '0'
-            ? 'select count(*) as count from ' +
-                datasource.query +
-                this.generateSqlWhereClause(filters)
+            ? 'select count(*) as count from ' + datasource.query + this.generateSqlWhereClause(filters)
             : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}` +
-                this.generateSqlWhereClause(filters)
+                this.generateSqlWhereClause(filters),
         );
         setTotalRecordsActionCreator(totalRecordsResponse[0].count);
       }
@@ -201,7 +192,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
               this.generateSqlWhereClause(filters) +
               orderSqlTxt +
-              ` limit ${pageSize} offset ${newPageNumber - 1}`
+              ` limit ${pageSize} offset ${newPageNumber - 1}`,
       );
       setPageNumberActionCreator(newPageNumber);
       this.setState({
@@ -215,23 +206,11 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public render() {
-    const {
-      columnDefinition,
-      pageNumber,
-      totalRecords,
-      pageSize,
-      datasource,
-      filters,
-      orderSql,
-    } = this.props;
+    const { columnDefinition, pageNumber, totalRecords, pageSize, datasource, filters, orderSql } = this.props;
     const { lookupTables } = this.state;
     const appLanguage = 'English';
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
-    const randomTableName =
-      'tab' +
-      Math.random()
-        .toString(36)
-        .substring(2, 12);
+    const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
     const query =
       datasource.type === '0'
         ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
@@ -253,31 +232,25 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
               <Table striped={true} borderless={true}>
                 <thead>
                   <tr>
-                    {columnDefinition.map(
-                      (singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                        if (isColumnObj(singleCol)) {
-                          return (
-                            <th
-                              key={'col-label-' + index}
-                              className="initialism text-uppercase text-nowrap"
-                            >
-                              {singleCol.sortable && (
-                                <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                              )}
-                            </th>
-                          );
-                        } else {
-                          return (
-                            <th
-                              key={'col-label-' + index}
-                              className="initialism text-uppercase text-nowrap"
-                            >
-                              {singleCol.label[appLanguage]}
-                            </th>
-                          );
-                        }
+                    {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      if (isColumnObj(singleCol)) {
+                        return (
+                          <th key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                            {singleCol.sortable ? (
+                              <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                            ) : (
+                              singleCol.label[appLanguage]
+                            )}
+                          </th>
+                        );
+                      } else {
+                        return (
+                          <th key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                            {singleCol.label[appLanguage]}
+                          </th>
+                        );
                       }
-                    )}
+                    })}
                   </tr>
                 </thead>
                 <tbody>
@@ -285,34 +258,31 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                     this.state.tableData &&
                     this.state.tableData.map((rowObj, rowIndex: number) => (
                       <tr key={'table-row-' + rowIndex}>
-                        {columnDefinition.map(
-                          (colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                            isColumnObj(colObj) ? (
-                              <td key={'data-field-' + colIndex}>
-                                {colObj.data_type === 'lookup' ? (
-                                  <LookUp
-                                    columnDef={colObj}
-                                    rowValues={rowObj}
-                                    lookupTable={lookupTables[colObj.field_name]}
-                                  />
-                                ) : (
-                                  rowObj[colObj.field_name]
-                                )}
-                              </td>
-                            ) : (
-                              <td key={'data-field-' + colIndex}>
-                                <Link
-                                  to={`/form/${
-                                    colObj.action_definition.xform_id
-                                  }/?dataJson=${this.mapListToFormData(
-                                    colObj.action_definition.data_mapping,
-                                    rowObj
-                                  )}`}
-                                >
-                                  <Button> Entry </Button>
-                                </Link>
-                              </td>
-                            )
+                        {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          isColumnObj(colObj) ? (
+                            <td key={'data-field-' + colIndex}>
+                              {colObj.data_type === 'lookup' ? (
+                                <LookUp
+                                  columnDef={colObj}
+                                  rowValues={rowObj}
+                                  lookupTable={lookupTables[colObj.field_name]}
+                                />
+                              ) : (
+                                rowObj[colObj.field_name]
+                              )}
+                            </td>
+                          ) : (
+                            <td key={'data-field-' + colIndex}>
+                              <Link
+                                to={`/form/${colObj.action_definition.xform_id}/?dataJson=${this.mapListToFormData(
+                                  colObj.action_definition.data_mapping,
+                                  rowObj,
+                                )}`}
+                              >
+                                <Button> Entry </Button>
+                              </Link>
+                            </td>
+                          ),
                         )}
                       </tr>
                     ))}
@@ -337,7 +307,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   private generateSqlWhereClause = (filters: any) => {
     let sqlWhereClause = '';
-    Object.keys(filters).forEach(filterName => {
+    Object.keys(filters).forEach((filterName) => {
       if (filters[filterName].sql !== '') {
         sqlWhereClause = `${sqlWhereClause} and ${filters[filterName].sql}`;
       }
@@ -390,9 +360,6 @@ const mapDispatchToProps = {
 };
 
 /** connect ListTable to the redux store */
-const ConnectedListTable = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ListTable);
+const ConnectedListTable = connect(mapStateToProps, mapDispatchToProps)(ListTable);
 
 export default ConnectedListTable;

@@ -33,14 +33,8 @@ describe('services/superset', () => {
   });
 
   it('authZ should authorize superset when it works', async () => {
-    fetchMock.get(
-      `${SUPERSET_API_BASE}oauth-authorized/${OPENSRP_OAUTH_STATE}`,
-      JSON.stringify({})
-    );
-    fetchMock.get(
-      `${SUPERSET_API_BASE}superset/slice_json/1337`,
-      JSON.stringify(fixtures.sliceResponse)
-    );
+    fetchMock.get(`${SUPERSET_API_BASE}oauth-authorized/${OPENSRP_OAUTH_STATE}`, JSON.stringify({}));
+    fetchMock.get(`${SUPERSET_API_BASE}superset/slice_json/1337`, JSON.stringify(fixtures.sliceResponse));
 
     store.dispatch(resetSuperset()); /** reset to null */
     await supersetFetch('1337');

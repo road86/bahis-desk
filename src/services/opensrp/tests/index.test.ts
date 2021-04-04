@@ -34,16 +34,12 @@ describe('services/OpenSRP', () => {
 
   it('getURLParams works', async () => {
     expect(getURLParams({})).toEqual('');
-    expect(getURLParams({ foo: 'bar', leet: 1337, mosh: 'pitt' })).toEqual(
-      'foo=bar&leet=1337&mosh=pitt'
-    );
+    expect(getURLParams({ foo: 'bar', leet: 1337, mosh: 'pitt' })).toEqual('foo=bar&leet=1337&mosh=pitt');
   });
 
   it('getFilterParams works', async () => {
     expect(getFilterParams({})).toEqual('');
-    expect(getFilterParams({ foo: 'bar', leet: 1337, mosh: 'pitt' })).toEqual(
-      'foo:bar,leet:1337,mosh:pitt'
-    );
+    expect(getFilterParams({ foo: 'bar', leet: 1337, mosh: 'pitt' })).toEqual('foo:bar,leet:1337,mosh:pitt');
   });
 
   it('OpenSRPService list method works', async () => {
@@ -70,9 +66,7 @@ describe('services/OpenSRP', () => {
     fetch.mockResponseOnce(JSON.stringify({}));
     const service = new OpenSRPService('location');
     await service.list({ is_jurisdiction: true });
-    expect(fetch.mock.calls[0][0]).toEqual(
-      'https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true'
-    );
+    expect(fetch.mock.calls[0][0]).toEqual('https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true');
   });
 
   it('OpenSRPService list method should handle http errors', async () => {
@@ -119,7 +113,7 @@ describe('services/OpenSRP', () => {
     const service = new OpenSRPService('location');
     await service.read('62b2f313', { is_jurisdiction: true });
     expect(fetch.mock.calls[0][0]).toEqual(
-      'https://test.smartregister.org/opensrp/rest/location/62b2f313?is_jurisdiction=true'
+      'https://test.smartregister.org/opensrp/rest/location/62b2f313?is_jurisdiction=true',
     );
   });
 
@@ -162,9 +156,7 @@ describe('services/OpenSRP', () => {
     fetch.mockResponseOnce(JSON.stringify({}), { status: 201 });
     const service = new OpenSRPService('location');
     await service.create({ foo: 'bar' }, { is_jurisdiction: true });
-    expect(fetch.mock.calls[0][0]).toEqual(
-      'https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true'
-    );
+    expect(fetch.mock.calls[0][0]).toEqual('https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true');
   });
 
   it('OpenSRPService create method should handle http errors', async () => {
@@ -210,9 +202,7 @@ describe('services/OpenSRP', () => {
     fetch.mockResponseOnce(JSON.stringify({}));
     const service = new OpenSRPService('location');
     await service.update({ foo: 'bar' }, { is_jurisdiction: true });
-    expect(fetch.mock.calls[0][0]).toEqual(
-      'https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true'
-    );
+    expect(fetch.mock.calls[0][0]).toEqual('https://test.smartregister.org/opensrp/rest/location?is_jurisdiction=true');
   });
 
   it('OpenSRPService update method should handle http errors', async () => {

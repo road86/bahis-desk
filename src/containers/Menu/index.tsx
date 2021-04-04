@@ -51,10 +51,7 @@ interface MenuURLParams {
   username: string;
 }
 
-class Menu extends React.Component<
-  RouteComponentProps<{}, {}, MenuURLParams> & MenuProps,
-  MenuState
-> {
+class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
     super(props);
     this.state = {
@@ -84,7 +81,7 @@ class Menu extends React.Component<
 
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
-    const { shouldAlertOpen, isLoadComplete, isDataAvailable, username } = this.state;
+    const { shouldAlertOpen, isLoadComplete, isDataAvailable } = this.state;
     return (
       <React.Fragment>
         {isLoadComplete ? (
@@ -117,11 +114,7 @@ class Menu extends React.Component<
                 ))}
             </Row>
             <Container>
-              <Button
-                tooltip="Sync App with Server"
-                className="floating-item"
-                onClick={this.onAppSyncHandler}
-              >
+              <Button tooltip="Sync App with Server" className="floating-item" onClick={this.onAppSyncHandler}>
                 <FontAwesomeIcon icon={['fas', 'tools']} />
               </Button>
               {/*<Button*/}
@@ -131,11 +124,7 @@ class Menu extends React.Component<
               {/*>*/}
               {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
               {/*</Button>*/}
-              <Button
-                tooltip="Sync Data with Server"
-                className="floating-item"
-                onClick={this.onSyncHandler}
-              >
+              <Button tooltip="Sync Data with Server" className="floating-item" onClick={this.onSyncHandler}>
                 <FontAwesomeIcon icon={['fas', 'sync']} />
               </Button>
               <Button tooltip="Menu" className="floating-btn">

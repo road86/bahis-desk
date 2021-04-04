@@ -16,7 +16,7 @@ defaultReducers[gateKeeperReducerName] = gateKeeperReducer;
 const store = getConnectedStore(defaultReducers);
 
 /** Set listener to add reducers to store when registered */
-reducerRegistry.setChangeListener(reducers => {
+reducerRegistry.setChangeListener((reducers) => {
   store.replaceReducer(combine(reducers));
 });
 

@@ -108,8 +108,7 @@ export const plansListResponse = [
       },
       {
         id: 'Mosquito_Collection_Min_3_Traps',
-        description:
-          'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
+        description: 'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
         priority: 'medium-priority',
         target: [
           {
@@ -201,8 +200,7 @@ export const plansListResponse = [
         identifier: '63ea7027-1296-4db1-80b4-4b700a0f0004',
         prefix: 5,
         title: 'Mosquito Collection',
-        description:
-          'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
+        description: 'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
         code: 'Mosquito Collection',
         timingPeriod: {
           start: '2019-06-18',
@@ -288,8 +286,7 @@ export const plansListResponse = [
       },
       {
         id: 'RACD_bednet_dist_1km_radius',
-        description:
-          'Visit 100% of residential structures in the operational area and provide nets',
+        description: 'Visit 100% of residential structures in the operational area and provide nets',
         priority: 'medium-priority',
         target: [
           {
@@ -344,8 +341,7 @@ export const plansListResponse = [
       },
       {
         id: 'Mosquito_Collection_Min_3_Traps',
-        description:
-          'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
+        description: 'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
         priority: 'medium-priority',
         target: [
           {
@@ -420,8 +416,7 @@ export const plansListResponse = [
         identifier: '1bd830ea-50e3-44dc-b855-9d5e9339e2be',
         prefix: 3,
         title: 'Bednet Distribution',
-        description:
-          'Visit 100% of residential structures in the operational area and provide nets',
+        description: 'Visit 100% of residential structures in the operational area and provide nets',
         code: 'Bednet Distribution',
         timingPeriod: {
           start: '2019-05-21',
@@ -473,8 +468,7 @@ export const plansListResponse = [
         identifier: '423f6665-5367-40be-855e-7c5e6941a0c3',
         prefix: 6,
         title: 'Mosquito Collection',
-        description:
-          'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
+        description: 'Set a minimum of three mosquito collection traps and complete the mosquito collection process',
         code: 'Mosquito Collection',
         timingPeriod: {
           start: '2019-05-21',

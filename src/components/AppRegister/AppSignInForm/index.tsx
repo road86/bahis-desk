@@ -10,17 +10,42 @@ interface AppSignInFormProps {
   userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
   submitted: boolean;
+  handleSignin: any;
 }
 
 // AppSignInForm component
 export default function AppSignInForm(props: AppSignInFormProps) {
   const classes = appSignInFormStyles();
-  const { userInput, setFieldValueHandler, submitted } = props;
+  const [inputRefs, setInputRef] = React.useState<any>();
+  const { userInput, setFieldValueHandler, submitted, handleSignin } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
+
   const username = 'username';
   const password = 'password';
+
+  React.useEffect(() => {
+    const ref = React.createRef();
+    setInputRef(ref);
+  }, []);
+
+  const changeFocus = (e: any) => {
+    const event = e;
+    if (event.key === 'Enter') {
+      inputRefs.current.focus();
+      event.preventDefault();
+    }
+  };
+
+  const signIn = (e: any) => {
+    const event = e;
+    if (event.key === 'Enter') {
+      handleSignin();
+      event.preventDefault();
+    }
+  };
+
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
@@ -35,6 +60,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             label="Username"
             variant="outlined"
             onChange={onChangeHandler}
+            inputProps={{ onKeyPress: changeFocus }}
             value={userInput[username] || ''}
             error={submitted && userInput[username] == undefined}
           />
@@ -47,7 +73,9 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             type="password"
             label="Password"
             variant="outlined"
+            inputRef={inputRefs}
             onChange={onChangeHandler}
+            inputProps={{ onKeyPress: signIn }}
             value={userInput[password] || ''}
             error={submitted && userInput[password] == undefined}
           />

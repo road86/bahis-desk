@@ -47,7 +47,7 @@ library.add(
   faPlus,
   faTools,
   faBars,
-  faPenNib
+  faPenNib,
 );
 
 /** Main App component */
@@ -69,7 +69,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
         const arr = txt.split('\n');
         const jsonObj = [];
         const headers = arr[0].split(',');
-        for (let n: number = 1; n < arr.length - 1; n++) {
+        for (let n = 1; n < arr.length - 1; n++) {
           const data = arr[n].split(',');
           const obj: any = {};
           for (let j = 0; j < data.length; j++) {
@@ -153,7 +153,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
       // setLoading(false);
     });
 
-    ipcRenderer.on('download_progress', function(event: any, data: any) {
+    ipcRenderer.on('download_progress', function (event: any, data: any) {
       console.log('ipcRenderer on download_progress', data, event);
       // setPercentage(data);
     });
@@ -173,12 +173,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
 
   return (
     <React.Fragment>
-      <LoadingOverlay
-        className="sync-overlay"
-        active={isOverlayPresent}
-        spinner={<BounceLoader />}
-        text="Syncing"
-      >
+      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
         {!headerExcludedURLs.includes(location.pathname) && (
           <Header handleLogout={logout} setSyncOverlayHandler={setSync} />
         )}

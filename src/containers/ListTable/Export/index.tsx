@@ -41,7 +41,7 @@ class Export extends React.Component<ExportProps, ExportState> {
   public render() {
     const { colDefifinition, appLanguage } = this.props;
     const { dataset } = this.state;
-    const filterColumns = colDefifinition.filter(tmp => isColumnObj(tmp));
+    const filterColumns = colDefifinition.filter((tmp) => isColumnObj(tmp));
     if (dataset) {
       return (
         <ExcelFile
@@ -60,7 +60,7 @@ class Export extends React.Component<ExportProps, ExportState> {
                     label={colObj.label[appLanguage]}
                     value={colObj.field_name}
                   />
-                )
+                ),
             )}
           </ExcelSheet>
         </ExcelFile>

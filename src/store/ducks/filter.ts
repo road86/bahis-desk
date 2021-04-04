@@ -43,11 +43,7 @@ export interface ResetFiltersAction extends AnyAction {
 }
 
 /** Create type for filter reducer actions */
-export type FilterActionTypes =
-  | SetConditionValueAction
-  | SetFilterValueAction
-  | ResetFiltersAction
-  | AnyAction;
+export type FilterActionTypes = SetConditionValueAction | SetFilterValueAction | ResetFiltersAction | AnyAction;
 
 // action creators
 
@@ -57,11 +53,7 @@ export type FilterActionTypes =
  * @param {string} sql - sql condition text to add store
  * @return {SetConditionValueAction} - an action to add condition value to store
  */
-export const setConditionValue = (
-  name: string,
-  value: string | null,
-  sql: string
-): SetConditionValueAction => ({
+export const setConditionValue = (name: string, value: string | null, sql: string): SetConditionValueAction => ({
   name,
   sql,
   type: SET_CONDITION_VALUE,
@@ -74,11 +66,7 @@ export const setConditionValue = (
  * @param {string} sql - sql condition text to add store
  * @return {SetFilterValueAction} - an action to add filter value to store
  */
-export const setFilterValue = (
-  name: string,
-  value: string[] | null,
-  sql: string
-): SetFilterValueAction => ({
+export const setFilterValue = (name: string, value: string[] | null, sql: string): SetFilterValueAction => ({
   name,
   sql,
   type: SET_FILTER_VALUE,
@@ -112,10 +100,7 @@ const initialState: any = SeamlessImmutable({
 });
 
 /** the filter reducer function */
-export default function reducer(
-  state: any = initialState,
-  action: FilterActionTypes
-): ImmutableFilterState {
+export default function reducer(state: any = initialState, action: FilterActionTypes): ImmutableFilterState {
   let filters;
   switch (action.type) {
     case SET_CONDITION_VALUE:

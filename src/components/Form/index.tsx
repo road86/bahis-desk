@@ -23,7 +23,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     this.state = { formDefinition: null, formChoices: null };
   }
   public async componentDidMount() {
-    console.log('this.props',this.props);
+    console.log('this.props', this.props);
     const { match } = this.props;
     const formId = match.params.id || '';
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
@@ -65,13 +65,14 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
     // const goBack = () => this.props.history.goBack();
-    console.log( this.context.history);
+    console.log(this.context.history);
     const getOdkFormRenderer = () => {
       try {
         return (
-        <ErrorBoundary>
-          <OdkFormRenderer {...props} />
-        </ErrorBoundary>) ;
+          <ErrorBoundary>
+            <OdkFormRenderer {...props} />
+          </ErrorBoundary>
+        );
       } catch (e) {
         // console.log("dhorsi");
         return null;
@@ -87,9 +88,9 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
               </span>
             </h6>
           </div>
-          </Link>
-          {formDefinition && getOdkFormRenderer()}
-        </div>
+        </Link>
+        {formDefinition && getOdkFormRenderer()}
+      </div>
     );
   }
   private s4 = () => {

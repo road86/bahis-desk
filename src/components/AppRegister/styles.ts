@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export const registerStyles = makeStyles(theme => ({
+export const registerStyles = makeStyles((theme) => ({
   button: {
     marginLeft: theme.spacing(1),
     marginTop: theme.spacing(3),

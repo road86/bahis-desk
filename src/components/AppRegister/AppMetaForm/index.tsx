@@ -36,11 +36,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
       setDistrictList(districtList.district);
       setUpazilaList([]);
     } else if (event.target.name == 'district') {
-      const upazilaList: any = await ipcRenderer.sendSync(
-        'fetch-upazila',
-        userInput.division,
-        event.target.value
-      );
+      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, event.target.value);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }
@@ -59,11 +55,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
       setUpazilaList([]);
     }
     if (userInput.district != '') {
-      const upazilaList: any = await ipcRenderer.sendSync(
-        'fetch-upazila',
-        userInput.division,
-        userInput.district
-      );
+      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, userInput.district);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }

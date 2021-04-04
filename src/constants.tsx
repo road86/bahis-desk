@@ -17,8 +17,7 @@ export const DEMO_FORM_JSON = {
       name: 'intro',
       hint:
         'This is a sample for introductory and debugging purposes. It is updated periodically so check ""Get Blank Form"" to get the latest! \n\nVersion 2018032801 adds:\n&nbsp;&nbsp;&nbsp;&nbsp;- Appearance new-front (selfie) for video type\n\nVersion 2018022001 adds:\n&nbsp;&nbsp;&nbsp;&nbsp;- Appearance image-map for select_one and select_multiple types\n&nbsp;&nbsp;&nbsp;&nbsp;- Appearance new for image, audio, video types\n\nVersion 2017121301 added:\n&nbsp;&nbsp;&nbsp;&nbsp;- Appearance thousands-sep for numeric types\n&nbsp;&nbsp;&nbsp;&nbsp;- Range questions\n&nbsp;&nbsp;&nbsp;&nbsp;- Ethiopian, coptic and islamic calendars',
-      label:
-        'Welcome to ODK Collect! This form showcases the different available question types (_widgets_).',
+      label: 'Welcome to ODK Collect! This form showcases the different available question types (_widgets_).',
       type: 'note',
     },
     {
@@ -48,8 +47,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           control: {
-            appearance:
-              "search('geo', 'matches', 'division_code', ${division})",
+            appearance: "search('geo', 'matches', 'division_code', ${division})",
           },
           name: 'district',
           bind: {
@@ -96,8 +94,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           control: {
-            appearance:
-              "minimal search('geo', 'matches', 'division_code', ${division_d})",
+            appearance: "minimal search('geo', 'matches', 'division_code', ${division_d})",
           },
           name: 'district(NEW)',
           bind: {
@@ -144,8 +141,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           control: {
-            appearance:
-              "minimal search('geo', 'matches', 'division_code', ${division_d_all})",
+            appearance: "minimal search('geo', 'matches', 'division_code', ${division_d_all})",
           },
           name: 'district_all',
           bind: {
@@ -192,8 +188,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           control: {
-            appearance:
-              "search('geo', 'matches', 'division_code', ${division_d_ck})",
+            appearance: "search('geo', 'matches', 'division_code', ${division_d_ck})",
           },
           name: 'district_all_ck',
           bind: {
@@ -239,15 +234,13 @@ export const DEMO_FORM_JSON = {
         },
         {
           name: 'url_widget',
-          hint:
-            'text type with url appearance and default value of http://opendatakit.org/',
+          hint: 'text type with url appearance and default value of http://opendatakit.org/',
           label: 'URL widget',
           type: 'text',
         },
         {
           name: 'ex_string_widget',
-          hint:
-            'text type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
+          hint: 'text type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
           label: 'Ex string widget',
           type: 'text',
         },
@@ -289,8 +282,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           name: 'ex_integer_widget',
-          hint:
-            'integer type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
+          hint: 'integer type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
           label: 'Ex integer widget',
           type: 'integer',
           bind: {
@@ -312,8 +304,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           name: 'ex_decimal_widget',
-          hint:
-            'decimal type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
+          hint: 'decimal type with ex:change.uw.android.BREATHCOUNT appearance (can use other external apps)',
           label: 'Ex decimal widget',
           type: 'decimal',
         },
@@ -378,8 +369,7 @@ export const DEMO_FORM_JSON = {
         },
         {
           name: 'aligned_image_widget',
-          hint:
-            'image type with align:1 1 1 appearance, requires external aligned image app',
+          hint: 'image type with align:1 1 1 appearance, requires external aligned image app',
           label: 'Align image widget',
           type: 'photo',
         },
@@ -706,8 +696,7 @@ export const DEMO_FORM_JSON = {
           ],
           name: 'brand_preferance',
           bind: {
-            relevant:
-              "selected(${brand_name},'1') or selected(${brand_name},'2') or selected(${brand_name},'3')",
+            relevant: "selected(${brand_name},'1') or selected(${brand_name},'2') or selected(${brand_name},'3')",
           },
           label: 'Brand Preference',
           type: 'select one',
@@ -816,8 +805,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_widget',
-          hint:
-            'select_one type with no appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
+          hint: 'select_one type with no appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
           label: 'Grid select one widget',
           type: 'select one',
         },
@@ -853,8 +841,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_widget_compact',
-          hint:
-            'select_one type with compact appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
+          hint: 'select_one type with compact appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
           label: 'Grid select one widget',
           type: 'select one',
         },
@@ -890,8 +877,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_widget_compact2',
-          hint:
-            'select_one type with compact-2 appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
+          hint: 'select_one type with compact-2 appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
           label: 'Grid select one widget',
           type: 'select one',
         },
@@ -927,8 +913,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_widget_quickcompact',
-          hint:
-            'select_one type with quickcompact appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
+          hint: 'select_one type with quickcompact appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
           label: 'Grid select one widget',
           type: 'select one',
         },
@@ -964,8 +949,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_widget_quickcompact2',
-          hint:
-            'select_one type with quickcompact-2 appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
+          hint: 'select_one type with quickcompact-2 appearance, 4 image choices (a.jpg, b.jpg, c.jpg, d.jpg)',
           label: 'Grid select one widget',
           type: 'select one',
         },
@@ -1120,8 +1104,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'grid_multi_widget_compact2',
-          hint:
-            'select_multiple type with compact-2 appearance, 4 image choices',
+          hint: 'select_multiple type with compact-2 appearance, 4 image choices',
           label: 'Grid select multiple widget',
           type: 'select all that apply',
         },
@@ -1203,8 +1186,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'select_multi_image_map',
-          hint:
-            'select_multiple type with image-map appearance and image body.svg',
+          hint: 'select_multiple type with image-map appearance and image body.svg',
           label: 'Image select multiple widget',
           type: 'select all that apply',
         },
@@ -1235,8 +1217,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'table_list_test_label',
-          hint:
-            'Show only the labels of these options and not the inputs (type=select_one yes_no, appearance=label)',
+          hint: 'Show only the labels of these options and not the inputs (type=select_one yes_no, appearance=label)',
           label: 'Label widget',
           type: 'select one',
         },
@@ -1335,8 +1316,7 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'list_widget',
-          hint:
-            'This is a normal list widget with (type = select_one, appearance = list)',
+          hint: 'This is a normal list widget with (type = select_one, appearance = list)',
           label: 'List widget',
           type: 'select one',
         },
@@ -1360,15 +1340,13 @@ export const DEMO_FORM_JSON = {
             },
           ],
           name: 'list_multi_widget',
-          hint:
-            'This is a normal list widget with (type = select_multiple, appearance = list)',
+          hint: 'This is a normal list widget with (type = select_multiple, appearance = list)',
           label: 'List multi widget',
           type: 'select all that apply',
         },
       ],
       name: 'table_list_test',
-      hint:
-        'Shows all questions on one page in ODK Collect (appearance=field-list)',
+      hint: 'Shows all questions on one page in ODK Collect (appearance=field-list)',
       label: 'List group',
       type: 'group',
     },
@@ -1392,8 +1370,7 @@ export const DEMO_FORM_JSON = {
         },
       ],
       name: 'list_multi_widget',
-      hint:
-        'This is a normal list widget with (type = select_multiple, appearance = list)',
+      hint: 'This is a normal list widget with (type = select_multiple, appearance = list)',
       label: 'Check',
       type: 'select all that apply',
     },
@@ -1437,40 +1414,41 @@ export const DEMO_FORM_JSON = {
 };
 
 export const sampleUserInput = {
-  "text_widgets/string_number_widget": "hello",
-  "repeat_1": [
+  'text_widgets/string_number_widget': 'hello',
+  repeat_1: [
     {
-      "repeat_1/repeat_q": "gsh"
-    }
+      'repeat_1/repeat_q': 'gsh',
+    },
   ],
-  "text_widgets/division": "10",
-  "text_widgets/district": "1004",
-  "text_widgets/division_d": "10",
-  "text_widgets/district(NEW)": "1004",
-  "text_widgets/division_d_all": [
-    "10"
-  ],
-  "text_widgets/district_all": [
-    "1004"
-  ],
-  "text_widgets/division_d_ck": [
-    "10"
-  ],
-  "text_widgets/district_all_ck": [
-    "1004"
-  ],
-  "text_widgets/string_widget": "hello",
-  "number_widgets/integer_widget": 1,
-  "number_widgets/integer_thousands_sep_widget": 121,
-  "number_widgets/ex_integer_widget": 12,
-  "number_widgets/decimal_widget": 12,
-  "select_one_widgets/return_from": "BY",
-  "select_multi_widgets/spinner_multi_widget": [
-    "c"
-  ]
-}
+  'text_widgets/division': '10',
+  'text_widgets/district': '1004',
+  'text_widgets/division_d': '10',
+  'text_widgets/district(NEW)': '1004',
+  'text_widgets/division_d_all': ['10'],
+  'text_widgets/district_all': ['1004'],
+  'text_widgets/division_d_ck': ['10'],
+  'text_widgets/district_all_ck': ['1004'],
+  'text_widgets/string_widget': 'hello',
+  'number_widgets/integer_widget': 1,
+  'number_widgets/integer_thousands_sep_widget': 121,
+  'number_widgets/ex_integer_widget': 12,
+  'number_widgets/decimal_widget': 12,
+  'select_one_widgets/return_from': 'BY',
+  'select_multi_widgets/spinner_multi_widget': ['c'],
+};
 
-export const FILTER_CHOICES = {"sample_select_one":[{"name":"Dhaka"},{"name":"Chatrogram"}],"sample_select_one_v1":[{"name":"Dhaka","sample_select_one":"Dhaka"},{"name":"Chatrogram","sample_select_one":"Chatrogram"}],"sample_select_multiple":[{"name":"Dhaka"},{"name":"Chatrogram"}],"sample_select_multiple_v1":[{"name":"Dhaka","sample_select_multiple":"Dhaka"},{"name":"Chatrogram","sample_select_multiple":"Chatrogram"}]};
+export const FILTER_CHOICES = {
+  sample_select_one: [{ name: 'Dhaka' }, { name: 'Chatrogram' }],
+  sample_select_one_v1: [
+    { name: 'Dhaka', sample_select_one: 'Dhaka' },
+    { name: 'Chatrogram', sample_select_one: 'Chatrogram' },
+  ],
+  sample_select_multiple: [{ name: 'Dhaka' }, { name: 'Chatrogram' }],
+  sample_select_multiple_v1: [
+    { name: 'Dhaka', sample_select_multiple: 'Dhaka' },
+    { name: 'Chatrogram', sample_select_multiple: 'Chatrogram' },
+  ],
+};
 // tslint: enable
 export type DEMO_FORM_JSON = typeof DEMO_FORM_JSON;
-export type FILTER_CHOICES = typeof FILTER_CHOICES
+export type FILTER_CHOICES = typeof FILTER_CHOICES;

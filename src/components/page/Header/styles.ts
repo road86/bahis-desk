@@ -26,5 +26,5 @@ export const headerStyles = makeStyles((theme: Theme) =>
         display: 'block',
       },
     },
-  })
+  }),
 );

@@ -77,31 +77,19 @@ class Filter extends React.Component<FilterProps, FilterState> {
         </Row>
         <div className="bg-filter-title">
           {isEnvSet &&
-            definition.map((filterItem, index) =>
-              this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
-            )}
+            definition.map((filterItem, index) => this.renderTypeEvaluator(filterItem, index, appLanguage, listId))}
         </div>
         <Button color="success" size="sm" onClick={(e: any) => this.filterHandler(e)}>
           Submit
         </Button>
-        <Button
-          className="reset-button"
-          color="secondary"
-          size="sm"
-          onClick={(e: any) => this.resetFilterHandler(e)}
-        >
+        <Button className="reset-button" color="secondary" size="sm" onClick={(e: any) => this.resetFilterHandler(e)}>
           Reset
         </Button>
       </div>
     );
   }
 
-  private renderTypeEvaluator = (
-    filterItem: FilterItem,
-    filterIndex: number,
-    appLanguage: string,
-    listId: string
-  ) => {
+  private renderTypeEvaluator = (filterItem: FilterItem, filterIndex: number, appLanguage: string, listId: string) => {
     console.log('filterItem', filterItem);
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {

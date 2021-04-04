@@ -69,12 +69,12 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
     if (JSON.stringify(options) !== JSON.stringify(filterOptions)) {
       const optionValues = options.map((option: FilterOption) => option.value);
       const newValues = (value || []).filter(
-        valueItem => valueItem && valueItem !== '' && optionValues.includes(valueItem)
+        (valueItem) => valueItem && valueItem !== '' && optionValues.includes(valueItem),
       );
       this.props.setFilterValueActionCreator(
         filterItem.name,
         newValues,
-        this.generateSqlText(filterItem, 'multiple select', newValues)
+        this.generateSqlText(filterItem, 'multiple select', newValues),
       );
       this.setState({ ...this.state, filterOptions: options });
     }
@@ -94,9 +94,7 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
             <Select
               isMulti={true}
               options={filterOptions}
-              value={filterOptions.filter(
-                (filterObj: any) => value && (value as any[]).includes(filterObj.value)
-              )}
+              value={filterOptions.filter((filterObj: any) => value && (value as any[]).includes(filterObj.value))}
               onChange={this.handleValueChange}
             />
           </Col>
@@ -113,7 +111,7 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
     this.props.setFilterValueActionCreator(
       filterItem.name,
       selectedValues,
-      this.generateSqlText(filterItem, 'multiple select', selectedValues)
+      this.generateSqlText(filterItem, 'multiple select', selectedValues),
     );
   };
 
@@ -126,11 +124,11 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
   private generateSqlText = (
     filterItem: FilterMultipleSelectItem,
     condition: FilterCondition,
-    value: FilterValue
+    value: FilterValue,
   ): string => {
     if (condition && value && value.length > 0) {
       return `${filterItem.name} in ("${value
-        .filter(item => item && item !== '')
+        .filter((item) => item && item !== '')
         .toString()
         .replace(',', '","')}")`;
     }
@@ -140,10 +138,10 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
   private fetchOptionsFromDataset = (
     filterItem: FilterItem,
     filterDataset: FilterDataset,
-    filtersValueObj: FiltersValueObj
+    filtersValueObj: FiltersValueObj,
   ): FilterOptions => {
     const options: FilterOptions = [];
-    const filterItems = lodash.filter(filterDataset, row => {
+    const filterItems = lodash.filter(filterDataset, (row) => {
       const dependency = filterItem.dependency
         ? typeof filterItem.dependency === 'string'
           ? [filterItem.dependency]
@@ -151,7 +149,7 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
         : [];
       if (dependency && dependency.length > 0) {
         let flag = true;
-        dependency.forEach(conditionKey => {
+        dependency.forEach((conditionKey) => {
           flag =
             flag &&
             filtersValueObj[conditionKey] &&
@@ -163,7 +161,7 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
       }
       return true;
     });
-    filterItems.forEach(item => {
+    filterItems.forEach((item) => {
       if (filterItem.name in item) {
         options.push({ label: item[filterItem.name], value: item[filterItem.name] });
       }
@@ -204,9 +202,6 @@ const mapDispatchToProps = {
 };
 
 /** connect FilterMultipleSelect to the redux store */
-const ConnectedFilterMultipleSelect = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FilterMultipleSelect);
+const ConnectedFilterMultipleSelect = connect(mapStateToProps, mapDispatchToProps)(FilterMultipleSelect);
 
 export default ConnectedFilterMultipleSelect;

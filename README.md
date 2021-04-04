@@ -14,7 +14,7 @@ The structure of this repository is inherited from [create-react-app](https://gi
 ## Getting started
 
 ### PC configueration for react project
-First, install node
+First, install node(version<14 && version>12)
 Second, install yarn globally
 
 ### PC configueration for bahis
@@ -44,7 +44,7 @@ yarn start
 To Lint:
 
 ```sh
-yarn lint-ts
+yarn lint
 ```
 
 Run the tests

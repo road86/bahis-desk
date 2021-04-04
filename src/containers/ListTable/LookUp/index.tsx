@@ -15,7 +15,7 @@ class LookUp extends React.Component<LookUpProps> {
     if ('lookup_definition' in columnDef && columnDef.lookup_definition) {
       const conditions = columnDef.lookup_definition.condition;
       const filterCondition: any = {};
-      conditions.forEach(condition => {
+      conditions.forEach((condition) => {
         if (condition.type === 'static') {
           filterCondition[condition.name] = condition.value;
         } else if (condition.type === 'list') {
@@ -26,7 +26,7 @@ class LookUp extends React.Component<LookUpProps> {
       const uniqRows = lodash.uniqBy(filteredTable, columnDef.lookup_definition.return_column);
       const uniqValues = lodash.map(
         uniqRows,
-        (row: any) => row[(columnDef as any).lookup_definition.return_column] || ''
+        (row: any) => row[(columnDef as any).lookup_definition.return_column] || '',
       );
       return <span>{uniqValues.toString()}</span>;
     }

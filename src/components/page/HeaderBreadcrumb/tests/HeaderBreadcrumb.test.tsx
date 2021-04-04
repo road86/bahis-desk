@@ -28,7 +28,7 @@ describe('components/page/HeaderBreadcrumb', () => {
     shallow(
       <Router history={history}>
         <HeaderBreadcrumb {...props} />
-      </Router>
+      </Router>,
     );
   });
 
@@ -59,7 +59,7 @@ describe('components/page/HeaderBreadcrumb', () => {
     const wrapper = mount(
       <Router history={history}>
         <HeaderBreadcrumb {...props} />
-      </Router>
+      </Router>,
     );
     expect(toJson(wrapper)).toMatchSnapshot();
     wrapper.unmount();

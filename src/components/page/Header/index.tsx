@@ -13,7 +13,6 @@ import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import { delay } from 'q';
 import React from 'react';
 import { dataSync } from '../../../helpers/utils';
-import { ipcRenderer } from '../../../services/ipcRenderer';
 import { headerStyles } from './styles';
 
 export interface HeaderProps {

@@ -1,2 +1,2 @@
-const SERVER_URL = 'http://192.168.19.16:8009';
+const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
 export const GEOLOC_ENDPOINT = `${SERVER_URL}/bhmodule/catchment-data-sync/`;

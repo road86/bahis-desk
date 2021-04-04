@@ -103,10 +103,7 @@ const initialState: ImmutableMenuState = SeamlessImmutable({
 });
 
 /** the menu reducer function */
-export default function reducer(
-  state: ImmutableMenuState = initialState,
-  action: MenuActionTypes
-): ImmutableMenuState {
+export default function reducer(state: ImmutableMenuState = initialState, action: MenuActionTypes): ImmutableMenuState {
   switch (action.type) {
     case SET_MENU_ITEM:
       const prev = state.getIn(['currentMenu']);

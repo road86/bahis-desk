@@ -47,7 +47,7 @@ class FilterDate extends React.Component<DateProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       IN_BETWEEN_TYPE,
-      this.generateSqlText(filterItem, IN_BETWEEN_TYPE, value)
+      this.generateSqlText(filterItem, IN_BETWEEN_TYPE, value),
     );
   }
 
@@ -57,7 +57,7 @@ class FilterDate extends React.Component<DateProps> {
       this.props.setFilterValueActionCreator(
         filterItem.name,
         [value[0]],
-        this.generateSqlText(filterItem, condition, [value[0]])
+        this.generateSqlText(filterItem, condition, [value[0]]),
       );
     }
     const startDate = value && value[0] ? new Date(value[0]) : null;
@@ -66,7 +66,7 @@ class FilterDate extends React.Component<DateProps> {
       this.props.setFilterValueActionCreator(
         filterItem.name,
         [startDate ? startDate.toISOString() : ''],
-        this.generateSqlText(filterItem, condition, [startDate ? startDate.toISOString() : ''])
+        this.generateSqlText(filterItem, condition, [startDate ? startDate.toISOString() : '']),
       );
     }
     return (
@@ -78,17 +78,12 @@ class FilterDate extends React.Component<DateProps> {
           <Col md={3}>
             <Select
               options={DATE_FILTER_OPERATORS}
-              value={DATE_FILTER_OPERATORS.filter(filterObj => filterObj.value === condition)}
+              value={DATE_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>
           <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
-            <DatePicker
-              className="form-control"
-              selected={startDate}
-              onChange={this.handleStartDate}
-            />{' '}
-            <br />
+            <DatePicker className="form-control" selected={startDate} onChange={this.handleStartDate} /> <br />
           </Col>
           {condition === IN_BETWEEN_TYPE && (
             <Col md={3}>
@@ -109,18 +104,14 @@ class FilterDate extends React.Component<DateProps> {
     const { filterItem, condition, value } = this.props;
     const selectedDateString = selectedDate
       ? `${selectedDate.getFullYear()}-${
-          selectedDate.getMonth() + 1 < 10
-            ? '0' + (selectedDate.getMonth() + 1)
-            : selectedDate.getMonth() + 1
-        }-${
-          selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()
-        }T00:00:00.000Z`
+          selectedDate.getMonth() + 1 < 10 ? '0' + (selectedDate.getMonth() + 1) : selectedDate.getMonth() + 1
+        }-${selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()}T00:00:00.000Z`
       : '';
     const tmpVal = value && value[1] ? [selectedDateString, value[1]] : [selectedDateString];
     this.props.setFilterValueActionCreator(
       filterItem.name,
       tmpVal,
-      this.generateSqlText(filterItem, condition, tmpVal)
+      this.generateSqlText(filterItem, condition, tmpVal),
     );
   };
 
@@ -128,18 +119,14 @@ class FilterDate extends React.Component<DateProps> {
     const { filterItem, condition, value } = this.props;
     const selectedDateString = selectedDate
       ? `${selectedDate.getFullYear()}-${
-          selectedDate.getMonth() + 1 < 10
-            ? '0' + (selectedDate.getMonth() + 1)
-            : selectedDate.getMonth() + 1
-        }-${
-          selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()
-        }T00:00:00.000Z`
+          selectedDate.getMonth() + 1 < 10 ? '0' + (selectedDate.getMonth() + 1) : selectedDate.getMonth() + 1
+        }-${selectedDate.getDate() < 10 ? '0' + selectedDate.getDate() : selectedDate.getDate()}T00:00:00.000Z`
       : '';
     const tmpVal = [value && value[0] ? value[0] : '', selectedDateString];
     this.props.setFilterValueActionCreator(
       filterItem.name,
       tmpVal,
-      this.generateSqlText(filterItem, condition, tmpVal)
+      this.generateSqlText(filterItem, condition, tmpVal),
     );
   };
 
@@ -148,7 +135,7 @@ class FilterDate extends React.Component<DateProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       selectedOption.value,
-      this.generateSqlText(filterItem, selectedOption.value, value)
+      this.generateSqlText(filterItem, selectedOption.value, value),
     );
   };
 
@@ -158,11 +145,7 @@ class FilterDate extends React.Component<DateProps> {
    * @param {FilterValue} value - the filter value
    * @returns {string} - the relevant WHERE SQL text
    */
-  private generateSqlText = (
-    filterItem: FilterDateItem,
-    condition: FilterCondition,
-    value: FilterValue
-  ): string => {
+  private generateSqlText = (filterItem: FilterDateItem, condition: FilterCondition, value: FilterValue): string => {
     if (condition && value && value.length > 0 && value[0] !== '') {
       switch (condition) {
         case GREATER_THAN_TYPE:
@@ -218,9 +201,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedFilterDate = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FilterDate);
+const ConnectedFilterDate = connect(mapStateToProps, mapDispatchToProps)(FilterDate);
 
 export default ConnectedFilterDate;

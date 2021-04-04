@@ -44,9 +44,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedModuleMenuItem = connect(
-  null,
-  mapDispatchToProps
-)(ModuleMenuItem);
+const ConnectedModuleMenuItem = connect(null, mapDispatchToProps)(ModuleMenuItem);
 
 export default ConnectedModuleMenuItem;

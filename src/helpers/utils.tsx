@@ -18,7 +18,7 @@ export function getNativeLanguageText(multiLanguageObject: FlexObject, languageI
 export const appSync = async () => {
   const user: any = await ipcRenderer.sendSync('fetch-username');
   await ipcRenderer.send('start-app-sync', user.username);
-  ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+  ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
     console.log('check', event, args);
     return args;
     // if (args == 'done') {
@@ -32,7 +32,7 @@ export const appSync = async () => {
 export const dataSync = async () => {
   const user: any = await ipcRenderer.sendSync('fetch-username');
   await ipcRenderer.send('request-data-sync', user.username);
-  ipcRenderer.on('dataSyncComplete', async function(event: any, args: any) {
+  ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
     console.log('check', event, args);
     return args;
   });

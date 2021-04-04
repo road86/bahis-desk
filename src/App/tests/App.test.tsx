@@ -23,7 +23,7 @@ describe('App', () => {
           <App />
         </Router>
       </Provider>,
-      div
+      div,
     );
     ReactDOM.unmountComponentAtNode(div);
   });
@@ -34,7 +34,7 @@ describe('App', () => {
         <Router history={history}>
           <App />
         </Router>
-      </Provider>
+      </Provider>,
     );
     expect(toJson(wrapper)).toMatchSnapshot();
     wrapper.unmount();

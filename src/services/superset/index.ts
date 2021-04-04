@@ -38,7 +38,7 @@ const supersetFetch = async (
   sliceId: string,
   params: FlexObject | null = null,
   callback: typeof fetchCallback = fetchCallback,
-  middleware: typeof fetchMiddleware = fetchMiddleware
+  middleware: typeof fetchMiddleware = fetchMiddleware,
 ) => {
   const config: SupersetConfig = {
     base: SUPERSET_API_BASE,

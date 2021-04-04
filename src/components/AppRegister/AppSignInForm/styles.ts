@@ -10,5 +10,5 @@ export const appSignInFormStyles = makeStyles((theme: Theme) =>
       },
       marginLeft: theme.spacing(3),
     },
-  })
+  }),
 );

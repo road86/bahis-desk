@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import React from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
-import { appSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
@@ -37,34 +36,24 @@ interface stepperProps {
   userInput: any;
   setFieldValueHandler: any;
   submitted: boolean;
+  handleSignin: any;
 }
 
 const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
-  const { step, userInput, setFieldValueHandler, submitted } = props;
+  const { step, userInput, setFieldValueHandler, submitted, handleSignin } = props;
   console.log(submitted);
   switch (step) {
     case 0:
-      return (
-        <AppTypeForm
-          userInput={userInput}
-          setFieldValueHandler={setFieldValueHandler}
-          submitted={submitted}
-        />
-      );
+      return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted} />;
     case 1:
-      return (
-        <AppMetaForm
-          userInput={userInput}
-          setFieldValueHandler={setFieldValueHandler}
-          submitted={submitted}
-        />
-      );
+      return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted} />;
     case 2:
       return (
         <AppSignInForm
           userInput={userInput}
           setFieldValueHandler={setFieldValueHandler}
           submitted={submitted}
+          handleSignin={handleSignin}
         />
       );
     default:
@@ -101,12 +90,7 @@ function AppRegister(props: any) {
     setUserEntry({ ...userEntry, formTypeSubmitted });
     if (activeStep == 0 && userEntry.app_type != '') {
       setActiveStep(activeStep + 1);
-    } else if (
-      activeStep == 1 &&
-      userEntry.division != '' &&
-      userEntry.district != '' &&
-      userEntry.upazilla != ''
-    ) {
+    } else if (activeStep == 1 && userEntry.division != '' && userEntry.district != '' && userEntry.upazilla != '') {
       setActiveStep(activeStep + 1);
     } else if (activeStep == 2 && userEntry.username != '' && userEntry.password != '') {
       handleSignIn();
@@ -115,7 +99,7 @@ function AppRegister(props: any) {
 
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
-    ipcRenderer.on('formSubmissionResults', function(event: any, args: any) {
+    ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
       console.log('args', event, args);
       if (args != undefined) {
         setToastVisible(true);
@@ -139,7 +123,7 @@ function AppRegister(props: any) {
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
     await ipcRenderer.send('start-app-sync', user.username);
-    ipcRenderer.on('formSyncComplete', async function(event: any, args: any) {
+    ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
       console.log('check', event, args);
       if (args === 'done') {
         props.history.push({
@@ -189,7 +173,7 @@ function AppRegister(props: any) {
           App Register
         </Typography>
         <Stepper activeStep={activeStep} className={classes.stepper}>
-          {steps.map(label => (
+          {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
             </Step>
@@ -216,6 +200,7 @@ function AppRegister(props: any) {
                 userInput={userInput}
                 setFieldValueHandler={setFieldValue}
                 submitted={userEntry.formTypeSubmitted[activeStep]}
+                handleSignin={handleNext}
               />
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
@@ -224,12 +209,7 @@ function AppRegister(props: any) {
                     Back
                   </Button>
                 )}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleNext}
-                  className={classes.button}
-                >
+                <Button variant="contained" color="primary" onClick={handleNext} className={classes.button}>
                   {activeStep === steps.length - 1 ? 'Sign In' : 'Next'}
                 </Button>
               </div>

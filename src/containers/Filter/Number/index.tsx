@@ -44,7 +44,7 @@ class FilterNumber extends React.Component<NumberProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       EQUAL_TYPE,
-      this.generateSqlText(filterItem, EQUAL_TYPE, value)
+      this.generateSqlText(filterItem, EQUAL_TYPE, value),
     );
   }
 
@@ -54,7 +54,7 @@ class FilterNumber extends React.Component<NumberProps> {
       this.props.setFilterValueActionCreator(
         filterItem.name,
         [value[0]],
-        this.generateSqlText(filterItem, condition, [value[0]])
+        this.generateSqlText(filterItem, condition, [value[0]]),
       );
     }
     return (
@@ -66,7 +66,7 @@ class FilterNumber extends React.Component<NumberProps> {
           <Col md={3}>
             <Select
               options={NUMBER_FILTER_OPERATORS}
-              value={NUMBER_FILTER_OPERATORS.filter(filterObj => filterObj.value === condition)}
+              value={NUMBER_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>
@@ -99,13 +99,12 @@ class FilterNumber extends React.Component<NumberProps> {
     if (event.currentTarget.name === filterItem.name + '_v2') {
       tmpVal = [value && value[0] ? value[0] : '', event.currentTarget.value];
     } else {
-      tmpVal =
-        value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
+      tmpVal = value && value[1] ? [event.currentTarget.value, value[1]] : [event.currentTarget.value];
     }
     this.props.setFilterValueActionCreator(
       filterItem.name,
       tmpVal,
-      this.generateSqlText(filterItem, condition, tmpVal)
+      this.generateSqlText(filterItem, condition, tmpVal),
     );
   };
 
@@ -114,7 +113,7 @@ class FilterNumber extends React.Component<NumberProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       selectedOption.value,
-      this.generateSqlText(filterItem, selectedOption.value, value)
+      this.generateSqlText(filterItem, selectedOption.value, value),
     );
   };
 
@@ -124,11 +123,7 @@ class FilterNumber extends React.Component<NumberProps> {
    * @param {FilterValue} value - the filter value
    * @returns {string} - the relevant WHERE SQL text
    */
-  private generateSqlText = (
-    filterItem: FilterNumberItem,
-    condition: FilterCondition,
-    value: FilterValue
-  ): string => {
+  private generateSqlText = (filterItem: FilterNumberItem, condition: FilterCondition, value: FilterValue): string => {
     if (condition && value && value.length > 0 && value[0] !== '') {
       switch (condition) {
         case GREATER_THAN_TYPE:
@@ -184,9 +179,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedFilterNumber = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FilterNumber);
+const ConnectedFilterNumber = connect(mapStateToProps, mapDispatchToProps)(FilterNumber);
 
 export default ConnectedFilterNumber;

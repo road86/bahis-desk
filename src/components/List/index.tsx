@@ -44,12 +44,10 @@ class List extends React.Component<ListProps, ListState> {
   public async componentDidMount() {
     const { match } = this.props;
     const listId = match.params.id || '';
-    const {
-      columnDefinition,
-      filterDefinition,
-      datasource,
-      listHeader,
-    } = await ipcRenderer.sendSync('fetch-list-definition', listId);
+    const { columnDefinition, filterDefinition, datasource, listHeader } = await ipcRenderer.sendSync(
+      'fetch-list-definition',
+      listId,
+    );
     this.setState({
       ...this.state,
       columnDefinition: columnDefinition ? JSON.parse(columnDefinition) : null,
