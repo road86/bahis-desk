@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import React from 'react';
 import { ipcRenderer } from '../../../services/ipcRenderer';
-import { FORM_TITLE } from './constants';
+import { LOCATION_FORM_TITLE } from '../constants';
 import { appMetaFormStyles } from './styles';
 
 // App type option interface
@@ -30,12 +30,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
 
   const onChangeHandler = async (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
-    if (event.target.name == 'division') {
+    if (event.target.name === 'division') {
       const districtList: any = await ipcRenderer.sendSync('fetch-district', event.target.value);
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
-    } else if (event.target.name == 'district') {
+    } else if (event.target.name === 'district') {
       const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, event.target.value);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
@@ -48,13 +48,13 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   const compUpdate = async () => {
     const divisionList: any = await ipcRenderer.sendSync('fetch-division');
     setDivisionList(divisionList.division);
-    if (userInput.division != '') {
+    if (userInput.division !== '') {
       const districtList: any = await ipcRenderer.sendSync('fetch-district', userInput.division);
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
     }
-    if (userInput.district != '') {
+    if (userInput.district !== '') {
       const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, userInput.district);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
@@ -68,7 +68,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
-        {FORM_TITLE}
+        {LOCATION_FORM_TITLE}
         <IconButton aria-label="update catchment">
           <SystemUpdateAltIcon />
         </IconButton>
@@ -84,7 +84,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[division] || ''}
-            error={submitted && userInput[division] == undefined}
+            error={submitted && userInput[division] === undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -106,7 +106,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[district] || ''}
-            error={submitted && userInput[district] == undefined}
+            error={submitted && userInput[district] === undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -128,7 +128,7 @@ export default function AppMetaForm(props: AppMetaFormProps) {
             variant="outlined"
             onChange={onChangeHandler}
             value={userInput[upazila] || ''}
-            error={submitted && userInput[upazila] == undefined}
+            error={submitted && userInput[upazila] === undefined}
           >
             <MenuItem value="">
               <em>None</em>

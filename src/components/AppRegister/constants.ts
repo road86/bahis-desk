@@ -1,12 +1,20 @@
-import { AppTypeOption } from '.';
-
-// Form Title Name
-export const FORM_TITLE = 'Choose App Type';
-export type FORM_TITLE = typeof FORM_TITLE;
+import { AppTypeOption } from './AppTypeForm';
 
 // Option Form Question Name
 export const APP_TYPE_FORM_NAME = 'app_type';
 export type APP_TYPE_FORM_NAME = typeof APP_TYPE_FORM_NAME;
+
+// Form Title Name
+export const TYPE_FORM_TITLE = 'Choose App Type';
+export type TYPE_FORM_TITLE = typeof TYPE_FORM_TITLE;
+
+// Form Title Name
+export const LOCATION_FORM_TITLE = 'Choose Location Type';
+export type LOCATION_FORM_TITLE = typeof LOCATION_FORM_TITLE;
+
+// Form Title Name
+export const SIGNIN_FORM_TITLE = 'Enter Crendentials';
+export type SIGNIN_FORM_TITLE = typeof SIGNIN_FORM_TITLE;
 
 // App type options
 

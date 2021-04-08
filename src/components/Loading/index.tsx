@@ -16,17 +16,8 @@ class Loading extends React.Component<{}, LoadingState> {
   constructor(props: any) {
     super(props);
     this.state = { isLoadComplete: false };
-    // const log = require("electron-log")
-    // log.transports.file.level = "debug"
-    // autoUpdater.logger = log
   }
   public async componentDidMount() {
-    // const response = await ipcRenderer.sendSync('start-app-sync');
-    // if (response) {
-    //   await setTimeout(() => {
-    //     this.setState({ isLoadComplete: true });
-    //   }, 2000);
-    // }
     setTimeout(() => {
       this.setState({ isLoadComplete: true });
     }, 2000);

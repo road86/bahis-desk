@@ -7,6 +7,8 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
 // import { cpuUsage } from 'process';
+import Typist from 'react-typist';
+import Loader from 'react-loader-spinner';
 import React from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
@@ -68,6 +70,7 @@ function AppRegister(props: any) {
   const [userInput, setUserInput] = React.useState({});
   const [toastVisible, setToastVisible] = React.useState<boolean>(false);
   const [toastContent, setToastContent] = React.useState<any>({});
+  const [isLoadComplete, setLoadComplete] = React.useState<boolean>(true);
   // const [formTypeSubmitted, setFormTypeSubmitted] = React.useState([false, false,false]);
   const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
     app_type: '',
@@ -88,11 +91,11 @@ function AppRegister(props: any) {
     const formTypeSubmitted = userEntry.formTypeSubmitted;
     formTypeSubmitted[activeStep] = true;
     setUserEntry({ ...userEntry, formTypeSubmitted });
-    if (activeStep == 0 && userEntry.app_type != '') {
+    if (activeStep === 0 && userEntry.app_type !== '') {
       setActiveStep(activeStep + 1);
-    } else if (activeStep == 1 && userEntry.division != '' && userEntry.district != '' && userEntry.upazilla != '') {
+    } else if (activeStep === 1 && userEntry.division !== '' && userEntry.district !== '' && userEntry.upazilla !== '') {
       setActiveStep(activeStep + 1);
-    } else if (activeStep == 2 && userEntry.username != '' && userEntry.password != '') {
+    } else if (activeStep === 2 && userEntry.username !== '' && userEntry.password !== '') {
       handleSignIn();
     }
   };
@@ -101,20 +104,13 @@ function AppRegister(props: any) {
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
       console.log('args', event, args);
-      if (args != undefined) {
+      if (args !== undefined) {
         setToastVisible(true);
-        if (args.message != '' && args.username == '') {
-          console.log('login failed');
+        if (args.message !== '' && args.username === '') {
           setToastContent({ severity: 'Error', msg: 'Un authenticated User' });
         } else {
-          console.log('login successful');
           setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-          // props.history.push({
-          //   pathname: '/menu/',
-          //   state: { username: args.username }
-          // });
           syncAppModule();
-          // props.history.push('/menu/');
         }
       }
     });
@@ -122,9 +118,11 @@ function AppRegister(props: any) {
 
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
+    setLoadComplete(false);
     await ipcRenderer.send('start-app-sync', user.username);
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
       console.log('check', event, args);
+      setLoadComplete(true);
       if (args === 'done') {
         props.history.push({
           pathname: '/menu/',
@@ -162,7 +160,10 @@ function AppRegister(props: any) {
   );
 
   return (
-    <div className={classes.layout}>
+    <React.Fragment>
+      {
+        isLoadComplete ? (
+          <div className={classes.layout}>
       {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
       <Paper className={classes.paper} elevation={3}>
         {toast(toastContent)}
@@ -219,6 +220,34 @@ function AppRegister(props: any) {
       </Paper>
       <Copyright />
     </div>
+        ) : (
+          <div className="loader-container">
+            <Loader
+              type="Puff"
+              color="#00BFFF"
+              height={100}
+              width={100}
+              timeout={3000} // 3 secs
+            />
+            <Typist cursor={{ hideWhenDone: true }}>
+              <span className="loader-title"> BAHIS </span>
+              <br />
+              <span className="loader-subtitle">
+                Welcome
+                <Typist.Backspace count={7} delay={500} />
+                Loading{' '}
+                <span className="blink-one">
+                  .
+                  <span className="blink-two">
+                    .<span className="blink-three">.</span>
+                  </span>
+                </span>
+              </span>
+            </Typist>
+          </div>
+        )
+      }
+    </React.Fragment>
   );
 }
 

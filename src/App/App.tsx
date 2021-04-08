@@ -11,9 +11,6 @@ import {
   faSync,
   faTools,
 } from '@fortawesome/free-solid-svg-icons';
-// import Box from '@material-ui/core/Box';
-// import CircularProgress from '@material-ui/core/CircularProgress';
-// import Typography from '@material-ui/core/Typography';
 import * as React from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { Redirect, Route, Switch } from 'react-router';
@@ -30,9 +27,6 @@ import { ipcRenderer } from '../services/ipcRenderer';
 import './App.css';
 import { GEOLOC_ENDPOINT } from './constant';
 import { appStyles } from './styles';
-// import axios from 'axios';
-// import { dialog } from 'electron';
-// import { ipcRenderer } from '../services/ipcRenderer';
 
 library.add(
   faUser,
@@ -112,12 +106,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     });
   };
 
-  const compUpdate = async () => {
-    // setLoading(true);
-    if (navigator.onLine) {
-      fetchGeoLocation();
-    }
-    // console.log('is online', navigator.onLine);
+  const autoUpdateCheck = () => {
     ipcRenderer.on('checking_for_update', () => {
       console.log('ipcRenderer on checking_for_update');
       ipcRenderer.removeAllListeners('checking_for_update');
@@ -136,9 +125,6 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     ipcRenderer.on('update_available', () => {
       console.log('ipcRenderer on update_available');
       ipcRenderer.removeAllListeners('update_available');
-      // setLoading(true);
-      // message.innerText = 'A new update is available. Downloading now...';
-      // notification.classList.remove('hidden');
     });
 
     ipcRenderer.on('update-downloading', () => {
@@ -157,7 +143,17 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
       console.log('ipcRenderer on download_progress', data, event);
       // setPercentage(data);
     });
-  };
+  }
+
+  React.useEffect(() => {
+    if (navigator.onLine) {
+      // fetchGeoLocation();
+      autoUpdateCheck();
+      setTimeout(() => {
+        fetchGeoLocation();
+      }, 1000)
+    }
+  }, []);
 
   const logout = () => {
     props.history.push('/signup/');
@@ -166,10 +162,6 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   const setSync = (data: boolean) => {
     setSyncOverlay(data);
   };
-
-  React.useEffect(() => {
-    compUpdate();
-  }, []);
 
   return (
     <React.Fragment>

@@ -2,7 +2,7 @@ import { TextField } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
-import { FORM_TITLE } from './constants';
+import { SIGNIN_FORM_TITLE } from '../constants';
 import { appSignInFormStyles } from './styles';
 
 // AppSignInForm props interface
@@ -49,7 +49,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
-        {FORM_TITLE}
+        {SIGNIN_FORM_TITLE}
       </Typography>
       <Grid container={true} spacing={3}>
         <Grid item={true} xs={12}>
@@ -62,7 +62,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             onChange={onChangeHandler}
             inputProps={{ onKeyPress: changeFocus }}
             value={userInput[username] || ''}
-            error={submitted && userInput[username] == undefined}
+            error={submitted && userInput[username] === undefined}
           />
         </Grid>
         <Grid item={true} xs={12}>
@@ -77,7 +77,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             onChange={onChangeHandler}
             inputProps={{ onKeyPress: signIn }}
             value={userInput[password] || ''}
-            error={submitted && userInput[password] == undefined}
+            error={submitted && userInput[password] === undefined}
           />
         </Grid>
       </Grid>

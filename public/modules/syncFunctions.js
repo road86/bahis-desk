@@ -23,7 +23,6 @@ const fetchDataFromServer = async (username) => {
     console.log(last_updated);
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
     const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
-    console.log('url', url);
     await axios
       .get(url)
       .then((response) => {

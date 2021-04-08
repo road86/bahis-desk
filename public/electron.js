@@ -486,6 +486,32 @@ const popuplateGeoTable = (event, geoList) => {
   db.close();
 };
 
+const popuplateCatchment = (catchments) => {
+  console.log('catchments', catchments.length);
+  const db = new Database(DB_NAME, { fileMustExist: true });
+  const geoData = catchments ? catchments : [];
+  // console.log('call', geoData);
+  if (geoData.length) {
+    const insertStmt = db.prepare(
+      `INSERT INTO geo_cluster (value, name, loc_type , parent) VALUES (@value, @name, @loc_type, @parent)`,
+    );
+
+    const insertMany = db.transaction((geos) => {
+      // console.log(geos);
+      for (const geo of geos)
+        insertStmt.run({
+          value: geo.value,
+          name: geo.name,
+          loc_type: geo.loc_type,
+          parent: geo.parent,
+        });
+    });
+
+    insertMany(geoData);
+  }
+  db.close();
+};
+
 const fetchUsername = (event) => {
   console.log('check call');
   try {
@@ -584,7 +610,6 @@ const startAppSync = (event, name) => {
       ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
-          // console.log(formConfigRes, moduleListRes);
           let message = 'done';
           mainWindow.send('formSyncComplete', message);
           if (formConfigRes.data) {
@@ -597,11 +622,13 @@ const startAppSync = (event, name) => {
             }
 
             formConfigRes.data.forEach((sqlObj) => {
-              try {
-                db.exec(sqlObj.sql_script);
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.log('db data table creation failed !!!', err);
+              if (sqlObj.sql_script) {
+                try {
+                  db.exec(sqlObj.sql_script);
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.log('db data table creation failed !!!', err);
+                }
               }
             });
           }
@@ -613,6 +640,7 @@ const startAppSync = (event, name) => {
               // eslint-disable-next-line no-console
               console.log('Previous Layout does not exist');
             }
+            popuplateCatchment(moduleListRes.data.catchment_area)
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
           }

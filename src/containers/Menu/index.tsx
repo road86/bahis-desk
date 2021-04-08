@@ -3,11 +3,11 @@ import reducerRegistry from '@onaio/redux-reducer-registry';
 import { delay } from 'q';
 import * as React from 'react';
 import { Button, Container } from 'react-floating-action-button';
-import Loader from 'react-loader-spinner';
+// import Loader from 'react-loader-spinner';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { RouteComponentProps } from 'react-router-dom';
-import Typist from 'react-typist';
+// import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { appSync, dataSync, getNativeLanguageText } from '../../helpers/utils';
@@ -81,11 +81,10 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
 
   public render() {
     const { currentMenu, isBackPossible, appLanguage } = this.props;
-    const { shouldAlertOpen, isLoadComplete, isDataAvailable } = this.state;
+    const { shouldAlertOpen, isDataAvailable } = this.state;
     return (
       <React.Fragment>
-        {isLoadComplete ? (
-          <div className="menu-container">
+        <div className="menu-container">
             {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
             {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
             <Row id="menu-title-container">
@@ -132,32 +131,6 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
               </Button>
             </Container>
           </div>
-        ) : (
-          <div className="loader-container">
-            <Loader
-              type="Puff"
-              color="#00BFFF"
-              height={100}
-              width={100}
-              timeout={3000} // 3 secs
-            />
-            <Typist cursor={{ hideWhenDone: true }}>
-              <span className="loader-title"> BAHIS </span>
-              <br />
-              <span className="loader-subtitle">
-                Welcome
-                <Typist.Backspace count={7} delay={500} />
-                Loading{' '}
-                <span className="blink-one">
-                  .
-                  <span className="blink-two">
-                    .<span className="blink-three">.</span>
-                  </span>
-                </span>
-              </span>
-            </Typist>
-          </div>
-        )}
       </React.Fragment>
     );
   }

@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Card, CardBody, CardTitle } from 'reactstrap';
+import { SERVER_URL } from '../../../App/constant';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { ModuleMenu, setMenuItem } from '../../../store/ducks/menu';
 
@@ -14,12 +15,13 @@ export interface ModuleMenuItemProps {
 class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
   public render() {
     const { menuItem, appLanguage } = this.props;
+    console.log(menuItem);
     return (
       <div>
         <Card>
           <CardBody onClick={this.onClickHandler}>
             <div className="card-image">
-              <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
+              {navigator.onLine && menuItem.img_id ? <img width="30%" height="60px" color={'red'} src={SERVER_URL + '/'+ menuItem.img_id} alt="menu image" /> : <FontAwesomeIcon icon={['far', 'folder']} size="4x" />}
             </div>
             <CardTitle className="text-nowrap initialism">
               {getNativeLanguageText(menuItem.label, appLanguage)}
