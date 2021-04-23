@@ -72,6 +72,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     };
     // const goBack = () => this.props.history.goBack();
     console.log(JSON.stringify(props.csvList));
+    console.log(JSON.stringify(props.formDefinitionJson));
     const getOdkFormRenderer = () => {
       try {
         return (

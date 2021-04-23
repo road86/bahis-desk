@@ -453,10 +453,11 @@ const signIn = async (event, userData) => {
   db.close();
 };
 
-const popuplateGeoTable = (event, geoList) => {
+const populateGeoTable = (event, geoList) => {
   const db = new Database(DB_NAME, { fileMustExist: true });
   const geoData = geoList ? geoList['catchment-area.csv'] : [];
   // console.log('call', geoData);
+  db.prepare('DELETE FROM geo').run();
   if (geoData.length) {
     const insertStmt = db.prepare(
       `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (@div_id, @division, @dis_id, @district, @upz_id, @upazila)`,
@@ -486,9 +487,10 @@ const popuplateGeoTable = (event, geoList) => {
   db.close();
 };
 
-const popuplateCatchment = (catchments) => {
+const populateCatchment = (catchments) => {
   console.log('catchments', catchments.length);
   const db = new Database(DB_NAME, { fileMustExist: true });
+  db.prepare('DELETE FROM geo_cluster').run();
   const geoData = catchments ? catchments : [];
   // console.log('call', geoData);
   if (geoData.length) {
@@ -500,10 +502,10 @@ const popuplateCatchment = (catchments) => {
       // console.log(geos);
       for (const geo of geos)
         insertStmt.run({
-          value: geo.value,
+          value: geo.value.toString(),
           name: geo.name,
-          loc_type: geo.loc_type,
-          parent: geo.parent,
+          loc_type: geo.loc_type.toString(),
+          parent: geo.parent.toString(),
         });
     });
 
@@ -640,7 +642,7 @@ const startAppSync = (event, name) => {
               // eslint-disable-next-line no-console
               console.log('Previous Layout does not exist');
             }
-            popuplateCatchment(moduleListRes.data.catchment_area)
+            populateCatchment(moduleListRes.data.catchment_area)
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
           }
@@ -757,7 +759,7 @@ ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
 ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
 ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
 ipcMain.on(SIGN_IN, signIn);
-ipcMain.on(WRITE_GEO_OBJECT, popuplateGeoTable);
+ipcMain.on(WRITE_GEO_OBJECT, populateGeoTable);
 ipcMain.on(FETCH_DIVISION, fetchDivision);
 ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);

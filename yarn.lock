@@ -1526,6 +1526,24 @@
   dependencies:
     cross-spawn "^7.0.1"
 
+"@material-ui/core@^4.11.3":
+  version "4.11.3"
+  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.11.3.tgz#f22e41775b0bd075e36a7a093d43951bf7f63850"
+  integrity sha512-Adt40rGW6Uds+cAyk3pVgcErpzU/qxc7KBR94jFHBYretU4AtWZltYcNsbeMn9tXL86jjVL1kuGcIHsgLgFGRw==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@material-ui/styles" "^4.11.3"
+    "@material-ui/system" "^4.11.3"
+    "@material-ui/types" "^5.1.0"
+    "@material-ui/utils" "^4.11.2"
+    "@types/react-transition-group" "^4.2.0"
+    clsx "^1.0.4"
+    hoist-non-react-statics "^3.3.2"
+    popper.js "1.16.1-lts"
+    prop-types "^15.7.2"
+    react-is "^16.8.0 || ^17.0.0"
+    react-transition-group "^4.4.0"
+
 "@material-ui/core@^4.9.3":
   version "4.11.0"
   resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.11.0.tgz#b69b26e4553c9e53f2bfaf1053e216a0af9be15a"
@@ -1543,6 +1561,13 @@
     prop-types "^15.7.2"
     react-is "^16.8.0"
     react-transition-group "^4.4.0"
+
+"@material-ui/icons@^4.11.2":
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-4.11.2.tgz#b3a7353266519cd743b6461ae9fdfcb1b25eb4c5"
+  integrity sha512-fQNsKX2TxBmqIGJCSi3tGTO/gZ+eJgWmMJkgDiOfyNaunNaxcklJQFaFogYcFl0qFuaEz1qaXYXboa/bUXVSOQ==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
 
 "@material-ui/icons@^4.9.1":
   version "4.9.1"
@@ -1573,6 +1598,38 @@
     jss-plugin-vendor-prefixer "^10.0.3"
     prop-types "^15.7.2"
 
+"@material-ui/styles@^4.11.3":
+  version "4.11.3"
+  resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.11.3.tgz#1b8d97775a4a643b53478c895e3f2a464e8916f2"
+  integrity sha512-HzVzCG+PpgUGMUYEJ2rTEmQYeonGh41BYfILNFb/1ueqma+p1meSdu4RX6NjxYBMhf7k+jgfHFTTz+L1SXL/Zg==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@emotion/hash" "^0.8.0"
+    "@material-ui/types" "^5.1.0"
+    "@material-ui/utils" "^4.11.2"
+    clsx "^1.0.4"
+    csstype "^2.5.2"
+    hoist-non-react-statics "^3.3.2"
+    jss "^10.5.1"
+    jss-plugin-camel-case "^10.5.1"
+    jss-plugin-default-unit "^10.5.1"
+    jss-plugin-global "^10.5.1"
+    jss-plugin-nested "^10.5.1"
+    jss-plugin-props-sort "^10.5.1"
+    jss-plugin-rule-value-function "^10.5.1"
+    jss-plugin-vendor-prefixer "^10.5.1"
+    prop-types "^15.7.2"
+
+"@material-ui/system@^4.11.3":
+  version "4.11.3"
+  resolved "https://registry.yarnpkg.com/@material-ui/system/-/system-4.11.3.tgz#466bc14c9986798fd325665927c963eb47cc4143"
+  integrity sha512-SY7otguNGol41Mu2Sg6KbBP1ZRFIbFLHGK81y4KYbsV2yIcaEPOmsCK6zwWlp+2yTV3J/VwT6oSBARtGIVdXPw==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@material-ui/utils" "^4.11.2"
+    csstype "^2.5.2"
+    prop-types "^15.7.2"
+
 "@material-ui/system@^4.9.14":
   version "4.9.14"
   resolved "https://registry.yarnpkg.com/@material-ui/system/-/system-4.9.14.tgz#4b00c48b569340cefb2036d0596b93ac6c587a5f"
@@ -1596,6 +1653,15 @@
     "@babel/runtime" "^7.4.4"
     prop-types "^15.7.2"
     react-is "^16.8.0"
+
+"@material-ui/utils@^4.11.2":
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/@material-ui/utils/-/utils-4.11.2.tgz#f1aefa7e7dff2ebcb97d31de51aecab1bb57540a"
+  integrity sha512-Uul8w38u+PICe2Fg2pDKCaIG7kOyhowZ9vjiC1FsVwPABTW8vPPKfF6OvxRq3IiBaI1faOJmgdvMG7rMJARBhA==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    prop-types "^15.7.2"
+    react-is "^16.8.0 || ^17.0.0"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -7657,6 +7723,13 @@ imurmurhash@^0.1.4:
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
 
+indefinite-observable@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/indefinite-observable/-/indefinite-observable-2.0.1.tgz#574af29bfbc17eb5947793797bddc94c9d859400"
+  integrity sha512-G8vgmork+6H9S8lUAg1gtXEj2JxIQTo0g2PbFiYOdjkziSI0F7UYBiVwhZRuixhBCNGczAls34+5HJPyZysvxQ==
+  dependencies:
+    symbol-observable "1.2.0"
+
 indent-string@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-4.0.0.tgz#624f8f4497d619b2d9768531d58f4122854d7251"
@@ -8945,6 +9018,15 @@ jss-plugin-camel-case@^10.0.3:
     hyphenate-style-name "^1.0.3"
     jss "10.4.0"
 
+jss-plugin-camel-case@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-camel-case/-/jss-plugin-camel-case-10.6.0.tgz#93d2cd704bf0c4af70cc40fb52d74b8a2554b170"
+  integrity sha512-JdLpA3aI/npwj3nDMKk308pvnhoSzkW3PXlbgHAzfx0yHWnPPVUjPhXFtLJzgKZge8lsfkUxvYSQ3X2OYIFU6A==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    hyphenate-style-name "^1.0.3"
+    jss "10.6.0"
+
 jss-plugin-default-unit@^10.0.3:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/jss-plugin-default-unit/-/jss-plugin-default-unit-10.4.0.tgz#2b10f01269eaea7f36f0f5fd1cfbfcc76ed42854"
@@ -8953,6 +9035,14 @@ jss-plugin-default-unit@^10.0.3:
     "@babel/runtime" "^7.3.1"
     jss "10.4.0"
 
+jss-plugin-default-unit@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-default-unit/-/jss-plugin-default-unit-10.6.0.tgz#af47972486819b375f0f3a9e0213403a84b5ef3b"
+  integrity sha512-7y4cAScMHAxvslBK2JRK37ES9UT0YfTIXWgzUWD5euvR+JR3q+o8sQKzBw7GmkQRfZijrRJKNTiSt1PBsLI9/w==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    jss "10.6.0"
+
 jss-plugin-global@^10.0.3:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/jss-plugin-global/-/jss-plugin-global-10.4.0.tgz#19449425a94e4e74e113139b629fd44d3577f97d"
@@ -8960,6 +9050,14 @@ jss-plugin-global@^10.0.3:
   dependencies:
     "@babel/runtime" "^7.3.1"
     jss "10.4.0"
+
+jss-plugin-global@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-global/-/jss-plugin-global-10.6.0.tgz#3e8011f760f399cbadcca7f10a485b729c50e3ed"
+  integrity sha512-I3w7ji/UXPi3VuWrTCbHG9rVCgB4yoBQLehGDTmsnDfXQb3r1l3WIdcO8JFp9m0YMmyy2CU7UOV6oPI7/Tmu+w==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    jss "10.6.0"
 
 jss-plugin-nested@^10.0.3:
   version "10.4.0"
@@ -8970,6 +9068,15 @@ jss-plugin-nested@^10.0.3:
     jss "10.4.0"
     tiny-warning "^1.0.2"
 
+jss-plugin-nested@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-nested/-/jss-plugin-nested-10.6.0.tgz#5f83c5c337d3b38004834e8426957715a0251641"
+  integrity sha512-fOFQWgd98H89E6aJSNkEh2fAXquC9aZcAVjSw4q4RoQ9gU++emg18encR4AT4OOIFl4lQwt5nEyBBRn9V1Rk8g==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    jss "10.6.0"
+    tiny-warning "^1.0.2"
+
 jss-plugin-props-sort@^10.0.3:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/jss-plugin-props-sort/-/jss-plugin-props-sort-10.4.0.tgz#7110bf0b6049cc2080b220b506532bf0b70c0e07"
@@ -8978,6 +9085,14 @@ jss-plugin-props-sort@^10.0.3:
     "@babel/runtime" "^7.3.1"
     jss "10.4.0"
 
+jss-plugin-props-sort@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-props-sort/-/jss-plugin-props-sort-10.6.0.tgz#297879f35f9fe21196448579fee37bcde28ce6bc"
+  integrity sha512-oMCe7hgho2FllNc60d9VAfdtMrZPo9n1Iu6RNa+3p9n0Bkvnv/XX5San8fTPujrTBScPqv9mOE0nWVvIaohNuw==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    jss "10.6.0"
+
 jss-plugin-rule-value-function@^10.0.3:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/jss-plugin-rule-value-function/-/jss-plugin-rule-value-function-10.4.0.tgz#7cff4a91e84973536fa49b6ebbdbf7f339b01c82"
@@ -8985,6 +9100,15 @@ jss-plugin-rule-value-function@^10.0.3:
   dependencies:
     "@babel/runtime" "^7.3.1"
     jss "10.4.0"
+    tiny-warning "^1.0.2"
+
+jss-plugin-rule-value-function@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-rule-value-function/-/jss-plugin-rule-value-function-10.6.0.tgz#3c1a557236a139d0151e70a82c810ccce1c1c5ea"
+  integrity sha512-TKFqhRTDHN1QrPTMYRlIQUOC2FFQb271+AbnetURKlGvRl/eWLswcgHQajwuxI464uZk91sPiTtdGi7r7XaWfA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    jss "10.6.0"
     tiny-warning "^1.0.2"
 
 jss-plugin-vendor-prefixer@^10.0.3:
@@ -8996,6 +9120,15 @@ jss-plugin-vendor-prefixer@^10.0.3:
     css-vendor "^2.0.8"
     jss "10.4.0"
 
+jss-plugin-vendor-prefixer@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-vendor-prefixer/-/jss-plugin-vendor-prefixer-10.6.0.tgz#e1fcd499352846890c38085b11dbd7aa1c4f2c78"
+  integrity sha512-doJ7MouBXT1lypLLctCwb4nJ6lDYqrTfVS3LtXgox42Xz0gXusXIIDboeh6UwnSmox90QpVnub7au8ybrb0krQ==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    css-vendor "^2.0.8"
+    jss "10.6.0"
+
 jss@10.4.0, jss@^10.0.3:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/jss/-/jss-10.4.0.tgz#473a6fbe42e85441020a07e9519dac1e8a2e79ca"
@@ -9003,6 +9136,17 @@ jss@10.4.0, jss@^10.0.3:
   dependencies:
     "@babel/runtime" "^7.3.1"
     csstype "^3.0.2"
+    is-in-browser "^1.1.3"
+    tiny-warning "^1.0.2"
+
+jss@10.6.0, jss@^10.5.1:
+  version "10.6.0"
+  resolved "https://registry.yarnpkg.com/jss/-/jss-10.6.0.tgz#d92ff9d0f214f65ca1718591b68e107be4774149"
+  integrity sha512-n7SHdCozmxnzYGXBHe0NsO0eUf9TvsHVq2MXvi4JmTn3x5raynodDVE/9VQmBdWFyyj9HpHZ2B4xNZ7MMy7lkw==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    csstype "^3.0.2"
+    indefinite-observable "^2.0.1"
     is-in-browser "^1.1.3"
     tiny-warning "^1.0.2"
 
@@ -10355,15 +10499,17 @@ obuf@^1.0.0, obuf@^1.1.2:
   resolved "https://registry.yarnpkg.com/obuf/-/obuf-1.1.2.tgz#09bea3343d41859ebd446292d11c9d4db619084e"
   integrity sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==
 
-"odkformrenderer@git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git":
+"odkformrenderer@git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#develop_bahis":
   version "0.1.0"
-  resolved "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#52703c7488274fc54098b59b6c3f5d3ed44c859a"
+  resolved "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#eda015688349bba8a97f89c312cdb9d151e978f3"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-brands-svg-icons" "^5.11.2"
     "@fortawesome/free-regular-svg-icons" "^5.11.2"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"
     "@fortawesome/react-fontawesome" "^0.1.7"
+    "@material-ui/core" "^4.11.3"
+    "@material-ui/icons" "^4.11.2"
     bootstrap "^4.3.1"
     fetch-mock "^7.5.1"
     jest-fetch-mock "^2.1.2"
@@ -12184,6 +12330,11 @@ react-is@^16.12.0, react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+"react-is@^16.8.0 || ^17.0.0":
+  version "17.0.2"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
+  integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
 react-js-pagination@^3.0.2:
   version "3.0.3"
@@ -14062,7 +14213,7 @@ svgo@^1.0.0, svgo@^1.2.2:
     unquote "~1.1.1"
     util.promisify "~1.0.0"
 
-symbol-observable@^1.2.0:
+symbol-observable@1.2.0, symbol-observable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
   integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
