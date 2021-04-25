@@ -601,7 +601,6 @@ const getDBTablesEndpoint = (db) => {
 
 const startAppSync = (event, name) => {
   try {
-    console.log('name', name);
     const db = new Database(DB_NAME, { fileMustExist: true });
     axios
       .all([
@@ -617,9 +616,8 @@ const startAppSync = (event, name) => {
           if (formConfigRes.data) {
             if (formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-              newLayoutQuery.run(formConfigRes.data[0].updated_at);
-              // db.prepare('INSERT INTO app_log(time) VALUES(?)').run(formConfigRes.data[0]);
-              // addAppLog(db, formConfigRes.data[0]);
+              const maxUpdateTime = Math.max(...formConfigRes.data.map((obj) => obj.updated_at), 0);
+              newLayoutQuery.run(maxUpdateTime);
               console.log('app log data --> ', db.prepare('SELECT * from app_log order by time desc limit 1').get());
             }
 
