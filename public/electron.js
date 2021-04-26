@@ -9,6 +9,7 @@ const axios = require('axios');
 const { dialog } = require('electron');
 var macaddress = require('macaddress');
 const { autoUpdater } = require('electron-updater');
+const download = require('image-downloader');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, queries } = require('./modules/syncFunctions');
 
 // SERVER URLS
@@ -21,7 +22,6 @@ const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/modul
 const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
 const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
 const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
-const GEOLOC_ENDPOINT = `${SERVER_URL}//bhmodule/catchment-data-sync/`;
 
 // DEV EXTENSIONS
 
@@ -49,6 +49,7 @@ const FETCH_DISTRICT = 'fetch-district';
 const FETCH_DIVISION = 'fetch-division';
 const FETCH_UPAZILA = 'fetch-upazila';
 const FETCH_USERNAME = 'fetch-username';
+const FETCH_IMAGE = 'fetch-image';
 const AUTO_UPDATE = 'auto-update';
 
 const { app, BrowserWindow, ipcMain } = electron;
@@ -514,6 +515,68 @@ const populateCatchment = (catchments) => {
   db.close();
 };
 
+const populateModuleImage = (module) => {
+  const db = new Database(DB_NAME, { fileMustExist: true });
+
+  const insertStmt = db.prepare(
+    `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (@module_id, @image_name, @directory_name)`,
+  );
+
+  if (module.img_id.length > 5) {
+    const query = 'SELECT * from module_image WHERE image_name = "' + module.img_id + '"';
+    const existingImage = db.prepare(query).all();
+
+    if (existingImage.length) {
+      insertStmt.run({
+        module_id: module.name,
+        image_name: module.img_id,
+        directory_name: existingImage[0].directory_name,
+      });
+    } else {
+      const options = {
+        url: SERVER_URL + '/' + module.img_id,
+        dest: 'src/assets/images', // will be saved to /path/to/dest/image.jpg
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+          'Content-Type': 'application/json',
+        },
+      };
+
+      download
+        .image(options)
+        .then(({ filename }) => {
+          const db = new Database(DB_NAME, { fileMustExist: true });
+          const insertStmt = db.prepare(
+            `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
+          );
+          insertStmt.run(module.name, module.img_id, filename);
+          db.close();
+        })
+        .catch((err) => {
+          const db = new Database(DB_NAME, { fileMustExist: true });
+          const insertStmt = db.prepare(
+            `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
+          );
+          insertStmt.run(module.name, module.img_id, '');
+          db.close();
+        });
+    }
+  } else {
+    insertStmt.run({
+      module_id: module.name,
+      image_name: module.img_id,
+      directory_name: '',
+    });
+  }
+
+  db.close();
+  for (let i = 0; i < module.children.length; i++) {
+    populateModuleImage(module.children[i]);
+  }
+};
+
 const fetchUsername = (event) => {
   console.log('check call');
   try {
@@ -529,6 +592,18 @@ const fetchUsername = (event) => {
     // eslint-disable-next-line no-console
     console.log(err);
     // db.close();
+  }
+};
+
+const fetchImage = (event, moduleId) => {
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const query = 'SELECT directory_name FROM module_image where module_id="' + moduleId + '"';
+    const fetchedRows = db.prepare(query).get();
+    event.returnValue = fetchedRows != null ? fetchedRows.directory_name : '';
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
   }
 };
 
@@ -640,7 +715,9 @@ const startAppSync = (event, name) => {
               // eslint-disable-next-line no-console
               console.log('Previous Layout does not exist');
             }
-            populateCatchment(moduleListRes.data.catchment_area)
+            db.prepare('DELETE FROM module_image').run();
+            populateModuleImage(moduleListRes.data);
+            populateCatchment(moduleListRes.data.catchment_area);
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
           }
@@ -761,5 +838,6 @@ ipcMain.on(WRITE_GEO_OBJECT, populateGeoTable);
 ipcMain.on(FETCH_DIVISION, fetchDivision);
 ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);
+ipcMain.on(FETCH_IMAGE, fetchImage);
 ipcMain.on(FETCH_USERNAME, fetchUsername);
 ipcMain.on(AUTO_UPDATE, autoUpdate);

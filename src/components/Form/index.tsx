@@ -44,7 +44,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
           formId,
         });
         this.setState({
-          toastVisible: true
+          toastVisible: true,
         });
         setTimeout(() => {
           this.props.history.push('/menu/');

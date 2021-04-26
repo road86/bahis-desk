@@ -42,9 +42,9 @@ export interface MenuProps {
 
 export interface MenuState {
   shouldAlertOpen: boolean;
-  isLoadComplete: boolean;
   isDataAvailable: boolean;
   username: string;
+  imageSrc: string;
 }
 
 interface MenuURLParams {
@@ -56,26 +56,22 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
     super(props);
     this.state = {
       isDataAvailable: false,
-      isLoadComplete: false,
       shouldAlertOpen: false,
       username: '',
+      imageSrc: '',
     };
   }
 
   public async componentDidMount() {
     const user: any = await ipcRenderer.sendSync('fetch-username');
     this.setState({ username: user.username });
-    await setTimeout(async () => {
-      const fix = this;
-      const { currentMenu, setMenuItemActionCreator } = fix.props;
-      if (!currentMenu) {
-        const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-        // console.log(newMenuItem);
-        setMenuItemActionCreator(JSON.parse(newMenuItem));
-      }
-      fix.setState({ shouldAlertOpen: false });
-      this.setState({ isLoadComplete: true });
-    }, 2000);
+    const { currentMenu, setMenuItemActionCreator } = this.props;
+    if (!currentMenu) {
+      const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+      // console.log(newMenuItem);
+      setMenuItemActionCreator(JSON.parse(newMenuItem));
+    }
+    this.setState({ shouldAlertOpen: false });
     // console.log(response);
   }
 
@@ -85,52 +81,52 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
     return (
       <React.Fragment>
         <div className="menu-container">
-            {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
-            {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
-            <Row id="menu-title-container">
-              <Col>
-                {isBackPossible && (
-                  <div onClick={this.onBackHandler}>
-                    <h6 className="menu-back">
-                      <span className="bg-menu-back">
-                        <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
-                      </span>
-                    </h6>
-                  </div>
-                )}
-                <h3 className="menu-title lead">
-                  {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
-                </h3>
-              </Col>
-            </Row>
-            <Row id="menu-body">
-              {currentMenu &&
-                currentMenu.type === MODULE_TYPE &&
-                currentMenu.children.map((menuItem, index) => (
-                  <Col key={'menu-' + index} className="menu-item" md={4}>
-                    {this.typeEvalutor(menuItem, appLanguage)}
-                  </Col>
-                ))}
-            </Row>
-            <Container>
-              <Button tooltip="Sync App with Server" className="floating-item" onClick={this.onAppSyncHandler}>
-                <FontAwesomeIcon icon={['fas', 'tools']} />
-              </Button>
-              {/*<Button*/}
-              {/*  tooltip="Fetch Latest Update"*/}
-              {/*  className="floating-item"*/}
-              {/*  onClick={this.appUpdateHandler}*/}
-              {/*>*/}
-              {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
-              {/*</Button>*/}
-              <Button tooltip="Sync Data with Server" className="floating-item" onClick={this.onSyncHandler}>
-                <FontAwesomeIcon icon={['fas', 'sync']} />
-              </Button>
-              <Button tooltip="Menu" className="floating-btn">
-                <FontAwesomeIcon icon={['fas', 'bars']} />
-              </Button>
-            </Container>
-          </div>
+          {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
+          {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
+          <Row id="menu-title-container">
+            <Col>
+              {isBackPossible && (
+                <div onClick={this.onBackHandler}>
+                  <h6 className="menu-back">
+                    <span className="bg-menu-back">
+                      <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
+                    </span>
+                  </h6>
+                </div>
+              )}
+              <h3 className="menu-title lead">
+                {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
+              </h3>
+            </Col>
+          </Row>
+          <Row id="menu-body">
+            {currentMenu &&
+              currentMenu.type === MODULE_TYPE &&
+              currentMenu.children.map((menuItem, index) => (
+                <Col key={'menu-' + index} className="menu-item" md={4}>
+                  {this.typeEvalutor(menuItem, appLanguage)}
+                </Col>
+              ))}
+          </Row>
+          <Container>
+            <Button tooltip="Sync App with Server" className="floating-item" onClick={this.onAppSyncHandler}>
+              <FontAwesomeIcon icon={['fas', 'tools']} />
+            </Button>
+            {/*<Button*/}
+            {/*  tooltip="Fetch Latest Update"*/}
+            {/*  className="floating-item"*/}
+            {/*  onClick={this.appUpdateHandler}*/}
+            {/*>*/}
+            {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
+            {/*</Button>*/}
+            <Button tooltip="Sync Data with Server" className="floating-item" onClick={this.onSyncHandler}>
+              <FontAwesomeIcon icon={['fas', 'sync']} />
+            </Button>
+            <Button tooltip="Menu" className="floating-btn">
+              <FontAwesomeIcon icon={['fas', 'bars']} />
+            </Button>
+          </Container>
+        </div>
       </React.Fragment>
     );
   }
