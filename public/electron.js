@@ -51,6 +51,7 @@ const FETCH_UPAZILA = 'fetch-upazila';
 const FETCH_USERNAME = 'fetch-username';
 const FETCH_IMAGE = 'fetch-image';
 const AUTO_UPDATE = 'auto-update';
+const FETCH_LAST_SYNC = 'fetch-last-sync';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -595,6 +596,26 @@ const fetchUsername = (event) => {
   }
 };
 
+const fetchLastSyncTime = (event) => {
+  console.log('why this colaveri dil');
+  try {
+    const db = new Database(DB_NAME, { fileMustExist: true });
+    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+    console.log(last_updated);
+    const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
+    // eslint-disable-next-line no-param-reassign
+    console.log('updated', updated);
+    event.returnValue = {
+      lastSync: updated,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    // db.close();
+  }
+};
+
 const fetchImage = (event, moduleId) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
@@ -666,9 +687,9 @@ const fetchDistrict = (event, divisionId) => {
  * @returns - success if sync successful
  */
 
-const getDBTablesEndpoint = (db) => {
-  const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
-  const time = log === undefined ? 0 : Math.round(log.time);
+const getDBTablesEndpoint = (time) => {
+  // const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
+  // const time = log === undefined ? 0 : Math.round(log.time);
   const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
   console.log(db_endpoint_url);
   return db_endpoint_url;
@@ -677,9 +698,11 @@ const getDBTablesEndpoint = (db) => {
 const startAppSync = (event, name) => {
   try {
     const db = new Database(DB_NAME, { fileMustExist: true });
+    const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
+    const time = log === undefined ? 0 : Math.round(log.time);
     axios
       .all([
-        axios.get(getDBTablesEndpoint(db).replace('core_admin', name)),
+        axios.get(getDBTablesEndpoint(time).replace('core_admin', name)),
         axios.get(APP_DEFINITION_ENDPOINT.replace('core_admin', name)),
         axios.get(FORMS_ENDPOINT.replace('core_admin', name)),
         axios.get(LISTS_ENDPOINT.replace('core_admin', name)),
@@ -784,14 +807,24 @@ const startAppSync = (event, name) => {
         }),
       )
       .catch((err) => {
-        let message = 'nope';
+        let message = '';
+        if (time == 0) {
+          message = 'nope'
+        } else {
+          message = 'done'
+        }
         mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
-        console.log('Axios FAILED', err);
+        console.log('Axios FAILED');
       });
   } catch (err) {
-    console.log('try catch', err);
-    let message = 'nope';
+    console.log('try catch');
+    let message = '';
+    if (time == 0) {
+      message = 'nope'
+    } else {
+      message = 'done'
+    }
     mainWindow.send('formSyncComplete', message);
     // eslint-disable-next-line no-console
     // console.log(err);
@@ -840,4 +873,5 @@ ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);
 ipcMain.on(FETCH_IMAGE, fetchImage);
 ipcMain.on(FETCH_USERNAME, fetchUsername);
+ipcMain.on(FETCH_LAST_SYNC, fetchLastSyncTime);
 ipcMain.on(AUTO_UPDATE, autoUpdate);

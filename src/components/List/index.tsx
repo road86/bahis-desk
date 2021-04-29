@@ -1,11 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
 import ListTable from '../../containers/ListTable';
-import { getNativeLanguageText } from '../../helpers/utils';
+// import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './List.css';
 
@@ -59,11 +59,11 @@ class List extends React.Component<ListProps, ListState> {
   }
   public render() {
     const { appLanguage } = this.props;
-    const { columnDefinition, datasource, filterDefinition, listHeader } = this.state;
+    const { columnDefinition, datasource, filterDefinition } = this.state;
     console.log(this.state.filterDefinition);
     return (
       <div className="list-container">
-        <Row id="bg-list-title-container">
+        {/* <Row id="bg-list-title-container">
           <Col>
             <div className="list-title-container">
               <Link to="/menu/">
@@ -76,7 +76,7 @@ class List extends React.Component<ListProps, ListState> {
               <h3 className="list-title"> {getNativeLanguageText(listHeader, appLanguage)} </h3>
             </div>
           </Col>
-        </Row>
+        </Row> */}
         {filterDefinition && this.state.listId !== '' && (
           <Row>
             <Col>

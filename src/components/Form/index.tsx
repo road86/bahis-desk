@@ -1,9 +1,9 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import OdkFormRenderer from 'odkformrenderer';
 import 'odkformrenderer/example/index.css';
 import queryString from 'query-string';
 import * as React from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
 import ErrorBoundary from '../page/ErrorBoundary';
@@ -88,7 +88,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     return (
       <div className="form-container">
         {this.state.toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
-        <Link to="/menu/">
+        {/* <Link to="/menu/">
           <div>
             <h6 className="menu-back">
               <span className="bg-menu-back">
@@ -96,7 +96,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
               </span>
             </h6>
           </div>
-        </Link>
+        </Link> */}
         {formDefinition && getOdkFormRenderer()}
       </div>
     );

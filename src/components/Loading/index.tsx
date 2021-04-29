@@ -4,6 +4,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Redirect } from 'react-router';
 import Typist from 'react-typist';
 import 'three-dots/dist/three-dots.css';
+import { theme } from '../../configs/theme';
 // import { ipcRenderer } from '../../services/ipcRenderer';
 import './Loading.css';
 
@@ -20,7 +21,7 @@ class Loading extends React.Component<{}, LoadingState> {
   public async componentDidMount() {
     setTimeout(() => {
       this.setState({ isLoadComplete: true });
-    }, 2000);
+    }, 3000);
   }
 
   public render() {
@@ -30,7 +31,7 @@ class Loading extends React.Component<{}, LoadingState> {
         <div className="loader-container">
           <Loader
             type="Puff"
-            color="#00BFFF"
+            color={theme.palette.primary.dark}
             height={100}
             width={100}
             timeout={3000} // 3 secs

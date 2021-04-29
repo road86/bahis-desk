@@ -9,11 +9,15 @@ import App from './App/App';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from './configs/theme';
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <App />
+      <MuiThemeProvider theme={theme}>
+        <App />
+      </MuiThemeProvider>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('openSRP-root'),

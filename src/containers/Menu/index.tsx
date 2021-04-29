@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 // import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
-import { appSync, dataSync, getNativeLanguageText } from '../../helpers/utils';
+import { appSync, dataSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
   FORM_TYPE,
@@ -76,14 +76,14 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
   }
 
   public render() {
-    const { currentMenu, isBackPossible, appLanguage } = this.props;
+    const { currentMenu, appLanguage } = this.props;
     const { shouldAlertOpen, isDataAvailable } = this.state;
     return (
       <React.Fragment>
         <div className="menu-container">
           {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
           {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
-          <Row id="menu-title-container">
+          {/* <Row id="menu-title-container">
             <Col>
               {isBackPossible && (
                 <div onClick={this.onBackHandler}>
@@ -98,7 +98,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
                 {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
               </h3>
             </Col>
-          </Row>
+          </Row> */}
           <Row id="menu-body">
             {currentMenu &&
               currentMenu.type === MODULE_TYPE &&
@@ -142,10 +142,10 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
     }
     return null;
   };
-  // tslint:disable-next-line: variable-name
-  private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
-    this.props.setPrevMenuActionCreator();
-  };
+  // // tslint:disable-next-line: variable-name
+  // private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
+  //   this.props.setPrevMenuActionCreator();
+  // };
 
   // tslint:disable-next-line: variable-name
   private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {

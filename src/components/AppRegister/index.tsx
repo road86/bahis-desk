@@ -1,4 +1,4 @@
-import { Avatar, Grid, Snackbar } from '@material-ui/core';
+import { Avatar, Grid, Snackbar, useTheme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
@@ -17,6 +17,7 @@ import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
 import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 function Copyright() {
   return (
@@ -65,7 +66,10 @@ const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
 
 function AppRegister(props: any) {
   const { history } = props;
-  const classes = registerStyles();
+  const theme = useTheme();
+  const useStyles = makeStyles(registerStyles(theme));
+  const classes = useStyles();
+  // const classes = registerStyles(theme);
   const [activeStep, setActiveStep] = React.useState(0);
   const [userInput, setUserInput] = React.useState({});
   const [toastVisible, setToastVisible] = React.useState<boolean>(false);
@@ -93,7 +97,12 @@ function AppRegister(props: any) {
     setUserEntry({ ...userEntry, formTypeSubmitted });
     if (activeStep === 0 && userEntry.app_type !== '') {
       setActiveStep(activeStep + 1);
-    } else if (activeStep === 1 && userEntry.division !== '' && userEntry.district !== '' && userEntry.upazilla !== '') {
+    } else if (
+      activeStep === 1 &&
+      userEntry.division !== '' &&
+      userEntry.district !== '' &&
+      userEntry.upazilla !== ''
+    ) {
       setActiveStep(activeStep + 1);
     } else if (activeStep === 2 && userEntry.username !== '' && userEntry.password !== '') {
       handleSignIn();
@@ -160,94 +169,98 @@ function AppRegister(props: any) {
   );
 
   return (
-    <React.Fragment>
-      {
-        isLoadComplete ? (
-          <div className={classes.layout}>
-      {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
-      <Paper className={classes.paper} elevation={3}>
-        {toast(toastContent)}
-        <Grid container={true} direction="row" justify="center" alignItems="center">
-          <Avatar variant="square" src="/icon.png" />
-        </Grid>
-        <Typography component="h1" variant="h4" align="center">
-          App Register
-        </Typography>
-        <Stepper activeStep={activeStep} className={classes.stepper}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        <React.Fragment>
-          {activeStep === steps.length ? (
-            <React.Fragment>
-              <Typography variant="h5" gutterBottom={true}>
-                App Registration Successful.
-              </Typography>
-              <Typography variant="subtitle1">
-                Please click the following button to go to{' '}
-                <Button color="primary" onClick={navigateToMenu}>
-                  Menu
-                </Button>
-                .
-              </Typography>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <StepContent
-                step={activeStep}
-                userInput={userInput}
-                setFieldValueHandler={setFieldValue}
-                submitted={userEntry.formTypeSubmitted[activeStep]}
-                handleSignin={handleNext}
-              />
-              {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
-              <div className={classes.buttons}>
-                {activeStep !== 0 && (
-                  <Button onClick={handleBack} className={classes.button}>
-                    Back
-                  </Button>
-                )}
-                <Button variant="contained" color="primary" onClick={handleNext} className={classes.button}>
-                  {activeStep === steps.length - 1 ? 'Sign In' : 'Next'}
-                </Button>
+    <Grid container={true} spacing={3} direction="row" justify="center" alignItems="center">
+      {isLoadComplete ? (
+        <div className={classes.layout}>
+          {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
+          <Paper className={classes.paper} elevation={3}>
+            {toast(toastContent)}
+            <Grid container={true} direction="row" justify="center" alignItems="center">
+              <div className={classes.circle}>
+                <div className={classes.image}>
+                  <Avatar variant="square" src="/icon.png" />
+                </div>
               </div>
+            </Grid>
+            <Grid item={true} style={{ marginTop: 20 }}>
+              <Typography component="h1" variant="h4" align="center">
+                App Register
+              </Typography>
+            </Grid>
+            <Stepper activeStep={activeStep} className={classes.stepper}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel className={classes.stepper}>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <React.Fragment>
+              {activeStep === steps.length ? (
+                <React.Fragment>
+                  <Typography variant="h5" gutterBottom={true}>
+                    App Registration Successful.
+                  </Typography>
+                  <Typography variant="subtitle1">
+                    Please click the following button to go to{' '}
+                    <Button color="primary" onClick={navigateToMenu}>
+                      Menu
+                    </Button>
+                    .
+                  </Typography>
+                </React.Fragment>
+              ) : (
+                <React.Fragment>
+                  <StepContent
+                    step={activeStep}
+                    userInput={userInput}
+                    setFieldValueHandler={setFieldValue}
+                    submitted={userEntry.formTypeSubmitted[activeStep]}
+                    handleSignin={handleNext}
+                  />
+                  {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
+                  <div className={classes.buttons}>
+                    {activeStep !== 0 && (
+                      <Button onClick={handleBack} className={classes.button}>
+                        Back
+                      </Button>
+                    )}
+                    <Button variant="contained" color="secondary" onClick={handleNext} className={classes.button}>
+                      {activeStep === steps.length - 1 ? 'Sign In' : 'Next'}
+                    </Button>
+                  </div>
+                </React.Fragment>
+              )}
             </React.Fragment>
-          )}
-        </React.Fragment>
-      </Paper>
-      <Copyright />
-    </div>
-        ) : (
-          <div className="loader-container">
-            <Loader
-              type="Puff"
-              color="#00BFFF"
-              height={100}
-              width={100}
-              timeout={3000} // 3 secs
-            />
-            <Typist cursor={{ hideWhenDone: true }}>
-              <span className="loader-title"> BAHIS </span>
-              <br />
-              <span className="loader-subtitle">
-                Welcome
-                <Typist.Backspace count={7} delay={500} />
-                Loading{' '}
-                <span className="blink-one">
-                  .
-                  <span className="blink-two">
-                    .<span className="blink-three">.</span>
-                  </span>
+          </Paper>
+          <Copyright />
+        </div>
+      ) : (
+        <div className="loader-container">
+          <Loader
+            type="Puff"
+            color={theme.palette.primary.dark}
+            height={100}
+            width={100}
+            timeout={3000} // 3 secs
+          />
+          <Typist cursor={{ hideWhenDone: true }}>
+            <span className="loader-title"> BAHIS </span>
+            <br />
+            <span className="loader-subtitle">
+              Welcome
+              <Typist.Backspace count={7} delay={500} />
+              Loading{' '}
+              <span className="blink-one">
+                .
+                <span className="blink-two">
+                  .<span className="blink-three">.</span>
                 </span>
               </span>
-            </Typist>
-          </div>
-        )
-      }
-    </React.Fragment>
+            </span>
+          </Typist>
+        </div>
+      )}
+    </Grid>
   );
 }
 
