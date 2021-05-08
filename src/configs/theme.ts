@@ -79,7 +79,7 @@ export const theme = createMuiTheme({
       fontFamily: 'Roboto',
       fontWeight: 400,
       // lineHeight: 1.18,
-      color: '#EBFDED',
+      // color: '#EBFDED',
       fontSize: 16,
     },
     caption: {
@@ -133,6 +133,21 @@ export const theme = createMuiTheme({
         color: '#222222',
       },
     },
+    MuiAccordionSummary: {
+      root: {
+        borderTop: '5px solid',
+        borderTopColor: '#649A6A !important',
+        color: '#EBFDED',
+        '&:hover': {
+          backgroundColor: '#649A6A !important',
+          color: '#EBFDED !important',
+        },
+        '&:Mui-expanded': {
+          backgroundColor: '#649A6A !important',
+          color: '#EBFDED important',
+        },
+      },
+    },
     MuiStepIcon: {
       active: {
         color: '#649A6A',
@@ -163,6 +178,11 @@ export const theme = createMuiTheme({
       root: {
         backgroundColor: '#EBFDED',
         borderRadius: 5,
+      },
+    },
+    MuiFormControlLabel : {
+      root: {
+        color: '#EBFDED',
       },
     },
     // MuiTableCell: {

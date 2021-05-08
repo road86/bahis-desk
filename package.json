@@ -80,6 +80,17 @@
     "typeface-roboto": "^0.0.75",
     "typescript": "^3.5.3"
   },
+  "build": {
+    "appId": "com.electron.bahis",
+    "nsis": {
+      "allowElevation": true,
+      "deleteAppDataOnUninstall": false,
+      "oneClick": false,
+      "perMachine": false,
+      "createStartMenuShortcut": true,
+      "license": "license.txt"
+    }
+  },
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",

@@ -94,7 +94,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
           <Col md={6}>
             <Select
               options={filterOptions}
-              value={filterOptions.filter((filterObj: any) => value && (value as any[]).includes(filterObj.value))}
+              values={filterOptions.filter((filterObj: any) => value && (value as any[]).includes(filterObj.value))}
               onChange={this.handleValueChange}
             />
           </Col>

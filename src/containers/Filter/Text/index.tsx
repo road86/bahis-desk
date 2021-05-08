@@ -58,7 +58,7 @@ class FilterText extends React.Component<TextProps> {
           <Col md={3}>
             <Select
               options={TEXT_FILTER_OPERATORS}
-              value={TEXT_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+              values={TEXT_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>

@@ -37,7 +37,7 @@ function ListMenuItem(props: ListMenuItemProps) {
                 src={
                   imageSource
                     ? require(`../../../../${imageSource}`)
-                    : require('../../../../src/assets/images/1617610510367_form_icon.png_form_icon.png')
+                    : require('../../../../src/assets/images/logo.png')
                 }
                 width="30%"
                 height="60px"

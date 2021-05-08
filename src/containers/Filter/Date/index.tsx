@@ -78,7 +78,7 @@ class FilterDate extends React.Component<DateProps> {
           <Col md={3}>
             <Select
               options={DATE_FILTER_OPERATORS}
-              value={DATE_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+              values={DATE_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>

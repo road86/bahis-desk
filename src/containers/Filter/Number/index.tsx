@@ -66,7 +66,7 @@ class FilterNumber extends React.Component<NumberProps> {
           <Col md={3}>
             <Select
               options={NUMBER_FILTER_OPERATORS}
-              value={NUMBER_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+              values={NUMBER_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>
