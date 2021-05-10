@@ -70,7 +70,7 @@ class FilterDate extends React.Component<DateProps> {
       );
     }
     return (
-      <FormGroup>
+      <FormGroup style={{ marginBottom: 0}}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>

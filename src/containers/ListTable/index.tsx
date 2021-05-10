@@ -48,6 +48,7 @@ export interface ColumnObj {
   format: string;
   data_type: string;
   lookup_definition?: LookupDefinition;
+  exportable: boolean;
 }
 
 export interface MappingObj {

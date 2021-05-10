@@ -40,48 +40,90 @@ export interface MenuProps {
   setSyncOverlayHandler: any;
 }
 
-export interface MenuState {
-  shouldAlertOpen: boolean;
-  isDataAvailable: boolean;
-  username: string;
-  imageSrc: string;
-}
+// export interface MenuState {
+//   shouldAlertOpen: boolean;
+//   isDataAvailable: boolean;
+//   username: string;
+//   imageSrc: string;
+// }
 
-interface MenuURLParams {
-  username: string;
-}
+// interface MenuURLParams {
+//   username: string;
+// }
+const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
+// class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
+  // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
+  const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
+  const [username, setUsername] = React.useState<string>('');
 
-class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
-  constructor(props: RouteComponentProps<{}, {}, MenuURLParams> & MenuProps) {
-    super(props);
-    this.state = {
-      isDataAvailable: false,
-      shouldAlertOpen: false,
-      username: '',
-      imageSrc: '',
-    };
-  }
+  const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
+    if (menuItem.type === MODULE_TYPE) {
+      return <ModuleMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+    }
+    if (menuItem.type === FORM_TYPE) {
+      return <FormMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+    }
+    if (menuItem.type === LIST_TYPE) {
+      return <ListMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+    }
+    return null;
+  };
+  // // tslint:disable-next-line: variable-name
+  // private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
+  //   this.props.setPrevMenuActionCreator();
+  // };
 
-  public async componentDidMount() {
+  // tslint:disable-next-line: variable-name
+  const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    // console.log(userName);
+    props.setSyncOverlayHandler(true);
+    await delay(500);
+    await dataSync();
+    props.setSyncOverlayHandler(false);
+    await delay(200);
+    setAlertOpen(true);
+    await delay(1000);
+    setAlertOpen(false);
+  };
+
+  // tslint:disable-next-line: variable-name
+  const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    // console.log(userName);
+    props.setSyncOverlayHandler(true);
+    await delay(500);
+    await appSync();
+    props.setSyncOverlayHandler(false);
+    await delay(200);
+    setAlertOpen(true);
+    await delay(1000);
+    setAlertOpen(false);
+  };
+
+  const compUpdate = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    this.setState({ username: user.username });
-    const { currentMenu, setMenuItemActionCreator } = this.props;
+    // this.setState({ username: user.username });
+    setUsername(user.username);
+    console.log(username);
+    const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
       // console.log(newMenuItem);
       setMenuItemActionCreator(JSON.parse(newMenuItem));
     }
-    this.setState({ shouldAlertOpen: false });
+    setAlertOpen(false);
     // console.log(response);
-  }
+  };
 
-  public render() {
-    const { currentMenu, appLanguage } = this.props;
-    const { shouldAlertOpen, isDataAvailable } = this.state;
+  React.useEffect(() => {
+    compUpdate();
+  }, []);
+
+
+    const { currentMenu, appLanguage } = props;
     return (
       <React.Fragment>
         <div className="menu-container">
-          {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>}
+          {/* {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>} */}
           {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
           {/* <Row id="menu-title-container">
             <Col>
@@ -103,13 +145,13 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
             {currentMenu &&
               currentMenu.type === MODULE_TYPE &&
               currentMenu.children.map((menuItem, index) => (
-                <Col key={'menu-' + index} className="menu-item" md={4}>
-                  {this.typeEvalutor(menuItem, appLanguage)}
+                <Col key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
+                  {typeEvalutor(menuItem, appLanguage)}
                 </Col>
               ))}
           </Row>
           <Container>
-            <Button tooltip="Sync App with Server" className="floating-item" onClick={this.onAppSyncHandler}>
+            <Button tooltip="Sync App with Server" className="floating-item" onClick={onAppSyncHandler}>
               <FontAwesomeIcon icon={['fas', 'tools']} />
             </Button>
             {/*<Button*/}
@@ -119,7 +161,7 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
             {/*>*/}
             {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
             {/*</Button>*/}
-            <Button tooltip="Sync Data with Server" className="floating-item" onClick={this.onSyncHandler}>
+            <Button tooltip="Sync Data with Server" className="floating-item" onClick={onSyncHandler}>
               <FontAwesomeIcon icon={['fas', 'sync']} />
             </Button>
             <Button tooltip="Menu" className="floating-btn">
@@ -129,49 +171,6 @@ class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & 
         </div>
       </React.Fragment>
     );
-  }
-  private typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
-    if (menuItem.type === MODULE_TYPE) {
-      return <ModuleMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
-    }
-    if (menuItem.type === FORM_TYPE) {
-      return <FormMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
-    }
-    if (menuItem.type === LIST_TYPE) {
-      return <ListMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
-    }
-    return null;
-  };
-  // // tslint:disable-next-line: variable-name
-  // private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
-  //   this.props.setPrevMenuActionCreator();
-  // };
-
-  // tslint:disable-next-line: variable-name
-  private onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-    // console.log(userName);
-    this.props.setSyncOverlayHandler(true);
-    await delay(500);
-    await dataSync();
-    this.props.setSyncOverlayHandler(false);
-    await delay(200);
-    this.setState({ shouldAlertOpen: true });
-    await delay(1000);
-    this.setState({ shouldAlertOpen: false });
-  };
-
-  // tslint:disable-next-line: variable-name
-  private onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-    // console.log(userName);
-    this.props.setSyncOverlayHandler(true);
-    await delay(500);
-    await appSync();
-    this.props.setSyncOverlayHandler(false);
-    await delay(200);
-    this.setState({ shouldAlertOpen: true });
-    await delay(1000);
-    this.setState({ shouldAlertOpen: false });
-  };
 
   // tslint:disable-next-line: variable-name
   // private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {

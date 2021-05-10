@@ -3,6 +3,7 @@ import React from 'react';
 import ReactExport from 'react-export-excel';
 import { Button } from 'reactstrap';
 import { ActionColumnObj, ColumnObj, isColumnObj } from '..';
+import { theme } from '../../../configs/theme';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 
 const ExcelFile = ReactExport.ExcelFile;
@@ -41,12 +42,13 @@ class Export extends React.Component<ExportProps, ExportState> {
   public render() {
     const { colDefifinition, appLanguage } = this.props;
     const { dataset } = this.state;
-    const filterColumns = colDefifinition.filter((tmp) => isColumnObj(tmp));
+    const filterColumns = colDefifinition.filter((tmp) => isColumnObj(tmp) && tmp.exportable == true);
+    console.log('what filter columns', filterColumns);
     if (dataset) {
       return (
         <ExcelFile
           element={
-            <Button color="success" size="sm">
+            <Button style={{ backgroundColor: theme.palette.primary.dark, borderColor: theme.palette.primary.dark, margin: 10}} size="sm">
               <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']} /> Export to XLSX
             </Button>
           }

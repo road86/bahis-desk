@@ -1,10 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Card, CardBody, CardTitle } from 'reactstrap';
+// import { Card, CardBody, CardTitle } from 'reactstrap';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { ModuleMenu, setMenuItem } from '../../../store/ducks/menu';
 import { ipcRenderer } from '../../../services/ipcRenderer';
+import { makeStyles, Typography, useTheme } from '@material-ui/core';
+import { menuStyle } from '../style';
 // import {SERVER_URL} from "../../../App/constant";
 // import containerImage from '../../../../src/assets/images/1617610473629_container.png_container.png';
 
@@ -16,6 +18,9 @@ export interface ModuleMenuItemProps {
 function ModuleMenuItem(props: ModuleMenuItemProps) {
   // class ModuleMenuItem extends React.Component<ModuleMenuItemProps> {
   const [imageSrc, setImageSource] = React.useState<string>('');
+  const theme = useTheme();
+  const useStyles = makeStyles(menuStyle(theme));
+  const classes = useStyles();
 
   const compUpdate = async () => {
     if (props.menuItem.img_id.toString().length > 5) {
@@ -41,10 +46,10 @@ function ModuleMenuItem(props: ModuleMenuItemProps) {
   // };
 
   return (
-    <div>
-      <Card>
-        <CardBody onClick={onClickHandler}>
-          <div className="card-image">
+    <div  className={classes.outerCircle} onClick={onClickHandler}>
+      <div className={classes.innerDiv}>
+        <div className={classes.circle}>
+          <div className={classes.image}>
             {navigator.onLine && imageSrc.length ? (
               <img
                 src={
@@ -52,18 +57,18 @@ function ModuleMenuItem(props: ModuleMenuItemProps) {
                     ? require(`../../../../${imageSrc}`)
                     : require('../../../../src/assets/images/logo.png')
                 }
-                width="30%" height="60px"
+                className={classes.iconClass}
                 alt={props.menuItem.name}
               />
             ) : (
               <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
             )}
           </div>
-          <CardTitle className="text-nowrap initialism">
-            {getNativeLanguageText(props.menuItem.label, props.appLanguage)}
-          </CardTitle>
-        </CardBody>
-      </Card>
+        </div>
+        <Typography variant="body1" color={'textPrimary'}>
+          {getNativeLanguageText(props.menuItem.label, props.appLanguage)}
+        </Typography>
+      </div>
     </div>
   );
   // tslint:disable-next-line: variable-name

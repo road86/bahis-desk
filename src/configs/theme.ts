@@ -185,6 +185,11 @@ export const theme = createMuiTheme({
         color: '#EBFDED',
       },
     },
+    // MuiFormControl : {
+    //   root: {
+    //     minWidth: '100%',
+    //   },
+    // },
     // MuiTableCell: {
     //   root: {
     //     fontSize: 16,

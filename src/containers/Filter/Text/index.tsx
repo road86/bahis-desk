@@ -50,7 +50,7 @@ class FilterText extends React.Component<TextProps> {
   public render() {
     const { filterItem, value, condition, appLanguage } = this.props;
     return (
-      <FormGroup>
+      <FormGroup style={{ marginBottom: 0}}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>

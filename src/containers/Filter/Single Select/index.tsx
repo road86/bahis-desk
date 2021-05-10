@@ -85,7 +85,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     const { filterItem, appLanguage, value } = this.props;
     const { filterOptions } = this.state;
     return (
-      <FormGroup>
+      <FormGroup style={{ marginBottom: 0}}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>

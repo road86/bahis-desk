@@ -1,10 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardBody, CardTitle } from 'reactstrap';
+// import { Card, CardBody, CardTitle } from 'reactstrap';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { FormMenu } from '../../../store/ducks/menu';
 import { ipcRenderer } from '../../../services/ipcRenderer';
+import { makeStyles, Typography, useTheme } from '@material-ui/core';
+import { menuStyle } from '../style';
 
 export interface FormMenuItemProps {
   menuItem: FormMenu;
@@ -27,35 +29,40 @@ function FormMenuItem(props: FormMenuItemProps) {
   React.useEffect(() => {
     compUpdate();
   }, []);
+
   const { menuItem, appLanguage } = props;
+
+  const theme = useTheme();
+  const useStyles = makeStyles(menuStyle(theme));
+  const classes = useStyles();
+  
   return (
-    <div>
-      <Card>
-        <Link to={`/form/${menuItem.xform_id}/`}>
-          <div className="card-image">
-            {navigator.onLine && imageSource.length ? (
-              <img
-                src={
-                  imageSource
-                    ? require(`../../../../${imageSource}`)
-                    : require('../../../../src/assets/images/logo.png')
-                }
-                width="30%"
-                height="60px"
-                alt={menuItem.name}
-              />
-            ) : (
-              <FontAwesomeIcon icon={['far', 'file-alt']} size="4x" />
-            )}
-          </div>
-          <CardBody>
-            <CardTitle className="text-nowrap initialism">
-              {getNativeLanguageText(menuItem.label, appLanguage)}
-            </CardTitle>
-          </CardBody>
-        </Link>
-      </Card>
-    </div>
+    <Link to={`/form/${menuItem.xform_id}/`}>
+      <div className={classes.outerCircle}>
+        <div className={classes.innerDiv}>
+              <div className={classes.circle}>
+                <div className={classes.image}>
+                {navigator.onLine && imageSource.length ? (
+                  <img
+                    src={
+                      imageSource
+                        ? require(`../../../../${imageSource}`)
+                        : require('../../../../src/assets/images/logo.png')
+                    }
+                    className={classes.iconClass}
+                    alt={props.menuItem.name}
+                  />
+                ) : (
+                  <FontAwesomeIcon icon={['far', 'file-alt']} size="4x" />
+                )}
+              </div>
+              </div>
+              <Typography variant="body1" color={'textPrimary'}>
+                {getNativeLanguageText(menuItem.label, appLanguage)}
+              </Typography>
+        </div>
+      </div>
+    </Link>
   );
 }
 

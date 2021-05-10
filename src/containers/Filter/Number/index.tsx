@@ -58,7 +58,7 @@ class FilterNumber extends React.Component<NumberProps> {
       );
     }
     return (
-      <FormGroup>
+      <FormGroup style={{ marginBottom: 0}}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>

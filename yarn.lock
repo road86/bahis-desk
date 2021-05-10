@@ -10694,7 +10694,7 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 "odkformrenderer@git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#develop_bahis":
   version "0.1.0"
-  resolved "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#d1f4ca567c3580b28115141c66c5babd3e2d003d"
+  resolved "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#667ec3c28df27b01b85dc79fce9ece35e0fa4713"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-brands-svg-icons" "^5.11.2"
