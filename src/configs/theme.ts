@@ -37,13 +37,13 @@ export const theme = createMuiTheme({
     //   paper: '#fff',
     //   default: '#fff',
     // },
-    // action: {
-    //   active: '#EEEEEE',
-    //   hover: '#888888',
-    //   hoverOpacity: 0.04,
-    //   selected: '#FFFFFF',
-    //   disabled: '#666666',
-    // },
+    action: {
+      // active: '#EEEEEE',
+      // hover: '#888888',
+      // hoverOpacity: 0.04,
+      // selected: '#FFFFFF',
+      disabled: '#888888',
+    },
   },
   typography: {
     h1: {
@@ -136,17 +136,26 @@ export const theme = createMuiTheme({
     MuiAccordionSummary: {
       root: {
         borderTop: '5px solid',
-        borderTopColor: '#649A6A !important',
-        color: '#EBFDED',
+        borderTopColor: '#8ac390 !important',
+        color: '#8ac390',
         '&:hover': {
-          backgroundColor: '#649A6A !important',
+          backgroundColor: '#8ac390 !important',
           color: '#EBFDED !important',
         },
-        '&:Mui-expanded': {
-          backgroundColor: '#649A6A !important',
-          color: '#EBFDED important',
+        '&$expanded': {
+          backgroundColor: '#8ac390 !important',
+          color: '#EBFDED !important',
         },
       },
+      // expanded: {
+      //   backgroundColor: '#8ac390 !important',
+      //   color: '#EBFDED important',
+      // }
+    },
+    MuiTableCell:{
+      body: {
+        color: '#222222'
+      }
     },
     MuiStepIcon: {
       active: {
@@ -190,14 +199,19 @@ export const theme = createMuiTheme({
     //     minWidth: '100%',
     //   },
     // },
-    // MuiTableCell: {
-    //   root: {
-    //     fontSize: 16,
-    //     lineHeight: 0.21,
-    //     fontWeight: 400,
-    //     whiteSpace: 'nowrap',
-    //   },
-    // },
+    MuiTablePagination: {
+      caption: {
+        color: '#222222',
+      },
+      actions: {
+        color: '#666666'
+      }
+    },
+    // Mui: {
+    //   disabled: {
+    //     color: '#666666',
+    //   }
+    // }
     // MuiSelect: {
     //   icon: {
     //     fill: '#666666',

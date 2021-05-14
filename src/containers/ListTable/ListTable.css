@@ -10,12 +10,13 @@
   overflow-x: scroll;
 }
 
+
 td {
   color: #687459;
 }
 
 thead {
-  background: #686868;
+  background: #649A6A;
   border-radius: 5px;
   color: white
 }
@@ -31,5 +32,4 @@ thead {
 
  .csv-export {
    justify-content: right;
-   margin-right: 2%;
  }

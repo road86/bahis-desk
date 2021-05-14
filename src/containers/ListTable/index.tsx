@@ -1,9 +1,10 @@
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, TableContainer, TablePagination, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
@@ -22,6 +23,8 @@ import Export from './Export';
 import './ListTable.css';
 import LookUp from './LookUp';
 import OrderBy from './OrderBy';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+// import EnhancedTable from './Table';
 
 export interface LookupListCondition {
   type: 'list';
@@ -100,6 +103,8 @@ export interface ListTableState {
   filters: any;
   orderSql: string;
   pageNumber: number;
+  rowsPerPage: number;
+  page: number;
 }
 
 /** register the filter reducer */
@@ -108,7 +113,7 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTables: {} };
+    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTables: {}, rowsPerPage: 5, page: 0 };
   }
 
   public async componentDidMount() {
@@ -121,7 +126,6 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       setTotalRecordsActionCreator,
       columnDefinition,
     } = this.props;
-    console.log(columnDefinition);
     resetListTableActionCreator();
     setPageSizeActionCreator(PAGINATION_SIZE);
     setPageNumberActionCreator(1);
@@ -207,7 +211,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public render() {
-    const { columnDefinition, pageNumber, totalRecords, pageSize, datasource, filters, orderSql } = this.props;
+    const { columnDefinition, datasource, filters, orderSql } = this.props;
     const { lookupTables } = this.state;
     const appLanguage = 'English';
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
@@ -219,7 +223,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           this.generateSqlWhereClause(filters) +
           orderSqlTxt;
     return (
-      <div>
+      <div style={{ marginBottom: 20 }}>
         <Row>
           <Col>
             <span className="float-right csv-export">
@@ -227,84 +231,112 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             </span>
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <div className="table-container">
-              <Table striped={true} borderless={true}>
-                <thead>
-                  <tr>
-                    {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                      if (isColumnObj(singleCol)) {
-                        return (
-                          <th key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                            {singleCol.sortable ? (
-                              <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                            ) : (
-                              singleCol.label[appLanguage]
-                            )}
-                          </th>
-                        );
-                      } else {
-                        return (
-                          <th key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                            {singleCol.label[appLanguage]}
-                          </th>
-                        );
-                      }
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state &&
-                    this.state.tableData &&
-                    this.state.tableData.map((rowObj, rowIndex: number) => (
-                      <tr key={'table-row-' + rowIndex}>
-                        {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                          isColumnObj(colObj) ? (
-                            <td key={'data-field-' + colIndex}>
-                              {colObj.data_type === 'lookup' ? (
-                                <LookUp
-                                  columnDef={colObj}
-                                  rowValues={rowObj}
-                                  lookupTable={lookupTables[colObj.field_name]}
-                                />
+        <Accordion defaultExpanded>
+          <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+              >
+                  ListTable
+          </AccordionSummary>
+          <AccordionDetails style={{ display: 'contents' }}>
+            <div style={{ padding: 15 }}>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                        if (isColumnObj(singleCol)) {
+                          return (
+                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                              {singleCol.sortable ? (
+                                <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
                               ) : (
-                                rowObj[colObj.field_name]
+                                singleCol.label[appLanguage]
                               )}
-                            </td>
-                          ) : (
-                            <td key={'data-field-' + colIndex}>
-                              <Link
-                                to={`/form/${colObj.action_definition.xform_id}/?dataJson=${this.mapListToFormData(
-                                  colObj.action_definition.data_mapping,
-                                  rowObj,
-                                )}`}
-                              >
-                                <Button> Entry </Button>
-                              </Link>
-                            </td>
-                          ),
-                        )}
-                      </tr>
-                    ))}
-                </tbody>
-              </Table>
+                            </TableCell>
+                          );
+                        } else {
+                          return (
+                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                              {singleCol.label[appLanguage]}
+                            </TableCell>
+                          );
+                        }
+                      })}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {this.state &&
+                      this.state.tableData &&
+                      this.state.tableData.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage)
+                      .map((rowObj, rowIndex: number) => (
+                        <TableRow key={'table-row-' + rowIndex}>
+                          {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                            isColumnObj(colObj) ? (
+                              <TableCell key={'data-field-' + colIndex}>
+                                {colObj.data_type === 'lookup' ? (
+                                  <LookUp
+                                    columnDef={colObj}
+                                    rowValues={rowObj}
+                                    lookupTable={lookupTables[colObj.field_name]}
+                                  />
+                                ) : (
+                                  rowObj[colObj.field_name]
+                                )}
+                              </TableCell>
+                            ) : (
+                              <TableCell key={'data-field-' + colIndex}>
+                                <Link
+                                  to={`/form/${colObj.action_definition.xform_id}/?dataJson=${this.mapListToFormData(
+                                    colObj.action_definition.data_mapping,
+                                    rowObj,
+                                  )}`}
+                                >
+                                  <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED'}}> Entry </Button>
+                                </Link>
+                              </TableCell>
+                            ),
+                          )}
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </div>
-          </Col>
-        </Row>
-        <div className="pagination-container">
-          <Pagination
-            activePage={pageNumber}
-            itemsCountPerPage={pageSize}
-            totalItemsCount={totalRecords}
-            onChange={this.onPageChange}
-            itemClass="page-item"
-            linkClass="page-link"
-          />
-        </div>
+          </AccordionDetails>
+          <AccordionActions>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={this.state.tableData.length}
+              rowsPerPage={this.state.rowsPerPage}
+              page={this.state.page}
+              onChangePage={this.handleChangePage}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+            />
+          </AccordionActions>
+        </Accordion>
       </div>
     );
   }
+
+  private handleChangePage = (event: unknown, newPage: number) => {
+    // setPage(newPage);
+    console.log(event);
+    this.setState({
+      page: newPage,
+    })
+  };
+
+  private handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
+    // setRowsPerPage(parseInt(event.target.value, 10));
+    // setPage(0);
+  };
+
 
   private generateSqlWhereClause = (filters: any) => {
     let sqlWhereClause = '';
