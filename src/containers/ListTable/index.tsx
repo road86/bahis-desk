@@ -1,7 +1,6 @@
 import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, TableContainer, TablePagination, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
-import Pagination from 'react-js-pagination';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Col, Row } from 'reactstrap';
@@ -346,10 +345,6 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       }
     });
     return sqlWhereClause !== '' ? ' where ' + sqlWhereClause.substring(4) : '';
-  };
-
-  private onPageChange = (pageNumber: number) => {
-    this.props.setPageNumberActionCreator(pageNumber);
   };
 
   private mapListToFormData = (mapping: MappingObj[], listRowData: { [key: string]: any }): any => {
