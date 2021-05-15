@@ -20,6 +20,7 @@ import menuReducer, {
   MenuItem,
   MODULE_TYPE,
   reducerName as menuReducerName,
+  resetMenu,
   setMenuItem,
   setPrevMenu,
 } from '../../store/ducks/menu';
@@ -34,6 +35,7 @@ reducerRegistry.register(menuReducerName, menuReducer);
 export interface MenuProps {
   setMenuItemActionCreator: any;
   setPrevMenuActionCreator: any;
+  resetMenuActionCreator: any;
   currentMenu: MenuItem | null;
   isBackPossible: boolean;
   appLanguage: string;
@@ -88,10 +90,16 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 
   // tslint:disable-next-line: variable-name
   const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    props.resetMenuActionCreator();
     // console.log(userName);
     props.setSyncOverlayHandler(true);
     await delay(500);
     await appSync();
+    await delay(200);
+    const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+    // console.log(newMenuItem);
+    props.setMenuItemActionCreator(JSON.parse(newMenuItem));
+    await delay(300);
     props.setSyncOverlayHandler(false);
     await delay(200);
     setAlertOpen(true);
@@ -103,7 +111,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     const user: any = await ipcRenderer.sendSync('fetch-username');
     // this.setState({ username: user.username });
     setUsername(user.username);
-    console.log(username);
+    console.log('check app call', username);
     const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
@@ -200,6 +208,7 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
 const mapDispatchToProps = {
   setMenuItemActionCreator: setMenuItem,
   setPrevMenuActionCreator: setPrevMenu,
+  resetMenuActionCreator: resetMenu,
 };
 
 /** connect clientsList to the redux store */

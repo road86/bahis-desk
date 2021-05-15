@@ -7,10 +7,10 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import AccountCircle from '@material-ui/icons/AccountCircle';
+// import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SyncIcon from '@material-ui/icons/Sync';
-import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
+// import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 import { delay } from 'q';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -30,32 +30,35 @@ export interface HeaderProps {
 }
 
 function Header(props: HeaderProps) {
-  const { handleLogout, setSyncOverlayHandler } = props;
+  const { setSyncOverlayHandler } = props;
   const classes = headerStyles();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  // const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const isMenuOpen = Boolean(anchorEl);
+  // const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    handleMobileMenuClose();
-  };
+  // const handleMenuClose = () => {
+  //   // setAnchorEl(null);
+  //   handleMobileMenuClose();
+  // };
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
   const handleAppSync = async () => {
+    if (isMobileMenuOpen) {
+      handleMobileMenuClose();
+    }
     setSyncOverlayHandler(true);
     await delay(500);
     const response = await dataSync();
@@ -64,23 +67,37 @@ function Header(props: HeaderProps) {
     setSyncOverlayHandler(false);
   };
 
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={menuId}
-      keepMounted={true}
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleLogout}>Logout</MenuItem>
-    </Menu>
-  );
+  // const menuId = 'primary-search-account-menu';
+  // const renderMenu = (
+  //   <Menu
+  //     anchorEl={anchorEl}
+  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     id={menuId}
+  //     keepMounted={true}
+  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     open={isMenuOpen}
+  //     onClose={handleMenuClose}
+  //   >
+  //     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+  //     <MenuItem onClick={handleLogout}>Logout</MenuItem>
+  //   </Menu>
+  // );
+
+  
+  // tslint:disable-next-line: variable-name
+  const onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
+    if (isMobileMenuOpen) {
+      handleMobileMenuClose();
+    }
+    if (props.pathName.includes('form') || props.pathName.includes('list')) {
+      props.redirectToMenu();
+    } else {
+      props.setPrevMenuActionCreator();
+    }
+  };
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
+
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
@@ -91,45 +108,28 @@ function Header(props: HeaderProps) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton aria-label="system update icon" color="inherit">
-          <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
-            <SystemUpdateAltIcon />
-          </Badge>
-        </IconButton>
-        <Typography variant="inherit">App Update</Typography>
-      </MenuItem>
-      <MenuItem>
+      <MenuItem onClick={handleAppSync}>
         <IconButton aria-label="data sync icon" color="inherit">
           <Badge variant="dot" overlap="circle" color="secondary" invisible={true}>
             <SyncIcon />
           </Badge>
         </IconButton>
-        <Typography variant="inherit">Data Sync</Typography>
+        <Typography variant="inherit">Sync</Typography>
       </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
+      {props.isBackPossible && <MenuItem onClick={onBackHandler}>
         <IconButton
           aria-label="account of current user"
           aria-controls="primary-search-account-menu"
           aria-haspopup="true"
           color="inherit"
         >
-          <AccountCircle />
+          <FontAwesomeIcon icon={['fas', 'chevron-left']}  style={{ marginRight: 3 }}/>
         </IconButton>
-        <Typography variant="inherit">Profile</Typography>
-      </MenuItem>
+        <Typography variant="inherit">Back</Typography>
+      </MenuItem>}
     </Menu>
   );
 
-  // tslint:disable-next-line: variable-name
-  const onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
-    console.log(props.pathName);
-    if (props.pathName.includes('form') || props.pathName.includes('list')) {
-      props.redirectToMenu();
-    } else {
-      props.setPrevMenuActionCreator();
-    }
-  };
 
   return (
     <div className={classes.grow}>
@@ -185,7 +185,7 @@ function Header(props: HeaderProps) {
         </Toolbar>
       </AppBar>
       {renderMobileMenu}
-      {renderMenu}
+      {/* {renderMenu} */}
     </div>
   );
 }

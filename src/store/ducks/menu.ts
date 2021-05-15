@@ -52,6 +52,7 @@ export type MenuItem = ModuleMenu | FormMenu | ListMenu;
 /** SET_MENU_ITEM action type */
 export const SET_MENU_ITEM = 'opensrp/reducer/menu/SET_MENU_ITEM';
 export const SET_PREV_MENU = 'opensrp/reducer/menu/SET_PREV_MENU';
+export const RESET_MENU = 'opensrp/reducer/menu/RESET_MENU';
 
 /** interface for SET_MENU_ITEM action */
 export interface SetMenuItemAction extends AnyAction {
@@ -64,8 +65,13 @@ export interface SetPrevMenuAction extends AnyAction {
   type: typeof SET_PREV_MENU;
 }
 
+/** interface for SET_PREV_MENU action */
+export interface ResetMenuAction extends AnyAction {
+  type: typeof RESET_MENU;
+}
+
 /** Create type for menu reducer actions */
-export type MenuActionTypes = SetMenuItemAction | SetPrevMenuAction | AnyAction;
+export type MenuActionTypes = SetMenuItemAction | SetPrevMenuAction | ResetMenuAction| AnyAction;
 
 // action creators
 
@@ -83,6 +89,10 @@ export const setMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
  */
 export const setPrevMenu = (): SetPrevMenuAction => ({
   type: SET_PREV_MENU,
+});
+
+export const resetMenu = () : ResetMenuAction => ({
+  type: RESET_MENU,
 });
 
 // The reducer
@@ -123,6 +133,8 @@ export default function reducer(state: ImmutableMenuState = initialState, action
         });
       }
       return state;
+    case RESET_MENU: 
+      return initialState;
     default:
       return state;
   }
