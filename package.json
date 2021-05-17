@@ -82,13 +82,20 @@
   },
   "build": {
     "appId": "com.electron.bahis",
+    "win": {
+      "target": [
+          "nsis"
+      ]
+    },
     "nsis": {
-      "allowElevation": true,
-      "deleteAppDataOnUninstall": false,
-      "oneClick": false,
-      "perMachine": false,
-      "createStartMenuShortcut": true,
-      "license": "license.txt"
+        "oneClick": false,
+        "perMachine": true,
+        "allowElevation": true,
+        "deleteAppDataOnUninstall": true,
+        "createDesktopShortcut": "always",
+        "menuCategory": "bahis",
+        "license": "license.txt",
+        "allowToChangeInstallationDirectory": true
     }
   },
   "scripts": {
