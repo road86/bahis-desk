@@ -112,7 +112,8 @@ function prepareDb() {
 
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME))
+  const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+  // const db = new Database(DB_NAME);
   // const db = new Database(DB_NAME);
   console.log('new db setup call');
   db.exec(queries);
@@ -369,6 +370,7 @@ const signIn = async (event, userData) => {
     console.log(mac);
   });
   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+  // const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const query =
     'SELECT user_id from users where username="' +
     userData.username +
@@ -457,7 +459,8 @@ const signIn = async (event, userData) => {
 };
 
 const populateGeoTable = (event, geoList) => {
-   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+  console.log(app.getPath("userData"));
+  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const geoData = geoList ? geoList['catchment-area.csv'] : [];
   // console.log('call', geoData);
   db.prepare('DELETE FROM geo').run();
@@ -492,7 +495,7 @@ const populateGeoTable = (event, geoList) => {
 
 const populateCatchment = (catchments) => {
   console.log('catchments', catchments.length);
-   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   db.prepare('DELETE FROM geo_cluster').run();
   const geoData = catchments ? catchments : [];
   // console.log('call', geoData);
@@ -518,7 +521,7 @@ const populateCatchment = (catchments) => {
 };
 
 const populateModuleImage = (module) => {
-   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
 
   const insertStmt = db.prepare(
     `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (@module_id, @image_name, @directory_name)`,
@@ -549,7 +552,7 @@ const populateModuleImage = (module) => {
       download
         .image(options)
         .then(({ filename }) => {
-           const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+          const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
           const insertStmt = db.prepare(
             `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
           );
@@ -557,7 +560,7 @@ const populateModuleImage = (module) => {
           db.close();
         })
         .catch((err) => {
-           const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+          const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
           const insertStmt = db.prepare(
             `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
           );
@@ -582,7 +585,7 @@ const populateModuleImage = (module) => {
 const fetchUsername = (event) => {
   console.log('check call');
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedUsername);
@@ -598,9 +601,8 @@ const fetchUsername = (event) => {
 };
 
 const fetchLastSyncTime = (event) => {
-  console.log('why this colaveri dil');
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     console.log(last_updated);
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
@@ -619,7 +621,7 @@ const fetchLastSyncTime = (event) => {
 
 const fetchImage = (event, moduleId) => {
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const query = 'SELECT directory_name FROM module_image where module_id="' + moduleId + '"';
     const fetchedRows = db.prepare(query).get();
     event.returnValue = fetchedRows != null ? fetchedRows.directory_name : '';
@@ -631,7 +633,7 @@ const fetchImage = (event, moduleId) => {
 
 const fetchDivision = (event) => {
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedRows = db.prepare('SELECT DISTINCT	div_id, division FROM geo').all();
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedRows);
@@ -649,7 +651,7 @@ const fetchDivision = (event) => {
 const fetchUpazila = (event, divisionId, districtId) => {
   console.log(divisionId, districtId);
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const query =
       'SELECT DISTINCT upz_id, upazila FROM geo WHERE div_id = "' + divisionId + '" AND dis_id = "' + districtId + '"';
     const fetchedRows = db.prepare(query).all();
@@ -667,7 +669,7 @@ const fetchUpazila = (event, divisionId, districtId) => {
 const fetchDistrict = (event, divisionId) => {
   // console.log(divisionId);
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const query = 'SELECT DISTINCT dis_id, district FROM geo WHERE div_id = "' + divisionId + '"';
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reassign
@@ -698,7 +700,8 @@ const getDBTablesEndpoint = (time) => {
 
 const startAppSync = (event, name) => {
   try {
-     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    //  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
     const time = log === undefined ? 0 : Math.round(log.time);
     axios

@@ -1,6 +1,9 @@
 const axios = require('axios');
+const electron = require('electron');
+const { app } = electron;
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
+const path = require('path');
 const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
@@ -18,17 +21,18 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchDataFromServer = async (username) => {
+  console.log('fetch call', username);
   try {
-    const db = new Database(DB_NAME, { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    console.log(last_updated);
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
     const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
+    console.log(url);
     await axios
       .get(url)
       .then((response) => {
         const newDataRows = response.data;
-        console.log(response.data);
+        console.log('resposne',response.data);
         newDataRows.forEach((newDataRow) => {
           // eslint-disable-next-line no-console
           // console.log(newDataRow);
@@ -38,13 +42,13 @@ const fetchDataFromServer = async (username) => {
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
-        // console.log(error);
+        console.log('axios error', error);
         return 'failed';
       });
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
-    // console.log(err);
+    console.log('fetch err', err);
     return 'failed';
   }
 };
@@ -55,7 +59,7 @@ const fetchDataFromServer = async (username) => {
  */
 const deleteDataWithInstanceId = (instanceId, formId) => {
   try {
-    const db = new Database(DB_NAME, { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const dataDeleteStmt = db.prepare(`delete from data where instanceid = ${instanceId}`);
     const info = dataDeleteStmt.run();
     if (info.changes > 0) {
@@ -84,8 +88,8 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
  * @param {object} userInput - the userinput object containing field values that need to be saved
  */
 const saveNewDataToTable = (instanceId, formId, userInput) => {
-  try {
-    const db = new Database(DB_NAME, { fileMustExist: true });
+  try {    
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const insertStmt = db.prepare(
       `INSERT INTO data (form_id, data, status, instanceid, last_updated) VALUES (?, ?, 1, ?, ?)`,
     );
@@ -213,7 +217,7 @@ const isNotArrayOfString = (testArray) => {
 const sendDataToServer = async (username) => {
   console.log('send data', username);
   try {
-    const db = new Database(DB_NAME, { fileMustExist: true });
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
     const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
     try {
