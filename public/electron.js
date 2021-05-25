@@ -10,6 +10,7 @@ const { dialog } = require('electron');
 var macaddress = require('macaddress');
 const { autoUpdater } = require('electron-updater');
 const download = require('image-downloader');
+const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, queries } = require('./modules/syncFunctions');
 
 // SERVER URLS
@@ -52,6 +53,7 @@ const FETCH_USERNAME = 'fetch-username';
 const FETCH_IMAGE = 'fetch-image';
 const AUTO_UPDATE = 'auto-update';
 const FETCH_LAST_SYNC = 'fetch-last-sync';
+const EXPORT_XLSX = 'export-xlsx';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -582,6 +584,48 @@ const populateModuleImage = (module) => {
   }
 };
 
+const exportExcel = (event, excelData) => {
+  filename = dialog.showSaveDialog({
+    filters: [{
+      name: 'Bahis',
+      extensions: ['xls']
+    }]
+  }
+    ).then(result => {
+      filename = result.filePath;
+      if (filename === undefined) {
+        console.log(filename);
+        dialog.showMessageBox({
+          title: 'Download Updates',
+          message: 'couldn\'t create a file.',
+        });
+        return;
+      }
+      // const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+      // const data = JSON.parse(excelData);
+      fs.writeFile(filename,new Buffer(excelData), (err) => {
+        if (err) {
+          console.log('an error ocurred with file creation ' + err.message);
+          dialog.showMessageBox({
+            title: 'Download Updates',
+            message: `an error ocurred with file creation ${err.message}`,
+          });
+          return
+        }
+        dialog.showMessageBox({
+          title: 'Download Updates',
+          message: 'File Downloaded Successfully',
+        });
+      })
+    }).catch(err => {
+      dialog.showMessageBox({
+        title: 'Download Updates',
+        message: `${err}`,
+      });
+      console.log(err);
+    });
+}
+
 const fetchUsername = (event) => {
   console.log('check call');
   try {
@@ -879,3 +923,4 @@ ipcMain.on(FETCH_IMAGE, fetchImage);
 ipcMain.on(FETCH_USERNAME, fetchUsername);
 ipcMain.on(FETCH_LAST_SYNC, fetchLastSyncTime);
 ipcMain.on(AUTO_UPDATE, autoUpdate);
+ipcMain.on(EXPORT_XLSX, exportExcel);

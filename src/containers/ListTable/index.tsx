@@ -62,10 +62,11 @@ export interface ActionDefinition {
   xform_id: number;
   data_mapping: MappingObj[];
   action_type: string;
+  label: { [key: string]: string };
 }
 
 export interface ActionColumnObj {
-  action_definition: ActionDefinition;
+  action_definition: ActionDefinition[];
   data_type: 'action';
   label: { [key: string]: string };
 }
@@ -256,7 +257,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                           );
                         } else {
                           return (
-                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
                               {singleCol.label[appLanguage]}
                             </TableCell>
                           );
@@ -284,15 +285,18 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                                 )}
                               </TableCell>
                             ) : (
-                              <TableCell key={'data-field-' + colIndex}>
-                                <Link
-                                  to={`/form/${colObj.action_definition.xform_id}/?dataJson=${this.mapListToFormData(
-                                    colObj.action_definition.data_mapping,
-                                    rowObj,
-                                  )}`}
-                                >
-                                  <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED'}}> Entry </Button>
-                                </Link>
+                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex'}}>
+                                {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
+                                  return(
+                                    <Link key={'action-field' + actionIndex} to={`/form/${actionObj.xform_id}/?dataJson=${this.mapListToFormData(
+                                        actionObj.data_mapping,
+                                        rowObj,
+                                      )}`}
+                                    >
+                                      <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                    </Link>
+                                  )
+                                })}
                               </TableCell>
                             ),
                           )}

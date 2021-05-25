@@ -78,24 +78,25 @@
     "three-dots": "^0.1.2",
     "to-array-buffer": "^3.2.0",
     "typeface-roboto": "^0.0.75",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "xlsx": "^0.17.0"
   },
   "build": {
     "appId": "com.electron.bahis",
     "win": {
       "target": [
-          "nsis"
+        "nsis"
       ]
     },
     "nsis": {
-        "oneClick": false,
-        "perMachine": true,
-        "allowElevation": true,
-        "deleteAppDataOnUninstall": true,
-        "createDesktopShortcut": "always",
-        "menuCategory": "bahis",
-        "license": "license.txt",
-        "allowToChangeInstallationDirectory": true
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "deleteAppDataOnUninstall": true,
+      "createDesktopShortcut": "always",
+      "menuCategory": "bahis",
+      "license": "license.txt",
+      "allowToChangeInstallationDirectory": true
     }
   },
   "scripts": {

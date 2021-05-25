@@ -168,7 +168,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
         }, 1000);
       }
     }, 3000)
-    console.log('why man why', location, props.history);
+    console.log('current', location);
   }, []);
 
   const logout = () => {
