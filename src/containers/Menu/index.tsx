@@ -57,6 +57,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
   const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
   const [username, setUsername] = React.useState<string>('');
+  // const [appData, setAppData] = React.useState<any>({});
 
   const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
     if (menuItem.type === MODULE_TYPE) {

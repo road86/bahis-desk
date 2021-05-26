@@ -23,6 +23,7 @@ import Form from '../components/Form';
 import List from '../components/List';
 import Loading from '../components/Loading';
 import Header from '../components/page/Header';
+import SubmittedForm from '../components/SubmittedForm';
 import Menu from '../containers/Menu';
 import { ipcRenderer } from '../services/ipcRenderer';
 import './App.css';
@@ -208,6 +209,9 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
                 </Route>
                 <Route exact={true} path="/form/:id">
                   <Form />
+                </Route>
+                <Route exact={true} path="/formList/:id">
+                  <SubmittedForm appLanguage={'English'}/>
                 </Route>
                 <Route exact={true} path="/list/:id">
                   <List appLanguage={'English'} />

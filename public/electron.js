@@ -269,7 +269,7 @@ const fetchAppDefinition = (event) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
-    event.returnValue = db.prepare('SELECT definition from app limit 1').get().definition;
+    event.returnValue = db.prepare('SELECT definition from app where app_id=2').get().definition;
     console.log('definition', event.returnValue);
     db.close();
   } catch (err) {
@@ -330,7 +330,7 @@ const fetchListDefinition = (event, listId) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedRows = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
-    // eslint-disable-next-line no-param-reassign
+    // eslint-disable-next-line no-param-reaFssign
     event.returnValue = {
       filterDefinition: fetchedRows.filter_definition,
       columnDefinition: fetchedRows.column_definition,
@@ -402,7 +402,7 @@ const signIn = async (event, userData) => {
         },
       })
       .then((response) => {
-        // console.log(response);
+        console.log(response);
         if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
           // if (response.status == 200 || response.status == 201) {
           console.log('successfull', userData);
@@ -431,7 +431,7 @@ const signIn = async (event, userData) => {
           // };
         } else if (response.status == 409) {
           results = {
-            message: 'Un-authenticated User',
+            message: 'Un-authenticated Really',
             username: '',
           };
           mainWindow.send('formSubmissionResults', results);
@@ -583,6 +583,53 @@ const populateModuleImage = (module) => {
     populateModuleImage(module.children[i]);
   }
 };
+
+const updateAppDefinition = (appDefinition) => {
+  let update = function(module)  {
+    if (module.xform_id != '') {
+       const currentModule = {
+          xform_id: module.xform_id,
+          name: module.name,
+          img_id: module.img_id,
+          children: [],
+          label:  {
+            Bangla: 'New Submission',
+            English: 'New Submission',
+          },
+          catchment_area: module.catchment_area,
+          list_id: "",
+          type: "form",
+          id: module.id
+       };
+       module.xform_id = "";
+       module.name ='module_' + 50;
+       module.img_id = "";
+       module.children.push(currentModule);
+       module.type = "container";
+       module.id = 50;
+    } else if (module.children)
+      module.children.forEach((mod) => {
+        update(mod)
+      });
+  };
+  
+  appDefinition.children.forEach((definition) => {
+    update(definition)
+  });
+
+  console.log(JSON.stringify(appDefinition))
+
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(2, ?,?)');
+    newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
+    db.close()
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    // db.close();
+  }
+}
 
 const exportExcel = (event, excelData) => {
   filename = dialog.showSaveDialog({
@@ -791,6 +838,7 @@ const startAppSync = (event, name) => {
             populateCatchment(moduleListRes.data.catchment_area);
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
+            updateAppDefinition(moduleListRes.data);
           }
           if (formListRes.data) {
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
