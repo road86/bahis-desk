@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
+import { random } from 'lodash';
 import { delay } from 'q';
 import * as React from 'react';
 import { Button, Container } from 'react-floating-action-button';
@@ -13,6 +14,7 @@ import { Store } from 'redux';
 import { appSync, dataSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
+  FORMLIST_TYPE,
   FORM_TYPE,
   getCurrentMenu,
   isPrevMenuEmpty,
@@ -28,6 +30,7 @@ import FormMenuItem from './Form';
 import ListMenuItem from './List';
 import './Menu.css';
 import ModuleMenuItem from './Module';
+import SubmittedFormMenuItem from './SubmittedForm';
 
 /** register the clients reducer */
 reducerRegistry.register(menuReducerName, menuReducer);
@@ -68,6 +71,10 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     }
     if (menuItem.type === LIST_TYPE) {
       return <ListMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+    }
+    if (menuItem.type === FORMLIST_TYPE) {
+      console.log(menuItem);
+      return <SubmittedFormMenuItem menuItem={menuItem} appLanguage={appLanguage} />
     }
     return null;
   };
@@ -118,11 +125,66 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
       // console.log(newMenuItem);
       setMenuItemActionCreator(JSON.parse(newMenuItem));
+      updateAppDefinition(JSON.parse(newMenuItem));
     }
     setAlertOpen(false);
     // console.log(response);
   };
 
+  const updateAppDefinition = (appDefinition: any) => {
+    let update = function(module: any)  {
+      if (module.xform_id != '') {
+         const formModule = {
+            xform_id: module.xform_id,
+            name: module.name,
+            img_id: module.img_id,
+            children: [],
+            label:  {
+              Bangla: 'New Submission',
+              English: 'New Submission',
+            },
+            catchment_area: module.catchment_area,
+            list_id: "",
+            type: "form",
+            id: module.id
+         };
+         const listId = random(100,200)
+         const listModule = {
+            xform_id: module.xform_id,
+            name: 'module_' + listId,
+            img_id: "",
+            children: [],
+            label:  {
+              Bangla: 'Submitted Data',
+              English: 'Submitted Data',
+            },
+            catchment_area: module.catchment_area,
+            list_id: "",
+            type: "form_list",
+            id: listId
+         }
+         module.xform_id = "";
+         module.name ='module_' + listId;
+         module.img_id = "";
+         module.childre = {
+           formModule,
+           listModule
+         }
+        //  module.children.push(formModule);
+        //  module.children.push(listModule);
+         module.type = "container";
+         module.id = listId;
+      } else if (module.children)
+        module.children.forEach((mod: any) => {
+          update(mod)
+        });
+    };
+    
+    appDefinition.children.forEach((definition: any) => {
+      update(definition)
+    });
+  }
+  
   React.useEffect(() => {
     compUpdate();
   }, []);

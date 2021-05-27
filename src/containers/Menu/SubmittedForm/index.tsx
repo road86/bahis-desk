@@ -3,24 +3,24 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 // import { Card, CardBody, CardTitle } from 'reactstrap';
 import { getNativeLanguageText } from '../../../helpers/utils';
-import { ListMenu } from '../../../store/ducks/menu';
+import { FormMenu } from '../../../store/ducks/menu';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import { menuStyle } from '../style';
 import { makeStyles, Typography, useTheme } from '@material-ui/core';
 
 export interface ListMenuItemProps {
-  menuItem: ListMenu;
+  menuItem: FormMenu;
   appLanguage: string;
 }
 
-function ListMenuItem(props: ListMenuItemProps) {
+function SubmittedFormMenuItem(props: ListMenuItemProps) {
   // class ListMenuItem extends React.Component<ListMenuItemProps> {
   const [imageSource, setImageSource] = React.useState<string>('');
 
   const compUpdate = async () => {
     if (props.menuItem.img_id.toString().length > 5) {
       const image: any = await ipcRenderer.sendSync('fetch-image', props.menuItem.name);
-      console.log('divisionList', image.replaceAll('\\', '/'));
+      console.log('divisionList', props.menuItem);
       setImageSource(image.replaceAll('\\', '/'));
     }
   };
@@ -31,13 +31,15 @@ function ListMenuItem(props: ListMenuItemProps) {
 
   const { menuItem, appLanguage } = props;
 
+  console.log('menu check', menuItem.xform_id)
+
   
   const theme = useTheme();
   const useStyles = makeStyles(menuStyle(theme));
   const classes = useStyles();
-  
+   
   return (
-    <Link to={`/list/${menuItem.list_id}/`}>
+    <Link to={`/formlist/${menuItem.xform_id}/`}>
       <div className={classes.outerCircle}>
         <div className={classes.innerDiv}>
               <div className={classes.circle}>
@@ -66,4 +68,4 @@ function ListMenuItem(props: ListMenuItemProps) {
   );
 }
 
-export default ListMenuItem;
+export default SubmittedFormMenuItem;

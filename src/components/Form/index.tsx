@@ -27,6 +27,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
   public async componentDidMount() {
     const { match } = this.props;
     const formId = match.params.id || '';
+    console.log(formId);
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
     console.log(formDefinitionObj);
     const { definition, formChoices } = formDefinitionObj;
@@ -53,6 +54,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     };
     const { formDefinition, formChoices } = this.state;
     const { dataJson } = queryString.parse(this.props.location.search);
+    console.log(dataJson);
     const props = {
       csvList: formChoices ? JSON.parse(formChoices) : {},
       defaultLanguage: 'English',
@@ -71,8 +73,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
     // const goBack = () => this.props.history.goBack();
-    console.log(JSON.stringify(props.csvList));
-    console.log(JSON.stringify(props.formDefinitionJson));
+    console.log(JSON.stringify(props.userInputJson));
     const getOdkFormRenderer = () => {
       try {
         return (

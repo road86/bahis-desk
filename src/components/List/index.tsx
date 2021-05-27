@@ -62,7 +62,7 @@ function List(props: ListProps) {
   };
 
   const { appLanguage } = props;
-  // console.log(filterDefinition);
+  console.log('filterDefinition', listId);
 
   const theme = useTheme();
   const useStyles = makeStyles(listPageStyles(theme));

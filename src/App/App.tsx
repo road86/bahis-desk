@@ -210,7 +210,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
                 <Route exact={true} path="/form/:id">
                   <Form />
                 </Route>
-                <Route exact={true} path="/formList/:id">
+                <Route exact={true} path="/formlist/:id">
                   <SubmittedForm appLanguage={'English'}/>
                 </Route>
                 <Route exact={true} path="/list/:id">

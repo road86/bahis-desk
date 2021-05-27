@@ -51,6 +51,7 @@ export interface ColumnObj {
   data_type: string;
   lookup_definition?: LookupDefinition;
   exportable: boolean;
+  hidden?: boolean;
 }
 
 export interface MappingObj {
@@ -63,17 +64,19 @@ export interface ActionDefinition {
   data_mapping: MappingObj[];
   action_type: string;
   label: { [key: string]: string };
+  formData?: string;
 }
 
 export interface ActionColumnObj {
   action_definition: ActionDefinition[];
   data_type: 'action';
   label: { [key: string]: string };
+  hidden: boolean;
 }
 
 /** typeguard to differentiate between ColumnObj and ActionColumnObj */
 export const isColumnObj = (obj: ColumnObj | ActionColumnObj): obj is ColumnObj => {
-  return obj.data_type !== 'action';
+  return obj.data_type !== 'action'
 };
 
 interface DataSourceObj {

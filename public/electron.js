@@ -9,6 +9,7 @@ const axios = require('axios');
 const { dialog } = require('electron');
 var macaddress = require('macaddress');
 const { autoUpdater } = require('electron-updater');
+const { random } = require ('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, queries } = require('./modules/syncFunctions');
@@ -39,6 +40,7 @@ const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
+const SUBMITTED_FORM_DEFINITION_CHANNEL = 'submitted-form-definition'
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
@@ -345,6 +347,21 @@ const fetchListDefinition = (event, listId) => {
   }
 };
 
+const fetchFormListDefinition = (event, formId) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const query = 'SELECT * from data where form_id = "' + formId + '"';
+    const fetchedRows = db.prepare(query).all();
+    // eslint-disable-next-line no-param-reaFssign
+    console.log(fetchedRows);
+    event.returnValue = {fetchedRows};
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+}
+
 /** fetches the data based on query
  * @param {IpcMainEvent} event - the default ipc main event
  * @param {string} queryString- the query string
@@ -587,7 +604,7 @@ const populateModuleImage = (module) => {
 const updateAppDefinition = (appDefinition) => {
   let update = function(module)  {
     if (module.xform_id != '') {
-       const currentModule = {
+       const formModule = {
           xform_id: module.xform_id,
           name: module.name,
           img_id: module.img_id,
@@ -601,12 +618,32 @@ const updateAppDefinition = (appDefinition) => {
           type: "form",
           id: module.id
        };
+       const listId = random(100,200)
+       const listModule = {
+          xform_id: module.xform_id,
+          name: 'module_' + listId,
+          img_id: "",
+          children: [],
+          label:  {
+            Bangla: 'Submitted Data',
+            English: 'Submitted Data',
+          },
+          catchment_area: module.catchment_area,
+          list_id: "",
+          type: "form_list",
+          id: listId
+       }
        module.xform_id = "";
-       module.name ='module_' + 50;
+       module.name ='module_' + listId;
        module.img_id = "";
-       module.children.push(currentModule);
+      //  module.childre = {
+      //    formModule,
+      //    listModule
+      //  }
+       module.children.push(formModule);
+       module.children.push(listModule);
        module.type = "container";
-       module.id = 50;
+       module.id = listId;
     } else if (module.children)
       module.children.forEach((mod) => {
         update(mod)
@@ -617,10 +654,10 @@ const updateAppDefinition = (appDefinition) => {
     update(definition)
   });
 
-  console.log(JSON.stringify(appDefinition))
-
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 2');
+    layoutDeleteQuery.run();
     const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(2, ?,?)');
     newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
     db.close()
@@ -827,6 +864,7 @@ const startAppSync = (event, name) => {
           }
           if (moduleListRes.data) {
             const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 1');
+            
             try {
               layoutDeleteQuery.run();
             } catch (err) {
@@ -957,6 +995,7 @@ ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
+ipcMain.on(SUBMITTED_FORM_DEFINITION_CHANNEL, fetchFormListDefinition);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);

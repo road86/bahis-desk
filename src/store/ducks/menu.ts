@@ -11,6 +11,8 @@ export const LIST_TYPE = 'list';
 export type LIST_TYPE = typeof LIST_TYPE;
 export const MODULE_TYPE = 'container';
 export type MODULE_TYPE = typeof MODULE_TYPE;
+export const FORMLIST_TYPE = 'form_list';
+export type FORMLIST_TYPE = typeof FORMLIST_TYPE;
 
 /** interface for multi language label object */
 export interface Label {
@@ -19,7 +21,7 @@ export interface Label {
 
 /** interface for form menu */
 export interface FormMenu {
-  type: FORM_TYPE;
+  type: FORM_TYPE | FORMLIST_TYPE;
   name: string;
   label: Label;
   img_id: number;
