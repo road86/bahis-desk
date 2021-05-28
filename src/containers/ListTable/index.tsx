@@ -60,6 +60,7 @@ export interface MappingObj {
 }
 
 export interface ActionDefinition {
+  form_title: string,
   xform_id: number;
   data_mapping: MappingObj[];
   action_type: string;

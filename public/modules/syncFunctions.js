@@ -12,7 +12,7 @@ const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
-CREATE TABLE data( data_id INTEGER PRIMARY KEY, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT, submitted_by TEXT NOT NULL, submitted_date TEXT NOT NULL);
+CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
 CREATE TABLE app_log( time TEXT);
 CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT NOT NULL, image_name TEXT NOT NULL, directory_name TEXT );
 CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
@@ -35,7 +35,7 @@ const fetchDataFromServer = async (username) => {
         console.log('resposne',response.data);
         newDataRows.forEach((newDataRow) => {
           // eslint-disable-next-line no-console
-          // console.log(newDataRow);
+          console.log(newDataRow.id);
           deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
           saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
         });
@@ -60,15 +60,17 @@ const fetchDataFromServer = async (username) => {
 const deleteDataWithInstanceId = (instanceId, formId) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const dataDeleteStmt = db.prepare(`delete from data where instanceid = ${instanceId}`);
-    const info = dataDeleteStmt.run();
+    const dataDeleteStmt = 'delete from data where instanceid ="' + instanceId + '"';
+    // const dataDeleteStmt = db.prepare(query);
+    // console.log(deleteStmt);
+    const info = db.prepare(dataDeleteStmt).run();
     if (info.changes > 0) {
       const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(formId);
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
       tableMapping.forEach((tableName) => {
         try {
-          const deleteStmt = db.prepare(`delete from ${tableName} where instanceid = ${instanceId}`);
-          deleteStmt.run();
+          const deleteStmt = 'delete from "' + tableName + '" where instanceid ="' + instanceId + '"';
+          db.prepare(deleteStmt).run();
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err);
@@ -90,10 +92,12 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
 const saveNewDataToTable = (instanceId, formId, userInput) => {
   try {    
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
+    const date = userInput.updated_at ? new Date(userInput.updated_at).toISOString() : new Date().toISOString();
     const insertStmt = db.prepare(
-      `INSERT INTO data (form_id, data, status, instanceid, last_updated) VALUES (?, ?, 1, ?, ?)`,
+      `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
     );
-    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()));
+    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()), fetchedUsername.username, date);
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -109,19 +113,21 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
  */
 const parseAndSaveToFlatTables = (dbConnection, formId, userInput, instanceId) => {
   const formObj = dbConnection.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
-  const formDefinition = JSON.parse(formObj.definition);
-  const formFieldNames = JSON.parse(formObj.field_names);
-  const userInputObj = JSON.parse(userInput);
-  objToTable(
-    dbConnection,
-    `bahis_${formDefinition.id_string}`,
-    '',
-    userInputObj,
-    instanceId !== null ? instanceId : userInputObj['meta/instanceID'],
-    null,
-    '',
-    formFieldNames,
-  );
+  if (formObj != 'undefined') {
+    const formDefinition = JSON.parse(formObj.definition);
+    const formFieldNames = JSON.parse(formObj.field_names);
+    const userInputObj = JSON.parse(userInput);
+    objToTable(
+      dbConnection,
+      `bahis_${formDefinition.id_string}`,
+      '',
+      userInputObj,
+      instanceId !== null ? instanceId : userInputObj['meta/instanceID'],
+      null,
+      '',
+      formFieldNames,
+    );
+  }
 };
 
 /** recursively generates insert query and saves to flat table
@@ -233,7 +239,7 @@ const sendDataToServer = async (username) => {
           test_file: queries,
         };
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
-        console.log(url);
+        console.log(apiFormData);
         await axios
           .post(url, JSON.stringify(apiFormData), {
             headers: {
@@ -244,7 +250,8 @@ const sendDataToServer = async (username) => {
             },
           })
           .then((response) => {
-            if (response.data.status === 201) {
+            console.log(response.data);
+            if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
               JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
                 const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
@@ -393,4 +400,5 @@ module.exports = {
   sendDataToServer,
   parseAndSaveToFlatTables,
   queries,
+  deleteDataWithInstanceId
 };

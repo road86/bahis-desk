@@ -10,6 +10,8 @@ import { listPageStyles } from './style';
 import { Link } from 'react-router-dom';
 import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../../containers/ListTable';
 import OrderBy from '../../containers/ListTable/OrderBy';
+import Typist from 'react-typist';
+import Loader from 'react-loader-spinner';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -25,19 +27,25 @@ function SubmittedForm(props: ListProps) {
   const [formId, setFormId] = React.useState<string>('');
   const [tableData, setTableData] = React.useState<any>([]);
   const [columnDefinition, setColumnDefinition] = React.useState([]);
+  const [updating, setUpdating] = React.useState<boolean>(true);
 
   const comUpdate = async () => {
     const { match } = props;
     const formId = match.params.id || '';
+    fetchTableData(formId);
+    setFormId(formId);
+    updateColumnDefinition(formId);
+  } 
+
+  const fetchTableData = async (formId: string) => {
     const tableData = await ipcRenderer.sendSync(
       'submitted-form-definition',
       formId,
     );
     console.log(tableData);
     setTableData(tableData.fetchedRows);
-    setFormId(formId);
-    updateColumnDefinition(formId);
-  } 
+    setUpdating(false);
+  }
 
   const updateColumnDefinition = (xform_id: any) => {
     const COLUMN_DEFINITION: any = [
@@ -58,54 +66,30 @@ function SubmittedForm(props: ListProps) {
         "data_type": "text",
         "format": "",
         "label": {
-          "Bangla": "Form Id",
-          "English": "Form Id"
+          "Bangla": "Submitted By",
+          "English": "Submitted By"
         },
         "sortable": true,
         "hidden": false,
-        "field_name": "form_id"
+        "field_name": "submitted_by"
       },
       {
         "exportable": true,
         "data_type": "text",
         "format": "",
         "label": {
-          "Bangla": "Instance ID",
-          "English": "Instance ID"
+          "Bangla": "Submission Date",
+          "English": "Submission Date"
         },
-        "sortable": false,
+        "sortable": true,
         "hidden": false,
-        "field_name": "instanceid"
-      },
-      {
-        "exportable": true,
-        "data_type": "text",
-        "format": "",
-        "label": {
-          "Bangla": "Data",
-          "English": "Data"
-        },
-        "sortable": false,
-        "hidden": true,
-        "field_name": "data"
-      },
-      {
-        "exportable": true,
-        "data_type": "text",
-        "format": "",
-        "label": {
-          "Bangla": "Status",
-          "English": "Status"
-        },
-        "sortable": false,
-        "hidden": true,
-        "field_name": "status"
+        "field_name": "submission_date",
       },
       {
         "action_definition": [
           {
             "xform_id": xform_id,
-            "form_title": "",
+            "form_title": "edit",
             "data_mapping": [],
             "action_type": "form_entry",
             "label": {
@@ -116,7 +100,7 @@ function SubmittedForm(props: ListProps) {
           },
           {
             "xform_id": xform_id,
-            "form_title": "",
+            "form_title": "delete",
             "data_mapping": [],
             "action_type": "form_entry",
             "label": {
@@ -127,7 +111,7 @@ function SubmittedForm(props: ListProps) {
           },
           {
             "xform_id": xform_id,
-            "form_title": "",
+            "form_title": "view",
             "data_mapping": [],
             "action_type": "form_entry",
             "label": {
@@ -144,11 +128,20 @@ function SubmittedForm(props: ListProps) {
         }
       }
     ];
-    console.log(COLUMN_DEFINITION[5].action_definition.length)
     setColumnDefinition(COLUMN_DEFINITION);
   }
 
-
+  const deleteData = (instanceId: string) =>{
+    setUpdating(true);
+    console.log(instanceId);
+    ipcRenderer.sendSync(
+      'delete-instance',
+      instanceId, formId
+    );
+    setTimeout(() => {
+      fetchTableData(formId);
+    }, 3000);
+  }
 
   React.useEffect(() => {
     comUpdate()
@@ -177,8 +170,25 @@ function SubmittedForm(props: ListProps) {
               >
                   ListTable
           </AccordionSummary>
-          <AccordionDetails style={{ display: 'contents' }}>
-            <div style={{ padding: 15 }}>
+          <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
+            {
+              updating ? <div style={{ marginTop: '2%', textAlign: 'center' }}>
+              <Loader
+                type="Puff"
+                color={theme.palette.primary.dark}
+                height={40}
+                width={100}
+                timeout={3000} // 3 secs
+              />
+              <Typist cursor={{ hideWhenDone: true }}>
+                <span className="loader-title"> BAHIS </span>
+                <br />
+                <span className="loader-subtitle">
+                  Updating Data Table
+                </span>
+              </Typist>
+            </div> : 
+              <div style={{ padding: 15 }}>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -214,14 +224,36 @@ function SubmittedForm(props: ListProps) {
                                 {rowObj[colObj.field_name]}
                               </TableCell>
                             ) : (
-                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex'}}>
+                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
                                 {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                  return(
-                                    <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
-                                    >
-                                      <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                    </Link>
-                                  )
+                                  if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
+                                    if (actionObj.form_title === 'edit') {
+                                      return(
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                                        >
+                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                        </Link>
+                                      )
+                                    } else {
+                                      return(
+                                        <Button 
+                                          key={'action-field' + actionIndex}  
+                                          variant="contained" 
+                                          onClick={() => deleteData(rowObj['instanceid'].toString())}
+                                          color={'secondary'} 
+                                          style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
+                                          {actionObj.label[appLanguage]} 
+                                        </Button>
+                                      )
+                                    }
+                                  } else if(actionObj.form_title === 'view'){
+                                    return(
+                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                                      >
+                                        <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                      </Link>
+                                    )
+                                  }
                                 })}
                               </TableCell>
                             ),
@@ -232,6 +264,7 @@ function SubmittedForm(props: ListProps) {
                 </Table>
               </TableContainer>
             </div>
+            }
           </AccordionDetails>
           {/* <AccordionActions>
             <TablePagination

@@ -37,11 +37,13 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     const handleSubmit = (userInput: any) => {
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
-        console.log(userInput);
+        const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
+        console.log('inputJson', inputJson);
+        const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : this.generateUid();
         const { match } = this.props;
         const formId = match.params.id || '';
         ipcRenderer.send('submit-form-response', {
-          data: JSON.stringify({ ...userInput, 'meta/instanceID': this.generateUid() }),
+          data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
           formId,
         });
         this.setState({
@@ -73,7 +75,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
     // const goBack = () => this.props.history.goBack();
-    console.log(JSON.stringify(props.userInputJson));
+    console.log(formDefinition);
     const getOdkFormRenderer = () => {
       try {
         return (

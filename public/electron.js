@@ -12,7 +12,7 @@ const { autoUpdater } = require('electron-updater');
 const { random } = require ('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
-const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, queries } = require('./modules/syncFunctions');
+const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, queries } = require('./modules/syncFunctions');
 
 // SERVER URLS
 const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
@@ -56,6 +56,7 @@ const FETCH_IMAGE = 'fetch-image';
 const AUTO_UPDATE = 'auto-update';
 const FETCH_LAST_SYNC = 'fetch-last-sync';
 const EXPORT_XLSX = 'export-xlsx';
+const DELETE_INSTANCE = 'delete-instance';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -272,7 +273,6 @@ const fetchAppDefinition = (event) => {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
     event.returnValue = db.prepare('SELECT definition from app where app_id=2').get().definition;
-    console.log('definition', event.returnValue);
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -287,9 +287,15 @@ const fetchAppDefinition = (event) => {
 const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   console.log('data', response, JSON.parse(response.data)['meta/instanceID']);
+  deleteDataWithInstanceId(JSON.parse(response.data)['meta/instanceID'], response.formId)
   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-  const insert = db.prepare('INSERT INTO data (form_id, data, status, instanceid) VALUES (@formId, @data, 0, ?)');
-  insert.run(response, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
+  const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
+  event.returnValue = {
+    username: fetchedUsername.username,
+  };
+  const date = new Date().toISOString();
+  const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
+  insert.run(response, fetchedUsername.username, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
   db.close();
 };
@@ -303,19 +309,23 @@ const fetchFormDefinition = (event, formId) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const formDefinitionObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
-    const choiceDefinition = formDefinitionObj.choice_definition ? JSON.parse(formDefinitionObj.choice_definition) : {};
-    const choices = {};
-    Object.keys(choiceDefinition).forEach((key) => {
-      try {
-        const { query } = choiceDefinition[key];
-        choices[`${key}.csv`] = db.prepare(query).all();
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log(err);
-      }
-    });
-    // eslint-disable-next-line no-param-reassign
-    event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
+    if (formDefinitionObj != 'undefined') {
+      const choiceDefinition = formDefinitionObj.choice_definition ? JSON.parse(formDefinitionObj.choice_definition) : {};
+      const choices = {};
+      Object.keys(choiceDefinition).forEach((key) => {
+        try {
+          const { query } = choiceDefinition[key];
+          choices[`${key}.csv`] = db.prepare(query).all();
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err);
+        }
+      });
+      // eslint-disable-next-line no-param-reassign
+      event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
+    } else {
+      event.returnValue = null;
+    }
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -353,7 +363,6 @@ const fetchFormListDefinition = (event, formId) => {
     const query = 'SELECT * from data where form_id = "' + formId + '"';
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
-    console.log(fetchedRows);
     event.returnValue = {fetchedRows};
     db.close();
   } catch (err) {
@@ -777,7 +786,6 @@ const fetchDivision = (event) => {
 };
 
 const fetchUpazila = (event, divisionId, districtId) => {
-  console.log(divisionId, districtId);
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const query =
@@ -976,6 +984,14 @@ const requestDataSync = async (event, username) => {
   event.returnValue = msg;
 };
 
+const deleteData = (event, instanceId, formId) => {
+  console.log(instanceId, formId);
+  deleteDataWithInstanceId(instanceId.toString(), formId);
+  event.returnValue = {
+    status: 'successful',
+  };
+}
+
 /** restarts the app
  * @param {IpcMainEvent} _event - the default ipc main event
  */
@@ -1011,3 +1027,4 @@ ipcMain.on(FETCH_USERNAME, fetchUsername);
 ipcMain.on(FETCH_LAST_SYNC, fetchLastSyncTime);
 ipcMain.on(AUTO_UPDATE, autoUpdate);
 ipcMain.on(EXPORT_XLSX, exportExcel);
+ipcMain.on(DELETE_INSTANCE, deleteData)
