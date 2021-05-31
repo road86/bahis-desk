@@ -8,6 +8,8 @@ import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
 import ErrorBoundary from '../page/ErrorBoundary';
 import { Alert } from 'reactstrap';
+import { Typography } from '@material-ui/core';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 /** interface for Form URL params */
 interface FormURLParams {
   id: string;
@@ -29,9 +31,11 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     const formId = match.params.id || '';
     console.log(formId);
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    console.log(formDefinitionObj);
-    const { definition, formChoices } = formDefinitionObj;
-    this.setState({ formDefinition: definition, formChoices });
+    console.log('formDefinitionObj', formDefinitionObj);
+    if (formDefinitionObj != null) {
+      const { definition, formChoices } = formDefinitionObj;
+      this.setState({ formDefinition: definition, formChoices });
+    }
   }
   public render() {
     const handleSubmit = (userInput: any) => {
@@ -100,7 +104,11 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
             </h6>
           </div>
         </Link> */}
-        {formDefinition && getOdkFormRenderer()}
+        {formDefinition ? getOdkFormRenderer() : <div style={{ marginTop: '10%' }}>
+            <Typography color="secondary" component="h1" variant="h4" align="center">
+                Couldn't Found Form Definition
+            </Typography>
+          </div>}
       </div>
     );
   }

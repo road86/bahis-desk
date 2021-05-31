@@ -57,6 +57,7 @@ const AUTO_UPDATE = 'auto-update';
 const FETCH_LAST_SYNC = 'fetch-last-sync';
 const EXPORT_XLSX = 'export-xlsx';
 const DELETE_INSTANCE = 'delete-instance';
+const FORM_DETAILS = 'form-details';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -309,7 +310,7 @@ const fetchFormDefinition = (event, formId) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const formDefinitionObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
-    if (formDefinitionObj != 'undefined') {
+    if (formDefinitionObj != undefined) {
       const choiceDefinition = formDefinitionObj.choice_definition ? JSON.parse(formDefinitionObj.choice_definition) : {};
       const choices = {};
       Object.keys(choiceDefinition).forEach((key) => {
@@ -323,6 +324,24 @@ const fetchFormDefinition = (event, formId) => {
       });
       // eslint-disable-next-line no-param-reassign
       event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
+    } else {
+      event.returnValue = null;
+    }
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
+const fetchFormDetails = (event, listId) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const formData = db.prepare('SELECT * from data where data_id = ? limit 1').get(listId);
+    console.log(formData)
+    if (formData != undefined) {
+      // eslint-disable-next-line no-param-reassign
+      event.returnValue = { formDetails: formData };
     } else {
       event.returnValue = null;
     }
@@ -1028,3 +1047,4 @@ ipcMain.on(FETCH_LAST_SYNC, fetchLastSyncTime);
 ipcMain.on(AUTO_UPDATE, autoUpdate);
 ipcMain.on(EXPORT_XLSX, exportExcel);
 ipcMain.on(DELETE_INSTANCE, deleteData)
+ipcMain.on(FORM_DETAILS, fetchFormDetails);

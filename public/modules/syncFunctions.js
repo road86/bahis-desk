@@ -239,7 +239,7 @@ const sendDataToServer = async (username) => {
           test_file: queries,
         };
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
-        console.log(apiFormData);
+        // console.log(apiFormData);
         await axios
           .post(url, JSON.stringify(apiFormData), {
             headers: {

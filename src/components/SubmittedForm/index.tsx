@@ -1,4 +1,4 @@
-import { makeStyles, useTheme } from '@material-ui/core';
+import { AccordionActions, makeStyles, TablePagination, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
@@ -12,6 +12,8 @@ import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../..
 import OrderBy from '../../containers/ListTable/OrderBy';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { exportToExcel } from '../../helpers/utils';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -28,6 +30,9 @@ function SubmittedForm(props: ListProps) {
   const [tableData, setTableData] = React.useState<any>([]);
   const [columnDefinition, setColumnDefinition] = React.useState([]);
   const [updating, setUpdating] = React.useState<boolean>(true);
+  const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
+  const [page, setPage] = React.useState<number>(0);
+  const [exportableColumn, setExportableColumn] = React.useState([]);
 
   const comUpdate = async () => {
     const { match } = props;
@@ -86,6 +91,30 @@ function SubmittedForm(props: ListProps) {
         "field_name": "submission_date",
       },
       {
+        "exportable": true,
+        "data_type": "text",
+        "format": "",
+        "label": {
+          "Bangla": "Data",
+          "English": "Data"
+        },
+        "sortable": true,
+        "hidden": true,
+        "field_name": "data"
+      },
+      {
+        "exportable": true,
+        "data_type": "text",
+        "format": "",
+        "label": {
+          "Bangla": "Status",
+          "English": "Status"
+        },
+        "sortable": true,
+        "hidden": true,
+        "field_name": "status"
+      },
+      {
         "action_definition": [
           {
             "xform_id": xform_id,
@@ -125,10 +154,13 @@ function SubmittedForm(props: ListProps) {
         "label": {
           "Bangla": "Action",
           "English": "Action"
-        }
+        },
+        "hidden": false,
       }
     ];
     setColumnDefinition(COLUMN_DEFINITION);
+    const filterColumns = COLUMN_DEFINITION.filter((tmp: any) => isColumnObj(tmp) && tmp.exportable == true);
+    setExportableColumn(filterColumns)
   }
 
   const deleteData = (instanceId: string) =>{
@@ -147,6 +179,21 @@ function SubmittedForm(props: ListProps) {
     comUpdate()
   }, [])
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    // setPage(newPage);
+    console.log(event);
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // this.setState({
+    //   rowsPerPage: parseInt(event.target.value, 10),
+    //   page: 0,
+    // });
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   // const { appLanguage } = props;
   console.log(formId);
 
@@ -155,6 +202,7 @@ function SubmittedForm(props: ListProps) {
   const classes = useStyles();
 
   const {appLanguage} = props;
+  console.log(exportableColumn);
 
   return (
     <div>
@@ -163,6 +211,11 @@ function SubmittedForm(props: ListProps) {
         <h3 className={classes.header}> Submitted List </h3>
       </div>
       <hr className={classes.hrTag}/>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcel(tableData, exportableColumn, appLanguage)}>
+          <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX
+        </Button>
+      </div>
       <Accordion defaultExpanded>
           <AccordionSummary  expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
@@ -193,7 +246,7 @@ function SubmittedForm(props: ListProps) {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
                         if (isColumnObj(singleCol)) {
                           return (
                             <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
@@ -215,10 +268,10 @@ function SubmittedForm(props: ListProps) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {tableData &&
-                      tableData.map((rowObj: any, rowIndex: number) => (
+                    {tableData && tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((rowObj: any, rowIndex: number) => (
                         <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
                               <TableCell key={'data-field-' + colIndex}>
                                 {rowObj[colObj.field_name]}
@@ -248,7 +301,7 @@ function SubmittedForm(props: ListProps) {
                                     }
                                   } else if(actionObj.form_title === 'view'){
                                     return(
-                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
                                       >
                                         <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                       </Link>
@@ -266,17 +319,17 @@ function SubmittedForm(props: ListProps) {
             </div>
             }
           </AccordionDetails>
-          {/* <AccordionActions>
+          <AccordionActions>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={this.state.tableData.length}
-              rowsPerPage={this.state.rowsPerPage}
-              page={this.state.page}
-              onChangePage={this.handleChangePage}
-              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              count={tableData.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
             />
-          </AccordionActions> */}
+          </AccordionActions>
         </Accordion>
     </div>
   );

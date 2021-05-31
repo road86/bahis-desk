@@ -20,6 +20,7 @@ import BounceLoader from 'react-spinners/BounceLoader';
 import { Col, Container, Row } from 'reactstrap';
 import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
+import FormDetails from '../components/FormDetails';
 import List from '../components/List';
 import Loading from '../components/Loading';
 import Header from '../components/page/Header';
@@ -212,6 +213,9 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
                 </Route>
                 <Route exact={true} path="/formlist/:id">
                   <SubmittedForm appLanguage={'English'}/>
+                </Route>
+                <Route exact={true} path="/submittedDetails/:id">
+                  <FormDetails />
                 </Route>
                 <Route exact={true} path="/list/:id">
                   <List appLanguage={'English'} />
