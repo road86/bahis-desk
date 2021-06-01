@@ -27,6 +27,7 @@ export interface HeaderProps {
   isBackPossible: boolean;
   pathName: string;
   redirectToMenu: any;
+  redirectToSubmitted: any;
 }
 
 function Header(props: HeaderProps) {
@@ -90,8 +91,13 @@ function Header(props: HeaderProps) {
       handleMobileMenuClose();
     }
     if (props.pathName.includes('form') || props.pathName.includes('list')) {
+      console.log('goto menu');
       props.redirectToMenu();
+    } else if (props.pathName.includes('submittedDetails')) {
+      console.log('another');
+      props.redirectToSubmitted();
     } else {
+      console.log('set previous');
       props.setPrevMenuActionCreator();
     }
   };

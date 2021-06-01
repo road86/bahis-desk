@@ -14,10 +14,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import * as React from 'react';
 import LoadingOverlay from 'react-loading-overlay';
+import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router';
 import BounceLoader from 'react-spinners/BounceLoader';
 import { Col, Container, Row } from 'reactstrap';
+import { Store } from 'redux';
 import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
 import FormDetails from '../components/FormDetails';
@@ -27,6 +29,7 @@ import Header from '../components/page/Header';
 import SubmittedForm from '../components/SubmittedForm';
 import Menu from '../containers/Menu';
 import { ipcRenderer } from '../services/ipcRenderer';
+import { getCurrentMenu, MenuItem, MODULE_TYPE, FORM_TYPE } from '../store/ducks/menu';
 import './App.css';
 import { GEOLOC_ENDPOINT } from './constant';
 import { appStyles } from './styles';
@@ -48,8 +51,13 @@ library.add(
   faChevronLeft,
 );
 
+export interface MenuProps {
+  currentMenu: MenuItem | null;
+}
+
+
 /** Main App component */
-const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
+const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
   const classes = appStyles();
   const { location } = props;
   // const [loading, setLoading] = React.useState<boolean>(false);
@@ -181,6 +189,14 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     props.history.push('/menu/');
   }
 
+  const gotoSubmittedData = () => {
+    console.log('current app menu', props.currentMenu);
+    if (props.currentMenu) {
+      const xform_id = props.currentMenu.type === MODULE_TYPE && props.currentMenu.children[0].type === FORM_TYPE && props.currentMenu.children[0].xform_id;
+      props.history.push(`/formlist/${xform_id}`);
+    }
+  }
+
   const setSync = (data: boolean) => {
     setSyncOverlay(data);
     fetchLastSyncTime();
@@ -190,7 +206,7 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
     <React.Fragment>
       <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
         {!headerExcludedURLs.includes(location.pathname) && (
-          <Header handleLogout={logout} setSyncOverlayHandler={setSync} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname}/>
+          <Header handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname}/>
         )}
         <div className={classes.offset} />
         <Container>
@@ -267,4 +283,25 @@ const App: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
   );
 };
 
-export default withRouter(App);
+/** connect the component to the store */
+
+/** Interface to describe props from mapStateToProps */
+interface DispatchedStateProps {
+  currentMenu: MenuItem | null;
+}
+
+/** Map props to state  */
+const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
+  const result = {
+    currentMenu: getCurrentMenu(state),
+  };
+  return result;
+};
+
+/** map props to actions */
+const mapDispatchToProps = {};
+
+/** connect clientsList to the redux store */
+const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+
+export default withRouter(ConnectedApp);

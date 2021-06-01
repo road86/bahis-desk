@@ -33,7 +33,6 @@ function SubmittedFormMenuItem(props: ListMenuItemProps) {
 
   console.log('menu check', menuItem.xform_id)
 
-  
   const theme = useTheme();
   const useStyles = makeStyles(menuStyle(theme));
   const classes = useStyles();
