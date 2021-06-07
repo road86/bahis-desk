@@ -11,12 +11,16 @@ import * as serviceWorker from './serviceWorker';
 import store from './store';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { theme } from './configs/theme';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <MuiThemeProvider theme={theme}>
-        <App />
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <App /> 
+        </MuiPickersUtilsProvider>
       </MuiThemeProvider>
     </ConnectedRouter>
   </Provider>,

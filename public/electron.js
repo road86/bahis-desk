@@ -13,6 +13,7 @@ const { random } = require ('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, queries } = require('./modules/syncFunctions');
+const firstRun = require('electron-first-run');
 
 // SERVER URLS
 const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
@@ -35,12 +36,16 @@ const REDUX_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/lmhkpmbe
 const APP_READY_STATE = 'ready';
 const APP_CLOSE_STATE = 'window-all-closed';
 const APP_ACTIVATE_STATE = 'activate';
+
+const cmd = process.argv[1];
+
 // types of channels
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 const SUBMITTED_FORM_DEFINITION_CHANNEL = 'submitted-form-definition'
+const FETCH_LIST_FOLLOWUP = 'fetch-list-followup'
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
@@ -49,6 +54,7 @@ const APP_RESTART_CHANNEL = 'request-app-restart';
 const SIGN_IN = 'sign-in';
 const WRITE_GEO_OBJECT = 'write-geo-object';
 const FETCH_DISTRICT = 'fetch-district';
+const FETCH_USERLIST = 'fetch-userlist';
 const FETCH_DIVISION = 'fetch-division';
 const FETCH_UPAZILA = 'fetch-upazila';
 const FETCH_USERNAME = 'fetch-username';
@@ -68,10 +74,31 @@ app.on(APP_READY_STATE, createWindow);
 
 /** adds window on app if window null */
 app.on(APP_ACTIVATE_STATE, () => {
+  const isFirstRun = firstRun()
+  if (isFirstRun || cmd == '--squirrel-firstrun') {
+    afterInstallation();
+  }
   if (mainWindow === null) {
     createWindow();
   }
 });
+
+function afterInstallation () {
+  dialog.showMessageBox({
+    title: 'No Updates',
+    message: 'Current version is up-to-date.',
+  });
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    fs.unlink(path.join(app.getPath("userData"), DB_NAME),function(err){
+      if(err) return console.log(err);
+      console.log('file deleted successfully');
+    }); 
+    db.close();
+  } catch (err) {
+    console.log('App Setup!!!!');
+  }
+}
 
 /** creates the db and sets up the window in electron */
 function createWindow() {
@@ -390,6 +417,21 @@ const fetchFormListDefinition = (event, formId) => {
   }
 }
 
+const fetchFollowupFormData = (event, formId, detailsPk, pkValue) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') = '" + pkValue +"'";
+    console.log(query);
+    const fetchedRows = db.prepare(query).all();
+    // eslint-disable-next-line no-param-reaFssign
+    event.returnValue = {fetchedRows};
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+}
+
 /** fetches the data based on query
  * @param {IpcMainEvent} event - the default ipc main event
  * @param {string} queryString- the query string
@@ -423,8 +465,8 @@ const signIn = async (event, userData) => {
     userData.username +
     '" AND password="' +
     userData.password +
-    '" AND upazila="' +
-    userData.upazila +
+    // '" AND upazila="' +
+    // userData.upazila +
     '"';
   const userInfo = db.prepare(query).get();
   // const info = userInfo.user_id;
@@ -787,6 +829,23 @@ const fetchImage = (event, moduleId) => {
   }
 };
 
+const fetchUserList = (event) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const fetchedRows = db.prepare('SELECT DISTINCT	username, name FROM users').all();
+    // eslint-disable-next-line no-param-reassign
+    console.log(fetchedRows);
+    event.returnValue = {
+      users: fetchedRows,
+    };
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    db.close();
+  }
+}
+
 const fetchDivision = (event) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
@@ -1031,6 +1090,7 @@ ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
 ipcMain.on(SUBMITTED_FORM_DEFINITION_CHANNEL, fetchFormListDefinition);
+ipcMain.on(FETCH_LIST_FOLLOWUP, fetchFollowupFormData);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
@@ -1038,6 +1098,7 @@ ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
 ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
 ipcMain.on(SIGN_IN, signIn);
 ipcMain.on(WRITE_GEO_OBJECT, populateGeoTable);
+ipcMain.on(FETCH_USERLIST, fetchUserList);
 ipcMain.on(FETCH_DIVISION, fetchDivision);
 ipcMain.on(FETCH_DISTRICT, fetchDistrict);
 ipcMain.on(FETCH_UPAZILA, fetchUpazila);

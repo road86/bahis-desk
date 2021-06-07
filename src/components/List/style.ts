@@ -10,4 +10,7 @@ export const listPageStyles = (theme: Theme) =>
       marginBottom: 0,
       color: theme.palette.primary.dark
     },
+    container: {
+      maxHeight: 300,
+    },
   });

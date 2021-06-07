@@ -1,6 +1,10 @@
-import { AccordionActions, makeStyles, TablePagination, useTheme } from '@material-ui/core';
+import { AccordionActions, Grid, makeStyles, MenuItem, TablePagination, TextField, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import {
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+
 import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 // import { Col, Row } from 'reactstrap';
 // import ListTable from '../../containers/ListTable';
@@ -33,6 +37,9 @@ function SubmittedForm(props: ListProps) {
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
   const [page, setPage] = React.useState<number>(0);
   const [exportableColumn, setExportableColumn] = React.useState([]);
+  const [submissionDate, setSubmissionDate] = React.useState<Date | null>(new Date());
+  const [submittedBy, setSubmissionBy] = React.useState<string>('');
+  const [userList, setUserList] = React.useState<any[]>([]);
 
   const comUpdate = async () => {
     const { match } = props;
@@ -40,6 +47,8 @@ function SubmittedForm(props: ListProps) {
     fetchTableData(formId);
     setFormId(formId);
     updateColumnDefinition(formId);
+    const userList: any = await ipcRenderer.sendSync('fetch-userlist');
+    setUserList(userList.users);
   } 
 
   const fetchTableData = async (formId: string) => {
@@ -211,126 +220,170 @@ function SubmittedForm(props: ListProps) {
         <h3 className={classes.header}> Submitted List </h3>
       </div>
       <hr className={classes.hrTag}/>
+      <Accordion defaultExpanded>
+        <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+            >
+                Filter
+        </AccordionSummary>
+        <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
+          <Grid item={true} xs={12}>
+            <Grid item={true} xs={10} style={{ padding: 20 }}>
+              <TextField
+                style={{ display: 'flex' }}
+                select={true}
+                required={true}
+                name={submittedBy}
+                label="Submitted By"
+                variant="outlined"
+                onChange={(e: any) => setSubmissionBy(e.target.value)}
+                value={submittedBy || ''}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {userList.map((option: { username: string; name: string }) => (
+                  <MenuItem key={option.username} value={option.username}>
+                    {option.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item={true} xs={10} style={{ padding: 20, paddingTop: 0 }}>
+                <KeyboardDatePicker
+                  clearable
+                  value={submissionDate}
+                  placeholder="10/10/2018"
+                  onChange={(date: any) => setSubmissionDate(date)}
+                  minDate={new Date()}
+                  format="MM/dd/yyyy"
+                />
+               {/* <DatePicker value={submissionDate} onChange={setSubmissionDate} />           */}
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcel(tableData, exportableColumn, appLanguage)}>
           <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX
         </Button>
       </div>
       <Accordion defaultExpanded>
-          <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-              >
-                  ListTable
-          </AccordionSummary>
-          <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
-            {
-              updating ? <div style={{ marginTop: '2%', textAlign: 'center' }}>
-              <Loader
-                type="Puff"
-                color={theme.palette.primary.dark}
-                height={40}
-                width={100}
-                timeout={3000} // 3 secs
-              />
-              <Typist cursor={{ hideWhenDone: true }}>
-                <span className="loader-title"> BAHIS </span>
-                <br />
-                <span className="loader-subtitle">
-                  Updating Data Table
-                </span>
-              </Typist>
-            </div> : 
-              <div style={{ padding: 15 }}>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                        if (isColumnObj(singleCol)) {
-                          return (
-                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                              {singleCol.sortable ? (
-                                <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                              ) : (
-                                singleCol.label[appLanguage]
-                              )}
-                            </TableCell>
-                          );
-                        } else {
-                          return (
-                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
-                              {singleCol.label[appLanguage]}
-                            </TableCell>
-                          );
-                        }
-                      })}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tableData && tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((rowObj: any, rowIndex: number) => (
-                        <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                            isColumnObj(colObj) ? (
-                              <TableCell key={'data-field-' + colIndex}>
-                                {rowObj[colObj.field_name]}
-                              </TableCell>
+        <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+            >
+                ListTable
+        </AccordionSummary>
+        <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
+          {
+            updating ? <div style={{ marginTop: '2%', textAlign: 'center' }}>
+            <Loader
+              type="Puff"
+              color={theme.palette.primary.dark}
+              height={40}
+              width={100}
+              timeout={3000} // 3 secs
+            />
+            <Typist cursor={{ hideWhenDone: true }}>
+              <span className="loader-title"> BAHIS </span>
+              <br />
+              <span className="loader-subtitle">
+                Updating Data Table
+              </span>
+            </Typist>
+          </div> : 
+            <div style={{ padding: 15 }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      if (isColumnObj(singleCol)) {
+                        return (
+                          <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                            {singleCol.sortable ? (
+                              <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
                             ) : (
-                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
-                                {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                  if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
-                                    if (actionObj.form_title === 'edit') {
-                                      return(
-                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
-                                        >
-                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                        </Link>
-                                      )
-                                    } else {
-                                      return(
-                                        <Button 
-                                          key={'action-field' + actionIndex}  
-                                          variant="contained" 
-                                          onClick={() => deleteData(rowObj['instanceid'].toString())}
-                                          color={'secondary'} 
-                                          style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
-                                          {actionObj.label[appLanguage]} 
-                                        </Button>
-                                      )
-                                    }
-                                  } else if(actionObj.form_title === 'view'){
+                              singleCol.label[appLanguage]
+                            )}
+                          </TableCell>
+                        );
+                      } else {
+                        return (
+                          <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
+                            {singleCol.label[appLanguage]}
+                          </TableCell>
+                        );
+                      }
+                    })}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {tableData && tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((rowObj: any, rowIndex: number) => (
+                      <TableRow key={'table-row-' + rowIndex}>
+                        {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          isColumnObj(colObj) ? (
+                            <TableCell key={'data-field-' + colIndex}>
+                              {rowObj[colObj.field_name]}
+                            </TableCell>
+                          ) : (
+                            <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
+                              {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
+                                if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
+                                  if (actionObj.form_title === 'edit') {
                                     return(
-                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
+                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
                                       >
                                         <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                       </Link>
                                     )
+                                  } else {
+                                    return(
+                                      <Button 
+                                        key={'action-field' + actionIndex}  
+                                        variant="contained" 
+                                        onClick={() => deleteData(rowObj['instanceid'].toString())}
+                                        color={'secondary'} 
+                                        style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
+                                        {actionObj.label[appLanguage]} 
+                                      </Button>
+                                    )
                                   }
-                                })}
-                              </TableCell>
-                            ),
-                          )}
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
-            }
-          </AccordionDetails>
-          <AccordionActions>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={tableData.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          </AccordionActions>
-        </Accordion>
+                                } else if(actionObj.form_title === 'view'){
+                                  return(
+                                    <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
+                                    >
+                                      <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                    </Link>
+                                  )
+                                }
+                              })}
+                            </TableCell>
+                          ),
+                        )}
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+          }
+        </AccordionDetails>
+        <AccordionActions>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={tableData.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+        </AccordionActions>
+      </Accordion>
     </div>
   );
 }

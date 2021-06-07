@@ -15,13 +15,17 @@ interface FormURLParams {
   id: string;
 }
 
+interface formProps extends RouteComponentProps<FormURLParams> {
+  appLanguage: string;
+}
+
 interface FormState {
   formDefinition: any;
   formChoices: any;
   toastVisible: boolean;
 }
 
-class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState> {
+class Form extends React.Component<formProps, FormState> {
   constructor(props: any) {
     super(props);
     this.state = { formDefinition: null, formChoices: null, toastVisible: false };
@@ -63,7 +67,7 @@ class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState
     console.log(dataJson);
     const props = {
       csvList: formChoices ? JSON.parse(formChoices) : {},
-      defaultLanguage: 'English',
+      defaultLanguage: this.props.appLanguage,
       formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
       handleSubmit,
       languageOptions: [

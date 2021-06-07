@@ -24,6 +24,7 @@ import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
 import FormDetails from '../components/FormDetails';
 import List from '../components/List';
+import ListProfile from '../components/ListProfile';
 import Loading from '../components/Loading';
 import Header from '../components/page/Header';
 import SubmittedForm from '../components/SubmittedForm';
@@ -225,7 +226,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                   <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
                 </Route>
                 <Route exact={true} path="/form/:id">
-                  <Form />
+                  <Form appLanguage={'English'}/>
                 </Route>
                 <Route exact={true} path="/formlist/:id">
                   <SubmittedForm appLanguage={'English'}/>
@@ -235,6 +236,9 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 </Route>
                 <Route exact={true} path="/list/:id">
                   <List appLanguage={'English'} />
+                </Route>
+                <Route exact={true} path="/listProfile/:id">
+                  <ListProfile />
                 </Route>
               </Switch>
             </Col>

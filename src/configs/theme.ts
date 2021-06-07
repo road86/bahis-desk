@@ -155,6 +155,9 @@ export const theme = createMuiTheme({
     MuiTableCell:{
       body: {
         color: '#222222'
+      },
+      stickyHeader: {
+        backgroundColor: '#649A6A'
       }
     },
     MuiStepIcon: {

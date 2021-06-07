@@ -60,6 +60,7 @@ export interface MappingObj {
 }
 
 export interface ActionDefinition {
+  details_pk?: string,
   form_title: string,
   xform_id: number;
   data_mapping: MappingObj[];
@@ -91,6 +92,7 @@ export interface ListTableProps {
   datasource: DataSourceObj;
   filters: any;
   orderSql: string;
+  listId: string;
   resetListTableActionCreator: typeof resetListTable;
   pageSize: number;
   pageNumber: number;
@@ -292,13 +294,24 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                               <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex'}}>
                                 {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
                                   return(
-                                    <Link key={'action-field' + actionIndex} to={`/form/${actionObj.xform_id}/?dataJson=${this.mapListToFormData(
-                                        actionObj.data_mapping,
-                                        rowObj,
-                                      )}`}
-                                    >
-                                      <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                    </Link>
+                                    <React.Fragment key={'action-field' + actionIndex}>
+                                      {
+                                        actionObj.action_type === 'details' ? (
+                                          <Link key={'action-field' + actionIndex} to={`/listProfile/${this.props.listId}/?dataJson=${btoa(JSON.stringify(rowObj))}&detailspk=${actionObj.details_pk}`}
+                                        >
+                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                        </Link>
+                                        ) : (
+                                          <Link key={'action-field' + actionIndex} to={`/form/${actionObj.xform_id}/?dataJson=${this.mapListToFormData(
+                                            actionObj.data_mapping,
+                                            rowObj,
+                                          )}`}
+                                        >
+                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                        </Link>
+                                        )
+                                      }
+                                    </React.Fragment>
                                   )
                                 })}
                               </TableCell>

@@ -1,139 +1,127 @@
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import OdkFormRenderer from 'odkformrenderer';
-import 'odkformrenderer/example/index.css';
-import queryString from 'query-string';
+import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, useTheme, makeStyles } from '@material-ui/core';
 import * as React from 'react';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { listPageStyles } from '../List/style';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+// import { ipcRenderer } from '../../services/ipcRenderer';
+import queryString from 'query-string';
 import { ipcRenderer } from '../../services/ipcRenderer';
-import ErrorBoundary from '../page/ErrorBoundary';
-import { Alert } from 'reactstrap';
-import { Typography } from '@material-ui/core';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionDefinition } from '../../containers/ListTable';
+import FollowUpTable from './DataTable';
+
+
+
 /** interface for Form URL params */
-interface FormURLParams {
+interface DetailsURLParams {
   id: string;
 }
 
-interface FormState {
-  formDefinition: any;
-  formChoices: any;
-  toastVisible: boolean;
-}
 
-class Form extends React.Component<RouteComponentProps<FormURLParams>, FormState> {
-  constructor(props: any) {
-    super(props);
-    this.state = { formDefinition: null, formChoices: null, toastVisible: false };
-  }
-  public async componentDidMount() {
-    const { match } = this.props;
-    const formId = match.params.id || '';
-    console.log(formId);
-    const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    console.log('formDefinitionObj', formDefinitionObj);
-    if (formDefinitionObj != null) {
-      const { definition, formChoices } = formDefinitionObj;
-      this.setState({ formDefinition: definition, formChoices });
-    }
-  }
-  public render() {
-    const handleSubmit = (userInput: any) => {
-      // tslint:disable-next-line: no-console
-      if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
-        const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
-        console.log('inputJson', inputJson);
-        const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : this.generateUid();
-        const { match } = this.props;
-        const formId = match.params.id || '';
-        ipcRenderer.send('submit-form-response', {
-          data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
-          formId,
-        });
-        this.setState({
-          toastVisible: true,
-        });
-        setTimeout(() => {
-          this.props.history.push('/menu/');
-        }, 2010);
-      }
-    };
-    const { formDefinition, formChoices } = this.state;
-    const { dataJson } = queryString.parse(this.props.location.search);
-    console.log(dataJson);
-    const props = {
-      csvList: formChoices ? JSON.parse(formChoices) : {},
-      defaultLanguage: 'English',
-      formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
-      handleSubmit,
-      languageOptions: [
-        {
-          label: 'English',
-          value: 'English',
-        },
-        {
-          label: 'Bangla',
-          value: 'Bangla',
-        },
-      ],
-      userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
-    };
-    // const goBack = () => this.props.history.goBack();
-    console.log(formDefinition);
-    const getOdkFormRenderer = () => {
-      try {
-        return (
-          <ErrorBoundary>
-            <OdkFormRenderer {...props} />
-          </ErrorBoundary>
-        );
-      } catch (e) {
-        return null;
-      }
-    };
+function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
+  const [formData, setFormData] = React.useState<any>([]);
+  const [detailsPk, setDetailsPk] = React.useState<string>('');
+  const [actionDefinition, setActionDefinition] = React.useState<ActionDefinition[]>([]);
+  const [detailsPkValue, setDetailsPkValue] = React.useState<string>('');
 
-    return (
-      <div className="form-container">
-        {this.state.toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
-        {/* <Link to="/menu/">
-          <div>
-            <h6 className="menu-back">
-              <span className="bg-menu-back">
-                <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
-              </span>
-            </h6>
-          </div>
-        </Link> */}
-        {formDefinition ? getOdkFormRenderer() : <div style={{ marginTop: '10%' }}>
-            <Typography color="secondary" component="h1" variant="h4" align="center">
-                Couldn't Found Form Definition
-            </Typography>
-          </div>}
+  const theme = useTheme();
+  const useStyles = makeStyles(listPageStyles(theme));
+  const classes = useStyles();
+
+  const comUpdate = async() => {
+    const { match } = props;
+    const listId = match.params.id || '';
+    const dataJson = queryString.parse(props.location.search).dataJson;
+    const detailspk = queryString.parse(props.location.search).detailspk;
+    const formData = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
+    const details = detailspk && typeof detailspk === 'string' ? detailspk : '';
+    console.log('detailsPk', detailspk, listId, detailsPk, formData);
+    setDetailsPk(details);
+    setDetailsPkValue(formData[details]);
+    setFormData(Object.entries(formData));
+    const { columnDefinition } = await ipcRenderer.sendSync(
+      'fetch-list-definition',
+      listId,
+    );
+    const definition = JSON.parse(columnDefinition);
+    const action = definition.find((obj: any) => obj.data_type === 'action');
+    setActionDefinition(action ? action.action_definition : []); 
+  }
+
+  console.log('details pk value', detailsPkValue)
+
+  React.useEffect(()=> {
+      comUpdate();
+  }, []);
+  
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <hr className={classes.hrTag}/>
+      <div style={{ textAlign: 'center' }}>
+        <h3 className={classes.header}> List Profile </h3>
       </div>
-    );
-  }
-  private s4 = () => {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  };
-
-  private generateUid = () => {
-    return (
-      'uuid:' +
-      this.s4() +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      this.s4() +
-      this.s4()
-    );
-  };
+      <hr className={classes.hrTag}/>
+      <Accordion defaultExpanded>
+        <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+            >
+                List Data
+        </AccordionSummary>
+        <AccordionDetails style={{ display: 'contents' }}>
+          <div style={{ padding: 15 }}>
+            <TableContainer className={classes.container}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
+                      Attribute Name
+                    </TableCell>
+                    <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
+                      Attribut Value
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {formData.length && formData.map((rowObj:any, index: number) => {
+                      return (
+                        <React.Fragment key={'body_' + index}>
+                          {rowObj[1] && (
+                            <TableRow>
+                            <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
+                              {rowObj[0].replace('_', ' ')}
+                            </TableCell>
+                            <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
+                              {rowObj[1]}
+                            </TableCell>
+                          </TableRow>  
+                          )}
+                        </React.Fragment>
+                      )
+                    })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        </AccordionDetails>
+      </Accordion>
+      { actionDefinition && actionDefinition.map((actionObj: ActionDefinition, actionIndex: number) => {
+          return(
+            <React.Fragment key={actionIndex}>
+              {
+                actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk) &&
+                  <FollowUpTable
+                    formTitle={actionObj.form_title}
+                    detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
+                    detailsPkValue={'avian_1'}
+                    formId={actionObj.xform_id}
+                    appLanguage={'English'}
+                  ></FollowUpTable>
+              }
+            </React.Fragment>
+          )
+        })}
+    </div>
+  );
 }
 
-export default withRouter(Form);
+export default withRouter(ListProfile);
