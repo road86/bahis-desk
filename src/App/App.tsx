@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router';
 import BounceLoader from 'react-spinners/BounceLoader';
-import { Col, Container, Row } from 'reactstrap';
+import { Col, Row, Container } from 'reactstrap';
 import { Store } from 'redux';
 import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
@@ -194,7 +194,12 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     console.log('current app menu', props.currentMenu);
     if (props.currentMenu) {
       const xform_id = props.currentMenu.type === MODULE_TYPE && props.currentMenu.children[0].type === FORM_TYPE && props.currentMenu.children[0].xform_id;
-      props.history.push(`/formlist/${xform_id}`);
+      console.log(xform_id);
+      if (xform_id) {
+        props.history.push(`/formlist/${xform_id}`);
+      } else {
+        gotoMenu();
+      }
     }
   }
 
@@ -210,8 +215,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
           <Header handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname}/>
         )}
         <div className={classes.offset} />
-        <Container>
-          <Row id="main-page-container">
+        <Row id="main-page-container">
             <Col>
               {/* Production hack. Sets the router to home url on app startup */}
               <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
@@ -226,24 +230,33 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                   <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
                 </Route>
                 <Route exact={true} path="/form/:id">
-                  <Form appLanguage={'English'}/>
+                  <Container>
+                    <Form appLanguage={'English'}/>
+                  </Container>
                 </Route>
                 <Route exact={true} path="/formlist/:id">
-                  <SubmittedForm appLanguage={'English'}/>
+                  <Container>
+                    <SubmittedForm appLanguage={'English'}/>
+                  </Container>
                 </Route>
                 <Route exact={true} path="/submittedDetails/:id">
-                  <FormDetails />
+                  <Container>
+                    <FormDetails />
+                  </Container>
                 </Route>
                 <Route exact={true} path="/list/:id">
-                  <List appLanguage={'English'} />
+                  <Container>
+                    <List appLanguage={'English'} />
+                  </Container>
                 </Route>
                 <Route exact={true} path="/listProfile/:id">
-                  <ListProfile />
+                  <Container>
+                    <ListProfile />
+                  </Container>
                 </Route>
               </Switch>
             </Col>
           </Row>
-        </Container>
       </LoadingOverlay>
       {/* {loading ? (
         <Box

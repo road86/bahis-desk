@@ -14,6 +14,7 @@ const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
+const DB = require('better-sqlite3-helper');
 
 // SERVER URLS
 const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
@@ -133,6 +134,20 @@ function createWindow() {
 function prepareDb() {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    DB({
+      path: path.join(app.getPath("userData"), DB_NAME), // this is the default
+      fileMustExist: false, // throw error if database not exists'
+      migrate: {  // disable completely by setting `migrate: false`
+        force: false, // set to 'last' to automatically reapply the last migration-file
+        migrations: [
+          `-- Up
+          CREATE TABLE Category (id INTEGER PRIMARY KEY, name TEXT);
+            // ALTER TABLE data
+            // ADD COLUMN submission_frontend text;
+            `,
+        ]
+      }
+    })
     db.close();
   } catch (err) {
     setUpNewDB();
@@ -438,10 +453,10 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue) => {
  * @returns - the returned dataset from the query
  */
 const fetchQueryData = (event, queryString) => {
+  console.log(queryString);
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedRows = db.prepare(queryString).all();
-    console.log(queryString);
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
     db.close();

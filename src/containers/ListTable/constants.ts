@@ -30,7 +30,7 @@ export const ColumnnDefinition = [
     },
     {
       "exportable": true,
-      "data_type": "text",
+      "data_type": "lookup",
       "format": "",
       "label": {
         "Bangla": "Union/City",
@@ -39,7 +39,12 @@ export const ColumnnDefinition = [
       "sortable": true,
       "hidden": false,
       "field_name": "basic_info_union",
-      "order": "3"
+      "order": "3",
+      "lookup_definition": {
+        "table_name": 'geo_cluster',
+        "return_column": 'name',
+        "column_name": 'value',
+      }
     },
     {
       "exportable": true,

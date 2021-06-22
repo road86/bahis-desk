@@ -4,37 +4,44 @@ export const menuStyle = (theme: Theme) =>
   createStyles({
     outerCircle: {
         height: 220,
-        width: 220,
-        borderRadius: 110,
-        backgroundColor: theme.palette.secondary.main,
-        margin: 10,
-        display: 'flex'
+        width: '110%',
+        borderRadius: 10,
+        backgroundColor: theme.palette.info.main,
+        borderWidth: '12px 20px', 
+        border: `solid ${theme.palette.primary.main}`,
+        display: 'grid',
+        alignItems: 'end'
     },
     circle: {
-      height: 100,
-      width: 100,
-      borderRadius: 50,
-      borderWidth: 2,
-      borderStyle: 'solid',
-      borderColor: theme.palette.primary.main,
-      backgroundColor: theme.palette.info.main,
-      display: 'table'
+      margin: 'auto auto',
+      // height: 100,
+      // width: 100,
+      // borderRadius: 50,
+      // borderWidth: 2,
+      // borderStyle: 'solid',
+      // borderColor: theme.palette.primary.main,
+      // backgroundColor: theme.palette.info.main,
+      justifyContent: 'center',
+      display: 'flex'
     },
     innerDiv: {
-        margin: 'auto auto',
-        textAlign: 'center',
-        maxWidth: 'min-content',
-        verticalAlign: 'middle'
+      width: '100%',
+      textAlign: 'center',
+      marginBottom: 20
+      // maxWidth: 'min-content',
+      // verticalAlign: 'middle'
     },
     image: {
-        display: 'table-cell',
-        verticalAlign: 'middle'
+      display: 'table-cell',
+      verticalAlign: 'middle',
+      color: theme.palette.primary.main
     },
     iconClass: {
-      height: 50,
-      width: 50,
+      height: 60,
+      width: 70, 
       top: 5,
       left: 5,
+      color: theme.palette.primary.main
     },
     labelClass: {}
   });

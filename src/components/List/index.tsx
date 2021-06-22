@@ -6,7 +6,7 @@ import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants';
 import Filter from '../../containers/Filter';
 import ListTable from '../../containers/ListTable';
-import { ColumnnDefinition } from '../../containers/ListTable/constants';
+// import { ColumnnDefinition } from '../../containers/ListTable/constants';
 import { getNativeLanguageText } from '../../helpers/utils';
 // import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -50,11 +50,12 @@ function List(props: ListProps) {
     setDataSource(datasource ? JSON.parse(datasource) : null);
     setFilterDefinition(filterDefinition ? JSON.parse(filterDefinition) : null);
     setListHeader(listHeader ? JSON.parse(listHeader) : {});
-    if (listId == '24') {
-      setColumnDefinition(ColumnnDefinition as any)
-    } else {
-      setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
-    }
+    // if (listId == '24') {
+    //   setColumnDefinition(ColumnnDefinition as any)
+    // } else {
+    //   setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
+    // }
+    setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
     setListId(listId);
   } 
 

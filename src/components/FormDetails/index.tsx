@@ -31,7 +31,6 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
     let {data} = formData.formDetails
     data = JSON.parse(data);
     setFormData(Object.entries(data));
-    console.log('form', Object.entries(data));
   }
 
   React.useEffect(()=> {
@@ -96,8 +95,8 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
         </AccordionSummary>
         <AccordionDetails style={{ display: 'contents' }}>
           <div style={{ padding: 15 }}>
-            <TableContainer>
-              <Table>
+            <TableContainer style={{ maxHeight: 400, overflowX: 'hidden' }}>
+              <Table stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
@@ -109,14 +108,14 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {formData.length && formData.map((rowObj:any) => {
-                      return (
+                  {formData.length && formData.map((rowObj:any, index: number) => {
+                     return (
                         <TableRow>
-                          <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
+                          <TableCell key={'col-label-1' + index} className="initialism text-uppercase text-nowrap"  style={{ verticalAlign: 'baseline'}}>
                             {rowObj[0]}
                           </TableCell>
-                          <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
-                            {rowObj[1]}
+                          <TableCell key={'col-label-2' + index} className="initialism text-uppercase" style={{ wordBreak: 'break-word'}}>
+                            {typeof rowObj[1] == 'string' ? rowObj[1] : JSON.stringify(rowObj[1])}
                           </TableCell>
                         </TableRow>  
                       )

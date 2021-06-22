@@ -12,5 +12,21 @@ export const listPageStyles = (theme: Theme) =>
     },
     datePicker: {
       padding: 20,
-    }
+    },
+    submitButton: {
+      backgroundColor: theme.palette.primary.dark,
+      borderColor: theme.palette.primary.dark
+
+    },
+    resetButton: {
+      marginLeft: 20,
+      backgroundColor: theme.palette.secondary.dark,
+      borderColor: theme.palette.secondary.dark
+    },
+    root: {
+      color: theme.palette.info.dark,
+      '&.MuiPickersDay-day': {
+        color: theme.palette.info.dark,
+      },
+    },
   });

@@ -41,26 +41,26 @@ function SubmittedFormMenuItem(props: ListMenuItemProps) {
     <Link to={`/formlist/${menuItem.xform_id}/`}>
       <div className={classes.outerCircle}>
         <div className={classes.innerDiv}>
-              <div className={classes.circle}>
-                <div className={classes.image}>
-                {navigator.onLine && imageSource.length ? (
-                  <img
-                    src={
-                      imageSource
-                        ? require(`../../../../${imageSource}`)
-                        : require('../../../../src/assets/images/logo.png')
-                    }
-                    className={classes.iconClass}
-                    alt={props.menuItem.name}
-                  />
-                ) : (
-                  <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
-                )}
-              </div>
-              </div>
-              <Typography variant="body1" color={'textPrimary'}>
-                {getNativeLanguageText(menuItem.label, appLanguage)}
-              </Typography>
+          <div className={classes.circle}>
+            <div className={classes.image}>
+              {navigator.onLine && imageSource.length ? (
+                <img
+                  src={
+                    imageSource
+                      ? require(`../../../../${imageSource}`)
+                      : require('../../../../src/assets/images/logo.png')
+                  }
+                  className={classes.iconClass}
+                  alt={props.menuItem.name}
+                />
+              ) : (
+                <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
+              )}
+            </div>
+          </div>
+          <Typography variant="h6" color={'primary'}>
+            {getNativeLanguageText(props.menuItem.label, appLanguage).toUpperCase()}
+          </Typography>
         </div>
       </div>
     </Link>  

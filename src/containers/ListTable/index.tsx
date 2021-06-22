@@ -25,22 +25,22 @@ import OrderBy from './OrderBy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 // import EnhancedTable from './Table';
 
-export interface LookupListCondition {
-  type: 'list';
-  name: string;
-  column: string;
-}
+// export interface LookupListCondition {
+//   type: 'list';
+//   name: string;
+//   column: string;
+// }
 
-export interface LookupStaticCondition {
-  type: 'static';
-  name: string;
-  value: string;
-}
+// export interface LookupStaticCondition {
+//   type: 'static';
+//   name: string;
+//   value: string;
+// }
 
 export interface LookupDefinition {
-  query: string;
+  table_name: string;
   return_column: string;
-  condition: Array<LookupListCondition | LookupStaticCondition>;
+  column_name: string;
 }
 
 export interface ColumnObj {
@@ -155,10 +155,12 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         const resp = await ipcRenderer.sendSync(
           'fetch-query-data',
           'lookup_definition' in column && column.lookup_definition
-            ? 'with p as(select  district_label, id, district from bahis_district_table ), s as(select  id from bahis_district_table )select p. district_label,p.id,p. district,s. id as  Id from p  Inner Join s on cast(p.Id as text) = cast(s.id as text)' ||
-                column.lookup_definition.query
+            ? `with lookup_union as(select ${column.lookup_definition.column_name},${column.lookup_definition.return_column} from ${column.lookup_definition.table_name}),
+            list_source as(${datasource.query})
+            select lookup_union.${column.lookup_definition.column_name}, lookup_union.${column.lookup_definition.return_column} from list_source left join lookup_union on list_source.${column.field_name} = lookup_union.${column.lookup_definition.column_name}`
             : '',
         );
+        console.log(resp);
         lookupTables[column.field_name] = resp;
       }
     });

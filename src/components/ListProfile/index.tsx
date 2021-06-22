@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, useTheme, makeStyles } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Table, TableHead, TableRow, TableCell, useTheme, makeStyles, TableBody } from '@material-ui/core';
 import * as React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { listPageStyles } from '../List/style';
@@ -47,7 +47,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     setActionDefinition(action ? action.action_definition : []); 
   }
 
-  console.log('details pk value', detailsPkValue)
+  console.log('details pk value', detailsPkValue, detailsPk, actionDefinition);
 
   React.useEffect(()=> {
       comUpdate();
@@ -82,7 +82,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {formData.length && formData.map((rowObj:any, index: number) => {
+                  {formData && formData.length && formData.map((rowObj:any, index: number) => {
                       return (
                         <React.Fragment key={'body_' + index}>
                           {rowObj[1] && (
@@ -91,7 +91,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
                               {rowObj[0].replace('_', ' ')}
                             </TableCell>
                             <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
-                              {rowObj[1]}
+                              {typeof rowObj[1] == 'string' ? rowObj[1] : JSON.stringify(rowObj[1])}
                             </TableCell>
                           </TableRow>  
                           )}
@@ -104,22 +104,18 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
           </div>
         </AccordionDetails>
       </Accordion>
-      { actionDefinition && actionDefinition.map((actionObj: ActionDefinition, actionIndex: number) => {
-          return(
-            <React.Fragment key={actionIndex}>
-              {
-                actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk) &&
-                  <FollowUpTable
-                    formTitle={actionObj.form_title}
-                    detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
-                    detailsPkValue={'avian_1'}
-                    formId={actionObj.xform_id}
-                    appLanguage={'English'}
-                  ></FollowUpTable>
-              }
-            </React.Fragment>
-          )
-        })}
+      { actionDefinition ? actionDefinition.map((actionObj: ActionDefinition, actionIndex: number) => {
+          if (actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)) {
+            return <FollowUpTable
+            key={actionIndex}
+            formTitle={actionObj.form_title}
+            detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
+            detailsPkValue={detailsPk}
+            formId={actionObj.xform_id}
+            appLanguage={'English'}
+          ></FollowUpTable>
+          }
+        }) : <React.Fragment></React.Fragment>}
     </div>
   );
 }

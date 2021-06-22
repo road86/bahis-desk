@@ -149,7 +149,7 @@ function FollowUpTable(props: ListProps) {
 
   return (
     <React.Fragment>
-      {tableData.length && (
+      {tableData && tableData.length && (
         <Accordion defaultExpanded>
             <AccordionSummary  expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content"

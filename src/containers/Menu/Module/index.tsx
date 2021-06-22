@@ -50,23 +50,23 @@ function ModuleMenuItem(props: ModuleMenuItemProps) {
       <div className={classes.innerDiv}>
         <div className={classes.circle}>
           <div className={classes.image}>
-            {navigator.onLine && imageSrc.length ? (
-              <img
-                src={
-                  imageSrc
-                    ? require(`../../../../${imageSrc}`)
-                    : require('../../../../src/assets/images/logo.png')
-                }
-                className={classes.iconClass}
-                alt={props.menuItem.name}
-              />
-            ) : (
-              <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
-            )}
-          </div>
+              {navigator.onLine && imageSrc.length ? (
+                <img
+                  src={
+                    imageSrc
+                      ? require(`../../../../${imageSrc}`)
+                      : require('../../../../src/assets/images/logo.png')
+                  }
+                  className={classes.iconClass}
+                  alt={props.menuItem.name}
+                />
+              ) : (
+                <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
+              )}
+            </div>
         </div>
-        <Typography variant="body1" color={'textPrimary'}>
-          {getNativeLanguageText(props.menuItem.label, props.appLanguage)}
+        <Typography variant="h6" color={'primary'}>
+          {getNativeLanguageText(props.menuItem.label, props.appLanguage).toUpperCase()}
         </Typography>
       </div>
     </div>
