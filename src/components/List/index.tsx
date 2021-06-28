@@ -1,5 +1,5 @@
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { makeStyles, useTheme } from '@material-ui/core';
+import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Col, Row } from 'reactstrap';
@@ -43,20 +43,24 @@ function List(props: ListProps) {
   const comUpdate = async () => {
     const { match } = props;
     const listId = match.params.id || '';
-    const { columnDefinition, filterDefinition, datasource, listHeader } = await ipcRenderer.sendSync(
+    const response = await ipcRenderer.sendSync(
       'fetch-list-definition',
       listId,
     );
-    setDataSource(datasource ? JSON.parse(datasource) : null);
-    setFilterDefinition(filterDefinition ? JSON.parse(filterDefinition) : null);
-    setListHeader(listHeader ? JSON.parse(listHeader) : {});
-    // if (listId == '24') {
-    //   setColumnDefinition(ColumnnDefinition as any)
-    // } else {
-    //   setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
-    // }
-    setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
-    setListId(listId);
+    if (response != null || response != undefined) {
+      const { columnDefinition, filterDefinition, datasource, listHeader } = response;
+      
+      setDataSource(datasource ? JSON.parse(datasource) : null);
+      setFilterDefinition(filterDefinition ? JSON.parse(filterDefinition) : null);
+      setListHeader(listHeader ? JSON.parse(listHeader) : {});
+      // if (listId == '24') {
+      //   setColumnDefinition(ColumnnDefinition as any)
+      // } else {
+      //   setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
+      // }
+      setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
+      setListId(listId);
+    }
   } 
 
   React.useEffect(() => {
@@ -75,38 +79,48 @@ function List(props: ListProps) {
   const classes = useStyles();
 
   return (
-    <div>
-      <hr className={classes.hrTag}/>
-      <div style={{ textAlign: 'center' }}>
-        <h3 className={classes.header}> {getNativeLanguageText(listHeader, appLanguage)} </h3>
-      </div>
-      <hr className={classes.hrTag}/>
-      {filterDefinition && listId !== '' && (
-        <Row>
-          <Col>
-            <Filter
-              definition={filterDefinition}
-              choices={FILTER_CHOICES}
-              onSubmitHandler={setFiltersValue}
-              appLanguage={appLanguage}
-              listId={listId}
-            />
-          </Col>
-        </Row>
-      )}
-      {columnDefinition && datasource && (
-        <Row>
-          <Col>
-            <ListTable
-              listId={listId}
-              columnDefinition={columnDefinition}
-              datasource={datasource}
-              filters={filtersValue}
-            />
-          </Col>
-        </Row>
-      )}
-    </div>
+    <React.Fragment>
+      {
+        columnDefinition && filterDefinition ? (
+          <div>
+          <hr className={classes.hrTag}/>
+          <div style={{ textAlign: 'center' }}>
+            <h3 className={classes.header}> {getNativeLanguageText(listHeader, appLanguage)} </h3>
+          </div>
+          <hr className={classes.hrTag}/>
+          {filterDefinition && listId !== '' && (
+            <Row>
+              <Col>
+                <Filter
+                  definition={filterDefinition}
+                  choices={FILTER_CHOICES}
+                  onSubmitHandler={setFiltersValue}
+                  appLanguage={appLanguage}
+                  listId={listId}
+                />
+              </Col>
+            </Row>
+          )}
+          {columnDefinition && datasource && (
+            <Row>
+              <Col>
+                <ListTable
+                  listId={listId}
+                  columnDefinition={columnDefinition}
+                  datasource={datasource}
+                  filters={filtersValue}
+                />
+              </Col>
+            </Row>
+          )}
+        </div>
+        ) : (
+          <Typography color="secondary" component="h1" variant="h4" align="center" style={{ marginTop: '10%' }}>
+              Couldn't Found List Definition
+          </Typography>
+        )
+      }
+    </React.Fragment>  
   );
 }
 

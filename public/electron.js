@@ -17,8 +17,8 @@ const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
 
 // SERVER URLS
-const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
-// const SERVER_URL = 'http://192.168.19.16:8009';
+// const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043'; //dev
+const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; //qa
 // const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
@@ -134,20 +134,20 @@ function createWindow() {
 function prepareDb() {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    DB({
-      path: path.join(app.getPath("userData"), DB_NAME), // this is the default
-      fileMustExist: false, // throw error if database not exists'
-      migrate: {  // disable completely by setting `migrate: false`
-        force: false, // set to 'last' to automatically reapply the last migration-file
-        migrations: [
-          `-- Up
-          CREATE TABLE Category (id INTEGER PRIMARY KEY, name TEXT);
-            // ALTER TABLE data
-            // ADD COLUMN submission_frontend text;
-            `,
-        ]
-      }
-    })
+    // DB({
+    //   path: path.join(app.getPath("userData"), DB_NAME), // this is the default
+    //   fileMustExist: false, // throw error if database not exists'
+    //   migrate: {  // disable completely by setting `migrate: false`
+    //     force: false, // set to 'last' to automatically reapply the last migration-file
+    //     migrations: [
+    //       `-- Up
+    //       CREATE TABLE Category (id INTEGER PRIMARY KEY, name TEXT);
+    //         // ALTER TABLE data
+    //         // ADD COLUMN submission_frontend text;
+    //         `,
+    //     ]
+    //   }
+    // })
     db.close();
   } catch (err) {
     setUpNewDB();
@@ -160,6 +160,7 @@ function prepareDb() {
 
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
+  console.log(path.join(app.getPath("userData"), DB_NAME));
   const db = new Database(path.join(app.getPath("userData"), DB_NAME));
   // const db = new Database(DB_NAME);
   // const db = new Database(DB_NAME);
@@ -404,13 +405,17 @@ const fetchListDefinition = (event, listId) => {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedRows = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
     // eslint-disable-next-line no-param-reaFssign
-    event.returnValue = {
-      filterDefinition: fetchedRows.filter_definition,
-      columnDefinition: fetchedRows.column_definition,
-      datasource: fetchedRows.datasource,
-      listName: fetchedRows.list_name,
-      listHeader: fetchedRows.list_header,
-    };
+    if (fetchedRows) {
+      event.returnValue = {
+        filterDefinition: fetchedRows.filter_definition,
+        columnDefinition: fetchedRows.column_definition,
+        datasource: fetchedRows.datasource,
+        listName: fetchedRows.list_name,
+        listHeader: fetchedRows.list_header,
+      };
+    } else {
+      event.returnValue = null;
+    }
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -923,7 +928,6 @@ const getDBTablesEndpoint = (time) => {
   // const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
   // const time = log === undefined ? 0 : Math.round(log.time);
   const db_endpoint_url = DB_TABLES_ENDPOINT.replace('?', time);
-  console.log(db_endpoint_url);
   return db_endpoint_url;
 };
 

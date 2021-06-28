@@ -127,6 +127,7 @@ function AppRegister(props: any) {
 
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
+    console.log(user.username);
     setLoadComplete(false);
     await ipcRenderer.send('start-app-sync', user.username);
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {

@@ -4,7 +4,8 @@ const { app } = electron;
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
 const path = require('path');
-const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
+// const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
+const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; // QA
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 
