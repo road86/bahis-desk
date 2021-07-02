@@ -240,6 +240,20 @@ export const theme = createMuiTheme({
         color: '#FFFFFF',
       },
     },
+    // MuiPickersDay: {
+    //   root: {
+    //     color: red,
+    //     "&$disabled": {
+    //       color: grey,
+    //     },
+    //     "&$selected": {
+    //       backgroundColor: red,
+    //     },
+    //   },
+    //   today: {
+    //     color: red,
+    //   },
+    // },
     MuiRadio: {
       root: {
         color: '#EBFDED',

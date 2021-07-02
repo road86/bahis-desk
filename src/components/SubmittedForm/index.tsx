@@ -1,11 +1,11 @@
 import { AccordionActions, makeStyles, TablePagination, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-// import {
-//   KeyboardDatePicker,
-// } from '@material-ui/pickers';
-// import { Button as ReactButton } from 'reactstrap';
-import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import {
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
+import { Button as ReactButton } from 'reactstrap';
+import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Button, TextField, MenuItem, Table, TableHead, TableRow, TableCell, TableBody, Grid } from '@material-ui/core';
 // import { Col, Row } from 'reactstrap';
 // import ListTable from '../../containers/ListTable';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -18,7 +18,7 @@ import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { exportToExcel } from '../../helpers/utils';
-// import moment from 'moment';
+import moment from 'moment';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -38,9 +38,9 @@ function SubmittedForm(props: ListProps) {
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
   const [page, setPage] = React.useState<number>(0);
   const [exportableColumn, setExportableColumn] = React.useState([]);
-  // const [submissionDate, setSubmissionDate] = React.useState<Date | null>(null);
-  // const [submittedBy, setSubmissionBy] = React.useState<string>('');
-  // const [userList, setUserList] = React.useState<any[]>([]);
+  const [submissionDate, setSubmissionDate] = React.useState<Date | null>(null);
+  const [submittedBy, setSubmissionBy] = React.useState<string>('');
+  const [userList, setUserList] = React.useState<any[]>([]);
 
   const comUpdate = async () => {
     const { match } = props;
@@ -48,8 +48,8 @@ function SubmittedForm(props: ListProps) {
     fetchTableData(formId);
     setFormId(formId);
     updateColumnDefinition(formId);
-    // const userList: any = await ipcRenderer.sendSync('fetch-userlist');
-    // setUserList(userList.users);
+    const userList: any = await ipcRenderer.sendSync('fetch-userlist');
+    setUserList(userList.users);
   } 
 
   const fetchTableData = async (formId: string) => {
@@ -204,21 +204,20 @@ function SubmittedForm(props: ListProps) {
     setPage(0);
   };
 
-  // const resetFilter = () => {
-  //   setSubmissionBy('');
-  //   setSubmissionDate(null);
-  // }
+  const resetFilter = () => {
+    setSubmissionBy('');
+    setSubmissionDate(null);
+  }
 
-  // const filterData = () => {
-  //   setUpdating(true);
-  //   const date = submissionDate ? moment(submissionDate).format('YYYY-MM-DD'): '';
-  //   const table = tableData.filter((obj: any) => obj.submitted_by == submittedBy && moment(obj.submission_date).format('YYYY-MM-DD') == date); 
-  //   setTableData(table);
-  //   console.log(date, table);
-  //   setUpdating(false);
-  // }
+  const filterData = () => {
+    setUpdating(true);
+    const date = submissionDate ? moment(submissionDate).format('YYYY-MM-DD'): '';
+    const table = tableData.filter((obj: any) => obj.submitted_by == submittedBy && moment(obj.submission_date).format('YYYY-MM-DD') == date); 
+    setTableData(table);
+    console.log(date, table);
+    setUpdating(false);
+  }
 
-  // const { appLanguage } = props;
   console.log(formId);
 
   const theme = useTheme();
@@ -235,7 +234,7 @@ function SubmittedForm(props: ListProps) {
         <h3 className={classes.header}> Submitted List </h3>
       </div>
       <hr className={classes.hrTag}/>
-      {/* <Accordion defaultExpanded>
+      <Accordion defaultExpanded>
         <AccordionSummary  expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
@@ -267,12 +266,11 @@ function SubmittedForm(props: ListProps) {
             </Grid>
             <Grid item={true} xs={10} style={{ padding: 20, paddingTop: 0 }}>
                 <KeyboardDatePicker
-                  // className={classes.root}
+                  className={classes.root}
                   inputProps={{ className: classes.root }}
                   value={submissionDate}
                   onChange={(date: any) => setSubmissionDate(date)}
                   format="MM/dd/yyyy"
-                  maxDate={new Date()}
                 />
             </Grid>
             <Grid item={true} xs={10} style={{ padding: 20, paddingTop: 0 }}>
@@ -285,7 +283,7 @@ function SubmittedForm(props: ListProps) {
             </Grid>
           </Grid>
         </AccordionDetails>
-      </Accordion> */}
+      </Accordion>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcel(tableData, exportableColumn, appLanguage)}>
           <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX

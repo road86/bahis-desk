@@ -24,9 +24,9 @@ export const listPageStyles = (theme: Theme) =>
       borderColor: theme.palette.secondary.dark
     },
     root: {
-      color: theme.palette.info.dark,
-      '&.MuiPickersDay-day': {
-        color: theme.palette.info.dark,
+      color: `${theme.palette.info.dark} !important`,
+      '&$MuiPickersDay-day': {
+        color: `${theme.palette.info.dark} !important`,
       },
     },
   });
