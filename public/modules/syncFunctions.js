@@ -33,7 +33,6 @@ const fetchDataFromServer = async (username) => {
       .get(url)
       .then((response) => {
         const newDataRows = response.data;
-        console.log('resposne',response.data);
         newDataRows.forEach((newDataRow) => {
           // eslint-disable-next-line no-console
           console.log(newDataRow.id);

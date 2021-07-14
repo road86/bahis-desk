@@ -58,7 +58,6 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
       : [];
     dependency = [...dependency, filterItem.name];
     const response = await ipcRenderer.sendSync('fetch-filter-dataset', listId, dependency);
-    console.log('response', response);
     const options = this.fetchOptionsFromDataset(filterItem, response, filtersValueObj);
     this.setState({ ...this.state, filterDataset: response, filterOptions: options });
   }

@@ -34,7 +34,6 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     const detailspk = queryString.parse(props.location.search).detailspk;
     const formData = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
     const details = detailspk && typeof detailspk === 'string' ? detailspk : '';
-    console.log('detailsPk', detailspk, listId, detailsPk, formData);
     setDetailsPk(details);
     setDetailsPkValue(formData[details]);
     setFormData(Object.entries(formData));
@@ -47,7 +46,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     setActionDefinition(action ? action.action_definition : []); 
   }
 
-  console.log('details pk value', detailsPkValue, detailsPk, actionDefinition);
+  console.log(detailsPkValue, detailsPk);
 
   React.useEffect(()=> {
       comUpdate();
@@ -110,7 +109,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
             key={actionIndex}
             formTitle={actionObj.form_title}
             detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
-            detailsPkValue={detailsPk}
+            detailsPkValue={detailsPkValue}
             formId={actionObj.xform_id}
             appLanguage={'English'}
           ></FollowUpTable>

@@ -21,7 +21,6 @@ function FormMenuItem(props: FormMenuItemProps) {
   const compUpdate = async () => {
     if (props.menuItem.img_id.toString().length > 5) {
       const image: any = await ipcRenderer.sendSync('fetch-image', props.menuItem.name);
-      console.log('divisionList', image.replaceAll('\\', '/'));
       setImageSource(image.replaceAll('\\', '/'));
     }
   };

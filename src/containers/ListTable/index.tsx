@@ -17,7 +17,6 @@ import ListTableReducer, {
   setPageSize,
   setTotalRecords,
 } from '../../store/ducks/listTable';
-import { PAGINATION_SIZE } from './constants';
 import Export from './Export';
 import './ListTable.css';
 import LookUp from './LookUp';
@@ -133,7 +132,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       columnDefinition,
     } = this.props;
     resetListTableActionCreator();
-    setPageSizeActionCreator(PAGINATION_SIZE);
+    setPageSizeActionCreator(5);
     setPageNumberActionCreator(1);
     const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
     const totalRecordsResponse = await ipcRenderer.sendSync(
@@ -146,8 +145,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
-        ? `select count(*) as count from ${datasource.query} limit ${PAGINATION_SIZE} offset 0`
-        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${PAGINATION_SIZE} offset 0`,
+        ? `select count(*) as count from ${datasource.query} limit ${5} offset 0`
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${5} offset 0`,
     );
     const lookupTables: any = {};
     await columnDefinition.forEach(async (column) => {
@@ -160,7 +159,6 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             select lookup_union.${column.lookup_definition.column_name}, lookup_union.${column.lookup_definition.return_column} from list_source left join lookup_union on list_source.${column.field_name} = lookup_union.${column.lookup_definition.column_name}`
             : '',
         );
-        console.log(resp);
         lookupTables[column.field_name] = resp;
       }
     });
@@ -201,11 +199,11 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
               datasource.query +
               this.generateSqlWhereClause(filters) +
               orderSqlTxt +
-              ` limit ${pageSize} offset ${newPageNumber - 1}`
+              ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`
           : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
               this.generateSqlWhereClause(filters) +
               orderSqlTxt +
-              ` limit ${pageSize} offset ${newPageNumber - 1}`,
+              ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`,
       );
       setPageNumberActionCreator(newPageNumber);
       this.setState({
@@ -276,8 +274,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                   <TableBody>
                     {this.state &&
                       this.state.tableData &&
-                      this.state.tableData.slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage)
-                      .map((rowObj, rowIndex: number) => (
+                      this.state.tableData.map((rowObj, rowIndex: number) => (
                         <TableRow key={'table-row-' + rowIndex}>
                           {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
@@ -330,7 +327,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={this.state.tableData.length}
+              count={this.props.totalRecords}
               rowsPerPage={this.state.rowsPerPage}
               page={this.state.page}
               onChangePage={this.handleChangePage}
@@ -345,12 +342,15 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   private handleChangePage = (event: unknown, newPage: number) => {
     // setPage(newPage);
     console.log(event);
+    this.props.setPageNumberActionCreator(newPage + 1);
     this.setState({
       page: newPage,
     })
   };
 
   private handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.setPageSizeActionCreator(parseInt(event.target.value, 10));
+    this.props.setPageNumberActionCreator(1);
     this.setState({
       rowsPerPage: parseInt(event.target.value, 10),
       page: 0,

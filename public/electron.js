@@ -93,7 +93,6 @@ function afterInstallation () {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     fs.unlink(path.join(app.getPath("userData"), DB_NAME),function(err){
       if(err) return console.log(err);
-      console.log('file deleted successfully');
     }); 
     db.close();
   } catch (err) {
@@ -316,7 +315,7 @@ const fetchAppDefinition = (event) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     // eslint-disable-next-line no-param-reassign
-    event.returnValue = db.prepare('SELECT definition from app where app_id=2').get().definition;
+    event.returnValue = db.prepare('SELECT definition from app where app_id=1').get().definition;
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -746,9 +745,9 @@ const updateAppDefinition = (appDefinition) => {
 
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 2');
-    layoutDeleteQuery.run();
-    const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(2, ?,?)');
+    // const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 2');
+    // layoutDeleteQuery.run();
+    const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
     newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
     db.close()
   } catch (err) {
@@ -946,8 +945,6 @@ const startAppSync = (event, name) => {
       ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
-          let message = 'done';
-          mainWindow.send('formSyncComplete', message);
           if (formConfigRes.data) {
             if (formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
@@ -968,7 +965,7 @@ const startAppSync = (event, name) => {
             });
           }
           if (moduleListRes.data) {
-            const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 1');
+            const layoutDeleteQuery = db.prepare('DELETE FROM app');
             
             try {
               layoutDeleteQuery.run();
@@ -979,8 +976,8 @@ const startAppSync = (event, name) => {
             db.prepare('DELETE FROM module_image').run();
             populateModuleImage(moduleListRes.data);
             populateCatchment(moduleListRes.data.catchment_area);
-            const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
-            newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
+            // const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
+            // newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
             updateAppDefinition(moduleListRes.data);
           }
           if (formListRes.data) {
@@ -1040,8 +1037,8 @@ const startAppSync = (event, name) => {
             }
           }
           // eslint-disable-next-line no-param-reassign
-          // let message = "done";
-          // mainWindow.send('formSyncComplete', message);
+          let message = 'done';
+          mainWindow.send('formSyncComplete', message);
           db.close();
         }),
       )

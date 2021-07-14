@@ -62,8 +62,7 @@ function Header(props: HeaderProps) {
     }
     setSyncOverlayHandler(true);
     await delay(500);
-    const response = await dataSync();
-    console.log('check response', response);
+    await dataSync();
     await delay(1000);
     setSyncOverlayHandler(false);
   };
@@ -91,13 +90,10 @@ function Header(props: HeaderProps) {
       handleMobileMenuClose();
     }
     if (props.pathName.includes('form') || props.pathName.includes('list')) {
-      console.log('goto menu');
       props.redirectToMenu();
     } else if (props.pathName.includes('submittedDetails')) {
-      console.log('another');
       props.redirectToSubmitted();
     } else {
-      console.log('set previous');
       props.setPrevMenuActionCreator();
     }
   };

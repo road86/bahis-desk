@@ -34,7 +34,6 @@ function FollowUpTable(props: ListProps) {
       props.detailsPk.form_field,
       props.detailsPkValue,
     );
-    console.log(tableData);
     setTableData(tableData.fetchedRows);
   }
 
@@ -126,7 +125,6 @@ function FollowUpTable(props: ListProps) {
   }
 
   React.useEffect(() => {
-    console.log('call check');
     comUpdate();
   }, [])
 
@@ -149,80 +147,80 @@ function FollowUpTable(props: ListProps) {
 
   return (
     <React.Fragment>
-      {tableData && tableData.length && (
+      {tableData && tableData.length ? (
         <Accordion defaultExpanded>
-            <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-                >
-                    {props.formTitle}
-            </AccordionSummary>
-              <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
-                  <TableContainer style={{ padding: 15 }}>
-                    <Table>
-                      <TableHead>
-                      <TableRow>
-                          {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                          if (isColumnObj(singleCol)) {
-                              return (
-                              <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                                  {singleCol.sortable ? (
-                                  <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                                  ) : (
-                                  singleCol.label[appLanguage]
-                                  )}
-                              </TableCell>
-                              );
-                          } else {
-                              return (
-                              <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
-                                  {singleCol.label[appLanguage]}
-                              </TableCell>
-                              );
-                          }
-                          })}
-                      </TableRow>
-                      </TableHead>
-                      <TableBody>
-                      {tableData && tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                          .map((rowObj: any, rowIndex: number) => (
-                          <TableRow key={'table-row-' + rowIndex}>
-                              {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                              isColumnObj(colObj) ? (
-                                  <TableCell key={'data-field-' + colIndex}>
-                                  {rowObj[colObj.field_name]}
-                                  </TableCell>
-                              ) : (
-                                  <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
-                                  {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                      return (
-                                          <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}>
-                                              <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                          </Link>
-                                      )
-                                  })}
-                                  </TableCell>
-                              ),
-                              )}
-                          </TableRow>
-                          ))}
-                      </TableBody>
-                  </Table>
-                  </TableContainer>
-              </AccordionDetails>
-            <AccordionActions>
-            <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={tableData.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-            </AccordionActions>
-        </Accordion>
-      )}
+          <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+              >
+                  {props.formTitle}
+          </AccordionSummary>
+            <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
+                <TableContainer style={{ padding: 15 }}>
+                  <Table>
+                    <TableHead>
+                    <TableRow>
+                        {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                        if (isColumnObj(singleCol)) {
+                            return (
+                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                                {singleCol.sortable ? (
+                                <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
+                                ) : (
+                                singleCol.label[appLanguage]
+                                )}
+                            </TableCell>
+                            );
+                        } else {
+                            return (
+                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
+                                {singleCol.label[appLanguage]}
+                            </TableCell>
+                            );
+                        }
+                        })}
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    {tableData ? tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map((rowObj: any, rowIndex: number) => (
+                        <TableRow key={'table-row-' + rowIndex}>
+                            {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                            isColumnObj(colObj) ? (
+                                <TableCell key={'data-field-' + colIndex}>
+                                {rowObj[colObj.field_name]}
+                                </TableCell>
+                            ) : (
+                                <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
+                                {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
+                                    return (
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}>
+                                            <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                        </Link>
+                                    )
+                                })}
+                                </TableCell>
+                            ),
+                            )}
+                        </TableRow>
+                        )) : <React.Fragment></React.Fragment> }
+                    </TableBody>
+                </Table>
+                </TableContainer>
+            </AccordionDetails>
+          <AccordionActions>
+          <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={tableData.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+          </AccordionActions>
+      </Accordion>
+      ): <React.Fragment></React.Fragment>}
     </React.Fragment>  
   );
 }

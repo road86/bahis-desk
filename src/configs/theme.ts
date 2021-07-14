@@ -147,10 +147,6 @@ export const theme = createMuiTheme({
           color: '#EBFDED !important',
         },
       },
-      // expanded: {
-      //   backgroundColor: '#8ac390 !important',
-      //   color: '#EBFDED important',
-      // }
     },
     MuiTableCell:{
       body: {
@@ -197,11 +193,6 @@ export const theme = createMuiTheme({
         color: '#EBFDED',
       },
     },
-    // MuiFormControl : {
-    //   root: {
-    //     minWidth: '100%',
-    //   },
-    // },
     MuiTablePagination: {
       caption: {
         color: '#222222',
@@ -210,21 +201,14 @@ export const theme = createMuiTheme({
         color: '#666666'
       }
     },
-    // Mui: {
-    //   disabled: {
-    //     color: '#666666',
-    //   }
-    // }
-    // MuiSelect: {
-    //   icon: {
-    //     fill: '#666666',
-    //   },
-    // },
-    // MuiFormLabel: {
-    //   root: {
-    //     color: '#666666',
-    //   },
-    // },
+    MuiPickersDay: {
+      day: {
+        color: '#a9a3a3',
+      },
+      current: {
+        color: '#649A6A',
+      },
+    },
     MuiButton: {
       root: {
         height: 40,
@@ -240,20 +224,6 @@ export const theme = createMuiTheme({
         color: '#FFFFFF',
       },
     },
-    // MuiPickersDay: {
-    //   root: {
-    //     color: red,
-    //     "&$disabled": {
-    //       color: grey,
-    //     },
-    //     "&$selected": {
-    //       backgroundColor: red,
-    //     },
-    //   },
-    //   today: {
-    //     color: red,
-    //   },
-    // },
     MuiRadio: {
       root: {
         color: '#EBFDED',
@@ -264,37 +234,5 @@ export const theme = createMuiTheme({
         color: '#222222',
       },
     },
-    // MuiTabs: {
-    //   flexContainer: {
-    //     justifyContent: 'flex-end',
-    //   },
-    //   indicator: {
-    //     backgroundColor: '#FFFFFF',
-    //   },
-    // },
-    // MuiTab: {
-    //   textColorPrimary: {
-    //     color: '#777171',
-    //     backgroundColor: '#EFEFEF',
-    //     margin: 10,
-    //     border: 'none',
-    //     '&$selected': { color: '#FFFFFF', backgroundColor: '#44B4DB' },
-    //   },
-    // },
-    // MuiTableFooter: {
-    //   root: {
-    //     justifyContent: 'flex-end',
-    //   },
-    // },
-    // MuiIconButton: {
-    //   root: {
-    //     color: '#888888',
-    //   },
-    // },
-    // MuiPopover: {
-    //   paper: {
-    //     minWidth: '50%',
-    //   },
-    // },
   },
 });

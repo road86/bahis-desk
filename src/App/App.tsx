@@ -97,7 +97,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
             setCsv({
               csv: tmpCsv,
             });
-            console.log(tmpCsv);
             ipcRenderer.send('write-geo-object', tmpCsv);
           }
         }
@@ -106,13 +105,11 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   };
 
   const fetchGeoLocation = async () => {
-    console.log(GEOLOC_ENDPOINT);
-
     const JSZip = require('jszip');
     const JSZipUtils = require('jszip-utils');
 
     JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
-      console.log(data, err);
+      console.log(err);
       JSZip.loadAsync(data).then((zip: any) => {
         const csvFiles = Object.keys(zip.files);
         writeCsvToObj(zip, csvFiles, 0, {});
@@ -162,9 +159,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const fetchLastSyncTime = async () => {
     const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
     //  setLastSync(syncTime);
-    console.log(syncTime.lastSync, syncTime.lastSync != 0);
     const time = syncTime.lastSync != 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
-    console.log(time);
     setLastSync(time);
   }
 
@@ -179,7 +174,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         }, 1000);
       }
     }, 3000)
-    console.log('current', location);
   }, []);
 
   const logout = () => {
@@ -191,10 +185,8 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   }
 
   const gotoSubmittedData = () => {
-    console.log('current app menu', props.currentMenu);
     if (props.currentMenu) {
       const xform_id = props.currentMenu.type === MODULE_TYPE && props.currentMenu.children[0].type === FORM_TYPE && props.currentMenu.children[0].xform_id;
-      console.log(xform_id);
       if (xform_id) {
         props.history.push(`/formlist/${xform_id}`);
       } else {

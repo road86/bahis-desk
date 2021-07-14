@@ -26,7 +26,6 @@ class LookUp extends React.Component<LookUpProps> {
       const uniqData = rowValues[columnDef.field_name];
       const uniqValues = lookupTable.find((obj: any) => obj[`${columnDef.lookup_definition?.column_name}`] == uniqData);
       // return <span>{uniqValues.toString()}</span>;     
-      console.log(lookupTable, uniqValues[`${columnDef.lookup_definition?.return_column}`]);
       return <span>{uniqValues[`${columnDef.lookup_definition?.return_column}`]}</span>;
     }
     return null;

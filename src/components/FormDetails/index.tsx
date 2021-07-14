@@ -25,7 +25,6 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
   const comUpdate = async() => {
     const { match } = props;
     const listId = match.params.id || '';
-    console.log(listId);
     const formData = await ipcRenderer.sendSync('form-details', listId);
     setUserData(formData.formDetails);
     let {data} = formData.formDetails

@@ -126,7 +126,6 @@ export default function reducer(state: ImmutableMenuState = initialState, action
       });
     case SET_PREV_MENU:
       const tmpPrev = state.getIn(['prevMenu']);
-      console.log('prev menu', tmpPrev);
       if (tmpPrev.length > 0) {
         return SeamlessImmutable({
           ...state,

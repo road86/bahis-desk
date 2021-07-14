@@ -33,9 +33,7 @@ class Form extends React.Component<formProps, FormState> {
   public async componentDidMount() {
     const { match } = this.props;
     const formId = match.params.id || '';
-    console.log(formId);
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    console.log('formDefinitionObj', formDefinitionObj);
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
       this.setState({ formDefinition: definition, formChoices });
@@ -46,7 +44,6 @@ class Form extends React.Component<formProps, FormState> {
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
-        console.log('inputJson', inputJson);
         const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : this.generateUid();
         const { match } = this.props;
         const formId = match.params.id || '';
@@ -64,7 +61,6 @@ class Form extends React.Component<formProps, FormState> {
     };
     const { formDefinition, formChoices } = this.state;
     const { dataJson } = queryString.parse(this.props.location.search);
-    console.log(dataJson);
     const props = {
       csvList: formChoices ? JSON.parse(formChoices) : {},
       defaultLanguage: this.props.appLanguage,
@@ -82,8 +78,8 @@ class Form extends React.Component<formProps, FormState> {
       ],
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
+
     // const goBack = () => this.props.history.goBack();
-    console.log(formDefinition);
     const getOdkFormRenderer = () => {
       try {
         return (

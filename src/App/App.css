@@ -86,4 +86,5 @@ fieldset[disabled] .gatekeeper-btn.active {
 .sync-overlay {
   min-width: 100vh;
   min-height: 100vh;
+  overflow: hidden;
 }

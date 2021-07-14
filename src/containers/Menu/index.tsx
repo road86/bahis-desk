@@ -11,7 +11,7 @@ import { RouteComponentProps } from 'react-router-dom';
 // import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
-import { appSync, dataSync } from '../../helpers/utils';
+import { dataSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
   FORMLIST_TYPE,
@@ -59,7 +59,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 // class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
   const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
-  const [username, setUsername] = React.useState<string>('');
+  // const [username, setUsername] = React.useState<string>('');
   // const [appData, setAppData] = React.useState<any>({});
 
   const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
@@ -73,7 +73,6 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
       return <ListMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
     }
     if (menuItem.type === FORMLIST_TYPE) {
-      console.log(menuItem);
       return <SubmittedFormMenuItem menuItem={menuItem} appLanguage={appLanguage} />
     }
     return null;
@@ -96,30 +95,37 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     setAlertOpen(false);
   };
 
+  const appSync = async () => {
+    const user: any = await ipcRenderer.sendSync('fetch-username');
+    await ipcRenderer.send('start-app-sync', user.username);
+    ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+      console.log('check', event, args);
+      // return args;
+      if (args) {
+        const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+        props.setMenuItemActionCreator(JSON.parse(newMenuItem));
+      } else {
+        return false;
+      }
+      props.setSyncOverlayHandler(false);
+      setAlertOpen(true);
+      await delay(1000);
+      setAlertOpen(false);
+    });
+  };
+
   // tslint:disable-next-line: variable-name
   const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
     props.resetMenuActionCreator();
     // console.log(userName);
     props.setSyncOverlayHandler(true);
-    await delay(500);
     await appSync();
-    await delay(200);
-    const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-    // console.log(newMenuItem);
-    props.setMenuItemActionCreator(JSON.parse(newMenuItem));
-    await delay(300);
-    props.setSyncOverlayHandler(false);
-    await delay(200);
-    setAlertOpen(true);
-    await delay(1000);
-    setAlertOpen(false);
   };
 
   const compUpdate = async () => {
-    const user: any = await ipcRenderer.sendSync('fetch-username');
+    // const user: any = await ipcRenderer.sendSync('fetch-username');
     // this.setState({ username: user.username });
-    setUsername(user.username);
-    console.log('check app call', username);
+    // setUsername(user.username);
     const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');

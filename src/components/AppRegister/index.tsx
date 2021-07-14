@@ -44,7 +44,6 @@ interface stepperProps {
 
 const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
   const { step, userInput, setFieldValueHandler, submitted, handleSignin } = props;
-  console.log(submitted);
   switch (step) {
     case 0:
       return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted} />;
@@ -112,7 +111,7 @@ function AppRegister(props: any) {
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-      console.log('args', event, args);
+      console.log('check', event);
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
@@ -127,7 +126,6 @@ function AppRegister(props: any) {
 
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    console.log(user.username);
     setLoadComplete(false);
     await ipcRenderer.send('start-app-sync', user.username);
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {

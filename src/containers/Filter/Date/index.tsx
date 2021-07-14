@@ -44,6 +44,7 @@ export interface DateProps {
 class FilterDate extends React.Component<DateProps> {
   public componentDidMount() {
     const { filterItem, value } = this.props;
+    console.log(filterItem);
     this.props.setConditionValueActionCreator(
       filterItem.name,
       IN_BETWEEN_TYPE,
