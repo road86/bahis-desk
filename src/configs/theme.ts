@@ -156,6 +156,11 @@ export const theme = createMuiTheme({
         backgroundColor: '#649A6A'
       }
     },
+    MuiTableSortLabel : {
+        icon: {
+          color: '#EBFDED !important'
+        }
+    },
     MuiStepIcon: {
       active: {
         color: '#649A6A',

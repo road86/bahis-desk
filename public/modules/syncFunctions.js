@@ -5,9 +5,10 @@ const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
 const path = require('path');
 // const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043';
-const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; // QA
+const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043'; // QA
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
+const CSV_DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
 
 const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila TEXT NOT NULL, role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
@@ -17,6 +18,99 @@ CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, subm
 CREATE TABLE app_log( time TEXT);
 CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT NOT NULL, image_name TEXT NOT NULL, directory_name TEXT );
 CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
+
+/** fetches data from server to app
+ * @returns {string} - success if successful; otherwise, failed
+ */
+ const fetchCsvDataFromServer = async (username) => {
+  console.log('fetch call', username);
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
+    const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
+    const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
+    console.log(url);
+    await axios
+      .get(url)
+      .then((response) => {
+        const newDataRows = response.data;
+        newDataRows.forEach((newDataRow) => {
+          // eslint-disable-next-line no-console
+          if (newDataRow.data) {
+            deleteCSVDataWithPk(newDataRow.primary_key, newDataRow, newDataRow.table_name);
+            saveNewCSVDataToTable(newDataRow);
+          }
+        });
+        const newLayoutQuery = db.prepare('INSERT INTO csv_sync_log(time) VALUES(?)');
+        newLayoutQuery.run(Math.round(new Date().getTime()));
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log('axios error', error);
+        return 'failed';
+      });
+    return 'success';
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log('fetch err', err);
+    return 'failed';
+  }
+};
+
+/** deletes the entry from data table and related tables if exist
+ * @param {string} pkList
+ * @param {string} rowData
+ */
+ const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    rowData.data.forEach((rowObj) => {
+      let sqlWhereClause = `delete from ${rowData.table_name} where `;
+      pkList.forEach((filterName) => {
+        if (rowObj[filterName] !== '') {
+          sqlWhereClause = `${sqlWhereClause} ${filterName} = ${rowObj[filterName]} and `;
+        }
+      });
+      const dataDeleteStmt = sqlWhereClause !== '' ? sqlWhereClause.slice(0, -4) : '';
+      // const dataDeleteStmt = db.prepare(query);
+      console.log(dataDeleteStmt);
+      db.prepare(dataDeleteStmt).run();
+    })
+    db.close();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
+/** saves new cvs data to table
+ * @param {object} rowData - the userinput object containing field values that need to be saved
+ */
+const saveNewCSVDataToTable = (rowData) => {
+  try {    
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    let keys = '';
+    let values = '';
+    Object.keys(rowData.data[0]).forEach((filterName) => {
+      if (rowData.data[filterName] !== '') {
+        keys = `${keys}${filterName}, `;
+        values = `${values}@${filterName}, `
+      }
+    });
+    let sqlWhereClause = `INSERT INTO ${rowData.table_name} (${keys.slice(0, -2)}) VALUES (${values.slice(0, -2)})`;
+    const insertMany = db.transaction((rows) => {
+      // console.log(geos);
+      for (const row of rows)
+        db.prepare(sqlWhereClause).run(row);
+    });
+
+    insertMany(rowData.data);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+};
+
 
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
@@ -400,5 +494,6 @@ module.exports = {
   sendDataToServer,
   parseAndSaveToFlatTables,
   queries,
-  deleteDataWithInstanceId
+  deleteDataWithInstanceId,
+  fetchCsvDataFromServer
 };

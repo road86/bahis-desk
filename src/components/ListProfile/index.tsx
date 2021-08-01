@@ -107,7 +107,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
           if (actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)) {
             return <FollowUpTable
             key={actionIndex}
-            formTitle={actionObj.form_title}
+            formTitle={actionObj.label}
             detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
             detailsPkValue={detailsPkValue}
             formId={actionObj.xform_id}

@@ -1,15 +1,15 @@
-import { AccordionActions, makeStyles, TablePagination, useTheme } from '@material-ui/core';
+import { AccordionActions, makeStyles, TablePagination, TableSortLabel, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Accordion, AccordionDetails, AccordionSummary, TableContainer, Button, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
-// import { Col, Row } from 'reactstrap';
+// import { Button as ReactButton } from 'reactstrap';
 // import ListTable from '../../containers/ListTable';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { listPageStyles } from './style';
 import { Link } from 'react-router-dom';
 import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../../containers/ListTable';
-import OrderBy from '../../containers/ListTable/OrderBy';
+// import OrderBy from '../../containers/ListTable/OrderBy';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -26,6 +26,8 @@ interface ListProps extends RouteComponentProps<ListURLParams> {
   appLanguage: string;
 }
 
+type Order = 'asc' | 'desc';
+
 function SubmittedForm(props: ListProps) {
   const [formId, setFormId] = React.useState<string>('');
   const [tableData, setTableData] = React.useState<any>([]);
@@ -36,18 +38,17 @@ function SubmittedForm(props: ListProps) {
   const [page, setPage] = React.useState<number>(0);
   const [exportableColumn, setExportableColumn] = React.useState([]);
   const [userList, setUserList] = React.useState<any[]>([]);
-  // const [fieldNames, setFieldNames] = React.useState<any[]>([]);
-  // const [selectedField, setSelectedField] = React.useState<string>('');
-  // const [searchText, setSearchText] = React.useState<string>('');
+  const [fieldNames, setFieldNames] = React.useState<any[]>([]);
+  const [order, setOrder] = React.useState<Order>('desc');
 
   const comUpdate = async () => {
     const { match } = props;
     const formId = match.params.id || '';
-    // const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    // if (formDefinitionObj != null) {
-    //   const { field_names } = formDefinitionObj;
-    //   setFieldNames(JSON.parse(field_names));
-    // }
+    const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
+    if (formDefinitionObj != null) {
+      const { field_names } = formDefinitionObj;
+      setFieldNames(JSON.parse(field_names));
+    }
     fetchTableData(formId);
     setFormId(formId);
     updateColumnDefinition(formId);
@@ -75,7 +76,7 @@ function SubmittedForm(props: ListProps) {
           "Bangla": "ID",
           "English": "ID"
         },
-        "sortable": true,
+        "sortable": false,
         "hidden": false,
         "field_name": "data_id"
       },
@@ -87,7 +88,7 @@ function SubmittedForm(props: ListProps) {
           "Bangla": "Submitted By",
           "English": "Submitted By"
         },
-        "sortable": true,
+        "sortable": false,
         "hidden": false,
         "field_name": "submitted_by"
       },
@@ -111,7 +112,7 @@ function SubmittedForm(props: ListProps) {
           "Bangla": "Data",
           "English": "Data"
         },
-        "sortable": true,
+        "sortable": false,
         "hidden": true,
         "field_name": "data"
       },
@@ -123,7 +124,7 @@ function SubmittedForm(props: ListProps) {
           "Bangla": "Status",
           "English": "Status"
         },
-        "sortable": true,
+        "sortable": false,
         "hidden": true,
         "field_name": "status"
       },
@@ -210,11 +211,26 @@ function SubmittedForm(props: ListProps) {
     setUpdating(false);
   }
 
+  function stableSort<T>(array: T[]) {
+    let stabilizedThis;
+    if (order === 'asc') {
+      stabilizedThis = array.sort((a: any,b: any) => new Date(a.submission_date).getTime() - new Date(b.submission_date).getTime())
+    } else {
+      stabilizedThis = array.sort((a: any,b: any) => new Date(b.submission_date).getTime() - new Date(a.submission_date).getTime())
+    }
+    return stabilizedThis;
+  }
+
   const theme = useTheme();
   const useStyles = makeStyles(listPageStyles(theme));
   const classes = useStyles();
 
   const {appLanguage} = props;
+
+  const handleRequestSort = () => {
+    const isAsc = order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+  };
 
   return (
     <div>
@@ -223,7 +239,7 @@ function SubmittedForm(props: ListProps) {
         <h3 className={classes.header}> Submitted List </h3>
       </div>
       <hr className={classes.hrTag}/>
-      <Filter tableData={tableData} userList={userList} submitFilter={filterData} resetFilter={resetFilter} setUpdater={setUpdating}></Filter>
+      <Filter formId={formId} fieldNames={fieldNames} tableData={tableData} userList={userList} submitFilter={filterData} resetFilter={resetFilter} setUpdater={setUpdating}></Filter>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcel(tableData, exportableColumn, appLanguage)}>
           <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX
@@ -255,128 +271,89 @@ function SubmittedForm(props: ListProps) {
               </Typist>
             </div> : 
             <div style={{ padding: 15 }}>
-              {/* <Grid item={true} lg={12} xs={12} style={{ display: 'flex', alignItems: 'center', paddingBottom: 15 }}>
-                <Grid item={true} lg={4} xs={10}>
-                  <TextField
-                    style={{ display: 'flex' }}
-                    select={true}
-                    required={true}
-                    name={selectedField}
-                    label="Select Field Name"
-                    variant="outlined"
-                    onChange={(e: any) => setSelectedField(e.target.value)}
-                    value={selectedField || ''}
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {fieldNames.map((option: string) => (
-                      <MenuItem key={option} value={option}>
-                        {option.replace('/', ' ').replace('_', ' ').toUpperCase()}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item={true} lg={4} xs={10} style={{ paddingLeft: 20 }}>
-                  <TextField
-                      style={{ display: 'flex' }}
-                      required={true}
-                      disabled={selectedField == ''}
-                      name={searchText}
-                      label={`Search ${selectedField.replace('/', ' ').replace('_', ' ').toUpperCase()}`}
-                      variant="outlined"
-                      onChange={(e: any) => setSearchText(e.target.value)}
-                      value={searchText || ''}
-                    >
-                    </TextField>
-                </Grid>
-                <Grid item={true} lg={4} xs={10} style={{ paddingLeft: 20 }}>
-                  <ReactButton className={classes.submitButton} size="sm" onClick={filterData} disabled={!searchText }>
-                    Submit
-                  </ReactButton>
-                  <ReactButton className={classes.resetButton} size="sm" onClick={() => {
-                    setSelectedField('');
-                    setSearchText('');
-                    setTableData(filteredData);
-                  }}>
-                    Reset
-                  </ReactButton>
-                </Grid>
-              </Grid> */}
               <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                      if (isColumnObj(singleCol)) {
-                        return (
-                          <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                            {singleCol.sortable ? (
-                              <OrderBy colDefifinitionObj={singleCol} appLanguage={appLanguage} />
-                            ) : (
-                              singleCol.label[appLanguage]
-                            )}
-                          </TableCell>
-                        );
-                      } else {
-                        return (
-                          <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
-                            {singleCol.label[appLanguage]}
-                          </TableCell>
-                        );
-                      }
-                    })}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredData && filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((rowObj: any, rowIndex: number) => (
-                      <TableRow key={'table-row-' + rowIndex}>
-                        {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                          isColumnObj(colObj) ? (
-                            <TableCell key={'data-field-' + colIndex}>
-                              {rowObj[colObj.field_name]}
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                        if (isColumnObj(singleCol)) {
+                          return (
+                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                              <TableSortLabel
+                                active={singleCol.sortable}
+                                direction={singleCol.sortable ? order : 'asc'}
+                                className="sortable-column" 
+                                onClick={handleRequestSort}
+                              >
+                                {singleCol.label[appLanguage]}
+                                {/* {orderBy === headCell.id ? (
+                                  <span className={classes.visuallyHidden}>
+                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                  </span>
+                                ) : null} */}
+                              </TableSortLabel>
+                              
                             </TableCell>
-                          ) : (
-                            <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
-                              {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
-                                  if (actionObj.form_title === 'edit') {
+                          );
+                        } else {
+                          return (
+                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
+                              {singleCol.label[appLanguage]}
+                            </TableCell>
+                          );
+                        }
+                      })}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredData && stableSort(filteredData).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((rowObj: any, rowIndex: number) => (
+                        <TableRow key={'table-row-' + rowIndex}>
+                          {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                            isColumnObj(colObj) ? (
+                              <TableCell key={'data-field-' + colIndex}>
+                                {rowObj[colObj.field_name]}
+                              </TableCell>
+                            ) : (
+                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
+                                {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
+                                  if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
+                                    if (actionObj.form_title === 'edit') {
+                                      return(
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                                        >
+                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                        </Link>
+                                      )
+                                    } else {
+                                      return(
+                                        <Button 
+                                          key={'action-field' + actionIndex}  
+                                          variant="contained" 
+                                          onClick={() => deleteData(rowObj['instanceid'].toString())}
+                                          color={'secondary'} 
+                                          style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
+                                          {actionObj.label[appLanguage]} 
+                                        </Button>
+                                      )
+                                    }
+                                  } else if(actionObj.form_title === 'view'){
                                     return(
-                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
                                       >
                                         <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                       </Link>
                                     )
-                                  } else {
-                                    return(
-                                      <Button 
-                                        key={'action-field' + actionIndex}  
-                                        variant="contained" 
-                                        onClick={() => deleteData(rowObj['instanceid'].toString())}
-                                        color={'secondary'} 
-                                        style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
-                                        {actionObj.label[appLanguage]} 
-                                      </Button>
-                                    )
                                   }
-                                } else if(actionObj.form_title === 'view'){
-                                  return(
-                                    <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
-                                    >
-                                      <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                    </Link>
-                                  )
-                                }
-                              })}
-                            </TableCell>
-                          ),
-                        )}
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                                })}
+                              </TableCell>
+                            ),
+                          )}
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </div>
           }
         </AccordionDetails>

@@ -13,7 +13,7 @@ interface ListProps {
     detailsPk: any;
     detailsPkValue: string;
     appLanguage: string;
-    formTitle: string;
+    formTitle: any;
 }
 
 function FollowUpTable(props: ListProps) {
@@ -33,6 +33,7 @@ function FollowUpTable(props: ListProps) {
       formId.toString(),
       props.detailsPk.form_field,
       props.detailsPkValue,
+      'equal'
     );
     setTableData(tableData.fetchedRows);
   }
@@ -153,7 +154,7 @@ function FollowUpTable(props: ListProps) {
               aria-controls="panel1a-content"
               id="panel1a-header"
               >
-                  {props.formTitle}
+                  {props.formTitle[appLanguage]}
           </AccordionSummary>
             <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
                 <TableContainer style={{ padding: 15 }}>

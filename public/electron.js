@@ -12,13 +12,13 @@ const { autoUpdater } = require('electron-updater');
 const { random } = require ('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
-const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, queries } = require('./modules/syncFunctions');
+const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
 
-// SERVER URLS
-// const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043'; //dev
-const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; //qa
+// SERVER URLShttp://dyn-bahis-dev.mpower-social.com:8043/
+const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043'; //dev
+// const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; //qa
 // const SERVER_URL = 'http://192.168.19.16:8043';
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
@@ -50,6 +50,7 @@ const FETCH_LIST_FOLLOWUP = 'fetch-list-followup'
 const QUERY_DATA_CHANNEL = 'fetch-query-data';
 const START_APP_CHANNEL = 'start-app-sync';
 const DATA_SYNC_CHANNEL = 'request-data-sync';
+const CSV_DATA_SYNC_CHANNEL = 'csv-data-sync';
 const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
 const APP_RESTART_CHANNEL = 'request-app-restart';
 const SIGN_IN = 'sign-in';
@@ -436,11 +437,15 @@ const fetchFormListDefinition = (event, formId) => {
   }
 }
 
-const fetchFollowupFormData = (event, formId, detailsPk, pkValue) => {
+const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') = '" + pkValue +"'";
-    console.log(query);
+    let query;
+    if (constraint == 'equal') {
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') = '" + pkValue +"'";
+    } else {
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') LIKE '%" + pkValue +"%'";
+    }
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = {fetchedRows};
@@ -1036,6 +1041,7 @@ const startAppSync = (event, name) => {
               });
             }
           }
+          csvDataSync(name);
           // eslint-disable-next-line no-param-reassign
           let message = 'done';
           mainWindow.send('formSyncComplete', message);
@@ -1074,8 +1080,32 @@ const startAppSync = (event, name) => {
 const requestDataSync = async (event, username) => {
   await fetchDataFromServer(username);
   const msg = await sendDataToServer(username);
+  csvDataSync(username);
   mainWindow.send('dataSyncComplete', msg);
   event.returnValue = msg;
+};
+
+/** starts csv data sync on request event
+ * @param {IpcMainEvent} event - the default ipc main event
+ * @returns {string} - success when completes; otherwise, failed if error occurs
+ */
+const csvDataSync = async (username) => {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"';
+    const info = db.prepare(tableExistStmt).get();
+    if(info && info.name == 'csv_sync_log') {
+      fetchCsvDataFromServer(username);
+    } else {
+      console.log('info', info);
+      db.prepare('CREATE TABLE csv_sync_log( time TEXT)').run();
+      fetchCsvDataFromServer(username);
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log('table create err', err);
+    return 'failed';
+  }
 };
 
 const deleteData = (event, instanceId, formId) => {
@@ -1110,6 +1140,7 @@ ipcMain.on(FETCH_LIST_FOLLOWUP, fetchFollowupFormData);
 ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
 ipcMain.on(START_APP_CHANNEL, startAppSync);
 ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
+ipcMain.on(CSV_DATA_SYNC_CHANNEL, csvDataSync);
 ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
 ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
 ipcMain.on(SIGN_IN, signIn);

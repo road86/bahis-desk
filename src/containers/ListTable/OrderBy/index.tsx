@@ -17,6 +17,7 @@ export interface OrderByProps {
 class OrderBy extends React.Component<OrderByProps> {
   public render() {
     const { order, colDefifinitionObj, appLanguage } = this.props;
+    console.log(order, colDefifinitionObj);
     if (colDefifinitionObj.sortable) {
       return (
         <div className="sortable-column" onClick={this.onClickHandler}>

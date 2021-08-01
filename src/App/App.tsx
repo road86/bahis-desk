@@ -117,44 +117,44 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     });
   };
 
-  const autoUpdateCheck = () => {
-    ipcRenderer.on('checking_for_update', () => {
-      console.log('ipcRenderer on checking_for_update');
-      ipcRenderer.removeAllListeners('checking_for_update');
-      // message.innerText = 'NO update is available';
-      // notification.classList.remove('hidden');
-    });
+  // const autoUpdateCheck = () => {
+  //   ipcRenderer.on('checking_for_update', () => {
+  //     console.log('ipcRenderer on checking_for_update');
+  //     ipcRenderer.removeAllListeners('checking_for_update');
+  //     // message.innerText = 'NO update is available';
+  //     // notification.classList.remove('hidden');
+  //   });
 
-    ipcRenderer.on('update_not_available', () => {
-      console.log('ipcRenderer on update_not_available');
-      ipcRenderer.removeAllListeners('update_not_available');
-      // message.innerText = 'NO update is available';
-      // setLoading(false);
-      // notification.classList.remove('hidden');
-    });
+  //   ipcRenderer.on('update_not_available', () => {
+  //     console.log('ipcRenderer on update_not_available');
+  //     ipcRenderer.removeAllListeners('update_not_available');
+  //     // message.innerText = 'NO update is available';
+  //     // setLoading(false);
+  //     // notification.classList.remove('hidden');
+  //   });
 
-    ipcRenderer.on('update_available', () => {
-      console.log('ipcRenderer on update_available');
-      ipcRenderer.removeAllListeners('update_available');
-    });
+  //   ipcRenderer.on('update_available', () => {
+  //     console.log('ipcRenderer on update_available');
+  //     ipcRenderer.removeAllListeners('update_available');    
+  //   });
 
-    ipcRenderer.on('update-downloading', () => {
-      console.log('ipcRenderer on update_downloading');
-      ipcRenderer.removeAllListeners('update_downloading');
-    });
+  //   ipcRenderer.on('update-downloading', () => {
+  //     console.log('ipcRenderer on update_downloading');
+  //     ipcRenderer.removeAllListeners('update_downloading');
+  //   });
 
-    ipcRenderer.on('update_downloaded', () => {
-      console.log('ipcRenderer on update_downloaded');
-      ipcRenderer.removeAllListeners('update_downloaded');
-      ipcRenderer.removeAllListeners('download_progress');
-      // setLoading(false);
-    });
+  //   ipcRenderer.on('update_downloaded', () => {
+  //     console.log('ipcRenderer on update_downloaded');
+  //     ipcRenderer.removeAllListeners('update_downloaded');
+  //     ipcRenderer.removeAllListeners('download_progress');
+  //     // setLoading(false);
+  //   });
 
-    ipcRenderer.on('download_progress', function (event: any, data: any) {
-      console.log('ipcRenderer on download_progress', data, event);
-      // setPercentage(data);
-    });
-  };
+  //   ipcRenderer.on('download_progress', function (event: any, data: any) {
+  //     console.log('ipcRenderer on download_progress', data, event);
+  //     // setPercentage(data);
+  //   });
+  // };
 
   const fetchLastSyncTime = async () => {
     const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
@@ -168,7 +168,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       fetchLastSyncTime();
       if (navigator.onLine) {
         // fetchGeoLocation();
-        autoUpdateCheck();
+        // autoUpdateCheck();
         setTimeout(() => {
           fetchGeoLocation();
         }, 1000);
