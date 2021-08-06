@@ -46,8 +46,6 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     setActionDefinition(action ? action.action_definition : []); 
   }
 
-  console.log(detailsPkValue, detailsPk);
-
   React.useEffect(()=> {
       comUpdate();
   }, []);

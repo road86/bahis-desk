@@ -79,9 +79,6 @@ class Form extends React.Component<formProps, FormState> {
       userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
     };
 
-    // console.log(JSON.stringify(props.csvList));
-    console.log(JSON.stringify(props.userInputJson));
-
     // const goBack = () => this.props.history.goBack();
     const getOdkFormRenderer = () => {
       try {

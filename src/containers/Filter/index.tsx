@@ -95,7 +95,6 @@ function Filter(props: FilterProps) {
         );
       }
       case FILTER_DATE_TYPE: {
-        console.log(filterItem);
         return (
           <FilterDate
             key={'filter-' + filterIndex}
@@ -131,7 +130,6 @@ function Filter(props: FilterProps) {
 
   // tslint:disable-next-line: variable-name
   const filterHandler = (_event: any) => {
-    console.log(props.filterValue);
     props.onSubmitHandler(props.filterValue);
   };
 

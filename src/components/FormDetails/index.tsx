@@ -27,9 +27,46 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
     const listId = match.params.id || '';
     const formData = await ipcRenderer.sendSync('form-details', listId);
     setUserData(formData.formDetails);
-    let {data} = formData.formDetails
+    let {data, form_id} = formData.formDetails;
     data = JSON.parse(data);
-    setFormData(Object.entries(data));
+    const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', form_id);
+    if (formDefinitionObj != null) {
+      const { definition, field_names } = formDefinitionObj;
+      createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data);
+    }
+    // setFormData(Object.entries(data));
+  }
+
+  const createFormKeyValuePair = (definition: any, fieldNames: any, data: any) => {
+    const formData: any[] = [];
+    const userInput = Object.entries(data);
+    fieldNames.forEach((element: any) => {
+      const exist = userInput.find((obj: any) => obj[0] == element);
+      if (exist) {
+        let formField: any = {}
+        if (exist[0].includes('/')) {
+          const fields = exist[0].split('/');
+          let children = definition.children
+          for (let i=0;i <= fields.length - 2; i++) {
+            const groupObj = children.find((obj: any) => obj.name == fields[i]);
+            if (groupObj) {
+              children = groupObj.children;
+            }
+          }
+          formField = children.find((obj: any) => obj.name == fields[fields.length-1]);
+        } else {
+          formField = definition.children.find((obj: any) => obj.name == exist[0]);
+        }
+        if (formField) {
+          formData.push({
+            label: formField.label,
+            value: typeof exist[1] == 'string' ? exist[1] : JSON.stringify(exist[1]),
+          })
+          console.log(formField.label, exist[1]);
+        }
+      }
+    });
+    setFormData(formData);
   }
 
   React.useEffect(()=> {
@@ -108,17 +145,19 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
                 </TableHead>
                 <TableBody>
                   {formData.length && formData.map((rowObj:any, index: number) => {
-                     return (
+                    if (rowObj.label) {
+                      return (
                         <TableRow>
-                          <TableCell key={'col-label-1' + index} className="initialism text-uppercase text-nowrap"  style={{ verticalAlign: 'baseline'}}>
-                            {rowObj[0]}
+                          <TableCell key={'col-label-1' + index} className="text-nowrap"  style={{ verticalAlign: 'baseline'}}>
+                            {rowObj.label['English']}
                           </TableCell>
                           <TableCell key={'col-label-2' + index} className="initialism text-uppercase" style={{ wordBreak: 'break-word'}}>
-                            {typeof rowObj[1] == 'string' ? rowObj[1] : JSON.stringify(rowObj[1])}
+                            {rowObj.value}
                           </TableCell>
                         </TableRow>  
                       )
-                    })}
+                    }
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
