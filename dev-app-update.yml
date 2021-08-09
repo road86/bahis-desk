@@ -1,7 +1,7 @@
 provider: "github"
-owner: "ShahnazKabir"
-repo: "electron-update"
+owner: "bahisMP"
+repo: "bahis_mpower"
 private: true
-token: "25c46e4f125abf8e27f4a7f4b6aba76cb80e1bfb"
+token: "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"
 releaseType: release
 electronVersion: 6.1.12

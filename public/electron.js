@@ -124,7 +124,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-  // autoUpdater.checkForUpdates();
+  autoUpdater.checkForUpdates();
   mainWindow.on('closed', () => {
     mainWindow = null;
   });

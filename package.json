@@ -103,7 +103,17 @@
       "menuCategory": "bahis",
       "license": "license.txt",
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "bahisMP",
+        "repo": "bahis_mpower",
+        "private": true,
+        "token": "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",
+        "releaseType": "release"
+      }
+    ]
   },
   "scripts": {
     "react-start": "react-scripts start",
@@ -113,7 +123,7 @@
     "electron-build": "electron-builder",
     "build": "yarn react-build && yarn electron-build",
     "release": "yarn react-build && yarn electron-build && yarn build --p always --win",
-    "win-build": "yarn react-build && yarn electron-build --win",
+    "win-build": "yarn react-build && yarn electron-build && yarn build --p always --win",
     "linux-build": "yarn react-build && yarn electron-build --linux",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
