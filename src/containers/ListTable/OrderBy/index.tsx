@@ -42,13 +42,13 @@ class OrderBy extends React.Component<OrderByProps> {
       this.props.setOrderValueActionCreator(
         colDefifinitionObj.field_name,
         'DESC',
-        `${colDefifinitionObj.field_name} DESC`
+        `${colDefifinitionObj.field_name} DESC`,
       );
     } else {
       this.props.setOrderValueActionCreator(
         colDefifinitionObj.field_name,
         'ASC',
-        `${colDefifinitionObj.field_name} ASC`
+        `${colDefifinitionObj.field_name} ASC`,
       );
     }
   };
@@ -80,9 +80,6 @@ const mapDispatchToProps = {
 };
 
 /** connect OrderBy to the redux store */
-const ConnectedOrderBy = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(OrderBy);
+const ConnectedOrderBy = connect(mapStateToProps, mapDispatchToProps)(OrderBy);
 
 export default ConnectedOrderBy;

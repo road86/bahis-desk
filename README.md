@@ -13,6 +13,14 @@ The structure of this repository is inherited from [create-react-app](https://gi
 
 ## Getting started
 
+### PC configueration for react project
+First, install node(version<14 && version>12)
+Second, install yarn globally
+
+### PC configueration for bahis
+Config node-gyp, follow this https://github.com/nodejs/node-gyp (just need the part gcc(linux)/visual studio tools(windows) add and python path config with npm)
+
+
 ### Running the web-app
 
 First, copy the included `.env.sample` into `.env`
@@ -26,6 +34,8 @@ Next install packages using yarn and then start the app:
 ```sh
 yarn
 
+yarn electron-rebuild
+
 yarn start
 ```
 
@@ -34,13 +44,30 @@ yarn start
 To Lint:
 
 ```sh
-yarn lint-ts
+yarn lint
 ```
 
 Run the tests
 
 ```sh
 yarn test
+```
+
+### build setup file
+
+for windows
+```sh
+yarn win-build
+```
+
+for linux
+```sh
+yarn linux-build
+```
+
+for git release 
+```sh
+yarn release
 ```
 
 ## Configuration

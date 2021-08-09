@@ -1,9 +1,9 @@
-import { FormControl, Radio, RadioGroup } from '@material-ui/core';
+import { FormControl, FormHelperText, Radio, RadioGroup } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import React from 'react';
-import { APP_TYPE_FORM_NAME, APP_TYPE_OPTIONS, FORM_TITLE } from './constants';
+import { APP_TYPE_FORM_NAME, APP_TYPE_OPTIONS, TYPE_FORM_TITLE } from '../constants';
 import { appTypeFormStyles } from './styles';
 
 // export App type option interface
@@ -16,19 +16,20 @@ export interface AppTypeOption {
 interface AppTypeFormProps {
   userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
+  submitted: boolean;
 }
 
 // AppTypeForm component
 export default function AppTypeForm(props: AppTypeFormProps) {
   const classes = appTypeFormStyles();
-  const { setFieldValueHandler, userInput } = props;
+  const { setFieldValueHandler, userInput, submitted } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
   return (
     <div className={classes.layout}>
       <Typography variant="h6" gutterBottom={true}>
-        {FORM_TITLE}
+        {TYPE_FORM_TITLE}
       </Typography>
       <Grid container={true} spacing={3}>
         <Grid item={true} xs={12}>
@@ -48,6 +49,9 @@ export default function AppTypeForm(props: AppTypeFormProps) {
                 />
               ))}
             </RadioGroup>
+            <FormHelperText error={submitted && userInput[APP_TYPE_FORM_NAME] === undefined}>
+              {submitted && userInput[APP_TYPE_FORM_NAME] === undefined ? 'Select an option' : ''}
+            </FormHelperText>
           </FormControl>
         </Grid>
       </Grid>

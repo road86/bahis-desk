@@ -129,10 +129,7 @@ const initialState: any = {
 };
 
 /** the clients reducer function */
-export default function reducer(
-  state: any = initialState,
-  action: ClientsActionTypes
-): ImmutableClientsState {
+export default function reducer(state: any = initialState, action: ClientsActionTypes): ImmutableClientsState {
   switch (action.type) {
     case CLIENTS_FETCHED:
       return SeamlessImmutable({

@@ -1,35 +1,68 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardBody, CardTitle } from 'reactstrap';
+// import { Card, CardBody, CardTitle } from 'reactstrap';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { ListMenu } from '../../../store/ducks/menu';
+import { ipcRenderer } from '../../../services/ipcRenderer';
+import { menuStyle } from '../style';
+import { makeStyles, Typography, useTheme } from '@material-ui/core';
 
 export interface ListMenuItemProps {
   menuItem: ListMenu;
   appLanguage: string;
 }
 
-class ListMenuItem extends React.Component<ListMenuItemProps> {
-  public render() {
-    const { menuItem, appLanguage } = this.props;
-    return (
-      <div>
-        <Card>
-          <Link to={`/list/${menuItem.list_id}/`}>
-            <div className="card-image">
-              <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
+function ListMenuItem(props: ListMenuItemProps) {
+  // class ListMenuItem extends React.Component<ListMenuItemProps> {
+  const [imageSource, setImageSource] = React.useState<string>('');
+
+  const compUpdate = async () => {
+    if (props.menuItem.img_id.toString().length > 5) {
+      const image: any = await ipcRenderer.sendSync('fetch-image', props.menuItem.name);
+      setImageSource(image.replaceAll('\\', '/'));
+    }
+  };
+
+  React.useEffect(() => {
+    compUpdate();
+  }, []);
+
+  const { menuItem, appLanguage } = props;
+
+  
+  const theme = useTheme();
+  const useStyles = makeStyles(menuStyle(theme));
+  const classes = useStyles();
+  
+  return (
+    <Link to={`/list/${menuItem.list_id}/`}>
+      <div className={classes.outerCircle}>
+        <div className={classes.innerDiv}>
+          <div className={classes.circle}>
+            <div className={classes.image}>
+              {navigator.onLine && imageSource.length ? (
+                <img
+                  src={
+                    imageSource
+                      ? require(`../../../../${imageSource}`)
+                      : require('../../../../src/assets/images/logo.png')
+                  }
+                  className={classes.iconClass}
+                  alt={props.menuItem.name}
+                />
+              ) : (
+                <FontAwesomeIcon icon={['far', 'list-alt']} size="4x" />
+              )}
             </div>
-            <CardBody>
-              <CardTitle className="text-nowrap initialism">
-                {getNativeLanguageText(menuItem.label, appLanguage)}
-              </CardTitle>
-            </CardBody>
-          </Link>
-        </Card>
+          </div>
+          <Typography variant="h6" color={'primary'}>
+            {getNativeLanguageText(props.menuItem.label, appLanguage).toUpperCase()}
+          </Typography>
+        </div>
       </div>
-    );
-  }
+    </Link>  
+  );
 }
 
 export default ListMenuItem;

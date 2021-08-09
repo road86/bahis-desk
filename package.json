@@ -1,10 +1,11 @@
 {
-  "name": "ulo-client",
-  "version": "0.1.0",
+  "name": "bahis",
+  "version": "1.0.2",
   "private": true,
   "main": "public/electron.js",
   "homepage": ".",
   "dependencies": {
+    "@date-io/date-fns": "1.x",
     "@fortawesome/fontawesome-svg-core": "^1.2.20",
     "@fortawesome/free-brands-svg-icons": "^5.10.0",
     "@fortawesome/free-regular-svg-icons": "^5.10.0",
@@ -12,10 +13,11 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@material-ui/core": "^4.9.3",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/pickers": "^3.3.10",
     "@onaio/connected-private-route": "^0.0.8",
     "@onaio/connected-reducer-registry": "^0.0.1",
     "@onaio/gatekeeper": "^0.0.14",
-    "@onaio/loaders": "^0.0.1",
+    "@onaio/loaders": "^0.0.2",
     "@onaio/redux-reducer-registry": "^0.0.8",
     "@onaio/session-reducer": "^0.0.10",
     "@onaio/superset-connector": "^0.0.13",
@@ -34,28 +36,39 @@
     "@types/seamless-immutable": "^7.1.10",
     "axios": "^0.19.0",
     "better-sqlite3": "^5.4.3",
+    "better-sqlite3-helper": "^3.1.3",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.6",
     "client-oauth2": "^4.2.5",
     "connected-react-router": "^6.5.2",
     "cross-blob": "^1.2.0",
     "cross-env": "^6.0.0",
+    "date-fns": "^2.22.1",
+    "electron-first-run": "^3.0.0",
     "electron-is-dev": "^1.1.0",
-    "eslint": "5.16.0",
+    "electron-log": "^4.3.2",
+    "electron-updater": "^4.3.5",
+    "eslint": "^7.23.0",
     "fetch-mock": "^7.3.9",
     "form-data": "^3.0.0",
     "history": "^4.9.0",
+    "image-downloader": "^4.0.2",
     "jest-fetch-mock": "^2.1.2",
+    "jszip": "^3.6.0",
+    "jszip-utils": "^0.1.0",
     "lodash": "^4.17.15",
     "lodash-es": "^4.17.15",
-    "odkformrenderer": "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git",
+    "macaddress": "^0.5.1",
+    "moment": "^2.29.1",
+    "odkformrenderer": "git+ssh://git@bitbucket.org:mpowersocial/odk-form-renderer-v2-lib.git#develop_bahis",
     "prop-types": "^15.7.2",
-    "react": "^16.8.6",
+    "react": "^17.0.2",
     "react-datepicker": "^2.10.1",
-    "react-dom": "^16.8.6",
+    "react-dom": "^17.0.2",
     "react-export-excel": "^0.5.3",
     "react-floating-action-button": "^1.0.5",
     "react-js-pagination": "^3.0.2",
+    "react-loader-spinner": "^4.0.0",
     "react-loading-overlay": "^1.0.1",
     "react-redux": "^7.1.0",
     "react-router": "^5.0.1",
@@ -71,7 +84,26 @@
     "three-dots": "^0.1.2",
     "to-array-buffer": "^3.2.0",
     "typeface-roboto": "^0.0.75",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "xlsx": "^0.17.0"
+  },
+  "build": {
+    "appId": "com.electron.bahis",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "deleteAppDataOnUninstall": true,
+      "createDesktopShortcut": "always",
+      "menuCategory": "bahis",
+      "license": "license.txt",
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "scripts": {
     "react-start": "react-scripts start",
@@ -79,13 +111,15 @@
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder",
-    "release": "yarn react-build && electron-builder --publish=always",
     "build": "yarn react-build && yarn electron-build",
+    "release": "yarn react-build && yarn electron-build && yarn build --p always --win",
     "win-build": "yarn react-build && yarn electron-build --win",
+    "linux-build": "yarn react-build && yarn electron-build --linux",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
     "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
-    "electron-rebuild": "electron-rebuild"
+    "electron-rebuild": "electron-rebuild",
+    "lint": "eslint */**/*.{js,ts,tsx} --quiet --fix"
   },
   "husky": {
     "hooks": {
@@ -93,16 +127,8 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "tslint --fix -c tslint.json",
-      "git add"
-    ],
-    "*.{js,jsx}": [
-      "eslint"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write",
-      "git add"
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
     ]
   },
   "browserslist": [
@@ -119,29 +145,24 @@
     "@types/react-datepicker": "^2.9.5",
     "@types/react-select": "^3.0.8",
     "@types/redux-testkit": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
     "concurrently": "^4.1.2",
-    "electron": "^6.0.9",
-    "electron-builder": "^21.2.0",
-    "electron-rebuild": "^2.3.2",
+    "electron": "^12.0.2",
+    "electron-builder": "^22.10.5",
+    "electron-rebuild": "^2.3.5",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jest": "^22.14.1",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
-    "husky": "^3.0.2",
-    "lint-staged": "^9.2.1",
-    "prettier": "^1.18.2",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.23.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1",
     "react-test-renderer": "^16.8.6",
     "redux-testkit": "^1.0.6",
-    "tslint": "^5.18.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "tslint-react": "^4.0.0",
     "wait-on": "^3.3.0"
   }
 }

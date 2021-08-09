@@ -24,8 +24,7 @@ interface SupersetState {
 }
 
 /** immutable Superset state */
-export type ImmutableSupersetState = SupersetState &
-  SeamlessImmutable.ImmutableObject<SupersetState>;
+export type ImmutableSupersetState = SupersetState & SeamlessImmutable.ImmutableObject<SupersetState>;
 
 /** initial Superset state */
 const initialState: ImmutableSupersetState = SeamlessImmutable({

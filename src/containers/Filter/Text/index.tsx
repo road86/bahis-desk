@@ -43,14 +43,14 @@ class FilterText extends React.Component<TextProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       EQUAL_TYPE,
-      this.generateSqlText(filterItem, EQUAL_TYPE, value)
+      this.generateSqlText(filterItem, EQUAL_TYPE, value),
     );
   }
 
   public render() {
     const { filterItem, value, condition, appLanguage } = this.props;
     return (
-      <FormGroup>
+      <FormGroup style={{ marginBottom: 0}}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
@@ -58,17 +58,12 @@ class FilterText extends React.Component<TextProps> {
           <Col md={3}>
             <Select
               options={TEXT_FILTER_OPERATORS}
-              value={TEXT_FILTER_OPERATORS.filter(filterObj => filterObj.value === condition)}
+              values={TEXT_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
               onChange={this.handleConditionChange}
             />
           </Col>
           <Col md={6}>
-            <Input
-              type="text"
-              name={filterItem.name}
-              value={value || ''}
-              onChange={this.handleValueChange}
-            />
+            <Input type="text" name={filterItem.name} value={value || ''} onChange={this.handleValueChange} />
           </Col>
         </Row>
       </FormGroup>
@@ -80,7 +75,7 @@ class FilterText extends React.Component<TextProps> {
     this.props.setFilterValueActionCreator(
       filterItem.name,
       [event.currentTarget.value],
-      this.generateSqlText(filterItem, condition, [event.currentTarget.value])
+      this.generateSqlText(filterItem, condition, [event.currentTarget.value]),
     );
   };
 
@@ -89,7 +84,7 @@ class FilterText extends React.Component<TextProps> {
     this.props.setConditionValueActionCreator(
       filterItem.name,
       selectedOption.value,
-      this.generateSqlText(filterItem, selectedOption.value, value)
+      this.generateSqlText(filterItem, selectedOption.value, value),
     );
   };
 
@@ -99,11 +94,7 @@ class FilterText extends React.Component<TextProps> {
    * @param {FilterValue} value - the filter value
    * @returns {string} - the relevant WHERE SQL text
    */
-  private generateSqlText = (
-    filterItem: FilterTextItem,
-    condition: FilterCondition,
-    value: FilterValue
-  ): string => {
+  private generateSqlText = (filterItem: FilterTextItem, condition: FilterCondition, value: FilterValue): string => {
     if (condition && value && value.length > 0 && value[0] !== '') {
       switch (condition) {
         case CONTAINS_TYPE:
@@ -154,9 +145,6 @@ const mapDispatchToProps = {
 };
 
 /** connect clientsList to the redux store */
-const ConnectedFilterText = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FilterText);
+const ConnectedFilterText = connect(mapStateToProps, mapDispatchToProps)(FilterText);
 
 export default ConnectedFilterText;

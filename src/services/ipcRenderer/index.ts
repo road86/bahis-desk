@@ -3,4 +3,7 @@ declare global {
     require: any;
   }
 }
-export const ipcRenderer = window.require('electron').ipcRenderer;
+
+const electron = window.require('electron');
+export const ipcRenderer = electron.ipcRenderer;
+// export const ipcRenderer = window.require('electron').ipcRenderer;

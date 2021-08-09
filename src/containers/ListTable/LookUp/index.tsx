@@ -1,4 +1,4 @@
-import lodash from 'lodash';
+// import lodash from 'lodash';
 import React from 'react';
 import { ColumnObj } from '..';
 
@@ -12,23 +12,21 @@ export interface LookUpProps {
 class LookUp extends React.Component<LookUpProps> {
   public render() {
     const { columnDef, rowValues, lookupTable } = this.props;
-    if ('lookup_definition' in columnDef && columnDef.lookup_definition) {
-      const conditions = columnDef.lookup_definition.condition;
-      const filterCondition: any = {};
-      conditions.forEach(condition => {
-        if (condition.type === 'static') {
-          filterCondition[condition.name] = condition.value;
-        } else if (condition.type === 'list') {
-          filterCondition[condition.name] = rowValues[condition.column];
-        }
-      });
-      const filteredTable = lodash.filter(lookupTable, filterCondition);
-      const uniqRows = lodash.uniqBy(filteredTable, columnDef.lookup_definition.return_column);
-      const uniqValues = lodash.map(
-        uniqRows,
-        (row: any) => row[(columnDef as any).lookup_definition.return_column] || ''
-      );
-      return <span>{uniqValues.toString()}</span>;
+    if ('lookup_definition' in columnDef && columnDef.lookup_definition != undefined && lookupTable) {
+      // const conditions = columnDef.lookup_definition.condition;
+      // const filterCondition: any = {};
+      // conditions.forEach((condition) => {
+      //   if (condition.type === 'static') {
+      //     filterCondition[condition.name] = condition.value;
+      //   } else if (condition.type === 'list') {
+      //     filterCondition[condition.name] = rowValues[condition.column];
+      //   }
+      // });
+      // const filteredTable = lodash.filter(lookupTable, filterCondition);
+      const uniqData = rowValues[columnDef.field_name];
+      const uniqValues = lookupTable.find((obj: any) => obj[`${columnDef.lookup_definition?.column_name}`] == uniqData);
+      // return <span>{uniqValues.toString()}</span>;     
+      return <span>{uniqValues[`${columnDef.lookup_definition?.return_column}`]}</span>;
     }
     return null;
   }

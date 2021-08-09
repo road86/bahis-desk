@@ -1,3 +1,4 @@
+import { Accordion, AccordionDetails, AccordionSummary, makeStyles, useTheme } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -16,11 +17,12 @@ import {
   FILTER_TEXT_TYPE,
 } from './constants';
 import FilterDate, { FilterDateItem } from './Date';
-import './Filter.css';
 import FilterMultipleSelect, { FilterMultipleSelectItem } from './Multiple Select';
 import FilterNumber, { FilterNumberItem } from './Number';
 import FilterSingleSelect, { FilterSingleSelectItem } from './Single Select';
+import { filterStyles } from './style';
 import FilterText, { FilterTextItem } from './Text';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 interface LabelObj {
   [key: string]: string;
@@ -51,58 +53,28 @@ interface FilterProps {
   listId: string;
 }
 
-interface FilterState {
-  isEnvSet: boolean;
-}
+// interface FilterState {
+//   isEnvSet: boolean;
+// }
 
 /** register the filter reducer */
 reducerRegistry.register(filterReducerName, filterReducer);
 
-class Filter extends React.Component<FilterProps, FilterState> {
-  public state = { isEnvSet: false };
-  public componentDidMount() {
-    this.props.resetFiltersActionCreator();
-    this.setState({ ...this.state, isEnvSet: true });
-  }
+function Filter(props: FilterProps) {
+// class Filter extends React.Component<FilterProps, FilterState> {
+//   public state = { isEnvSet: false };
+  const [isEnvSet, setIsEnvSet] = React.useState<boolean>(false);
+//   public componentDidMount() {
+    
+//   }
 
-  public render() {
-    const { definition, appLanguage, listId } = this.props;
-    const { isEnvSet } = this.state;
-    return (
-      <div className="filter-container">
-        <Row className="filter-title-underline">
-          <Col>
-            <h2 className="lead text-uppercase"> Filter By </h2>
-          </Col>
-        </Row>
-        <div className="bg-filter-title">
-          {isEnvSet &&
-            definition.map((filterItem, index) =>
-              this.renderTypeEvaluator(filterItem, index, appLanguage, listId)
-            )}
-        </div>
-        <Button color="success" size="sm" onClick={(e: any) => this.filterHandler(e)}>
-          Submit
-        </Button>
-        <Button
-          className="reset-button"
-          color="secondary"
-          size="sm"
-          onClick={(e: any) => this.resetFilterHandler(e)}
-        >
-          Reset
-        </Button>
-      </div>
-    );
-  }
+  React.useEffect(() => {
+    props.resetFiltersActionCreator();
+    setIsEnvSet(true);
+  },[])
 
-  private renderTypeEvaluator = (
-    filterItem: FilterItem,
-    filterIndex: number,
-    appLanguage: string,
-    listId: string
-  ) => {
-    console.log('filterItem', filterItem);
+  
+  const renderTypeEvaluator = (filterItem: FilterItem, filterIndex: number, appLanguage: string, listId: string) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
         return (
@@ -157,15 +129,49 @@ class Filter extends React.Component<FilterProps, FilterState> {
   };
 
   // tslint:disable-next-line: variable-name
-  private filterHandler = (_event: any) => {
-    this.props.onSubmitHandler(this.props.filterValue);
+  const filterHandler = (_event: any) => {
+    props.onSubmitHandler(props.filterValue);
   };
 
   // tslint:disable-next-line: variable-name
-  private resetFilterHandler = (_event: any) => {
-    this.props.resetFiltersActionCreator();
-    this.props.onSubmitHandler({});
+  const resetFilterHandler = (_event: any) => {
+    props.resetFiltersActionCreator();
+    props.onSubmitHandler({});
   };
+
+  const theme = useTheme();
+  const useStyles = makeStyles(filterStyles(theme));
+  const classes = useStyles();
+
+  const { definition, appLanguage, listId } = props;
+  return (
+    <Accordion defaultExpanded>
+      <AccordionSummary  expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          className={classes.root}>
+        Filter
+      </AccordionSummary>
+      <AccordionDetails>
+        <div style={{ paddingLeft: '5%', paddingRight: '5%'}}>
+          <Row id="menu-body">
+            {isEnvSet &&
+              definition.map((filterItem, index) => (
+                <Col key={'filter-' + index} className="menu-item" lg={12} md={12} sm={12} xs={12}>
+                  {renderTypeEvaluator(filterItem, index, appLanguage, listId)}
+                </Col>
+              ))}
+          </Row>
+          <Button className={classes.submitButton} size="sm" onClick={(e: any) => filterHandler(e)}>
+            Submit
+          </Button>
+          <Button className={classes.resetButton} size="sm" onClick={(e: any) => resetFilterHandler(e)}>
+            Reset
+          </Button>
+      </div>
+      </AccordionDetails>
+    </Accordion> 
+  );
 }
 
 /** connect the component to the store */

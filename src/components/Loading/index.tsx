@@ -1,8 +1,11 @@
 import * as React from 'react';
+import Loader from 'react-loader-spinner';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Redirect } from 'react-router';
 import Typist from 'react-typist';
 import 'three-dots/dist/three-dots.css';
-import { ipcRenderer } from '../../services/ipcRenderer';
+import { theme } from '../../configs/theme';
+// import { ipcRenderer } from '../../services/ipcRenderer';
 import './Loading.css';
 
 /** interface for Loading State */
@@ -16,12 +19,9 @@ class Loading extends React.Component<{}, LoadingState> {
     this.state = { isLoadComplete: false };
   }
   public async componentDidMount() {
-    const response = await ipcRenderer.sendSync('start-app-sync');
-    if (response) {
-      await setTimeout(() => {
-        this.setState({ isLoadComplete: true });
-      }, 5000);
-    }
+    setTimeout(() => {
+      this.setState({ isLoadComplete: true });
+    }, 3000);
   }
 
   public render() {
@@ -29,6 +29,13 @@ class Loading extends React.Component<{}, LoadingState> {
       <div className="menu-container">
         {this.state.isLoadComplete && <Redirect to="/signup/" />}
         <div className="loader-container">
+          <Loader
+            type="Puff"
+            color={theme.palette.primary.dark}
+            height={100}
+            width={100}
+            timeout={3000} // 3 secs
+          />
           <Typist cursor={{ hideWhenDone: true }}>
             <span className="loader-title"> BAHIS </span>
             <br />

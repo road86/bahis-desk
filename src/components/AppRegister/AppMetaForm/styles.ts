@@ -10,5 +10,5 @@ export const appMetaFormStyles = makeStyles((theme: Theme) =>
       },
       marginLeft: theme.spacing(3),
     },
-  })
+  }),
 );

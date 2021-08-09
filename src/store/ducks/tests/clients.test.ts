@@ -48,11 +48,9 @@ describe('reducers/clients', () => {
     });
     expect(getClientsArray(store.getState())).toEqual(values([fixtures.client1, fixtures.client2]));
     expect(getClientsIdArray(store.getState())).toEqual(
-      [fixtures.client1, fixtures.client2].map(client => client.baseEntityId)
+      [fixtures.client1, fixtures.client2].map((client) => client.baseEntityId),
     );
-    expect(getClientById(store.getState(), '71ad460c-bf76-414e-9be1-0d1b2cb1bce8')).toEqual(
-      fixtures.client1
-    );
+    expect(getClientById(store.getState(), '71ad460c-bf76-414e-9be1-0d1b2cb1bce8')).toEqual(fixtures.client1);
   });
 
   it('removes clients', () => {
@@ -82,12 +80,8 @@ describe('reducers/clients', () => {
       '123fc98d-4cce-412a-8327-ca2315efedf3': fixtures.household1,
       '456fc98d-4cce-412a-8327-ca2315efedf3': fixtures.household2,
     });
-    expect(getHouseholdsArray(store.getState())).toEqual(
-      values([fixtures.household1, fixtures.household2])
-    );
-    expect(getHouseholdById(store.getState(), '123fc98d-4cce-412a-8327-ca2315efedf3')).toEqual(
-      fixtures.household1
-    );
+    expect(getHouseholdsArray(store.getState())).toEqual(values([fixtures.household1, fixtures.household2]));
+    expect(getHouseholdById(store.getState(), '123fc98d-4cce-412a-8327-ca2315efedf3')).toEqual(fixtures.household1);
   });
 
   it('Adds new households to store instead of overwriting existing ones', () => {

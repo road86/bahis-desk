@@ -88,7 +88,7 @@ a .card-body {
 }
 
 .menu-item {
-  max-width: 200px;
-  margin: 8px;
   padding: 5px;
+  margin: 40px;
+  margin-top: 0px;
 }

@@ -9,14 +9,22 @@ import App from './App/App';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 import store from './store';
+import { ThemeProvider } from '@material-ui/core/styles';
+import { theme } from './configs/theme';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <App />
+      <ThemeProvider theme={theme}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <App /> 
+        </MuiPickersUtilsProvider>
+      </ThemeProvider>
     </ConnectedRouter>
   </Provider>,
-  document.getElementById('openSRP-root')
+  document.getElementById('openSRP-root'),
 );
 
 // If you want your app to work offline and load faster, you can change

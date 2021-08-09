@@ -8,9 +8,9 @@ type HTTPMethod = 'GET' | 'POST' | 'PUT';
 
 /** get default HTTP headers for OpenSRP service */
 export function getDefaultHeaders(
-  accept: string = 'application/json',
-  authorizationType: string = 'Bearer',
-  contentType: string = 'application/json;charset=UTF-8'
+  accept = 'application/json',
+  authorizationType = 'Bearer',
+  contentType = 'application/json;charset=UTF-8',
 ): IncomingHttpHeaders {
   return {
     accept,
@@ -115,9 +115,7 @@ export class OpenSRPService {
     const response = await fetch(url, payload);
 
     if (!response.ok || response.status !== 201) {
-      throw new Error(
-        `OpenSRPService create on ${this.endpoint} failed, HTTP status ${response.status}`
-      );
+      throw new Error(`OpenSRPService create on ${this.endpoint} failed, HTTP status ${response.status}`);
     }
 
     return {};
@@ -135,9 +133,7 @@ export class OpenSRPService {
     const response = await fetch(url, getPayload(method));
 
     if (!response.ok) {
-      throw new Error(
-        `OpenSRPService read on ${this.endpoint} failed, HTTP status ${response.status}`
-      );
+      throw new Error(`OpenSRPService read on ${this.endpoint} failed, HTTP status ${response.status}`);
     }
 
     return await response.json();
@@ -162,9 +158,7 @@ export class OpenSRPService {
     const response = await fetch(url, payload);
 
     if (!response.ok) {
-      throw new Error(
-        `OpenSRPService update on ${this.endpoint} failed, HTTP status ${response.status}`
-      );
+      throw new Error(`OpenSRPService update on ${this.endpoint} failed, HTTP status ${response.status}`);
     }
 
     return {};
@@ -181,9 +175,7 @@ export class OpenSRPService {
     const response = await fetch(url, getPayload(method));
 
     if (!response.ok) {
-      throw new Error(
-        `OpenSRPService list on ${this.endpoint} failed, HTTP status ${response.status}`
-      );
+      throw new Error(`OpenSRPService list on ${this.endpoint} failed, HTTP status ${response.status}`);
     }
 
     return await response.json();

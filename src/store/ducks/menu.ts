@@ -11,6 +11,8 @@ export const LIST_TYPE = 'list';
 export type LIST_TYPE = typeof LIST_TYPE;
 export const MODULE_TYPE = 'container';
 export type MODULE_TYPE = typeof MODULE_TYPE;
+export const FORMLIST_TYPE = 'form_list';
+export type FORMLIST_TYPE = typeof FORMLIST_TYPE;
 
 /** interface for multi language label object */
 export interface Label {
@@ -19,7 +21,7 @@ export interface Label {
 
 /** interface for form menu */
 export interface FormMenu {
-  type: FORM_TYPE;
+  type: FORM_TYPE | FORMLIST_TYPE;
   name: string;
   label: Label;
   img_id: number;
@@ -52,6 +54,7 @@ export type MenuItem = ModuleMenu | FormMenu | ListMenu;
 /** SET_MENU_ITEM action type */
 export const SET_MENU_ITEM = 'opensrp/reducer/menu/SET_MENU_ITEM';
 export const SET_PREV_MENU = 'opensrp/reducer/menu/SET_PREV_MENU';
+export const RESET_MENU = 'opensrp/reducer/menu/RESET_MENU';
 
 /** interface for SET_MENU_ITEM action */
 export interface SetMenuItemAction extends AnyAction {
@@ -64,8 +67,13 @@ export interface SetPrevMenuAction extends AnyAction {
   type: typeof SET_PREV_MENU;
 }
 
+/** interface for SET_PREV_MENU action */
+export interface ResetMenuAction extends AnyAction {
+  type: typeof RESET_MENU;
+}
+
 /** Create type for menu reducer actions */
-export type MenuActionTypes = SetMenuItemAction | SetPrevMenuAction | AnyAction;
+export type MenuActionTypes = SetMenuItemAction | SetPrevMenuAction | ResetMenuAction| AnyAction;
 
 // action creators
 
@@ -83,6 +91,10 @@ export const setMenuItem = (menuItem: MenuItem): SetMenuItemAction => ({
  */
 export const setPrevMenu = (): SetPrevMenuAction => ({
   type: SET_PREV_MENU,
+});
+
+export const resetMenu = () : ResetMenuAction => ({
+  type: RESET_MENU,
 });
 
 // The reducer
@@ -103,10 +115,7 @@ const initialState: ImmutableMenuState = SeamlessImmutable({
 });
 
 /** the menu reducer function */
-export default function reducer(
-  state: ImmutableMenuState = initialState,
-  action: MenuActionTypes
-): ImmutableMenuState {
+export default function reducer(state: ImmutableMenuState = initialState, action: MenuActionTypes): ImmutableMenuState {
   switch (action.type) {
     case SET_MENU_ITEM:
       const prev = state.getIn(['currentMenu']);
@@ -125,6 +134,8 @@ export default function reducer(
         });
       }
       return state;
+    case RESET_MENU: 
+      return initialState;
     default:
       return state;
   }

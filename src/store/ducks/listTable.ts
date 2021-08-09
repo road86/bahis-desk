@@ -70,11 +70,7 @@ export type ListTableActionTypes =
  * @param {string} sql - the sql string related to order property
  * @returns {SetOrderValueAction} - an action to set order value in store
  */
-export const setOrderValue = (
-  name: string,
-  value: OrderProperty,
-  sql: string
-): SetOrderValueAction => ({
+export const setOrderValue = (name: string, value: OrderProperty, sql: string): SetOrderValueAction => ({
   name,
   sql,
   type: SET_ORDER_VALUE,
@@ -183,10 +179,7 @@ export default function reducer(state: any = initialState, action: ListTableActi
  * @param {string} name - the column name
  * @return { ColumnPropertyObj | null } - the column property obj respect to name
  */
-export function getColumnPropertyObj(
-  state: Partial<Store>,
-  name: string
-): ColumnPropertyObj | null {
+export function getColumnPropertyObj(state: Partial<Store>, name: string): ColumnPropertyObj | null {
   return (state as any)[reducerName].columns[name] || null;
 }
 

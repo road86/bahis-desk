@@ -6,5 +6,5 @@ export const appTypeFormStyles = makeStyles((theme: Theme) =>
     layout: {
       marginLeft: theme.spacing(3),
     },
-  })
+  }),
 );
