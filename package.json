@@ -1,6 +1,6 @@
 {
   "name": "bahis",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "private": true,
   "main": "public/electron.js",
   "homepage": ".",
@@ -47,7 +47,7 @@
     "electron-first-run": "^3.0.0",
     "electron-is-dev": "^1.1.0",
     "electron-log": "^4.3.2",
-    "electron-updater": "^4.3.5",
+    "electron-updater": "^4.0.4",
     "eslint": "^7.23.0",
     "fetch-mock": "^7.3.9",
     "form-data": "^3.0.0",
@@ -89,10 +89,20 @@
   },
   "build": {
     "appId": "com.electron.bahis",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "bahisMP",
+        "repo": "bahis_mpower",
+        "private": true,
+        "token": "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",
+        "releaseType": "release"
+      }
+    ],
     "win": {
-      "target": [
-        "nsis"
-      ]
+        "target": [
+          "nsis"
+        ]
     },
     "nsis": {
       "oneClick": false,
@@ -103,17 +113,7 @@
       "menuCategory": "bahis",
       "license": "license.txt",
       "allowToChangeInstallationDirectory": true
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "bahisMP",
-        "repo": "bahis_mpower",
-        "private": true,
-        "token": "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",
-        "releaseType": "release"
-      }
-    ]
+    }
   },
   "scripts": {
     "react-start": "react-scripts start",
@@ -122,8 +122,8 @@
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder",
     "build": "yarn react-build && yarn electron-build",
-    "release": "yarn react-build && yarn electron-build && yarn build --p always --win",
-    "win-build": "yarn react-build && yarn electron-build && yarn build --p always --win",
+    "release": "yarn build --p always --win",
+    "win-build": "yarn react-build && yarn electron-build --win",
     "linux-build": "yarn react-build && yarn electron-build --linux",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
@@ -159,8 +159,8 @@
     "@typescript-eslint/parser": "^4.20.0",
     "concurrently": "^4.1.2",
     "electron": "^12.0.2",
-    "electron-builder": "^22.10.5",
-    "electron-rebuild": "^2.3.5",
+    "electron-builder": "^20.38.0",
+    "electron-rebuild": "^2.3.2",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",

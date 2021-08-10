@@ -12,6 +12,7 @@ import {
   faSync,
   faTools,
 } from '@fortawesome/free-solid-svg-icons';
+import { Box, CircularProgress, Typography } from '@material-ui/core';
 import * as React from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { connect } from 'react-redux';
@@ -117,7 +118,8 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     });
   };
 
-  const autoUpdateCheck = () => {
+  const autoUpdateCheck = async () => {
+    await ipcRenderer.send('auto-update');
     ipcRenderer.on('checking_for_update', () => {
       console.log('ipcRenderer on checking_for_update');
       ipcRenderer.removeAllListeners('checking_for_update');
@@ -147,12 +149,12 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       console.log('ipcRenderer on update_downloaded');
       ipcRenderer.removeAllListeners('update_downloaded');
       ipcRenderer.removeAllListeners('download_progress');
-      // setLoading(false);
+      setLoading(false);
     });
 
     ipcRenderer.on('download_progress', function (event: any, data: any) {
       console.log('ipcRenderer on download_progress', data, event);
-      // setPercentage(data);
+      setPercentage(data);
     });
   };
 
@@ -250,7 +252,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
             </Col>
           </Row>
       </LoadingOverlay>
-      {/* {loading ? (
+      {loading ? (
         <Box
           position="fixed"
           bottom={0}
@@ -287,7 +289,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
             </Box>
           </Box>
         </Box>
-      ) : null} */}
+      ) : null}
     </React.Fragment>
   );
 };

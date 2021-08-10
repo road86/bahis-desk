@@ -70,6 +70,8 @@ const FORM_DETAILS = 'form-details';
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
 let mainWindow;
+let prevPercent = 0;
+let newPercent = 0;
 
 // App/** creates window on app ready */
 app.on(APP_READY_STATE, createWindow);
@@ -124,7 +126,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-  autoUpdater.checkForUpdates();
+  // autoUpdater.checkForUpdates();
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -134,19 +136,6 @@ function createWindow() {
 function prepareDb() {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    // DB({
-    //   path: path.join(app.getPath("userData"), DB_NAME), // this is the default
-    //   fileMustExist: false, // throw error if database not exists'
-    //   migrate: {  // disable completely by setting `migrate: false`
-    //     force: false, // set to 'last' to automatically reapply the last migration-file
-    //     migrations: [
-    //       `-- Up
-    //       CREATE TABLE Category (id INTEGER PRIMARY KEY, name TEXT);
-    //         // ALTER TABLE data
-    //         // ADD COLUMN submission_frontend text;
-    //         `,
-    //     ]
-    //   }
     // })
     db.close();
   } catch (err) {
@@ -196,18 +185,28 @@ autoUpdater.on('update-available', () => {
       title: 'Found Updates',
       message: 'Found updates, do you want update now?',
       buttons: ['Sure', 'No'],
-    },
-    (buttonIndex) => {
-      if (buttonIndex === 0) {
-        console.log('check downloading');
-        sendStatusToWindow('update-downloading');
-        autoUpdater.downloadUpdate();
-      }
-      // else {
-      //   updater.enabled = true
-      //   updater = null
-      // }
-    },
+    }).then(result => {
+        if (result.response === 0) {
+          console.log('check downloading');
+          sendStatusToWindow('update-downloading');
+          autoUpdater.downloadUpdate();
+        } else if (result.response === 1) {
+          // bound to buttons array
+          console.log("Cancel button clicked.");
+        }
+      },
+    // (buttonIndex) => {
+    //   console.log('button', buttonIndex);
+    //   if (buttonIndex === 0) {
+    //     console.log('check downloading');
+    //     sendStatusToWindow('update-downloading');
+    //     autoUpdater.downloadUpdate();
+    //   }
+    //   // else {
+    //   //   updater.enabled = true
+    //   //   updater = null
+    //   // }
+    // },
   );
 });
 
@@ -220,6 +219,16 @@ autoUpdater.on('update-not-available', () => {
   // updater.enabled = true
   // updater = null
 });
+
+autoUpdater.on('download-progress', (progressObj) => {
+  let percent = Math.round(progressObj.percent);
+  if (percent - prevPercent >= 1) {
+    prevPercent = newPercent;
+    newPercent = percent;
+    mainWindow.send('download_progress', percent);
+  }
+  // sendStatusToWindow(log_message);
+})
 
 autoUpdater.on('update-downloaded', () => {
   sendStatusToWindow('update_downloaded');
