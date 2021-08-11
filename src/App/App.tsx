@@ -142,6 +142,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
     ipcRenderer.on('update-downloading', () => {
       console.log('ipcRenderer on update_downloading');
+      setLoading(true);
       ipcRenderer.removeAllListeners('update_downloading');
     });
 
