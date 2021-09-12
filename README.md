@@ -1,15 +1,3 @@
-# OpenSRP Web Frontend
-
-[![CircleCI](https://circleci.com/gh/OpenSRP/opensrp-web.svg?style=svg)](https://circleci.com/gh/OpenSRP/opensrp-web)
-
-## Summary
-
-OpenSRP web is the web interface to the OpenSRP server. OpenSRP uses OpenMRS backend and web interface to perform most of the administrative tasks
-
-The structure of this repository is inherited from [create-react-app](https://github.com/facebook/create-react-app).
-
-- We try follow the [BEM](https://en.bem.info/methodology/quick-start/) or Block Element Modifier guidelines for CSS.
-- We strictly follow the [three principles of redux](https://redux.js.org/introduction/three-principles).
 
 ## Getting started
 
@@ -39,20 +27,6 @@ yarn electron-rebuild
 yarn start
 ```
 
-### Lint and test
-
-To Lint:
-
-```sh
-yarn lint
-```
-
-Run the tests
-
-```sh
-yarn test
-```
-
 ### build setup file
 
 for windows
@@ -76,10 +50,6 @@ The configurations are located in the `configs` directory and are split into two
 
 - **env.ts**: this module reads configurations from environment variables
 - **settings.ts**: this module holds more complicated configurations
-
-## Contributing/Collaboration
-
-See [contribution guidelines](https://github.com/OpenSRP/opensrp-web/blob/docs/docs/contributing.md).
 
 ## Documentation
 
