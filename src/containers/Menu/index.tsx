@@ -11,7 +11,6 @@ import { RouteComponentProps } from 'react-router-dom';
 // import Typist from 'react-typist';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
-import { dataSync } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
   FORMLIST_TYPE,
@@ -85,21 +84,25 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   // tslint:disable-next-line: variable-name
   const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
     // console.log(userName);
-    props.setSyncOverlayHandler(true);
-    await delay(500);
-    await dataSync();
-    props.setSyncOverlayHandler(false);
-    await delay(200);
-    setAlertOpen(true);
-    await delay(1000);
-    setAlertOpen(false);
+    await props.setSyncOverlayHandler(true);
+   
+    const user: any = await ipcRenderer.sendSync('fetch-username');
+    await ipcRenderer.send('request-data-sync', user.username);
+    ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
+      console.log('data check', event, args);
+      props.setSyncOverlayHandler(false);
+      setAlertOpen(true);
+      await delay(1000);
+      setAlertOpen(false);
+      return args;
+    });
   };
 
   const appSync = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
     await ipcRenderer.send('start-app-sync', user.username);
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      console.log('check', event, args);
+      console.log('nahid check', event, args);
       // return args;
       if (args) {
         const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');

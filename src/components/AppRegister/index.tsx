@@ -243,7 +243,7 @@ function AppRegister(props: any) {
             timeout={3000} // 3 secs
           />
           <Typist cursor={{ hideWhenDone: true }}>
-            <span className="loader-title"> BAHIS UPDATED </span>
+            <span className="loader-title"> BAHIS </span>
             <br />
             <span className="loader-subtitle">
               Welcome

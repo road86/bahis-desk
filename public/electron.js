@@ -15,17 +15,8 @@ const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
+const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT } = require('./constants');
 
-// SERVER URLShttp://dyn-bahis-dev.mpower-social.com:8043/
-const SERVER_URL = 'http://dyn-bahis-dev.mpower-social.com:8043'; //dev
-// const SERVER_URL = 'http://dyn-bahis-qa.mpower-social.com'; //qa
-// const SERVER_URL = 'http://192.168.19.16:8043';
-// TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
-const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
-const APP_DEFINITION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
-const FORMS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
-const LISTS_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
-const SIGN_IN_ENDPOINT = `${SERVER_URL}/bhmodule/app-user-verify/`;
 
 // DEV EXTENSIONS
 
@@ -66,6 +57,7 @@ const FETCH_LAST_SYNC = 'fetch-last-sync';
 const EXPORT_XLSX = 'export-xlsx';
 const DELETE_INSTANCE = 'delete-instance';
 const FORM_DETAILS = 'form-details';
+const USER_DB_INFO = 'user-db-info';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -1062,9 +1054,10 @@ const startAppSync = (event, name) => {
         } else {
           message = 'done'
         }
+        console.log(err);
         mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
-        console.log('Axios FAILED');
+        console.log('Axios FAILED in startAppSync');
       });
   } catch (err) {
     console.log('try catch');
@@ -1089,6 +1082,7 @@ const requestDataSync = async (event, username) => {
   const msg = await sendDataToServer(username);
   csvDataSync(username);
   mainWindow.send('dataSyncComplete', msg);
+  console.log('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;
 };
 
@@ -1115,6 +1109,31 @@ const csvDataSync = async (username) => {
   }
 };
 
+const getUserDBInfo =(event)=>{
+
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+    const query  = `with division as (
+                      select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
+                  ), district as (
+                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from division limit 1)
+                  ), upazila as (
+                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from district limit 1)
+                  ) select
+                          division.value division,
+                          district.value district,
+                          upazila.value upazila
+                  from division join district on division.ca = district.ca
+                      join upazila on upazila.ca = division.ca`
+
+    const info = db.prepare(query).get();
+    console.log(info);
+    event.returnValue = info;
+  } catch(err) {
+    console.log("error while fetching user location ", err);
+  }
+}
+
 const deleteData = (event, instanceId, formId) => {
   console.log(instanceId, formId);
   deleteDataWithInstanceId(instanceId.toString(), formId);
@@ -1134,7 +1153,7 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdate = (event) => {
   console.log('check update call');
-  autoUpdater.checkForUpdates();
+  // autoUpdater.checkForUpdates();
 };
 
 // subscribes the listeners to channels
@@ -1163,3 +1182,4 @@ ipcMain.on(AUTO_UPDATE, autoUpdate);
 ipcMain.on(EXPORT_XLSX, exportExcel);
 ipcMain.on(DELETE_INSTANCE, deleteData)
 ipcMain.on(FORM_DETAILS, fetchFormDetails);
+ipcMain.on(USER_DB_INFO, getUserDBInfo);

@@ -23,22 +23,71 @@ interface FormState {
   formDefinition: any;
   formChoices: any;
   toastVisible: boolean;
+  userDBInfo: any;
+}
+
+const getSearchDBProperties=(question: any, path: any)=>{
+
+  const pickSearchDBVariable=(appearance: any)=> {
+    const arr = appearance.split(',').filter((data:any)=> data.includes('searchDB'));
+    return arr.length > 0 ? arr[0].trim() : null; 
+  }
+
+  let properties: any = [];
+  if(question && question.children !== undefined) {
+
+    
+    for(let i=0; i<question.children.length; i++) {
+      const ques = question.children[i];
+      const questionPath = `${path}/${ques.name}`;
+
+      if(ques.control !== undefined && ques.control.appearance !== undefined && ques.control.appearance.includes("searchDB")) {
+        properties.push([questionPath, pickSearchDBVariable(ques.control.appearance)]);
+      }
+      if(ques.type == 'group' || ques.type == 'survey') {
+        const result = getSearchDBProperties(ques, questionPath);
+        properties = properties.concat(result); 
+      }
+    }
+  }
+  console.log(properties);
+  return properties;
 }
 
 class Form extends React.Component<formProps, FormState> {
   constructor(props: any) {
     super(props);
-    this.state = { formDefinition: null, formChoices: null, toastVisible: false };
+    this.state = { formDefinition: null, formChoices: null, toastVisible: false, userDBInfo: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
     const formId = match.params.id || '';
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
+    const userDBInfo = await ipcRenderer.sendSync('user-db-info');
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
-      this.setState({ formDefinition: definition, formChoices });
+      this.setState({ formDefinition: definition, formChoices, userDBInfo, });
     }
   }
+
+  public getUserInput =(dataJson: any) => {
+    let userInput = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {}
+
+    console.log("calling getUserinput ");
+    const userInputProperties = getSearchDBProperties(JSON.parse(this.state.formDefinition), '');
+    if(userInputProperties.length > 0) {
+      const {userDBInfo} = this.state;
+      for(let prop of userInputProperties) {
+        userInput = {
+          ...userInput,
+          [prop[0].slice(1)] : userDBInfo[prop[1].split('@')[1]]
+        }
+      }
+    }
+    console.log({userInput});
+    return userInput;
+  }
+
   public render() {
     const handleSubmit = (userInput: any) => {
       // tslint:disable-next-line: no-console
@@ -76,7 +125,7 @@ class Form extends React.Component<formProps, FormState> {
           value: 'Bangla',
         },
       ],
-      userInputJson: dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {},
+      userInputJson: this.getUserInput(dataJson),
     };
 
     // const goBack = () => this.props.history.goBack();
