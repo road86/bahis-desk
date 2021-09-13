@@ -11,11 +11,10 @@ import Typography from '@material-ui/core/Typography';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import SyncIcon from '@material-ui/icons/Sync';
 // import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
-import { delay } from 'q';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
-import { dataSync } from '../../../helpers/utils';
+import { ipcRenderer } from '../../../services/ipcRenderer';
 import { isPrevMenuEmpty, setPrevMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
 
@@ -60,11 +59,15 @@ function Header(props: HeaderProps) {
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
-    setSyncOverlayHandler(true);
-    await delay(500);
-    await dataSync();
-    await delay(1000);
-    setSyncOverlayHandler(false);
+    await setSyncOverlayHandler(true);
+   
+    const user: any = await ipcRenderer.sendSync('fetch-username');
+    await ipcRenderer.send('request-data-sync', user.username);
+    ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
+      console.log('data check', event, args);
+      setSyncOverlayHandler(false);
+      return args;
+    });
   };
 
   // const menuId = 'primary-search-account-menu';
