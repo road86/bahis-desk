@@ -18,12 +18,13 @@ import AppSignInForm from './AppSignInForm';
 import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
 import { makeStyles } from '@material-ui/core/styles';
+import packageJson from '../../../package.json';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
+      {`App Version ${packageJson.version}`}{' Copyright © '}
+      <Link color="inherit" href="https://www.mpower-social.com/">
         mPower Social Enterprise
       </Link>{' '}
       {new Date().getFullYear()}
