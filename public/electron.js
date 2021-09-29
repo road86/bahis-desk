@@ -12,9 +12,10 @@ const { autoUpdater } = require('electron-updater');
 const { random } = require ('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
-const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
+const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, fetchCsvDataFromServer, queries} = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
+const fsExtra = require('fs-extra')
 const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT } = require('./constants');
 
 
@@ -58,6 +59,7 @@ const EXPORT_XLSX = 'export-xlsx';
 const DELETE_INSTANCE = 'delete-instance';
 const FORM_DETAILS = 'form-details';
 const USER_DB_INFO = 'user-db-info';
+const LOGIN_OPERATION = 'login-operation';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -474,6 +476,44 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
+const loginOperation = async(event, obj)=> {
+  console.log('i am in login operation');
+
+  const db_path = path.join(app.getPath("userData"), DB_NAME);
+  fsExtra.removeSync(db_path); 
+  const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+  // const db = new Database(DB_NAME);
+  console.log('new db setup call after delete previous user data');
+  db.exec(queries);
+  
+  const {response, userData} = obj;
+   const insertStmt = db.prepare(
+      `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    );
+    const data = response;
+    insertStmt.run(
+      userData.username,
+      userData.password,
+      '70:66:55:b0:13:6b',
+      userData.upazila,
+      Math.round(new Date().getTime()),
+      data.name,
+      data.role,
+      data.organization,
+      data.branch,
+      data.email,
+    );
+    results = { username: data.user_name, message: '' };
+    // event.sender.send('formSubmissionResults', results);
+    mainWindow.send('formSubmissionResults', results);
+    event.returnValue = {
+      userInfo: data,
+      // message: ""
+    };
+    db.close();
+
+}
+
 // eslint-disable-next-line no-unused-vars
 const signIn = async (event, userData) => {
   let mac;
@@ -484,17 +524,10 @@ const signIn = async (event, userData) => {
   const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   // const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const query =
-    'SELECT user_id from users where username="' +
-    userData.username +
-    '" AND password="' +
-    userData.password +
-    // '" AND upazila="' +
-    // userData.upazila +
-    '"';
+    'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
   // const info = userInfo.user_id;
-  console.log('user input', userInfo);
-  if (userInfo == undefined) {
+
     const data = {
       username: userData.username,
       password: userData.password,
@@ -512,33 +545,53 @@ const signIn = async (event, userData) => {
         },
       })
       .then((response) => {
-        console.log(response);
+        let results= '';
         if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
           // if (response.status == 200 || response.status == 201) {
-          console.log('successfull', userData);
-          const insertStmt = db.prepare(
-            `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          );
-          const data = response.data;
-          insertStmt.run(
-            userData.username,
-            userData.password,
-            mac,
-            userData.upazila,
-            Math.round(new Date().getTime()),
-            data.name,
-            data.role,
-            data.organization,
-            data.branch,
-            data.email,
-          );
-          results = { username: data.user_name, message: '' };
-          // event.sender.send('formSubmissionResults', results);
-          mainWindow.send('formSubmissionResults', results);
-          // event.returnValue = {
-          //   userInfo: data,
-          //   // message: ""
-          // };
+            console.log('sign in successfull: ');
+
+          if(userInfo === undefined) {
+            const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+            const insertStmt = db.prepare(
+                  `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                );
+                const data = response.data;
+                insertStmt.run(
+                  userData.username,
+                  userData.password,
+                  mac,
+                  userData.upazila,
+                  Math.round(new Date().getTime()),
+                  data.name,
+                  data.role,
+                  data.organization,
+                  data.branch,
+                  data.email,
+                );
+            results = { username: response.data.user_name, message: '' };
+            // event.sender.send('formSubmissionResults', results);
+            mainWindow.send('formSubmissionResults', results);
+            event.returnValue = {
+              userInfo: response.data,
+              // message: ""
+            };
+          }
+          else if(userInfo && userInfo.username !== response.data.user_name) {
+            results = {
+              response: response.data,
+               userData,
+            };
+            mainWindow.send('deleteTableDialogue', results);
+          }
+          else {
+            results = { username: response.data.user_name, message: '' };
+            mainWindow.send('formSubmissionResults', results);
+            event.returnValue = {
+              userInfo: response.data,
+              // message: ""
+            };
+          }
+      
         } else if (response.status == 409) {
           results = {
             message: 'Un-authenticated Really',
@@ -549,24 +602,14 @@ const signIn = async (event, userData) => {
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
+        console.log(error);
         results = {
           message: 'Un-authenticated User',
           username: '',
         };
         mainWindow.send('formSubmissionResults', results);
       });
-  } else {
-    // const updateUserQuery = db.prepare(
-    //   'UPDATE users SET lastlogin = ? WHERE user_id = ?'
-    // );
-    // const dateTime = (new Date()).toString()
-    // updateUserQuery.run( dateTime, userInfo);
-    results = {
-      message: '',
-      username: userData.username,
-    };
-    mainWindow.send('formSubmissionResults', results);
-  }
+  
   db.close();
 };
 
@@ -1183,3 +1226,4 @@ ipcMain.on(EXPORT_XLSX, exportExcel);
 ipcMain.on(DELETE_INSTANCE, deleteData)
 ipcMain.on(FORM_DETAILS, fetchFormDetails);
 ipcMain.on(USER_DB_INFO, getUserDBInfo);
+ipcMain.on(LOGIN_OPERATION, loginOperation);

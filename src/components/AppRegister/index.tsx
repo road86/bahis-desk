@@ -19,6 +19,7 @@ import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
 import { makeStyles } from '@material-ui/core/styles';
 import packageJson from '../../../package.json';
+import AlertDialog from './Dialog';
 
 function Copyright() {
   return (
@@ -75,6 +76,8 @@ function AppRegister(props: any) {
   const [toastVisible, setToastVisible] = React.useState<boolean>(false);
   const [toastContent, setToastContent] = React.useState<any>({});
   const [isLoadComplete, setLoadComplete] = React.useState<boolean>(true);
+  const [openAlert, setOpenAlert] = React.useState<boolean>(false);
+  const [loginArgs, setLoginArgs] = React.useState<any>({});
   // const [formTypeSubmitted, setFormTypeSubmitted] = React.useState([false, false,false]);
   const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
     app_type: '',
@@ -95,13 +98,16 @@ function AppRegister(props: any) {
     const formTypeSubmitted = userEntry.formTypeSubmitted;
     formTypeSubmitted[activeStep] = true;
     setUserEntry({ ...userEntry, formTypeSubmitted });
-    if (activeStep === 0 && userEntry.app_type !== '') {
+    if (activeStep === 0 
+      // && userEntry.app_type !== ''
+      ) {
       setActiveStep(activeStep + 1);
     } else if (
-      activeStep === 1 &&
-      userEntry.division !== '' &&
-      userEntry.district !== '' &&
-      userEntry.upazilla !== ''
+      activeStep === 1 
+      // &&
+      // userEntry.division !== '' &&
+      // userEntry.district !== '' &&
+      // userEntry.upazilla !== ''
     ) {
       setActiveStep(activeStep + 1);
     } else if (activeStep === 2 && userEntry.username !== '' && userEntry.password !== '') {
@@ -111,6 +117,12 @@ function AppRegister(props: any) {
 
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
+    ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
+      console.log('in delete table dialogue: ',event, args);
+      setOpenAlert(true);
+      setLoginArgs(args);
+    });
+    
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
       console.log('check', event);
       if (args !== undefined) {
@@ -124,6 +136,16 @@ function AppRegister(props: any) {
       }
     });
   };
+
+  const performLoginOperation = async (ans: any) => {
+    if(ans === 'delete') {
+      await ipcRenderer.send('login-operation', loginArgs);
+    } else {
+      setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
+      syncAppModule();
+    }
+    setOpenAlert(false);
+  }
 
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
@@ -260,6 +282,7 @@ function AppRegister(props: any) {
           </Typist>
         </div>
       )}
+      <AlertDialog open={openAlert} handleClick={(e: any)=> performLoginOperation(e)} />
     </Grid>
   );
 }
