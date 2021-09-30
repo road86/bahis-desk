@@ -488,14 +488,13 @@ const loginOperation = async(event, obj)=> {
   
   const {response, userData} = obj;
    const insertStmt = db.prepare(
-      `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     const data = response;
     insertStmt.run(
       userData.username,
       userData.password,
       '70:66:55:b0:13:6b',
-      userData.upazila,
       Math.round(new Date().getTime()),
       data.name,
       data.role,
@@ -532,7 +531,6 @@ const signIn = async (event, userData) => {
       username: userData.username,
       password: userData.password,
       mac_address: mac,
-      upazila: userData.upazila,
     };
     // console.log(data);
     await axios
@@ -553,14 +551,13 @@ const signIn = async (event, userData) => {
           if(userInfo === undefined) {
             const db = new Database(path.join(app.getPath("userData"), DB_NAME));
             const insertStmt = db.prepare(
-                  `INSERT INTO users (username, password, macaddress, upazila, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                  `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 );
                 const data = response.data;
                 insertStmt.run(
                   userData.username,
                   userData.password,
                   mac,
-                  userData.upazila,
                   Math.round(new Date().getTime()),
                   data.name,
                   data.role,

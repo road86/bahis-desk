@@ -9,7 +9,7 @@ import { appSignInFormStyles } from './styles';
 interface AppSignInFormProps {
   userInput: { [key: string]: any };
   setFieldValueHandler: (fieldName: string, fieldValue: any) => void;
-  submitted: boolean;
+  // submitted: boolean;
   handleSignin: any;
 }
 
@@ -17,7 +17,7 @@ interface AppSignInFormProps {
 export default function AppSignInForm(props: AppSignInFormProps) {
   const classes = appSignInFormStyles();
   const [inputRefs, setInputRef] = React.useState<any>();
-  const { userInput, setFieldValueHandler, submitted, handleSignin } = props;
+  const { userInput, setFieldValueHandler, handleSignin } = props;
   const onChangeHandler = (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
   };
@@ -62,7 +62,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             onChange={onChangeHandler}
             inputProps={{ onKeyPress: changeFocus }}
             value={userInput[username] || ''}
-            error={submitted && userInput[username] === undefined}
+            // error={submitted && userInput[username] === undefined}
           />
         </Grid>
         <Grid item={true} xs={12}>
@@ -77,7 +77,7 @@ export default function AppSignInForm(props: AppSignInFormProps) {
             onChange={onChangeHandler}
             inputProps={{ onKeyPress: signIn }}
             value={userInput[password] || ''}
-            error={submitted && userInput[password] === undefined}
+            // error={submitted && userInput[password] === undefined}
           />
         </Grid>
       </Grid>

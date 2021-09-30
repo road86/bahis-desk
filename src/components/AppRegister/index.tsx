@@ -2,20 +2,14 @@ import { Avatar, Grid, Snackbar, useTheme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
 import Typography from '@material-ui/core/Typography';
-// import { cpuUsage } from 'process';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import React from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
-import AppMetaForm from './AppMetaForm';
 import AppSignInForm from './AppSignInForm';
-import AppTypeForm from './AppTypeForm';
 import { registerStyles } from './styles';
 import { makeStyles } from '@material-ui/core/styles';
 import packageJson from '../../../package.json';
@@ -34,49 +28,18 @@ function Copyright() {
   );
 }
 
-const steps = ['Select App', 'Select Region', 'User Sign In'];
-
-interface stepperProps {
-  step: number;
-  userInput: any;
-  setFieldValueHandler: any;
-  submitted: boolean;
-  handleSignin: any;
-}
-
-const StepContent: React.FC<stepperProps> = (props: stepperProps) => {
-  const { step, userInput, setFieldValueHandler, submitted, handleSignin } = props;
-  switch (step) {
-    case 0:
-      return <AppTypeForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted} />;
-    case 1:
-      return <AppMetaForm userInput={userInput} setFieldValueHandler={setFieldValueHandler} submitted={submitted} />;
-    case 2:
-      return (
-        <AppSignInForm
-          userInput={userInput}
-          setFieldValueHandler={setFieldValueHandler}
-          submitted={submitted}
-          handleSignin={handleSignin}
-        />
-      );
-    default:
-      throw new Error('Unknown step');
-  }
-};
-
 function AppRegister(props: any) {
-  const { history } = props;
+  // const { history } = props;
   const theme = useTheme();
   const useStyles = makeStyles(registerStyles(theme));
   const classes = useStyles();
   // const classes = registerStyles(theme);
-  const [activeStep, setActiveStep] = React.useState(0);
+  // const [activeStep, setActiveStep] = React.useState(0);
   const [userInput, setUserInput] = React.useState({});
   const [toastVisible, setToastVisible] = React.useState<boolean>(false);
   const [toastContent, setToastContent] = React.useState<any>({});
   const [isLoadComplete, setLoadComplete] = React.useState<boolean>(true);
-  const [openAlert, setOpenAlert] = React.useState<boolean>(false);
+  const [openAlert, setOpenAlert] = React.useState<any>(false);
   const [loginArgs, setLoginArgs] = React.useState<any>({});
   // const [formTypeSubmitted, setFormTypeSubmitted] = React.useState([false, false,false]);
   const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
@@ -94,26 +57,15 @@ function AppRegister(props: any) {
     setUserEntry({ ...userEntry, [fieldName]: fieldValue });
   };
 
-  const handleNext = () => {
-    const formTypeSubmitted = userEntry.formTypeSubmitted;
-    formTypeSubmitted[activeStep] = true;
-    setUserEntry({ ...userEntry, formTypeSubmitted });
-    if (activeStep === 0 
-      // && userEntry.app_type !== ''
-      ) {
-      setActiveStep(activeStep + 1);
-    } else if (
-      activeStep === 1 
-      // &&
-      // userEntry.division !== '' &&
-      // userEntry.district !== '' &&
-      // userEntry.upazilla !== ''
-    ) {
-      setActiveStep(activeStep + 1);
-    } else if (activeStep === 2 && userEntry.username !== '' && userEntry.password !== '') {
-      handleSignIn();
+  const performLoginOperation = async (ans: any) => {
+    if(ans === 'delete') {
+      await ipcRenderer.send('login-operation', loginArgs);
+    } else {
+      setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
+      syncAppModule();
     }
-  };
+    setOpenAlert(false);
+  }
 
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
@@ -122,7 +74,7 @@ function AppRegister(props: any) {
       setOpenAlert(true);
       setLoginArgs(args);
     });
-    
+
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
       console.log('check', event);
       if (args !== undefined) {
@@ -136,16 +88,6 @@ function AppRegister(props: any) {
       }
     });
   };
-
-  const performLoginOperation = async (ans: any) => {
-    if(ans === 'delete') {
-      await ipcRenderer.send('login-operation', loginArgs);
-    } else {
-      setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-      syncAppModule();
-    }
-    setOpenAlert(false);
-  }
 
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
@@ -163,14 +105,6 @@ function AppRegister(props: any) {
         setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
       }
     });
-  };
-
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
-
-  const navigateToMenu = () => {
-    history.push('/menu/');
   };
 
   const snackbarClose = () => {
@@ -206,52 +140,22 @@ function AppRegister(props: any) {
             </Grid>
             <Grid item={true} style={{ marginTop: 20 }}>
               <Typography component="h1" variant="h4" align="center">
-                App Register
+                Sign In
               </Typography>
             </Grid>
-            <Stepper activeStep={activeStep} className={classes.stepper}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel className={classes.stepper}>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
             <React.Fragment>
-              {activeStep === steps.length ? (
-                <React.Fragment>
-                  <Typography variant="h5" gutterBottom={true}>
-                    App Registration Successful.
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    Please click the following button to go to{' '}
-                    <Button color="primary" onClick={navigateToMenu}>
-                      Menu
-                    </Button>
-                    .
-                  </Typography>
-                </React.Fragment>
-              ) : (
-                <React.Fragment>
-                  <StepContent
-                    step={activeStep}
-                    userInput={userInput}
-                    setFieldValueHandler={setFieldValue}
-                    submitted={userEntry.formTypeSubmitted[activeStep]}
-                    handleSignin={handleNext}
-                  />
-                  {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
-                  <div className={classes.buttons}>
-                    {activeStep !== 0 && (
-                      <Button onClick={handleBack} className={classes.button}>
-                        Back
-                      </Button>
-                    )}
-                    <Button variant="contained" color="secondary" onClick={handleNext} className={classes.button}>
-                      {activeStep === steps.length - 1 ? 'Sign In' : 'Next'}
-                    </Button>
-                  </div>
-                </React.Fragment>
-              )}
+              <AppSignInForm
+                userInput={userInput}
+                setFieldValueHandler={setFieldValue}
+                handleSignin={handleSignIn}
+              />
+
+              {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
+              <div className={classes.buttons}>
+                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button}>
+                  Sign In
+                </Button>
+              </div>
             </React.Fragment>
           </Paper>
           <Copyright />
@@ -282,9 +186,11 @@ function AppRegister(props: any) {
           </Typist>
         </div>
       )}
-      <AlertDialog open={openAlert} handleClick={(e: any)=> performLoginOperation(e)} />
+          <AlertDialog open={openAlert} handleClick={(e: any)=> performLoginOperation(e)} />
     </Grid>
   );
 }
 
 export default withRouter(AppRegister);
+
+
