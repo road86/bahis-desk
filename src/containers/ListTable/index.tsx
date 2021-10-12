@@ -40,6 +40,9 @@ export interface LookupDefinition {
   table_name: string;
   return_column: string;
   column_name: string;
+  query: any,
+  condition: any;
+  datasource: any;
 }
 
 export interface ColumnObj {
@@ -151,15 +154,29 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const lookupTables: any = {};
     await columnDefinition.forEach(async (column) => {
       if (isColumnObj(column) && column.data_type === 'lookup') {
-        const resp = await ipcRenderer.sendSync(
-          'fetch-query-data',
-          'lookup_definition' in column && column.lookup_definition
-            ? `with lookup_union as(select ${column.lookup_definition.column_name},${column.lookup_definition.return_column} from ${column.lookup_definition.table_name}),
-            list_source as(${datasource.query})
-            select lookup_union.${column.lookup_definition.column_name}, lookup_union.${column.lookup_definition.return_column} from list_source left join lookup_union on list_source.${column.field_name} = lookup_union.${column.lookup_definition.column_name}`
-            : '',
-        );
-        lookupTables[column.field_name] = resp;
+
+        if('lookup_definition' in column && column.lookup_definition) {
+
+          let conditions = '';
+          for(let i=0; i<column.lookup_definition.condition.length; i++) {
+            if(i !==0) conditions+= ' and ';
+            conditions += ` list_table.${column.lookup_definition.condition[i].column} = lookup_table.${column.lookup_definition.condition[i].name}`;
+          }
+          const query = `with list_table as ( 
+              ${datasource.query}
+            ), lookup_table as (
+              ${column.lookup_definition.query}
+            ) select
+              list_table.id,
+              lookup_table.${column.lookup_definition.return_column}
+            from list_table left join lookup_table on ${conditions}`;
+          
+          console.log('--------------- lookup query ------------------');
+          console.log(query);
+          const resp = await ipcRenderer.sendSync('fetch-query-data', query);
+          lookupTables[column.lookup_definition.return_column] = resp;
+
+        }
       }
     });
     this.setState({ ...this.state, tableData: response || [], filters, lookupTables });
@@ -228,6 +245,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
           this.generateSqlWhereClause(filters) +
           orderSqlTxt;
+    
+    console.log('lookup tables: ', {lookupTables});
     return (
       <div style={{ marginBottom: 20 }}>
         <Row>
@@ -282,8 +301,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                                 {colObj.data_type === 'lookup' ? (
                                   <LookUp
                                     columnDef={colObj}
-                                    rowValues={rowObj}
-                                    lookupTable={lookupTables[colObj.field_name]}
+                                    rowValue={rowObj}
+                                    lookupTable={lookupTables}
                                   />
                                 ) : (
                                   rowObj[colObj.field_name]

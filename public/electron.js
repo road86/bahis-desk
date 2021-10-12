@@ -531,6 +531,7 @@ const signIn = async (event, userData) => {
       username: userData.username,
       password: userData.password,
       mac_address: mac,
+      upazila: 202249,
     };
     // console.log(data);
     await axios
@@ -544,6 +545,8 @@ const signIn = async (event, userData) => {
       })
       .then((response) => {
         let results= '';
+        console.log('-----------signin response --------------');
+        console.log(response);
         if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
           // if (response.status == 200 || response.status == 201) {
             console.log('sign in successfull: ');
