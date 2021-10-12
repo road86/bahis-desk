@@ -10,8 +10,8 @@ const { update } = require('lodash');
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 const CSV_DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
-const DATA_SYNC_COUNT = `${SERVER_URL}/bhmodule/form/ghatail/data-sync-count/`;
-const DATA_SYNC_PAGINATED = `${SERVER_URL}/bhmodule/form/ghatail/data-sync-paginated/`;
+const DATA_SYNC_COUNT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-count/`;
+const DATA_SYNC_PAGINATED = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-paginated/`;
 const PAGE_LENGTH = 100;
 
 const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila TEXT , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
@@ -125,9 +125,9 @@ const fetchDataFromServer = async (username) => {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    const url = DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
-    const dataSyncCountResponse = await axios.get(`${DATA_SYNC_COUNT}`, {last_modified: updated});
-    const dataSyncResponse = await axios.get(`${DATA_SYNC_PAGINATED}`, {last_modified: updated, page_no: 1, page_length: 1 });
+    const url = DATA_SYNC_PAGINATED.replace('core_admin', username) ;
+    const dataCountUrl = DATA_SYNC_COUNT.replace('core_admin', username) + '?last_modified=' + updated;
+    const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
     const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
 
@@ -135,7 +135,7 @@ const fetchDataFromServer = async (username) => {
     let serverCalls = [];
     for(let i=1; i<=(dataLength / PAGE_LENGTH) + 1; i++) {
       promises.push(
-         axios.get(`${DATA_SYNC_PAGINATED}`, {last_modified: updated, page_no: i, page_length: PAGE_LENGTH }).then((response)=> {
+         axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response)=> {
               serverCalls.push(i);
               const newDataRows = response.data;
               newDataRows.forEach((newDataRow) => {
@@ -208,6 +208,9 @@ const saveNewDataToTable = (instanceId, formId, userInput) => {
       `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
     );
     insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()), fetchedUsername.username, date);
+
+    // console.log('xform_id: '+userInput._xform_id_string);
+
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -276,6 +279,10 @@ const objToTable = (
     }
   }
   let newParentId = null;
+
+  if(tableName.includes('medicine')) {
+    console.log('table name: '+tableName);
+  }
   if (columnNames !== '' || repeatKeys.length > 0) {
     if (instanceId) {
       columnNames += 'instanceid, ';
@@ -288,7 +295,7 @@ const objToTable = (
     const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
       0,
       columnNames.length - 2,
-    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;
+    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;2
     try {
       const successfulInsert = dbCon.prepare(query).run();
       newParentId = successfulInsert.lastInsertRowid;
