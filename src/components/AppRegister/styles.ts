@@ -9,7 +9,7 @@ export const registerStyles = (theme: Theme) =>
     },
     buttons: {
       display: 'flex',
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
     },
     layout: {
       marginLeft: theme.spacing(2),

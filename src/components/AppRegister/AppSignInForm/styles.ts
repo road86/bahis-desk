@@ -9,6 +9,7 @@ export const appSignInFormStyles = makeStyles((theme: Theme) =>
         width: '60%',
       },
       marginLeft: theme.spacing(3),
+      textAlign: 'center',
     },
   }),
 );
