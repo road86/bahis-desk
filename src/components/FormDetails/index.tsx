@@ -33,14 +33,17 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
     let { data, form_id } = formData.formDetails;
     data = JSON.parse(data);
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', form_id);
+    const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', form_id);
+    console.log('-------------------- form choices ----------------');
+    console.log(simpleFormChoice.length);
     if (formDefinitionObj != null) {
       const { definition, field_names, formChoices } = formDefinitionObj;
-      createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data, JSON.parse(formChoices));
+      createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data, { simpleFormChoice, formChoices: JSON.parse(formChoices)});
     }
     // setFormData(Object.entries(data));
   }
 
-  const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, formChoices: any) => {
+  const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, choices: any) => {
     const formData: any[] = [];
     const userInput = Object.entries(data);
     fieldNames.forEach((element: any) => {
@@ -63,7 +66,7 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
         if (formField) {
           formData.push({
             label: formField.label,
-            value: getReadableValue(exist[1], formField, formChoices),
+            value: getReadableValue(exist[1], formField, choices),
           })
           console.log(formField.label, exist[1]);
         }
@@ -72,7 +75,7 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
     setFormData(formData);
   }
 
-  const getReadableValue = (fieldValue: any, formField: any, formChoices: any) => {
+  const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
 
     //  it means that value has been selected from csv-list.
     if (formField && formField.control && formField.control.appearance && formField.control.appearance.includes('search')) {
@@ -84,24 +87,38 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
       if (params.length > 2) {
         params = params.substring(1, params.length - 1);
         const csvName = params.split(',')[0].replaceAll('\'', '');
-  
-        const choices = formChoices[`${csvName}.csv`];
-        let result = choices.find((option: any)=> option[formField.children[0].name] === fieldValue);
-        result = result[formField.children[0].label['English']];
-        console.log('--------csvname :', csvName, result);
-        return result;
+        
+        console.log(formField, fieldValue);
+        const csvChoices = choices.formChoices[`${csvName}.csv`];
+        console.log('--------------choices -------------------');
+        console.log(csvChoices);
+        console.log('--------csvname :', csvName);
+        let result = csvChoices.find((option: any)=> String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+        console.log('--------result :', result);
+        if(result === undefined) return ' -- ';
+        else {
+          result = result[formField.children[0].label['English']];
+          return result;
+        }
       }
     } 
-    else if(formField.type === SELECT_ONE) {
-      const result = formField.children.find((option: any)=> option.name === fieldValue);
-      return  typeof result.label == 'string' ? result.label : result.label.English;
+    else if(formField.type === SELECT_ONE || formField.type === SELECT_ALL) {
+      // console.log('----------in select one -----------------');
+      // console.log(fieldValue, formField);
+      for (let i=0; i<choices.simpleFormChoice.length; i++) {
+        const choice = choices.simpleFormChoice[i];
+
+        if( choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
+          choice.value_label = JSON.parse(choice.value_label);
+          console.log('--- got it: ', formField.name, fieldValue);
+          if(typeof choice.value_label === 'string') return choice.value_label;
+          else if(typeof choice.value_label === 'object') {
+            console.log('ans: ',choice.value_label.English);
+            return choice.value_label.English;
+          }
+        }
+      }
     } 
-    else if(formField.type === SELECT_ALL) {
-      return formField.children
-              .filter((option: any)=> fieldValue.includes(option.name))
-              .map((option: any)=> option.label == 'string' ? option.label : option.label.English)
-              .join(', ');
-    }
     else {
       return typeof fieldValue == 'string' ? fieldValue : JSON.stringify(fieldValue);
     }

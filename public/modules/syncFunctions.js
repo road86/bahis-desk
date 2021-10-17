@@ -21,7 +21,9 @@ CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_h
 CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
 CREATE TABLE app_log( time TEXT);
 CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT NOT NULL, image_name TEXT NOT NULL, directory_name TEXT );
+CREATE TABLE form_choices( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);
 CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
+
 
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed

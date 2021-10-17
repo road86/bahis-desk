@@ -16,7 +16,7 @@ const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDa
 const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
 const fsExtra = require('fs-extra')
-const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT } = require('./constants');
+const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
 
 
 // DEV EXTENSIONS
@@ -36,6 +36,7 @@ const cmd = process.argv[1];
 const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
 const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
 const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
+const FORM_CHOICES_CHANNEL = 'fetch-form-choices';
 const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
 const SUBMITTED_FORM_DEFINITION_CHANNEL = 'submitted-form-definition'
 const FETCH_LIST_FOLLOWUP = 'fetch-list-followup'
@@ -377,6 +378,25 @@ const fetchFormDefinition = (event, formId) => {
     console.log(err);
   }
 };
+
+const fetchFormChoices=(event, formId)=> {
+  try {
+    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
+    console.log('------------------- form id: ', formId);
+    const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ${formId} `).all();
+
+    console.log(formchoices);
+    event.returnValue = formchoices;
+    db.close();
+
+  } catch(err) {
+    console.log('------------- error fetch form choices ------------------');
+  } finally {
+
+  }
+  
+}
 
 const fetchFormDetails = (event, listId) => {
   try {
@@ -989,9 +1009,10 @@ const startAppSync = (event, name) => {
         axios.get(APP_DEFINITION_ENDPOINT.replace('core_admin', name)),
         axios.get(FORMS_ENDPOINT.replace('core_admin', name)),
         axios.get(LISTS_ENDPOINT.replace('core_admin', name)),
+        axios.get(FORM_CHOICE_ENDPOINT.replace('core_admin', name))
       ])
       .then(
-        axios.spread((formConfigRes, moduleListRes, formListRes, listRes) => {
+        axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
           if (formConfigRes.data) {
             if (formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
@@ -1081,6 +1102,35 @@ const startAppSync = (event, name) => {
                   console.log('db list insertion failed', err);
                 }
               });
+            }
+            if (formChoice.data) {
+              const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE id > 0');
+
+              try {
+                previousFormChoices.run();
+              } catch (err) {
+                console.log(' db form_choice insertion failed');
+              }
+
+              const insertQuery = db.prepare(
+                'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
+              );
+
+              console.log('---------------------------- form choice data ---------------------');
+              console.log(formChoice.data.length);
+
+              try {
+                formChoice.data.forEach(async (formObj) => {
+                  insertQuery.run(
+                    formObj.value_text,
+                    String(formObj.xform_id),
+                    formObj.value_label,
+                    formObj.field_name,
+                    formObj.field_type);
+                });
+              } catch (err) {
+                console.log(' ')
+              }
             }
           }
           csvDataSync(name);
@@ -1203,6 +1253,7 @@ const autoUpdate = (event) => {
 ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
 ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
 ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
+ipcMain.on(FORM_CHOICES_CHANNEL, fetchFormChoices);
 ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
 ipcMain.on(SUBMITTED_FORM_DEFINITION_CHANNEL, fetchFormListDefinition);
 ipcMain.on(FETCH_LIST_FOLLOWUP, fetchFollowupFormData);
