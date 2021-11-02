@@ -13,7 +13,7 @@ import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../..
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { exportToExcel } from '../../helpers/utils';
+import { exportToExcelForSubmittedData } from '../../helpers/utils';
 import Filter from './Filter';
 
 /** interface for Form URL params */
@@ -36,18 +36,51 @@ function SubmittedForm(props: ListProps) {
   const [updating, setUpdating] = React.useState<boolean>(true);
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(5);
   const [page, setPage] = React.useState<number>(0);
-  const [exportableColumn, setExportableColumn] = React.useState([]);
   const [userList, setUserList] = React.useState<any[]>([]);
   const [fieldNames, setFieldNames] = React.useState<any[]>([]);
   const [order, setOrder] = React.useState<Order>('desc');
+  const [fieldWithLabels, setFieldWithLabels] = React.useState<any>({});
+  const [formAllChoices, setFormAllChoices] = React.useState<any>({});
+
+  const constructFieldWithLabel=( ob: any, parent: any ): any =>{
+    if(parent === '/') parent = '';
+
+    let labels = {};
+    for(let i=0; i<ob.children.length; i++) {
+      if(ob.children[i].type === "group")
+        labels = { ...labels, ...constructFieldWithLabel(ob.children[i], `${parent}${ob.name}/`) };
+      else {
+        if(ob.children[i].label)
+          labels = {
+            ...labels, 
+            [`${parent}${ob.name}/${ob.children[i].name}`]: { 
+              label: ob.children[i].label[appLanguage],
+              type: ob.children[i].type,
+              fieldElement: ob.children[i],
+            }
+          }
+        else {
+          labels = {...labels, ...{[`${parent}${ob.name}/${ob.children[i].name}`]: ob.children[i].name }}
+        }
+      }
+    }
+    return labels;
+  }
 
   const comUpdate = async () => {
     const { match } = props;
     const formId = match.params.id || '';
+    console.log('---------> form id: ', formId);
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
+    const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', formId);
+
     if (formDefinitionObj != null) {
-      const { field_names } = formDefinitionObj;
+      const { field_names, formChoices } = formDefinitionObj;
+      const form = {name: '', children: JSON.parse(formDefinitionObj.definition).children}
+      const result = constructFieldWithLabel(form, ""); 
+      setFieldWithLabels(result);
       setFieldNames(JSON.parse(field_names));
+      setFormAllChoices({ simpleFormChoice, formChoices: JSON.parse(formChoices)})
     }
     fetchTableData(formId);
     setFormId(formId);
@@ -173,8 +206,6 @@ function SubmittedForm(props: ListProps) {
       }
     ];
     setColumnDefinition(COLUMN_DEFINITION);
-    const filterColumns = COLUMN_DEFINITION.filter((tmp: any) => isColumnObj(tmp) && tmp.exportable == true);
-    setExportableColumn(filterColumns)
   }
 
   const deleteData = (instanceId: string) =>{
@@ -241,7 +272,7 @@ function SubmittedForm(props: ListProps) {
       <hr className={classes.hrTag}/>
       <Filter formId={formId} fieldNames={fieldNames} tableData={tableData} userList={userList} submitFilter={filterData} resetFilter={resetFilter} setUpdater={setUpdating}></Filter>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcel(tableData, exportableColumn, appLanguage)}>
+        <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcelForSubmittedData(tableData, fieldWithLabels, formAllChoices)}>
           <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX
         </Button>
       </div>

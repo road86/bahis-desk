@@ -246,7 +246,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           this.generateSqlWhereClause(filters) +
           orderSqlTxt;
     
-    console.log('lookup tables: ', {lookupTables});
+    console.log(' column definition: ', columnDefinition);
+    console.log('table data: ', this.state.tableData);
     return (
       <div style={{ marginBottom: 20 }}>
         <Row>
@@ -391,6 +392,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   private mapListToFormData = (mapping: MappingObj[], listRowData: { [key: string]: any }): any => {
     const preFormJsn: any = {};
+    console.log('-------mapping: ', mapping);
+    console.log('-------list row data: ', listRowData);
     mapping.forEach((item: MappingObj) => {
       preFormJsn[item.form_field] = listRowData[item.column];
     });

@@ -17,11 +17,11 @@ export const ENDS_WITH_LABEL = 'ends with';
 
 // equals option
 export const EQUAL_TYPE = 'equals';
-export const EQUAL_LABEL = '=';
+export const EQUAL_LABEL = 'equals';
 
 // not equals option
 export const NOT_EQUAL_TYPE = 'not_equals';
-export const NOT_EQUAL_LABEL = '!=';
+export const NOT_EQUAL_LABEL = 'not equals';
 
 // text filter operators
 export const TEXT_FILTER_OPERATORS = [

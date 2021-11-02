@@ -43,6 +43,9 @@ function List(props: ListProps) {
   const comUpdate = async () => {
     const { match } = props;
     const listId = match.params.id || '';
+
+    console.log('------------------list id -----------------');
+    console.log(listId);
     const response = await ipcRenderer.sendSync(
       'fetch-list-definition',
       listId,
