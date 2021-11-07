@@ -533,7 +533,15 @@ const loginOperation = async(event, obj)=> {
 
 }
 
-// eslint-disable-next-line no-unused-vars
+// ------------ NOTE ------------
+/**
+ * there are four scenario in sign in process
+ * 1. when a user login for the first time we save its details in db. and sync for its  modules, forms, lists
+ * 2. when a user try to login, we check db for its login history. if we found any, we will forward that user to home page
+ * 3. if a user try to login, we will check the db for its login history and if we found a different user then
+ *    we will show a delete-data dialog to remove everything related to the previous user
+ *    
+ */
 const signIn = async (event, userData) => {
   let mac;
   macaddress.one(function (err, mac) {
@@ -547,6 +555,15 @@ const signIn = async (event, userData) => {
   const userInfo = db.prepare(query).get();
   // const info = userInfo.user_id;
 
+  // if a user has signed in before then no need to call signin-api
+  if(userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+    results = { username: userData.username, message: '' };
+    mainWindow.send('formSubmissionResults', results);
+    event.returnValue = {
+      userInfo: '',
+      // message: ""
+    };
+  }
     const data = {
       username: userData.username,
       password: userData.password,
@@ -570,7 +587,7 @@ const signIn = async (event, userData) => {
         if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
           // if (response.status == 200 || response.status == 201) {
             console.log('sign in successfull: ');
-
+          // if a user has signed in for the first time
           if(userInfo === undefined) {
             const db = new Database(path.join(app.getPath("userData"), DB_NAME));
             const insertStmt = db.prepare(

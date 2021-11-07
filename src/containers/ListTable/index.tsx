@@ -270,7 +270,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {columnDefinition.map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      {columnDefinition.filter((ob: any)=> !ob.hidden).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
                         if (isColumnObj(singleCol)) {
                           return (
                             <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
@@ -296,7 +296,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                       this.state.tableData &&
                       this.state.tableData.map((rowObj, rowIndex: number) => (
                         <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          {columnDefinition.filter((ob: any)=> !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
                               <TableCell key={'data-field-' + colIndex}>
                                 {colObj.data_type === 'lookup' ? (
@@ -392,11 +392,15 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   private mapListToFormData = (mapping: MappingObj[], listRowData: { [key: string]: any }): any => {
     const preFormJsn: any = {};
-    console.log('-------mapping: ', mapping);
-    console.log('-------list row data: ', listRowData);
+    let metainstanceIdFormField = '';
     mapping.forEach((item: MappingObj) => {
+      if(item.column.toLocaleLowerCase() == 'meta_instanceid') metainstanceIdFormField = item.form_field;
       preFormJsn[item.form_field] = listRowData[item.column];
     });
+    const metaInstanceId = Object.keys(listRowData).find((item)=> (item && String(item).toLocaleLowerCase() === 'meta_instanceid'));
+    if(metaInstanceId) {
+      preFormJsn[metainstanceIdFormField] = listRowData[metaInstanceId];
+    }
     return btoa(JSON.stringify(preFormJsn));
   };
 }
