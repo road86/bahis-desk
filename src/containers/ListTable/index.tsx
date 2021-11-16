@@ -40,9 +40,13 @@ export interface LookupDefinition {
   table_name: string;
   return_column: string;
   column_name: string;
+  match_column?: string;
   query: any,
   condition: any;
   datasource: any;
+  lookup_type?: string;
+  form_id?: string;
+  form_field: string;
 }
 
 export interface ColumnObj {
@@ -107,7 +111,8 @@ export interface ListTableProps {
 /** state inteface for ListTable */
 export interface ListTableState {
   tableData: Array<{ [key: string]: any }>;
-  lookupTables: any;
+  lookupTableForDatasource: any;
+  lookupTableForLabel: any;
   filters: any;
   orderSql: string;
   pageNumber: number;
@@ -121,7 +126,11 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTables: {}, rowsPerPage: 5, page: 0 };
+    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTableForDatasource: {}, lookupTableForLabel: {}, rowsPerPage: 5, page: 0 };
+  }
+
+  public hasLookup=(column: any): boolean => {
+    return ('lookup_definition' in column && column.lookup_definition)
   }
 
   public async componentDidMount() {
@@ -151,35 +160,37 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         ? `select count(*) as count from ${datasource.query} limit ${5} offset 0`
         : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${5} offset 0`,
     );
-    const lookupTables: any = {};
+    const lookupTableForDatasource: any = {};
+    let lookupTableForLabel: any = {};
     await columnDefinition.forEach(async (column) => {
-      if (isColumnObj(column) && column.data_type === 'lookup') {
 
-        if('lookup_definition' in column && column.lookup_definition) {
+      if('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "datasource" ) {
+        const query = `with list_table as ( 
+            ${datasource.query}
+          ), lookup_table as (
+            ${column.lookup_definition.query}
+          ) select
+            list_table.id,
+            lookup_table.${column.lookup_definition.return_column}
+          from list_table left join lookup_table on list_table.${column.field_name} = lookup_table.${column.lookup_definition.match_column}`;
+        
+        console.log('--------------- lookup query ------------------');
+        console.log(query);
+        const resp = await ipcRenderer.sendSync('fetch-query-data', query);
+        lookupTableForDatasource[column.lookup_definition.return_column] = resp;
 
-          let conditions = '';
-          for(let i=0; i<column.lookup_definition.condition.length; i++) {
-            if(i !==0) conditions+= ' and ';
-            conditions += ` list_table.${column.lookup_definition.condition[i].column} = lookup_table.${column.lookup_definition.condition[i].name}`;
-          }
-          const query = `with list_table as ( 
-              ${datasource.query}
-            ), lookup_table as (
-              ${column.lookup_definition.query}
-            ) select
-              list_table.id,
-              lookup_table.${column.lookup_definition.return_column}
-            from list_table left join lookup_table on ${conditions}`;
-          
-          console.log('--------------- lookup query ------------------');
-          console.log(query);
-          const resp = await ipcRenderer.sendSync('fetch-query-data', query);
-          lookupTables[column.lookup_definition.return_column] = resp;
-
-        }
       }
+
+      if('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "label" ) {
+        const form_id: any = column.lookup_definition.form_id;
+        const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', form_id);
+        const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', form_id);
+        lookupTableForLabel = {...lookupTableForLabel, [form_id]:  {simpleFormChoice, formChoices: JSON.parse(formDefinitionObj.formChoices), definition: formDefinitionObj}}
+        this.setState({...this.state.filters, lookupTableForLabel});
+      }
+
     });
-    this.setState({ ...this.state, tableData: response || [], filters, lookupTables });
+    this.setState({ ...this.state, tableData: response || [], filters, lookupTableForDatasource, lookupTableForLabel });
   }
 
   public async componentDidUpdate() {
@@ -235,7 +246,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
   public render() {
     const { columnDefinition, datasource, filters, orderSql } = this.props;
-    const { lookupTables } = this.state;
+    const { lookupTableForDatasource, lookupTableForLabel } = this.state;
     const appLanguage = 'English';
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
     const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
@@ -299,11 +310,12 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                           {columnDefinition.filter((ob: any)=> !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
                               <TableCell key={'data-field-' + colIndex}>
-                                {colObj.data_type === 'lookup' ? (
+                                { this.hasLookup(colObj) ? (
                                   <LookUp
                                     columnDef={colObj}
                                     rowValue={rowObj}
-                                    lookupTable={lookupTables}
+                                    lookupTableForDatasource = {lookupTableForDatasource}
+                                    lookupTableForLabel = {lookupTableForLabel}
                                   />
                                 ) : (
                                   rowObj[colObj.field_name]

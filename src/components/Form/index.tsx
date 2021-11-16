@@ -23,7 +23,8 @@ interface FormState {
   formDefinition: any;
   formChoices: any;
   toastVisible: boolean;
-  userDBInfo: any;
+  userLocationInfo: any;
+  userInfo: any;
 }
 
 const getSearchDBProperties=(question: any, path: any)=>{
@@ -57,16 +58,17 @@ const getSearchDBProperties=(question: any, path: any)=>{
 class Form extends React.Component<formProps, FormState> {
   constructor(props: any) {
     super(props);
-    this.state = { formDefinition: null, formChoices: null, toastVisible: false, userDBInfo: null };
+    this.state = { formDefinition: null, formChoices: null, toastVisible: false, userLocationInfo: null, userInfo: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
     const formId = match.params.id || '';
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
-    const userDBInfo = await ipcRenderer.sendSync('user-db-info');
+    const userLocationInfo = await ipcRenderer.sendSync('user-db-info');
+    const userInfo = await ipcRenderer.sendSync('fetch-userlist');
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
-      this.setState({ formDefinition: definition, formChoices, userDBInfo, });
+      this.setState({ formDefinition: definition, formChoices, userLocationInfo, userInfo});
     }
   }
 
@@ -76,11 +78,11 @@ class Form extends React.Component<formProps, FormState> {
     console.log("calling getUserinput ");
     const userInputProperties = getSearchDBProperties(JSON.parse(this.state.formDefinition), '');
     if(userInputProperties.length > 0) {
-      const {userDBInfo} = this.state;
+      const {userLocationInfo} = this.state;
       for(let prop of userInputProperties) {
         userInput = {
           ...userInput,
-          [prop[0].slice(1)] : userDBInfo[prop[1].split('@')[1]]
+          [prop[0].slice(1)] : userLocationInfo[prop[1].split('@')[1]]
         }
       }
     }
@@ -93,7 +95,7 @@ class Form extends React.Component<formProps, FormState> {
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
-        const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : this.generateUid();
+        const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : `${this.state.userInfo.users[0].username}-${this.generateUid()}`;
         const { match } = this.props;
         const formId = match.params.id || '';
         ipcRenderer.send('submit-form-response', {
@@ -161,27 +163,16 @@ class Form extends React.Component<formProps, FormState> {
       </div>
     );
   }
-  private s4 = () => {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  };
+  // private s4 = () => {
+  //   return Math.floor((1 + Math.random()) * 0x10000)
+  //     .toString(16)
+  //     .substring(1);
+  // };
 
   private generateUid = () => {
-    return (
-      'uuid:' +
-      this.s4() +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      '-' +
-      this.s4() +
-      this.s4() +
-      this.s4()
+    // @ts-ignore: Unreachable code error
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c: any) =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
   };
 }

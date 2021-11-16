@@ -1031,6 +1031,7 @@ const startAppSync = (event, name) => {
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
           if (formConfigRes.data) {
+            console.log('---------------------fromConfigRes data ---------------------');
             if (formConfigRes.data.length > 0) {
               const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
               const maxUpdateTime = Math.max(...formConfigRes.data.map((obj) => obj.updated_at), 0);
@@ -1050,6 +1051,7 @@ const startAppSync = (event, name) => {
             });
           }
           if (moduleListRes.data) {
+            console.log('---------------------moduleListRes data ---------------------');
             const layoutDeleteQuery = db.prepare('DELETE FROM app');
             
             try {
@@ -1066,6 +1068,7 @@ const startAppSync = (event, name) => {
             updateAppDefinition(moduleListRes.data);
           }
           if (formListRes.data) {
+            console.log('---------------------FormListRes data ---------------------');
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
               'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
@@ -1094,6 +1097,7 @@ const startAppSync = (event, name) => {
               }
             });
             if (listRes.data) {
+              console.log('---------------------ListRes data ---------------------');
               const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
               const newListInsertQuery = db.prepare(
                 'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
@@ -1121,6 +1125,7 @@ const startAppSync = (event, name) => {
               });
             }
             if (formChoice.data) {
+              console.log('---------------------formChoice data ---------------------');
               const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE id > 0');
 
               try {
@@ -1164,7 +1169,7 @@ const startAppSync = (event, name) => {
         } else {
           message = 'done'
         }
-        console.log(err);
+        console.log(err.config);
         mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
         console.log('Axios FAILED in startAppSync');
