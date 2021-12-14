@@ -1268,7 +1268,7 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdate = (event) => {
   console.log('check update call');
-  // autoUpdater.checkForUpdates();
+  autoUpdater.checkForUpdates();
 };
 
 // subscribes the listeners to channels

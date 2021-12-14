@@ -92,6 +92,8 @@ class Form extends React.Component<formProps, FormState> {
 
   public render() {
     const handleSubmit = (userInput: any) => {
+      const result = window.confirm("Are you sure you want to submit the form ?");
+      if(!result) return;
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
