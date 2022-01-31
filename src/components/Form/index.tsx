@@ -9,6 +9,7 @@ import './Form.css';
 import ErrorBoundary from '../page/ErrorBoundary';
 import { Alert } from 'reactstrap';
 import { Typography } from '@material-ui/core';
+import AlertDialog from './dialog';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 /** interface for Form URL params */
 interface FormURLParams {
@@ -25,6 +26,8 @@ interface FormState {
   toastVisible: boolean;
   userLocationInfo: any;
   userInfo: any;
+  showConfirmDialog: boolean;
+  userInput: any;
 }
 
 const getSearchDBProperties=(question: any, path: any)=>{
@@ -58,7 +61,7 @@ const getSearchDBProperties=(question: any, path: any)=>{
 class Form extends React.Component<formProps, FormState> {
   constructor(props: any) {
     super(props);
-    this.state = { formDefinition: null, formChoices: null, toastVisible: false, userLocationInfo: null, userInfo: null };
+    this.state = { formDefinition: null, formChoices: null, toastVisible: false, userLocationInfo: null, userInfo: null, showConfirmDialog: false, userInput: null };
   }
   public async componentDidMount() {
     const { match } = this.props;
@@ -91,9 +94,10 @@ class Form extends React.Component<formProps, FormState> {
   }
 
   public render() {
-    const handleSubmit = (userInput: any) => {
-      const result = window.confirm("Are you sure you want to submit the form ?");
-      if(!result) return;
+
+    const handleYes = () => {
+     
+      const userInput = this.state.userInput;
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
@@ -106,11 +110,22 @@ class Form extends React.Component<formProps, FormState> {
         });
         this.setState({
           toastVisible: true,
+          showConfirmDialog: false
         });
         setTimeout(() => {
           this.props.history.push('/menu/');
         }, 2010);
       }
+    }
+
+    const handleCancel =()=> {
+      const state = this.state;
+      this.setState({...state, showConfirmDialog: false});
+    }
+
+    const handleSubmit = (userInput: any) => {
+      const state = this.state;
+      this.setState({...state, userInput, showConfirmDialog: true});
     };
     const { formDefinition, formChoices } = this.state;
     const { dataJson } = queryString.parse(this.props.location.search);
@@ -147,6 +162,7 @@ class Form extends React.Component<formProps, FormState> {
 
     return (
       <div className="form-container">
+        <AlertDialog open={this.state.showConfirmDialog}  yes={handleYes} cancel={handleCancel}/>
         {this.state.toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
         {/* <Link to="/menu/">
           <div>
