@@ -4,7 +4,7 @@ const { app } = electron;
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
 const path = require('path');
-const {SERVER_URL} = require('../constants');
+const { SERVER_URL } = require('../constants');
 const { update } = require('lodash');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
@@ -28,7 +28,7 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
- const fetchCsvDataFromServer = async (username) => {
+const fetchCsvDataFromServer = async (username) => {
   console.log('fetch call', username);
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
@@ -67,7 +67,7 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
  * @param {string} pkList
  * @param {string} rowData
  */
- const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
+const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     rowData.data.forEach((rowObj) => {
@@ -93,7 +93,7 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
  * @param {object} rowData - the userinput object containing field values that need to be saved
  */
 const saveNewCSVDataToTable = (rowData) => {
-  try {    
+  try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     let keys = '';
     let values = '';
@@ -127,7 +127,7 @@ const fetchDataFromServer = async (username) => {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    const url = DATA_SYNC_PAGINATED.replace('core_admin', username) ;
+    const url = DATA_SYNC_PAGINATED.replace('core_admin', username);
     const dataCountUrl = DATA_SYNC_COUNT.replace('core_admin', username) + '?last_modified=' + updated;
     const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
@@ -135,18 +135,18 @@ const fetchDataFromServer = async (username) => {
 
     let promises = [];
     let serverCalls = [];
-    for(let i=1; i<=(dataLength / PAGE_LENGTH) + 1; i++) {
+    for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
       promises.push(
-         axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response)=> {
-              serverCalls.push(i);
-              const newDataRows = response.data;
-              newDataRows.forEach((newDataRow) => {
-                // eslint-disable-next-line no-console
-                console.log(newDataRow.id);
-                deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
-                saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
-              });
-        }).catch((err)=> {
+        axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
+          serverCalls.push(i);
+          const newDataRows = response.data;
+          newDataRows.forEach((newDataRow) => {
+            // eslint-disable-next-line no-console
+            console.log(newDataRow.id);
+            deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
+            saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
+          });
+        }).catch((err) => {
 
           console.log("error in data sync paginated ");
           console.log(err);
@@ -154,8 +154,8 @@ const fetchDataFromServer = async (username) => {
       );
     }
 
-      await Promise.all(promises);
-      console.log(serverCalls);
+    await Promise.all(promises);
+    console.log(serverCalls);
 
     return 'success';
   } catch (err) {
@@ -202,10 +202,10 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
  * @param {object} userInput - the userinput object containing field values that need to be saved
  */
 const saveNewDataToTable = (instanceId, formId, userInput) => {
-  try {    
+  try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
-    const date = userInput.updated_at ? new Date(userInput.updated_at).toISOString() : new Date().toISOString();
+    const date = userInput._submission_time ? new Date(userInput._submission_time).toISOString() : new Date().toISOString();
     const insertStmt = db.prepare(
       `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
     );
@@ -282,8 +282,8 @@ const objToTable = (
   }
   let newParentId = null;
 
-  if(tableName.includes('medicine')) {
-    console.log('table name: '+tableName);
+  if (tableName.includes('medicine')) {
+    console.log('table name: ' + tableName);
   }
   if (columnNames !== '' || repeatKeys.length > 0) {
     if (instanceId) {
@@ -297,7 +297,7 @@ const objToTable = (
     const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
       0,
       columnNames.length - 2,
-    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;2
+    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;
     try {
       const successfulInsert = dbCon.prepare(query).run();
       newParentId = successfulInsert.lastInsertRowid;
