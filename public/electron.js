@@ -9,10 +9,10 @@ const axios = require('axios');
 const { dialog } = require('electron');
 var macaddress = require('macaddress');
 const { autoUpdater } = require('electron-updater');
-const { random } = require ('lodash');
+const { random } = require('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
-const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables,deleteDataWithInstanceId, fetchCsvDataFromServer, queries} = require('./modules/syncFunctions');
+const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
 const DB = require('better-sqlite3-helper');
 const fsExtra = require('fs-extra')
@@ -82,16 +82,16 @@ app.on(APP_ACTIVATE_STATE, () => {
   }
 });
 
-function afterInstallation () {
+function afterInstallation() {
   dialog.showMessageBox({
     title: 'No Updates',
     message: 'Current version is up-to-date.',
   });
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    fs.unlink(path.join(app.getPath("userData"), DB_NAME),function(err){
-      if(err) return console.log(err);
-    }); 
+    fs.unlink(path.join(app.getPath("userData"), DB_NAME), function (err) {
+      if (err) return console.log(err);
+    });
     db.close();
   } catch (err) {
     console.log('App Setup!!!!');
@@ -181,28 +181,28 @@ autoUpdater.on('update-available', () => {
       message: 'Found updates, do you want update now?',
       buttons: ['Sure', 'No'],
     }).then(result => {
-        if (result.response === 0) {
-          console.log('check downloading');
-          sendStatusToWindow('update-downloading');
-          autoUpdater.downloadUpdate();
-        } else if (result.response === 1) {
-          // bound to buttons array
-          console.log("Cancel button clicked.");
-        }
-      },
-    // (buttonIndex) => {
-    //   console.log('button', buttonIndex);
-    //   if (buttonIndex === 0) {
-    //     console.log('check downloading');
-    //     sendStatusToWindow('update-downloading');
-    //     autoUpdater.downloadUpdate();
-    //   }
-    //   // else {
-    //   //   updater.enabled = true
-    //   //   updater = null
-    //   // }
-    // },
-  );
+      if (result.response === 0) {
+        console.log('check downloading');
+        sendStatusToWindow('update-downloading');
+        autoUpdater.downloadUpdate();
+      } else if (result.response === 1) {
+        // bound to buttons array
+        console.log("Cancel button clicked.");
+      }
+    },
+      // (buttonIndex) => {
+      //   console.log('button', buttonIndex);
+      //   if (buttonIndex === 0) {
+      //     console.log('check downloading');
+      //     sendStatusToWindow('update-downloading');
+      //     autoUpdater.downloadUpdate();
+      //   }
+      //   // else {
+      //   //   updater.enabled = true
+      //   //   updater = null
+      //   // }
+      // },
+    );
 });
 
 autoUpdater.on('update-not-available', () => {
@@ -379,7 +379,7 @@ const fetchFormDefinition = (event, formId) => {
   }
 };
 
-const fetchFormChoices=(event, formId)=> {
+const fetchFormChoices = (event, formId) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
 
@@ -390,12 +390,12 @@ const fetchFormChoices=(event, formId)=> {
     event.returnValue = formchoices;
     db.close();
 
-  } catch(err) {
+  } catch (err) {
     console.log('------------- error fetch form choices ------------------');
   } finally {
 
   }
-  
+
 }
 
 const fetchFormDetails = (event, listId) => {
@@ -450,7 +450,7 @@ const fetchFormListDefinition = (event, formId) => {
     const query = 'SELECT * from data where form_id = "' + formId + '"';
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
-    event.returnValue = {fetchedRows};
+    event.returnValue = { fetchedRows };
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -463,13 +463,13 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     let query;
     if (constraint == 'equal') {
-      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') = '" + pkValue +"'";
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$." + detailsPk + "') = '" + pkValue + "'";
     } else {
-      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$."+ detailsPk +"') LIKE '%" + pkValue +"%'";
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$." + detailsPk + "') LIKE '%" + pkValue + "%'";
     }
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
-    event.returnValue = {fetchedRows};
+    event.returnValue = { fetchedRows };
     db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -483,7 +483,6 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
  * @returns - the returned dataset from the query
  */
 const fetchQueryData = (event, queryString) => {
-  console.log(queryString);
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const fetchedRows = db.prepare(queryString).all();
@@ -496,40 +495,40 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
-const loginOperation = async(event, obj)=> {
+const loginOperation = async (event, obj) => {
   console.log('i am in login operation');
 
   const db_path = path.join(app.getPath("userData"), DB_NAME);
-  fsExtra.removeSync(db_path); 
+  fsExtra.removeSync(db_path);
   const db = new Database(path.join(app.getPath("userData"), DB_NAME));
   // const db = new Database(DB_NAME);
   console.log('new db setup call after delete previous user data');
   db.exec(queries);
-  
-  const {response, userData} = obj;
-   const insertStmt = db.prepare(
-      `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-    const data = response;
-    insertStmt.run(
-      userData.username,
-      userData.password,
-      '70:66:55:b0:13:6b',
-      Math.round(new Date().getTime()),
-      data.name,
-      data.role,
-      data.organization,
-      data.branch,
-      data.email,
-    );
-    results = { username: data.user_name, message: '' };
-    // event.sender.send('formSubmissionResults', results);
-    mainWindow.send('formSubmissionResults', results);
-    event.returnValue = {
-      userInfo: data,
-      // message: ""
-    };
-    db.close();
+
+  const { response, userData } = obj;
+  const insertStmt = db.prepare(
+    `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const data = response;
+  insertStmt.run(
+    userData.username,
+    userData.password,
+    '70:66:55:b0:13:6b',
+    Math.round(new Date().getTime()),
+    data.name,
+    data.role,
+    data.organization,
+    data.branch,
+    data.email,
+  );
+  results = { username: data.user_name, message: '' };
+  // event.sender.send('formSubmissionResults', results);
+  mainWindow.send('formSubmissionResults', results);
+  event.returnValue = {
+    userInfo: data,
+    // message: ""
+  };
+  db.close();
 
 }
 
@@ -556,7 +555,7 @@ const signIn = async (event, userData) => {
   // const info = userInfo.user_id;
 
   // if a user has signed in before then no need to call signin-api
-  if(userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+  if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
     mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
@@ -564,89 +563,89 @@ const signIn = async (event, userData) => {
       // message: ""
     };
   }
-    const data = {
-      username: userData.username,
-      password: userData.password,
-      mac_address: mac,
-      upazila: 202249,
-    };
-    // console.log(data);
-    await axios
-      .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': '*',
-          'Content-Type': 'application/json',
-        },
-      })
-      .then((response) => {
-        let results= '';
-        console.log('-----------signin response --------------');
-        console.log(response);
-        if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
-          // if (response.status == 200 || response.status == 201) {
-            console.log('sign in successfull: ');
-          // if a user has signed in for the first time
-          if(userInfo === undefined) {
-            const db = new Database(path.join(app.getPath("userData"), DB_NAME));
-            const insertStmt = db.prepare(
-                  `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                );
-                const data = response.data;
-                insertStmt.run(
-                  userData.username,
-                  userData.password,
-                  mac,
-                  Math.round(new Date().getTime()),
-                  data.name,
-                  data.role,
-                  data.organization,
-                  data.branch,
-                  data.email,
-                );
-            results = { username: response.data.user_name, message: '' };
-            // event.sender.send('formSubmissionResults', results);
-            mainWindow.send('formSubmissionResults', results);
-            event.returnValue = {
-              userInfo: response.data,
-              // message: ""
-            };
-          }
-          else if(userInfo && userInfo.username !== response.data.user_name) {
-            results = {
-              response: response.data,
-               userData,
-            };
-            mainWindow.send('deleteTableDialogue', results);
-          }
-          else {
-            results = { username: response.data.user_name, message: '' };
-            mainWindow.send('formSubmissionResults', results);
-            event.returnValue = {
-              userInfo: response.data,
-              // message: ""
-            };
-          }
-      
-        } else if (response.status == 409) {
-          results = {
-            message: 'Un-authenticated Really',
-            username: '',
-          };
+  const data = {
+    username: userData.username,
+    password: userData.password,
+    mac_address: mac,
+    upazila: 202249,
+  };
+  // console.log(data);
+  await axios
+    .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => {
+      let results = '';
+      console.log('-----------signin response --------------');
+      console.log(response);
+      if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
+        // if (response.status == 200 || response.status == 201) {
+        console.log('sign in successfull: ');
+        // if a user has signed in for the first time
+        if (userInfo === undefined) {
+          const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+          const insertStmt = db.prepare(
+            `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          );
+          const data = response.data;
+          insertStmt.run(
+            userData.username,
+            userData.password,
+            mac,
+            Math.round(new Date().getTime()),
+            data.name,
+            data.role,
+            data.organization,
+            data.branch,
+            data.email,
+          );
+          results = { username: response.data.user_name, message: '' };
+          // event.sender.send('formSubmissionResults', results);
           mainWindow.send('formSubmissionResults', results);
+          event.returnValue = {
+            userInfo: response.data,
+            // message: ""
+          };
         }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.log(error);
+        else if (userInfo && userInfo.username !== response.data.user_name) {
+          results = {
+            response: response.data,
+            userData,
+          };
+          mainWindow.send('deleteTableDialogue', results);
+        }
+        else {
+          results = { username: response.data.user_name, message: '' };
+          mainWindow.send('formSubmissionResults', results);
+          event.returnValue = {
+            userInfo: response.data,
+            // message: ""
+          };
+        }
+
+      } else if (response.status == 409) {
         results = {
-          message: 'Un-authenticated User',
+          message: 'Un-authenticated Really',
           username: '',
         };
         mainWindow.send('formSubmissionResults', results);
-      });
-  
+      }
+    })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      results = {
+        message: 'Un-authenticated User',
+        username: '',
+      };
+      mainWindow.send('formSubmissionResults', results);
+    });
+
   db.close();
 };
 
@@ -775,54 +774,54 @@ const populateModuleImage = (module) => {
 };
 
 const updateAppDefinition = (appDefinition) => {
-  let update = function(module)  {
+  let update = function (module) {
     if (module.xform_id != '') {
-       const formModule = {
-          xform_id: module.xform_id,
-          name: module.name,
-          img_id: module.img_id,
-          children: [],
-          label:  {
-            Bangla: 'New Submission',
-            English: 'New Submission',
-          },
-          catchment_area: module.catchment_area,
-          list_id: "",
-          type: "form",
-          id: module.id
-       };
-       const listId = random(100,200)
-       const listModule = {
-          xform_id: module.xform_id,
-          name: 'module_' + listId,
-          img_id: "",
-          children: [],
-          label:  {
-            Bangla: 'Submitted Data',
-            English: 'Submitted Data',
-          },
-          catchment_area: module.catchment_area,
-          list_id: "",
-          type: "form_list",
-          id: listId
-       }
-       module.xform_id = "";
-       module.name ='module_' + listId;
-       module.img_id = "";
+      const formModule = {
+        xform_id: module.xform_id,
+        name: module.name,
+        img_id: module.img_id,
+        children: [],
+        label: {
+          Bangla: 'New Submission',
+          English: 'New Submission',
+        },
+        catchment_area: module.catchment_area,
+        list_id: "",
+        type: "form",
+        id: module.id
+      };
+      const listId = random(100, 200)
+      const listModule = {
+        xform_id: module.xform_id,
+        name: 'module_' + listId,
+        img_id: "",
+        children: [],
+        label: {
+          Bangla: 'Submitted Data',
+          English: 'Submitted Data',
+        },
+        catchment_area: module.catchment_area,
+        list_id: "",
+        type: "form_list",
+        id: listId
+      }
+      module.xform_id = "";
+      module.name = 'module_' + listId;
+      module.img_id = "";
       //  module.childre = {
       //    formModule,
       //    listModule
       //  }
-       module.children.push(formModule);
-       module.children.push(listModule);
-       module.type = "container";
-       module.id = listId;
+      module.children.push(formModule);
+      module.children.push(listModule);
+      module.type = "container";
+      module.id = listId;
     } else if (module.children)
       module.children.forEach((mod) => {
         update(mod)
       });
   };
-  
+
   appDefinition.children.forEach((definition) => {
     update(definition)
   });
@@ -848,39 +847,39 @@ const exportExcel = (event, excelData) => {
       extensions: ['xls']
     }]
   }
-    ).then(result => {
-      filename = result.filePath;
-      if (filename === undefined) {
-        console.log(filename);
-        dialog.showMessageBox({
-          title: 'Download Updates',
-          message: 'couldn\'t create a file.',
-        });
-        return;
-      }
-      // const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
-      // const data = JSON.parse(excelData);
-      fs.writeFile(filename,new Buffer(excelData), (err) => {
-        if (err) {
-          console.log('an error ocurred with file creation ' + err.message);
-          dialog.showMessageBox({
-            title: 'Download Updates',
-            message: `an error ocurred with file creation ${err.message}`,
-          });
-          return
-        }
-        dialog.showMessageBox({
-          title: 'Download Updates',
-          message: 'File Downloaded Successfully',
-        });
-      })
-    }).catch(err => {
+  ).then(result => {
+    filename = result.filePath;
+    if (filename === undefined) {
+      console.log(filename);
       dialog.showMessageBox({
         title: 'Download Updates',
-        message: `${err}`,
+        message: 'couldn\'t create a file.',
       });
-      console.log(err);
+      return;
+    }
+    // const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    // const data = JSON.parse(excelData);
+    fs.writeFile(filename, new Buffer(excelData), (err) => {
+      if (err) {
+        console.log('an error ocurred with file creation ' + err.message);
+        dialog.showMessageBox({
+          title: 'Download Updates',
+          message: `an error ocurred with file creation ${err.message}`,
+        });
+        return
+      }
+      dialog.showMessageBox({
+        title: 'Download Updates',
+        message: 'File Downloaded Successfully',
+      });
+    })
+  }).catch(err => {
+    dialog.showMessageBox({
+      title: 'Download Updates',
+      message: `${err}`,
     });
+    console.log(err);
+  });
 }
 
 const fetchUsername = (event) => {
@@ -1053,7 +1052,7 @@ const startAppSync = (event, name) => {
           if (moduleListRes.data) {
             console.log('---------------------moduleListRes data ---------------------');
             const layoutDeleteQuery = db.prepare('DELETE FROM app');
-            
+
             try {
               layoutDeleteQuery.run();
             } catch (err) {
@@ -1210,7 +1209,7 @@ const csvDataSync = async (username) => {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"';
     const info = db.prepare(tableExistStmt).get();
-    if(info && info.name == 'csv_sync_log') {
+    if (info && info.name == 'csv_sync_log') {
       fetchCsvDataFromServer(username);
     } else {
       console.log('info', info);
@@ -1224,11 +1223,11 @@ const csvDataSync = async (username) => {
   }
 };
 
-const getUserDBInfo =(event)=>{
+const getUserDBInfo = (event) => {
 
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const query  = `with division as (
+    const query = `with division as (
                       select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
                   ), district as (
                       select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from division limit 1)
@@ -1244,7 +1243,7 @@ const getUserDBInfo =(event)=>{
     const info = db.prepare(query).get();
     console.log(info);
     event.returnValue = info;
-  } catch(err) {
+  } catch (err) {
     console.log("error while fetching user location ", err);
   }
 }

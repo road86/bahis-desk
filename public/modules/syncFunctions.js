@@ -282,9 +282,6 @@ const objToTable = (
   }
   let newParentId = null;
 
-  if (tableName.includes('medicine')) {
-    console.log('table name: ' + tableName);
-  }
   if (columnNames !== '' || repeatKeys.length > 0) {
     if (instanceId) {
       columnNames += 'instanceid, ';
