@@ -38,7 +38,7 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
     console.log(simpleFormChoice.length);
     if (formDefinitionObj != null) {
       const { definition, field_names, formChoices } = formDefinitionObj;
-      createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data, { simpleFormChoice, formChoices: JSON.parse(formChoices)});
+      createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data, { simpleFormChoice, formChoices: JSON.parse(formChoices) });
     }
     // setFormData(Object.entries(data));
   }
@@ -64,6 +64,8 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
           formField = definition.children.find((obj: any) => obj.name == exist[0]);
         }
         if (formField) {
+          console.log('----------------|| form field || ------------------');
+          console.log(formField);
           formData.push({
             label: formField.label,
             value: getReadableValue(exist[1], formField, choices),
@@ -87,38 +89,38 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
       if (params.length > 2) {
         params = params.substring(1, params.length - 1);
         const csvName = params.split(',')[0].replaceAll('\'', '');
-        
+
         console.log(formField, fieldValue);
         const csvChoices = choices.formChoices[`${csvName}.csv`];
         console.log('--------------choices -------------------');
         console.log(csvChoices);
         console.log('--------csvname :', csvName);
-        let result = csvChoices.find((option: any)=> String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+        let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
         console.log('--------result :', result);
-        if(result === undefined) return ' -- ';
+        if (result === undefined) return ' -- ';
         else {
           result = result[formField.children[0].label['English']];
           return result;
         }
       }
-    } 
-    else if(formField.type === SELECT_ONE || formField.type === SELECT_ALL) {
+    }
+    else if (formField.type === SELECT_ONE || formField.type === SELECT_ALL) {
       // console.log('----------in select one -----------------');
       // console.log(fieldValue, formField);
-      for (let i=0; i<choices.simpleFormChoice.length; i++) {
+      for (let i = 0; i < choices.simpleFormChoice.length; i++) {
         const choice = choices.simpleFormChoice[i];
 
-        if( choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
-          choice.value_label = JSON.parse(choice.value_label);
+        if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
+          // choice.value_label = JSON.parse(choice.value_label);
           console.log('--- got it: ', formField.name, fieldValue);
-          if(typeof choice.value_label === 'string') return choice.value_label;
-          else if(typeof choice.value_label === 'object') {
-            console.log('ans: ',choice.value_label.English);
+          if (typeof choice.value_label === 'string') return choice.value_label;
+          else if (typeof choice.value_label === 'object') {
+            console.log('ans: ', choice.value_label.English);
             return choice.value_label.English;
           }
         }
       }
-    } 
+    }
     else {
       return typeof fieldValue == 'string' ? fieldValue : JSON.stringify(fieldValue);
     }
@@ -203,8 +205,8 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
                     if (rowObj.label) {
                       return (
                         <TableRow>
-                          <TableCell key={'col-label-1' + index} className="text-nowrap" style={{ verticalAlign: 'baseline' }}>
-                            {rowObj.label['English']}
+                          <TableCell key={'col-label-1' + index} style={{ verticalAlign: 'baseline' }}>
+                            {(typeof rowObj.label === 'object') ? rowObj.label['English'] : rowObj.label}
                           </TableCell>
                           <TableCell key={'col-label-2' + index} className="initialism text-uppercase" style={{ wordBreak: 'break-word' }}>
                             {rowObj.value}

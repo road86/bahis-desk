@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 //imports
 const electron = require('electron');
+const electronLog = require('electron-log');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const Database = require('better-sqlite3');
@@ -206,11 +207,11 @@ autoUpdater.on('update-available', () => {
 });
 
 autoUpdater.on('update-not-available', () => {
-  sendStatusToWindow('update_not_available');
-  dialog.showMessageBox({
-    title: 'No Updates',
-    message: 'Current version is up-to-date.',
-  });
+  // sendStatusToWindow('update_not_available');
+  // dialog.showMessageBox({
+  //   title: 'No Updates',
+  //   message: 'Current version is up-to-date.',
+  // });
   // updater.enabled = true
   // updater = null
 });
@@ -570,6 +571,10 @@ const signIn = async (event, userData) => {
     upazila: 202249,
   };
   // console.log(data);
+  electronLog.info('----------- || Attempt To Signin || -----------------');
+  electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
+  electronLog.info(JSON.stringify(data));
+
   await axios
     .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
       headers: {
@@ -583,6 +588,9 @@ const signIn = async (event, userData) => {
       let results = '';
       console.log('-----------signin response --------------');
       console.log(response);
+      electronLog.info('-------|| Signed In Successfully ||-----------');
+
+
       if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
         // if (response.status == 200 || response.status == 201) {
         console.log('sign in successfull: ');
@@ -644,6 +652,9 @@ const signIn = async (event, userData) => {
         username: '',
       };
       mainWindow.send('formSubmissionResults', results);
+      electronLog.info('-------|| Sign In Error ||-----------');
+      electronLog.info(error);
+
     });
 
   db.close();
@@ -1014,11 +1025,23 @@ const getDBTablesEndpoint = (time) => {
 };
 
 const startAppSync = (event, name) => {
+  electronLog.info('--------- || App Sync Started || ------------------');
+  electronLog.info('----------|| Below API will be called || -----------');
+  
+
   try {
     //  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
     const time = log === undefined ? 0 : Math.round(log.time);
+
+    electronLog.info(`${getDBTablesEndpoint(time).replace('core_admin', name)}`);
+    electronLog.info(`${APP_DEFINITION_ENDPOINT.replace('core_admin', name)}`);
+    electronLog.info(`${FORMS_ENDPOINT.replace('core_admin', name)}`);
+    electronLog.info(`${LISTS_ENDPOINT.replace('core_admin', name)}`);
+    electronLog.info(`${FORM_CHOICE_ENDPOINT.replace('core_admin', name)}`);
+    electronLog.info('-----------------------------------------------------');
+
     axios
       .all([
         axios.get(getDBTablesEndpoint(time).replace('core_admin', name)),
@@ -1035,7 +1058,6 @@ const startAppSync = (event, name) => {
               const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
               const maxUpdateTime = Math.max(...formConfigRes.data.map((obj) => obj.updated_at), 0);
               newLayoutQuery.run(maxUpdateTime);
-              console.log('app log data --> ', db.prepare('SELECT * from app_log order by time desc limit 1').get());
             }
 
             formConfigRes.data.forEach((sqlObj) => {
@@ -1158,6 +1180,7 @@ const startAppSync = (event, name) => {
           // eslint-disable-next-line no-param-reassign
           let message = 'done';
           mainWindow.send('formSyncComplete', message);
+          electronLog.info('App Sync Complete');
           db.close();
         }),
       )
@@ -1168,7 +1191,9 @@ const startAppSync = (event, name) => {
         } else {
           message = 'done'
         }
-        console.log(err.config);
+        console.log(err);
+        electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------`);
+        electronLog.info(err);
         mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
         console.log('Axios FAILED in startAppSync');

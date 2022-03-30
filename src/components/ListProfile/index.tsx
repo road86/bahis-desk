@@ -27,7 +27,8 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
   const useStyles = makeStyles(listPageStyles(theme));
   const classes = useStyles();
 
-  const comUpdate = async() => {
+  const comUpdate = async () => {
+
     const { match } = props;
     const listId = match.params.id || '';
     const dataJson = queryString.parse(props.location.search).dataJson;
@@ -43,26 +44,27 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     );
     const definition = JSON.parse(columnDefinition);
     const action = definition.find((obj: any) => obj.data_type === 'action');
-    setActionDefinition(action ? action.action_definition : []); 
+    setActionDefinition(action ? action.action_definition : []);
   }
 
-  React.useEffect(()=> {
-      comUpdate();
+  React.useEffect(() => {
+    console.log(' i am in the correct component. ');
+    comUpdate();
   }, []);
-  
+
   return (
     <div style={{ marginBottom: 20 }}>
-      <hr className={classes.hrTag}/>
+      <hr className={classes.hrTag} />
       <div style={{ textAlign: 'center' }}>
         <h3 className={classes.header}> List Profile </h3>
       </div>
-      <hr className={classes.hrTag}/>
+      <hr className={classes.hrTag} />
       <Accordion defaultExpanded>
-        <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-            >
-                List Data
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          List Data
         </AccordionSummary>
         <AccordionDetails style={{ display: 'contents' }}>
           <div style={{ padding: 15 }}>
@@ -79,22 +81,22 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {formData && formData.length && formData.map((rowObj:any, index: number) => {
-                      return (
-                        <React.Fragment key={'body_' + index}>
-                          {rowObj[1] && (
-                            <TableRow>
+                  {formData && formData.length && formData.map((rowObj: any, index: number) => {
+                    return (
+                      <React.Fragment key={'body_' + index}>
+                        {rowObj[1] && (
+                          <TableRow>
                             <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
                               {rowObj[0].replace('_', ' ')}
                             </TableCell>
                             <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
                               {typeof rowObj[1] == 'string' ? rowObj[1] : JSON.stringify(rowObj[1])}
                             </TableCell>
-                          </TableRow>  
-                          )}
-                        </React.Fragment>
-                      )
-                    })}
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -102,8 +104,8 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
         </AccordionDetails>
       </Accordion>
       { actionDefinition ? actionDefinition.map((actionObj: ActionDefinition, actionIndex: number) => {
-          if (actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)) {
-            return <FollowUpTable
+        if (actionObj.data_mapping.length && actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)) {
+          return <FollowUpTable
             key={actionIndex}
             formTitle={actionObj.label}
             detailsPk={actionObj.data_mapping.find((obj: any) => obj.column === detailsPk)}
@@ -111,8 +113,8 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
             formId={actionObj.xform_id}
             appLanguage={'English'}
           ></FollowUpTable>
-          }
-        }) : <React.Fragment></React.Fragment>}
+        }
+      }) : <React.Fragment></React.Fragment>}
     </div>
   );
 }

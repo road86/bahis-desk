@@ -6,6 +6,7 @@ const DB_NAME = 'foobar.db';
 const path = require('path');
 const { SERVER_URL } = require('../constants');
 const { update } = require('lodash');
+const electronLog = require('electron-log');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
@@ -129,8 +130,12 @@ const fetchDataFromServer = async (username) => {
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
     const url = DATA_SYNC_PAGINATED.replace('core_admin', username);
     const dataCountUrl = DATA_SYNC_COUNT.replace('core_admin', username) + '?last_modified=' + updated;
+
+    electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
     const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
+
+    electronLog.info('---------- || Data Sync Started || -------------------');
     const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
 
     let promises = [];
@@ -150,17 +155,23 @@ const fetchDataFromServer = async (username) => {
 
           console.log("error in data sync paginated ");
           console.log(err);
+          electronLog.info("-------------- || Error in Data sync || -----------------");
+          electronLog.info(` Error Occured In the response of this url: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`);
+          electronLog.info(err);
         })
       );
     }
 
     await Promise.all(promises);
     console.log(serverCalls);
+    electronLog.info('------- || Data Sync Complete || --------------');
 
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log('fetch err', err);
+    electronLog.info('----------------|| Error In Fetching Data From Server || -------------------');
+    electronLog.info(err);
     return 'failed';
   }
 };

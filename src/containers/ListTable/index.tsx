@@ -1,4 +1,4 @@
-import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, TableContainer, TablePagination, Button,  Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Accordion, AccordionActions, AccordionDetails, AccordionSummary, TableContainer, TablePagination, Button, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -129,7 +129,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTableForDatasource: {}, lookupTableForLabel: {}, rowsPerPage: 5, page: 0 };
   }
 
-  public hasLookup=(column: any): boolean => {
+  public hasLookup = (column: any): boolean => {
     return ('lookup_definition' in column && column.lookup_definition)
   }
 
@@ -154,6 +154,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`,
     );
     setTotalRecordsActionCreator(totalRecordsResponse[0].count);
+    console.log('----------|| datasource || ----------------');
+
+    console.log(`with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${5} offset 0`);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
@@ -164,7 +167,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     let lookupTableForLabel: any = {};
     await columnDefinition.forEach(async (column) => {
 
-      if('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "datasource" ) {
+      if ('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "datasource") {
         const query = `with list_table as ( 
             ${datasource.query}
           ), lookup_table as (
@@ -173,7 +176,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             list_table.id,
             lookup_table.${column.lookup_definition.return_column}
           from list_table left join lookup_table on list_table.${column.field_name} = lookup_table.${column.lookup_definition.match_column}`;
-        
+
         console.log('--------------- lookup query ------------------');
         console.log(query);
         const resp = await ipcRenderer.sendSync('fetch-query-data', query);
@@ -181,15 +184,18 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
       }
 
-      if('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "label" ) {
+      if ('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "label") {
         const form_id: any = column.lookup_definition.form_id;
         const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', form_id);
         const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', form_id);
-        lookupTableForLabel = {...lookupTableForLabel, [form_id]:  {simpleFormChoice, formChoices: JSON.parse(formDefinitionObj.formChoices), definition: formDefinitionObj}}
-        this.setState({...this.state.filters, lookupTableForLabel});
+        lookupTableForLabel = { ...lookupTableForLabel, [form_id]: { simpleFormChoice, formChoices: JSON.parse(formDefinitionObj.formChoices), definition: formDefinitionObj } }
+        this.setState({ ...this.state.filters, lookupTableForLabel });
       }
 
     });
+
+    console.log('--> tableData: ', response);
+    console.log('lookupTableForDatasource: ', lookupTableForDatasource);
     this.setState({ ...this.state, tableData: response || [], filters, lookupTableForDatasource, lookupTableForLabel });
   }
 
@@ -216,7 +222,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           datasource.type === '0'
             ? 'select count(*) as count from ' + datasource.query + this.generateSqlWhereClause(filters)
             : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}` +
-                this.generateSqlWhereClause(filters),
+            this.generateSqlWhereClause(filters),
         );
         setTotalRecordsActionCreator(totalRecordsResponse[0].count);
       }
@@ -224,14 +230,14 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         'fetch-query-data',
         datasource.type === '0'
           ? 'select * from ' +
-              datasource.query +
-              this.generateSqlWhereClause(filters) +
-              orderSqlTxt +
-              ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`
+          datasource.query +
+          this.generateSqlWhereClause(filters) +
+          orderSqlTxt +
+          ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`
           : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
-              this.generateSqlWhereClause(filters) +
-              orderSqlTxt +
-              ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`,
+          this.generateSqlWhereClause(filters) +
+          orderSqlTxt +
+          ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`,
       );
       setPageNumberActionCreator(newPageNumber);
       this.setState({
@@ -254,9 +260,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       datasource.type === '0'
         ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
         : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
-          this.generateSqlWhereClause(filters) +
-          orderSqlTxt;
-    
+        this.generateSqlWhereClause(filters) +
+        orderSqlTxt;
+
     console.log(' column definition: ', columnDefinition);
     console.log('table data: ', this.state.tableData);
     return (
@@ -269,11 +275,11 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
           </Col>
         </Row>
         <Accordion defaultExpanded>
-          <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-              >
-                  ListTable
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            ListTable
           </AccordionSummary>
           <AccordionDetails style={{ display: 'contents' }}>
             <div style={{ padding: 15 }}>
@@ -281,7 +287,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {columnDefinition.filter((ob: any)=> !ob.hidden).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      {columnDefinition.filter((ob: any) => !ob.hidden).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
                         if (isColumnObj(singleCol)) {
                           return (
                             <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
@@ -294,7 +300,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                           );
                         } else {
                           return (
-                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
+                            <TableCell colSpan={singleCol.action_definition.length} key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
                               {singleCol.label[appLanguage]}
                             </TableCell>
                           );
@@ -307,39 +313,39 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                       this.state.tableData &&
                       this.state.tableData.map((rowObj, rowIndex: number) => (
                         <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.filter((ob: any)=> !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          {columnDefinition.filter((ob: any) => !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
                               <TableCell key={'data-field-' + colIndex}>
                                 { this.hasLookup(colObj) ? (
                                   <LookUp
                                     columnDef={colObj}
                                     rowValue={rowObj}
-                                    lookupTableForDatasource = {lookupTableForDatasource}
-                                    lookupTableForLabel = {lookupTableForLabel}
+                                    lookupTableForDatasource={lookupTableForDatasource}
+                                    lookupTableForLabel={lookupTableForLabel}
                                   />
                                 ) : (
                                   rowObj[colObj.field_name]
                                 )}
                               </TableCell>
                             ) : (
-                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex'}}>
+                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length} style={{ display: 'flex' }}>
                                 {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                  return(
+                                  return (
                                     <React.Fragment key={'action-field' + actionIndex}>
                                       {
                                         actionObj.action_type === 'details' ? (
                                           <Link key={'action-field' + actionIndex} to={`/listProfile/${this.props.listId}/?dataJson=${btoa(JSON.stringify(rowObj))}&detailspk=${actionObj.details_pk}`}
-                                        >
-                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                        </Link>
+                                          >
+                                            <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                          </Link>
                                         ) : (
                                           <Link key={'action-field' + actionIndex} to={`/form/${actionObj.xform_id}/?dataJson=${this.mapListToFormData(
                                             actionObj.data_mapping,
                                             rowObj,
                                           )}`}
-                                        >
-                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                        </Link>
+                                          >
+                                            <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                          </Link>
                                         )
                                       }
                                     </React.Fragment>
@@ -406,11 +412,11 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const preFormJsn: any = {};
     let metainstanceIdFormField = '';
     mapping.forEach((item: MappingObj) => {
-      if(item.column.toLocaleLowerCase() == 'meta_instanceid') metainstanceIdFormField = item.form_field;
+      if (item.column.toLocaleLowerCase() == 'meta_instanceid') metainstanceIdFormField = item.form_field;
       preFormJsn[item.form_field] = listRowData[item.column];
     });
-    const metaInstanceId = Object.keys(listRowData).find((item)=> (item && String(item).toLocaleLowerCase() === 'meta_instanceid'));
-    if(metaInstanceId) {
+    const metaInstanceId = Object.keys(listRowData).find((item) => (item && String(item).toLocaleLowerCase() === 'meta_instanceid'));
+    if (metaInstanceId) {
       preFormJsn[metainstanceIdFormField] = listRowData[metaInstanceId];
     }
     return btoa(JSON.stringify(preFormJsn));
