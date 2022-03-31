@@ -215,12 +215,12 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
 const saveNewDataToTable = (instanceId, formId, userInput) => {
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     const date = userInput._submission_time ? new Date(userInput._submission_time).toISOString() : new Date().toISOString();
+
     const insertStmt = db.prepare(
       `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
     );
-    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()), fetchedUsername.username, date);
+    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()), userInput._submitted_by, date);
 
     // console.log('xform_id: '+userInput._xform_id_string);
 

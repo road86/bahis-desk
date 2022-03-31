@@ -126,7 +126,7 @@ reducerRegistry.register(ListTableReducerName, ListTableReducer);
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
     super(props);
-    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: 1, lookupTableForDatasource: {}, lookupTableForLabel: {}, rowsPerPage: 5, page: 0 };
+    this.state = { tableData: [], filters: {}, orderSql: '', pageNumber: -1, lookupTableForDatasource: {}, lookupTableForLabel: {}, rowsPerPage: 5, page: 0 };
   }
 
   public hasLookup = (column: any): boolean => {
@@ -156,12 +156,12 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     setTotalRecordsActionCreator(totalRecordsResponse[0].count);
     console.log('----------|| datasource || ----------------');
 
-    console.log(`with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${5} offset 0`);
+    console.log(`with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${this.state.rowsPerPage} offset 0`);
     const response = await ipcRenderer.sendSync(
       'fetch-query-data',
       datasource.type === '0'
-        ? `select count(*) as count from ${datasource.query} limit ${5} offset 0`
-        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${5} offset 0`,
+        ? `select count(*) as count from ${datasource.query} limit ${this.state.rowsPerPage} offset 0`
+        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${this.state.rowsPerPage} offset 0`,
     );
     const lookupTableForDatasource: any = {};
     let lookupTableForLabel: any = {};
@@ -199,7 +199,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     this.setState({ ...this.state, tableData: response || [], filters, lookupTableForDatasource, lookupTableForLabel });
   }
 
-  public async componentDidUpdate() {
+  public async componentDidUpdate(prevProps: any, prevState: any) {
     const {
       datasource,
       filters,
@@ -209,12 +209,13 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
       setTotalRecordsActionCreator,
       setPageNumberActionCreator,
     } = this.props;
+    console.log({ prevProps });
     const stateFilters = this.state.filters;
     const stateOrderSql = this.state.orderSql;
     const statePageNumber = this.state.pageNumber;
     const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
     const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
-    if (filters !== stateFilters || orderSql !== stateOrderSql || pageNumber !== statePageNumber) {
+    if (filters !== stateFilters || orderSql !== stateOrderSql || pageNumber !== statePageNumber || prevState.rowsPerPage !== this.state.rowsPerPage) {
       const newPageNumber = filters !== stateFilters || orderSql !== stateOrderSql ? 1 : pageNumber;
       if (filters !== stateFilters) {
         const totalRecordsResponse = await ipcRenderer.sendSync(
