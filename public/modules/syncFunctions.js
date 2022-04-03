@@ -144,6 +144,8 @@ const fetchDataFromServer = async (username) => {
       promises.push(
         axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
           serverCalls.push(i);
+
+          electronLog.info(`----------|| call ${i}: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH} ||------------------`);
           const newDataRows = response.data;
           newDataRows.forEach((newDataRow) => {
             // eslint-disable-next-line no-console
@@ -151,6 +153,9 @@ const fetchDataFromServer = async (username) => {
             deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
             saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
           });
+
+          electronLog.info('-------- || data saved into database || ------------');
+
         }).catch((err) => {
 
           console.log("error in data sync paginated ");
@@ -164,6 +169,7 @@ const fetchDataFromServer = async (username) => {
 
     await Promise.all(promises);
     console.log(serverCalls);
+    electronLog.info(`--------|| total server call: ${serverCalls.length} `);
     electronLog.info('------- || Data Sync Complete || --------------');
 
     return 'success';
