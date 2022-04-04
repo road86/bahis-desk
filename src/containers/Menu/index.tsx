@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
-import { random } from 'lodash';
+import _, { random } from 'lodash';
 import { delay } from 'q';
 import * as React from 'react';
 import { Button, Container } from 'react-floating-action-button';
@@ -55,7 +55,7 @@ export interface MenuProps {
 //   username: string;
 // }
 const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
-// class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
+  // class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
   const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
   // const [username, setUsername] = React.useState<string>('');
@@ -85,7 +85,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
     // console.log(userName);
     await props.setSyncOverlayHandler(true);
-   
+
     const user: any = await ipcRenderer.sendSync('fetch-username');
     await ipcRenderer.send('request-data-sync', user.username);
     ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
@@ -141,116 +141,94 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   };
 
   const updateAppDefinition = (appDefinition: any) => {
-    let update = function(module: any)  {
+    let update = function (module: any) {
       if (module.xform_id != '') {
-         const formModule = {
-            xform_id: module.xform_id,
-            name: module.name,
-            img_id: module.img_id,
-            children: [],
-            label:  {
-              Bangla: 'New Submission',
-              English: 'New Submission',
-            },
-            catchment_area: module.catchment_area,
-            list_id: "",
-            type: "form",
-            id: module.id
-         };
-         const listId = random(100,200)
-         const listModule = {
-            xform_id: module.xform_id,
-            name: 'module_' + listId,
-            img_id: "",
-            children: [],
-            label:  {
-              Bangla: 'Submitted Data',
-              English: 'Submitted Data',
-            },
-            catchment_area: module.catchment_area,
-            list_id: "",
-            type: "form_list",
-            id: listId
-         }
-         module.xform_id = "";
-         module.name ='module_' + listId;
-         module.img_id = "";
-         module.childre = {
-           formModule,
-           listModule
-         }
+        const formModule = {
+          xform_id: module.xform_id,
+          name: module.name,
+          img_id: module.img_id,
+          children: [],
+          label: {
+            Bangla: 'New Submission',
+            English: 'New Submission',
+          },
+          catchment_area: module.catchment_area,
+          list_id: "",
+          type: "form",
+          id: module.id
+        };
+        const listId = random(100, 200)
+        const listModule = {
+          xform_id: module.xform_id,
+          name: 'module_' + listId,
+          img_id: "",
+          children: [],
+          label: {
+            Bangla: 'Submitted Data',
+            English: 'Submitted Data',
+          },
+          catchment_area: module.catchment_area,
+          list_id: "",
+          type: "form_list",
+          id: listId
+        }
+        module.xform_id = "";
+        module.name = 'module_' + listId;
+        module.img_id = "";
+        module.childre = {
+          formModule,
+          listModule
+        }
         //  module.children.push(formModule);
         //  module.children.push(listModule);
-         module.type = "container";
-         module.id = listId;
+        module.type = "container";
+        module.id = listId;
       } else if (module.children)
         module.children.forEach((mod: any) => {
           update(mod)
         });
     };
-    
+
     appDefinition.children.forEach((definition: any) => {
       update(definition)
     });
   }
-  
+
   React.useEffect(() => {
     compUpdate();
   }, []);
 
 
-    const { currentMenu, appLanguage } = props;
-    return (
-      <React.Fragment>
-        <div className="menu-container">
-          {/* {isDataAvailable && <Alert color="success">Couldn't Fetch Latest Data!</Alert>} */}
-          {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
-          {/* <Row id="menu-title-container">
-            <Col>
-              {isBackPossible && (
-                <div onClick={this.onBackHandler}>
-                  <h6 className="menu-back">
-                    <span className="bg-menu-back">
-                      <FontAwesomeIcon icon={['fas', 'arrow-left']} /> <span> Back </span>
-                    </span>
-                  </h6>
-                </div>
-              )}
-              <h3 className="menu-title lead">
-                {currentMenu ? getNativeLanguageText(currentMenu.label, appLanguage) : ''}
-              </h3>
-            </Col>
-          </Row> */}
-          <Row id="menu-body">
-            {currentMenu &&
-              currentMenu.type === MODULE_TYPE &&
-              currentMenu.children.map((menuItem, index) => (
-                <Col key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
-                  {typeEvalutor(menuItem, appLanguage)}
-                </Col>
-              ))}
-          </Row>
-          <Container>
-            <Button tooltip="Sync App with Server" className="floating-item" onClick={onAppSyncHandler}>
-              <FontAwesomeIcon icon={['fas', 'tools']} />
-            </Button>
-            {/*<Button*/}
-            {/*  tooltip="Fetch Latest Update"*/}
-            {/*  className="floating-item"*/}
-            {/*  onClick={this.appUpdateHandler}*/}
-            {/*>*/}
-            {/*  <FontAwesomeIcon icon={['fas', 'pen-nib']} />*/}
-            {/*</Button>*/}
-            <Button tooltip="Sync Data with Server" className="floating-item" onClick={onSyncHandler}>
-              <FontAwesomeIcon icon={['fas', 'sync']} />
-            </Button>
-            <Button tooltip="Menu" className="floating-btn">
-              <FontAwesomeIcon icon={['fas', 'bars']} />
-            </Button>
-          </Container>
-        </div>
-      </React.Fragment>
-    );
+  const { currentMenu, appLanguage } = props;
+  console.log(' ----> ', currentMenu);
+  return (
+    <React.Fragment>
+      <div className="menu-container">
+        {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
+
+        <Row id="menu-body">
+          {currentMenu &&
+            currentMenu.type === MODULE_TYPE &&
+            _.sortBy(currentMenu.children, ['order']).map((menuItem, index) => (
+              <Col key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
+                {typeEvalutor(menuItem, appLanguage)}
+              </Col>
+            ))}
+        </Row>
+        <Container>
+          <Button tooltip="Sync App with Server" className="floating-item" onClick={onAppSyncHandler}>
+            <FontAwesomeIcon icon={['fas', 'tools']} />
+          </Button>
+          <Button tooltip="Sync Data with Server" className="floating-item" onClick={onSyncHandler}>
+            <FontAwesomeIcon icon={['fas', 'sync']} />
+          </Button>
+          <Button tooltip="Menu" className="floating-btn">
+            <FontAwesomeIcon icon={['fas', 'bars']} />
+          </Button>
+        </Container>
+      </div>
+    </React.Fragment>
+  );
 
   // tslint:disable-next-line: variable-name
   // private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {

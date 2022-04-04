@@ -13,7 +13,7 @@ import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../..
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { exportToExcelForSubmittedData } from '../../helpers/utils';
+import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils';
 import Filter from './Filter';
 
 /** interface for Form URL params */
@@ -42,25 +42,30 @@ function SubmittedForm(props: ListProps) {
   const [fieldWithLabels, setFieldWithLabels] = React.useState<any>({});
   const [formAllChoices, setFormAllChoices] = React.useState<any>({});
 
-  const constructFieldWithLabel=( ob: any, parent: any ): any =>{
-    if(parent === '/') parent = '';
+
+
+
+  const constructFieldWithLabel = (ob: any, parent: any): any => {
+    if (parent === '/') parent = '';
 
     let labels = {};
-    for(let i=0; i<ob.children.length; i++) {
-      if(ob.children[i].type === "group")
+    for (let i = 0; i < ob.children.length; i++) {
+      if (ob.children[i].type === "group")
         labels = { ...labels, ...constructFieldWithLabel(ob.children[i], `${parent}${ob.name}/`) };
       else {
-        if(ob.children[i].label)
+        if (ob.children[i].label) {
+          console.log('------------->> boom: ', ob);
           labels = {
-            ...labels, 
-            [`${parent}${ob.name}/${ob.children[i].name}`]: { 
-              label: ob.children[i].label[appLanguage],
+            ...labels,
+            [`${parent}${ob.name}/${ob.children[i].name}`]: {
+              label: getFormLabel(ob.children[i].label),
               type: ob.children[i].type,
               fieldElement: ob.children[i],
             }
           }
+        }
         else {
-          labels = {...labels, ...{[`${parent}${ob.name}/${ob.children[i].name}`]: ob.children[i].name }}
+          labels = { ...labels, ...{ [`${parent}${ob.name}/${ob.children[i].name}`]: ob.children[i].name } }
         }
       }
     }
@@ -76,18 +81,18 @@ function SubmittedForm(props: ListProps) {
 
     if (formDefinitionObj != null) {
       const { field_names, formChoices } = formDefinitionObj;
-      const form = {name: '', children: JSON.parse(formDefinitionObj.definition).children}
-      const result = constructFieldWithLabel(form, ""); 
+      const form = { name: '', children: JSON.parse(formDefinitionObj.definition).children }
+      const result = constructFieldWithLabel(form, "");
       setFieldWithLabels(result);
       setFieldNames(JSON.parse(field_names));
-      setFormAllChoices({ simpleFormChoice, formChoices: JSON.parse(formChoices)})
+      setFormAllChoices({ simpleFormChoice, formChoices: JSON.parse(formChoices) })
     }
     fetchTableData(formId);
     setFormId(formId);
     updateColumnDefinition(formId);
     const userList: any = await ipcRenderer.sendSync('fetch-userlist');
     setUserList(userList.users);
-  } 
+  }
 
   const fetchTableData = async (formId: string) => {
     const tableData = await ipcRenderer.sendSync(
@@ -208,7 +213,7 @@ function SubmittedForm(props: ListProps) {
     setColumnDefinition(COLUMN_DEFINITION);
   }
 
-  const deleteData = (instanceId: string) =>{
+  const deleteData = (instanceId: string) => {
     setUpdating(true);
     ipcRenderer.sendSync(
       'delete-instance',
@@ -245,9 +250,9 @@ function SubmittedForm(props: ListProps) {
   function stableSort<T>(array: T[]) {
     let stabilizedThis;
     if (order === 'asc') {
-      stabilizedThis = array.sort((a: any,b: any) => new Date(a.submission_date).getTime() - new Date(b.submission_date).getTime())
+      stabilizedThis = array.sort((a: any, b: any) => new Date(a.submission_date).getTime() - new Date(b.submission_date).getTime())
     } else {
-      stabilizedThis = array.sort((a: any,b: any) => new Date(b.submission_date).getTime() - new Date(a.submission_date).getTime())
+      stabilizedThis = array.sort((a: any, b: any) => new Date(b.submission_date).getTime() - new Date(a.submission_date).getTime())
     }
     return stabilizedThis;
   }
@@ -256,7 +261,7 @@ function SubmittedForm(props: ListProps) {
   const useStyles = makeStyles(listPageStyles(theme));
   const classes = useStyles();
 
-  const {appLanguage} = props;
+  const { appLanguage } = props;
 
   const handleRequestSort = () => {
     const isAsc = order === 'asc';
@@ -265,34 +270,34 @@ function SubmittedForm(props: ListProps) {
 
   return (
     <div>
-      <hr className={classes.hrTag}/>
-        <div style={{ textAlign: 'center' }}>
+      <hr className={classes.hrTag} />
+      <div style={{ textAlign: 'center' }}>
         <h3 className={classes.header}> Submitted List </h3>
       </div>
-      <hr className={classes.hrTag}/>
+      <hr className={classes.hrTag} />
       <Filter formId={formId} fieldNames={fieldNames} tableData={tableData} userList={userList} submitFilter={filterData} resetFilter={resetFilter} setUpdater={setUpdating}></Filter>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10}} onClick={() => exportToExcelForSubmittedData(tableData, fieldWithLabels, formAllChoices)}>
-          <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']}/> Export to XLSX
+        <Button style={{ backgroundColor: '#8ac390', borderColor: '#8ac390', margin: 10 }} onClick={() => exportToExcelForSubmittedData(tableData, fieldWithLabels, formAllChoices)}>
+          <FontAwesomeIcon icon={['fas', 'long-arrow-alt-down']} /> Export to XLSX
         </Button>
       </div>
       <Accordion defaultExpanded>
-        <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-            >
-                ListTable
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          ListTable
         </AccordionSummary>
         <AccordionDetails style={{ display: 'contents', justifyContent: 'flex-start' }}>
           {
             updating ? <div style={{ marginTop: '2%', textAlign: 'center' }}>
-            <Loader
-              type="Puff"
-              color={theme.palette.primary.dark}
-              height={40}
-              width={100}
-              timeout={3000} // 3 secs
-            />
+              <Loader
+                type="Puff"
+                color={theme.palette.primary.dark}
+                height={40}
+                width={100}
+                timeout={3000} // 3 secs
+              />
               <Typist cursor={{ hideWhenDone: true }}>
                 <span className="loader-title"> BAHIS </span>
                 <br />
@@ -300,92 +305,92 @@ function SubmittedForm(props: ListProps) {
                   Updating Data Table
                 </span>
               </Typist>
-            </div> : 
-            <div style={{ padding: 15 }}>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
-                        if (isColumnObj(singleCol)) {
-                          return (
-                            <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
-                              <TableSortLabel
-                                active={singleCol.sortable}
-                                direction={singleCol.sortable ? order : 'asc'}
-                                className="sortable-column" 
-                                onClick={handleRequestSort}
-                              >
-                                {singleCol.label[appLanguage]}
-                                {/* {orderBy === headCell.id ? (
+            </div> :
+              <div style={{ padding: 15 }}>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                          if (isColumnObj(singleCol)) {
+                            return (
+                              <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
+                                <TableSortLabel
+                                  active={singleCol.sortable}
+                                  direction={singleCol.sortable ? order : 'asc'}
+                                  className="sortable-column"
+                                  onClick={handleRequestSort}
+                                >
+                                  {singleCol.label[appLanguage]}
+                                  {/* {orderBy === headCell.id ? (
                                   <span className={classes.visuallyHidden}>
                                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                                   </span>
                                 ) : null} */}
-                              </TableSortLabel>
-                              
-                            </TableCell>
-                          );
-                        } else {
-                          return (
-                            <TableCell  colSpan={singleCol.action_definition.length } key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
-                              {singleCol.label[appLanguage]}
-                            </TableCell>
-                          );
-                        }
-                      })}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredData && stableSort(filteredData).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((rowObj: any, rowIndex: number) => (
-                        <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
-                            isColumnObj(colObj) ? (
-                              <TableCell key={'data-field-' + colIndex}>
-                                {rowObj[colObj.field_name]}
+                                </TableSortLabel>
+
                               </TableCell>
-                            ) : (
-                              <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
-                                {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
-                                  if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
-                                    if (actionObj.form_title === 'edit') {
-                                      return(
-                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}`: '/'}
+                            );
+                          } else {
+                            return (
+                              <TableCell colSpan={singleCol.action_definition.length} key={'col-label-' + index} style={{ textAlign: 'center' }} className="initialism text-uppercase text-nowrap">
+                                {singleCol.label[appLanguage]}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredData && stableSort(filteredData).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map((rowObj: any, rowIndex: number) => (
+                          <TableRow key={'table-row-' + rowIndex}>
+                            {columnDefinition.filter((col: ColumnObj | ActionColumnObj) => col.hidden === false).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                              isColumnObj(colObj) ? (
+                                <TableCell key={'data-field-' + colIndex}>
+                                  {rowObj[colObj.field_name]}
+                                </TableCell>
+                              ) : (
+                                <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length} style={{ display: 'flex', justifyContent: 'center' }}>
+                                  {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
+                                    if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
+                                      if (actionObj.form_title === 'edit') {
+                                        return (
+                                          <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}` : '/'}
+                                          >
+                                            <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                          </Link>
+                                        )
+                                      } else {
+                                        return (
+                                          <Button
+                                            key={'action-field' + actionIndex}
+                                            variant="contained"
+                                            onClick={() => deleteData(rowObj['instanceid'].toString())}
+                                            color={'secondary'}
+                                            style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}>
+                                            {actionObj.label[appLanguage]}
+                                          </Button>
+                                        )
+                                      }
+                                    } else if (actionObj.form_title === 'view') {
+                                      return (
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}` : '/'}
                                         >
-                                          <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
+                                          <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                         </Link>
                                       )
-                                    } else {
-                                      return(
-                                        <Button 
-                                          key={'action-field' + actionIndex}  
-                                          variant="contained" 
-                                          onClick={() => deleteData(rowObj['instanceid'].toString())}
-                                          color={'secondary'} 
-                                          style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> 
-                                          {actionObj.label[appLanguage]} 
-                                        </Button>
-                                      )
                                     }
-                                  } else if(actionObj.form_title === 'view'){
-                                    return(
-                                      <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}
-                                      >
-                                        <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
-                                      </Link>
-                                    )
-                                  }
-                                })}
-                              </TableCell>
-                            ),
-                          )}
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
+                                  })}
+                                </TableCell>
+                              ),
+                            )}
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
           }
         </AccordionDetails>
         <AccordionActions>
