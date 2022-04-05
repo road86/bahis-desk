@@ -473,6 +473,11 @@ const assignJsnValue = (mJsnObj, xPath, index, xvalue) => {
  * @returns {string} - the transformed xml value
  */
 const generateIndividualXml = (xkey, xvalue) => {
+  const getObjKey = (value) => {
+    let arr = value.split('/');
+    return arr[arr.length - 1];
+  }
+
   let tmp = '';
   if (xvalue !== null && xvalue !== undefined) {
     if (Array.isArray(xvalue)) {
@@ -488,11 +493,11 @@ const generateIndividualXml = (xkey, xvalue) => {
           });
           tmp += `</${xkey}>`;
         } else {
-          tmp += `<${xkey}>`;
+          tmp += `<${getObjKey(xkey)}>`;
           xvalue.forEach((tmpValue) => {
             tmp += `${typeof tmpValue === 'string' ? handleXmlInvalidEntries(tmpValue) : tmpValue} `;
           });
-          tmp += `</${xkey}>`;
+          tmp += `</${getObjKey(xkey)}>`;
         }
       }
     } else if (xvalue.constructor.name === 'Object') {
@@ -504,13 +509,13 @@ const generateIndividualXml = (xkey, xvalue) => {
         tmp += `</${xkey}>`;
       }
     } else if (xvalue.constructor.name === 'Date') {
-      tmp += `<${xkey}>`;
+      tmp += `<${getObjKey(xkey)}>`;
       tmp += xvalue.toISOString();
-      tmp += `</${xkey}>`;
+      tmp += `</${getObjKey(xkey)}>`;
     } else {
-      tmp += `<${xkey}>`;
+      tmp += `<${getObjKey(xkey)}>`;
       tmp += typeof xvalue === 'string' ? handleXmlInvalidEntries(xvalue) : xvalue;
-      tmp += `</${xkey}>`;
+      tmp += `</${getObjKey(xkey)}>`;
     }
   }
   return tmp;

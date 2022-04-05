@@ -37,7 +37,7 @@ function List(props: ListProps) {
   const [filterDefinition, setFilterDefinition] = React.useState<any>(null);
   const [datasource, setDataSource] = React.useState<any>(null);
   const [filtersValue, setFilterValue] = React.useState<any>({});
-  const [listHeader, setListHeader] = React.useState<{ [key: string]: string}>({});
+  const [listHeader, setListHeader] = React.useState<{ [key: string]: string }>({});
   const [listId, setListId] = React.useState<string>('');
 
   const comUpdate = async () => {
@@ -52,7 +52,7 @@ function List(props: ListProps) {
     );
     if (response != null || response != undefined) {
       const { columnDefinition, filterDefinition, datasource, listHeader } = response;
-      
+
       setDataSource(datasource ? JSON.parse(datasource) : null);
       setFilterDefinition(filterDefinition ? JSON.parse(filterDefinition) : null);
       setListHeader(listHeader ? JSON.parse(listHeader) : {});
@@ -64,7 +64,7 @@ function List(props: ListProps) {
       setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
       setListId(listId);
     }
-  } 
+  }
 
   React.useEffect(() => {
     comUpdate()
@@ -85,44 +85,44 @@ function List(props: ListProps) {
       {
         columnDefinition && filterDefinition ? (
           <div>
-          <hr className={classes.hrTag}/>
-          <div style={{ textAlign: 'center' }}>
-            <h3 className={classes.header}> {getNativeLanguageText(listHeader, appLanguage)} </h3>
+            <hr className={classes.hrTag} />
+            <div style={{ textAlign: 'center' }}>
+              <h3 className={classes.header}> {getNativeLanguageText(listHeader, appLanguage)} </h3>
+            </div>
+            <hr className={classes.hrTag} />
+            {filterDefinition && listId !== '' && (
+              <Row>
+                <Col>
+                  <Filter
+                    definition={filterDefinition}
+                    choices={FILTER_CHOICES}
+                    onSubmitHandler={setFiltersValue}
+                    appLanguage={appLanguage}
+                    listId={listId}
+                  />
+                </Col>
+              </Row>
+            )}
+            {columnDefinition && datasource && (
+              <Row>
+                <Col>
+                  <ListTable
+                    listId={listId}
+                    columnDefinition={columnDefinition}
+                    datasource={datasource}
+                    filters={filtersValue}
+                  />
+                </Col>
+              </Row>
+            )}
           </div>
-          <hr className={classes.hrTag}/>
-          {filterDefinition && listId !== '' && (
-            <Row>
-              <Col>
-                <Filter
-                  definition={filterDefinition}
-                  choices={FILTER_CHOICES}
-                  onSubmitHandler={setFiltersValue}
-                  appLanguage={appLanguage}
-                  listId={listId}
-                />
-              </Col>
-            </Row>
-          )}
-          {columnDefinition && datasource && (
-            <Row>
-              <Col>
-                <ListTable
-                  listId={listId}
-                  columnDefinition={columnDefinition}
-                  datasource={datasource}
-                  filters={filtersValue}
-                />
-              </Col>
-            </Row>
-          )}
-        </div>
         ) : (
           <Typography color="secondary" component="h1" variant="h4" align="center" style={{ marginTop: '10%' }}>
-              Couldn't Found List Definition
+            Couldn't Found List Definition
           </Typography>
         )
       }
-    </React.Fragment>  
+    </React.Fragment>
   );
 }
 
