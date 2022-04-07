@@ -24,19 +24,6 @@ import OrderBy from './OrderBy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import _ from 'lodash';
 import { getFormLabel } from '../../helpers/utils';
-// import EnhancedTable from './Table';
-
-// export interface LookupListCondition {
-//   type: 'list';
-//   name: string;
-//   column: string;
-// }
-
-// export interface LookupStaticCondition {
-//   type: 'static';
-//   name: string;
-//   value: string;
-// }
 
 export interface LookupDefinition {
   table_name: string;
@@ -124,6 +111,25 @@ export interface ListTableState {
 
 /** register the filter reducer */
 reducerRegistry.register(ListTableReducerName, ListTableReducer);
+
+/**
+ * --------------------------- || NEED TO KNOW STUFF BEFORE YOU START DEBUGGING THIS COMPONENT || ----------------------------------
+ * 
+ * All the list come from an API (/get-api/list-def/). there is a table in the database named 'lists'. it contains all the list data.
+ *  'lists' table has many columns amongst two major columns are  Datasource and Column Definition (CD).
+ *    
+ *  # Datasource:  it just contains a query. 
+ * 
+ *  # Column definition: it contains a list of columns. each column has its own lookup_definition.
+ *  some columns might have lookuptype and some don't. lookuptype can be 3 types.
+ *  1. table
+ *  2. datasource
+ *  3. label
+ *  
+ * table and datasource are almost similar. we need to perform a query that will fetch a dictionary from the database.
+ * the purpose of this query is to show  the label of the corresponding value of each row of that column.
+ *        
+ * */
 
 class ListTable extends React.Component<ListTableProps, ListTableState> {
   constructor(props: ListTableProps) {
