@@ -1,5 +1,4 @@
 // import lodash from 'lodash';
-import React from 'react';
 import { ColumnObj } from '..';
 
 /** interface for LookUpProps */
@@ -13,21 +12,24 @@ export interface LookUpProps {
 const SELECT_ALL: string = 'select all that apply';
 const SELECT_ONE = 'select one';
 
-class LookUp extends React.Component<LookUpProps> {
-  public render() {
-    const { columnDef } = this.props;
-    let result = null;
-    if ('lookup_definition' in columnDef && columnDef.lookup_definition != undefined) {
-      result = columnDef.lookup_definition.lookup_type == "datasource" ? datasourceLookup(this.props) : labelLookup(this.props);
-    }
-    // console.log('---- >>> lookup result: ', result);
-    return <> {result} </>;
+export default function LookUp(props: any) {
+
+  const { columnDef } = props;
+  let result = null;
+  if ('lookup_definition' in columnDef && columnDef.lookup_definition != undefined) {
+    result = ((columnDef.lookup_definition.lookup_type == "datasource") || (columnDef.lookup_definition.lookup_type == "table"))
+      ? datasourceLookup(props) : labelLookup(props);
   }
+  // console.log('---- >>> lookup result: ', result);
+  return result;
+
 }
 
 const datasourceLookup = (props: any) => {
   const { columnDef, rowValue, lookupTableForDatasource } = props;
-  console.log("-----|| datasource lookup", rowValue, columnDef, lookupTableForDatasource);
+
+  // console.log('----- column: ', columnDef.field_name)
+  // console.log("-----|| datasource lookup", rowValue, columnDef, lookupTableForDatasource);
   if (Object.keys(lookupTableForDatasource).length > 0) {
     let result = '';
     const rows = lookupTableForDatasource[columnDef.lookup_definition.return_column];
@@ -37,7 +39,7 @@ const datasourceLookup = (props: any) => {
         break;
       }
     }
-    return <span> {result} </span>;
+    return result;
   }
   return null;
 
@@ -75,8 +77,7 @@ const labelLookup = (props: any) => {
       formField = definition.children.find((obj: any) => obj.name == exist);
     }
     if (formField) {
-
-      return <> {getReadableValue(rowValue[columnDef.field_name], formField, { simpleFormChoice, formChoices })} </>
+      return getReadableValue(rowValue[columnDef.field_name], formField, { simpleFormChoice, formChoices })
     }
     else return null;
   }
@@ -132,5 +133,3 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
   }
 }
 
-
-export default LookUp;

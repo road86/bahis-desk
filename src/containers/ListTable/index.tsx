@@ -22,6 +22,8 @@ import './ListTable.css';
 import LookUp from './LookUp';
 import OrderBy from './OrderBy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import _ from 'lodash';
+import { getFormLabel } from '../../helpers/utils';
 // import EnhancedTable from './Table';
 
 // export interface LookupListCondition {
@@ -167,7 +169,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     let lookupTableForLabel: any = {};
     await columnDefinition.forEach(async (column) => {
 
-      if ('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "datasource") {
+      if ('lookup_definition' in column && column.lookup_definition && (column.lookup_definition.lookup_type == "datasource" || column.lookup_definition.lookup_type == "table")) {
         const query = `with list_table as ( 
             ${datasource.query}
           ), lookup_table as (
@@ -252,26 +254,49 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
   }
 
   public render() {
-    const { columnDefinition, datasource, filters, orderSql } = this.props;
+    const { columnDefinition, datasource } = this.props;
     const { lookupTableForDatasource, lookupTableForLabel } = this.state;
     const appLanguage = 'English';
-    const orderSqlTxt = orderSql !== '' ? ` ORDER BY ${orderSql}` : '';
     const randomTableName = 'tab' + Math.random().toString(36).substring(2, 12);
-    const query =
-      datasource.type === '0'
-        ? 'select * from ' + datasource.query + this.generateSqlWhereClause(filters) + orderSqlTxt
-        : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
-        this.generateSqlWhereClause(filters) +
-        orderSqlTxt;
 
-    console.log(' column definition: ', columnDefinition);
-    console.log('table data: ', this.state.tableData);
+    const getCD = (): any[] => {
+      let cd = columnDefinition.map((c: any) => ({ ...c, order: parseInt(c.order) }));
+      return _.sortBy(cd, ['order']);
+    }
+
+    const generateExcel = async () => {
+      let excelData: any = [];
+      let tableData: any = await ipcRenderer.sendSync(
+        'fetch-query-data',
+        datasource.type === '0'
+          ? `select count(*) as count from ${datasource.query} `
+          : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}`,
+      );
+
+      tableData.forEach((row: any) => {
+        let newRow = {};
+        getCD().filter((ob: any) => ob.exportable).map((colObj: any) => {
+
+          let result = this.hasLookup(colObj) ? LookUp({
+            columnDef: colObj,
+            rowValue: row,
+            lookupTableForDatasource: lookupTableForDatasource,
+            lookupTableForLabel: lookupTableForLabel,
+          }) : row[colObj.field_name]
+
+          newRow = { ...newRow, [getFormLabel(colObj.label)]: result }
+        });
+        excelData.push(newRow);
+      });
+      return excelData;
+    }
+
     return (
       <div style={{ marginBottom: 20 }}>
         <Row>
           <Col>
-            <span className="float-right csv-export">
-              <Export query={query} appLanguage={appLanguage} colDefifinition={columnDefinition} />
+            <span className="float-right csv-export" >
+              <Export generateExcel={generateExcel} />
             </span>
           </Col>
         </Row>
@@ -288,7 +313,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {columnDefinition.filter((ob: any) => !ob.hidden).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
+                      {getCD().filter((ob: any) => !ob.hidden).map((singleCol: ColumnObj | ActionColumnObj, index: number) => {
                         if (isColumnObj(singleCol)) {
                           return (
                             <TableCell key={'col-label-' + index} className="initialism text-uppercase text-nowrap">
@@ -314,16 +339,17 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                       this.state.tableData &&
                       this.state.tableData.map((rowObj, rowIndex: number) => (
                         <TableRow key={'table-row-' + rowIndex}>
-                          {columnDefinition.filter((ob: any) => !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
+                          {getCD().filter((ob: any) => !ob.hidden).map((colObj: ColumnObj | ActionColumnObj, colIndex: number) =>
                             isColumnObj(colObj) ? (
                               <TableCell key={'data-field-' + colIndex}>
                                 { this.hasLookup(colObj) ? (
-                                  <LookUp
-                                    columnDef={colObj}
-                                    rowValue={rowObj}
-                                    lookupTableForDatasource={lookupTableForDatasource}
-                                    lookupTableForLabel={lookupTableForLabel}
-                                  />
+                                  <>{LookUp({
+                                    columnDef: colObj,
+                                    rowValue: rowObj,
+                                    lookupTableForDatasource: lookupTableForDatasource,
+                                    lookupTableForLabel: lookupTableForLabel
+                                  })}</>
+
                                 ) : (
                                   rowObj[colObj.field_name]
                                 )}

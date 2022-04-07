@@ -42,18 +42,7 @@ export const dataSync = async () => {
   });
 };
 
-export const exportToExcel = (tableData: any, filteredColumns: any, language: string) => {
-  const filter = filteredColumns.map((a: { field_name: string; }) => a.field_name);
-  const labels = filteredColumns.map((a: any) => a.label[language]);
-  const excelDataList = tableData.map((a: any) => _.pick(a, filter));
-  const excelData: any = excelDataList.map((obj: any) => {
-    const newObj: any = {};
-    for (let i = 0; i < filter.length; i++) {
-      newObj[labels[i]] = obj[filter[i]];
-    }
-    return newObj;
-  });
-  // const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+export const exportToExcel = (excelData: any) => {
   const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
   const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
