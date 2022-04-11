@@ -170,7 +170,10 @@ function sendStatusToWindow(text) {
 autoUpdater.autoDownload = false;
 
 autoUpdater.on('error', (error) => {
-  dialog.showErrorBox('Error: ', error == null ? 'unknown' : (error.stack || error).toString());
+
+  electronLog.info('-------------------- || Error Occured in Auto Updater Library|| ------------------------');
+  electronLog.info(error);
+  // dialog.showErrorBox('Error: ', error == null ? 'unknown' : (error.stack || error).toString());
 });
 
 autoUpdater.on('update-available', () => {
