@@ -1,9 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import _, { random } from 'lodash';
-import { delay } from 'q';
 import * as React from 'react';
-import { Button, Container } from 'react-floating-action-button';
+import {
+  // Button, 
+  Container
+} from 'react-floating-action-button';
 // import Loader from 'react-loader-spinner';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
@@ -82,48 +84,48 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   // };
 
   // tslint:disable-next-line: variable-name
-  const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-    // console.log(userName);
-    await props.setSyncOverlayHandler(true);
+  // const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+  //   // console.log(userName);
+  //   await props.setSyncOverlayHandler(true);
 
-    const user: any = await ipcRenderer.sendSync('fetch-username');
-    await ipcRenderer.send('request-data-sync', user.username);
-    ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
-      console.log('data check', event, args);
-      props.setSyncOverlayHandler(false);
-      setAlertOpen(true);
-      await delay(1000);
-      setAlertOpen(false);
-      return args;
-    });
-  };
+  //   const user: any = await ipcRenderer.sendSync('fetch-username');
+  //   await ipcRenderer.send('request-data-sync', user.username);
+  //   ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
+  //     console.log('data check', event, args);
+  //     props.setSyncOverlayHandler(false);
+  //     setAlertOpen(true);
+  //     await delay(1000);
+  //     setAlertOpen(false);
+  //     return args;
+  //   });
+  // };
 
-  const appSync = async () => {
-    const user: any = await ipcRenderer.sendSync('fetch-username');
-    await ipcRenderer.send('start-app-sync', user.username);
-    ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      console.log('nahid check', event, args);
-      // return args;
-      if (args) {
-        const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-        props.setMenuItemActionCreator(JSON.parse(newMenuItem));
-      } else {
-        return false;
-      }
-      props.setSyncOverlayHandler(false);
-      setAlertOpen(true);
-      await delay(1000);
-      setAlertOpen(false);
-    });
-  };
+  // const appSync = async () => {
+  //   const user: any = await ipcRenderer.sendSync('fetch-username');
+  //   await ipcRenderer.send('start-app-sync', user.username);
+  //   ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+  //     console.log('nahid check', event, args);
+  //     // return args;
+  //     if (args) {
+  //       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
+  //       props.setMenuItemActionCreator(JSON.parse(newMenuItem));
+  //     } else {
+  //       return false;
+  //     }
+  //     props.setSyncOverlayHandler(false);
+  //     setAlertOpen(true);
+  //     await delay(1000);
+  //     setAlertOpen(false);
+  //   });
+  // };
 
   // tslint:disable-next-line: variable-name
-  const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-    props.resetMenuActionCreator();
-    // console.log(userName);
-    props.setSyncOverlayHandler(true);
-    await appSync();
-  };
+  // const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+  //   props.resetMenuActionCreator();
+  //   // console.log(userName);
+  //   props.setSyncOverlayHandler(true);
+  //   await appSync();
+  // };
 
   const compUpdate = async () => {
     // const user: any = await ipcRenderer.sendSync('fetch-username');
@@ -216,15 +218,15 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
             ))}
         </Row>
         <Container>
-          <Button tooltip="Sync App with Server" className="floating-item" onClick={onAppSyncHandler}>
+          {/* <Button tooltip="Sync App with Server" className="floating-item" onClick={onAppSyncHandler}>
             <FontAwesomeIcon icon={['fas', 'tools']} />
           </Button>
           <Button tooltip="Sync Data with Server" className="floating-item" onClick={onSyncHandler}>
             <FontAwesomeIcon icon={['fas', 'sync']} />
-          </Button>
-          <Button tooltip="Menu" className="floating-btn">
+          </Button> */}
+          {/* <Button tooltip="Menu" className="floating-btn">
             <FontAwesomeIcon icon={['fas', 'bars']} />
-          </Button>
+          </Button> */}
         </Container>
       </div>
     </React.Fragment>
