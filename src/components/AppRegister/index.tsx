@@ -58,7 +58,7 @@ function AppRegister(props: any) {
   };
 
   const performLoginOperation = async (ans: any) => {
-    if(ans === 'delete') {
+    if (ans === 'delete') {
       await ipcRenderer.send('login-operation', loginArgs);
     } else {
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
@@ -70,7 +70,7 @@ function AppRegister(props: any) {
   const handleSignIn = async () => {
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
-      console.log('in delete table dialogue: ',event, args);
+      console.log('in delete table dialogue: ', event, args);
       setOpenAlert(true);
       setLoginArgs(args);
     });
@@ -80,7 +80,7 @@ function AppRegister(props: any) {
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
-          setToastContent({ severity: 'Error', msg: 'Un authenticated User' });
+          setToastContent({ severity: 'Error', msg: args.message });
         } else {
           setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
           syncAppModule();
@@ -186,7 +186,7 @@ function AppRegister(props: any) {
           </Typist>
         </div>
       )}
-          <AlertDialog open={openAlert} handleClick={(e: any)=> performLoginOperation(e)} />
+      <AlertDialog open={openAlert} handleClick={(e: any) => performLoginOperation(e)} />
     </Grid>
   );
 }

@@ -1,5 +1,6 @@
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import OdkFormRenderer from 'odkformrenderer';
+// import OdkFormRenderer from 'odkformrenderer';
+
 import 'odkformrenderer/example/index.css';
 import queryString from 'query-string';
 import * as React from 'react';
@@ -7,9 +8,11 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
 import ErrorBoundary from '../page/ErrorBoundary';
+import { Suspense } from 'react';
 import { Alert } from 'reactstrap';
 import { Typography } from '@material-ui/core';
 import AlertDialog from './dialog';
+const OdkFormRenderer = React.lazy(() => import('odkformrenderer'));
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 /** interface for Form URL params */
 interface FormURLParams {
@@ -30,27 +33,27 @@ interface FormState {
   userInput: any;
 }
 
-const getSearchDBProperties=(question: any, path: any)=>{
+const getSearchDBProperties = (question: any, path: any) => {
 
-  const pickSearchDBVariable=(appearance: any)=> {
-    const arr = appearance.split(',').filter((data:any)=> data.includes('searchDB'));
-    return arr.length > 0 ? arr[0].trim() : null; 
+  const pickSearchDBVariable = (appearance: any) => {
+    const arr = appearance.split(',').filter((data: any) => data.includes('searchDB'));
+    return arr.length > 0 ? arr[0].trim() : null;
   }
 
   let properties: any = [];
-  if(question && question.children !== undefined) {
+  if (question && question.children !== undefined) {
 
-    
-    for(let i=0; i<question.children.length; i++) {
+
+    for (let i = 0; i < question.children.length; i++) {
       const ques = question.children[i];
       const questionPath = `${path}/${ques.name}`;
 
-      if(ques.control !== undefined && ques.control.appearance !== undefined && ques.control.appearance.includes("searchDB")) {
+      if (ques.control !== undefined && ques.control.appearance !== undefined && ques.control.appearance.includes("searchDB")) {
         properties.push([questionPath, pickSearchDBVariable(ques.control.appearance)]);
       }
-      if(ques.type == 'group' || ques.type == 'survey') {
+      if (ques.type == 'group' || ques.type == 'survey') {
         const result = getSearchDBProperties(ques, questionPath);
-        properties = properties.concat(result); 
+        properties = properties.concat(result);
       }
     }
   }
@@ -71,36 +74,36 @@ class Form extends React.Component<formProps, FormState> {
     const userInfo = await ipcRenderer.sendSync('fetch-userlist');
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
-      this.setState({ formDefinition: definition, formChoices, userLocationInfo, userInfo});
+      this.setState({ formDefinition: definition, formChoices, userLocationInfo, userInfo });
     }
   }
 
-  public getUserInput =(dataJson: any) => {
+  public getUserInput = (dataJson: any) => {
     let userInput = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {}
 
     console.log("calling getUserinput ");
     const userInputProperties = getSearchDBProperties(JSON.parse(this.state.formDefinition), '');
-    if(userInputProperties.length > 0) {
-      const {userLocationInfo} = this.state;
-      for(let prop of userInputProperties) {
+    if (userInputProperties.length > 0) {
+      const { userLocationInfo } = this.state;
+      for (let prop of userInputProperties) {
         userInput = {
           ...userInput,
-          [prop[0].slice(1)] : userLocationInfo[prop[1].split('@')[1]]
+          [prop[0].slice(1)]: userLocationInfo[prop[1].split('@')[1]]
         }
       }
     }
-    console.log({userInput});
+    console.log({ userInput });
     return userInput;
   }
 
   public render() {
 
     const handleYes = () => {
-     
+
       const userInput = this.state.userInput;
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
-        const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null; 
+        const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
         const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : `${this.state.userInfo.users[0].username}-${this.generateUid()}`;
         const { match } = this.props;
         const formId = match.params.id || '';
@@ -118,14 +121,14 @@ class Form extends React.Component<formProps, FormState> {
       }
     }
 
-    const handleCancel =()=> {
+    const handleCancel = () => {
       const state = this.state;
-      this.setState({...state, showConfirmDialog: false});
+      this.setState({ ...state, showConfirmDialog: false });
     }
 
     const handleSubmit = (userInput: any) => {
       const state = this.state;
-      this.setState({...state, userInput, showConfirmDialog: true});
+      this.setState({ ...state, userInput, showConfirmDialog: true });
     };
     const { formDefinition, formChoices } = this.state;
     const { dataJson } = queryString.parse(this.props.location.search);
@@ -151,9 +154,11 @@ class Form extends React.Component<formProps, FormState> {
     const getOdkFormRenderer = () => {
       try {
         return (
-          <ErrorBoundary>
-            <OdkFormRenderer {...props} />
-          </ErrorBoundary>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ErrorBoundary>
+              <OdkFormRenderer {...props} />
+            </ErrorBoundary>
+          </Suspense>
         );
       } catch (e) {
         return null;
@@ -162,7 +167,7 @@ class Form extends React.Component<formProps, FormState> {
 
     return (
       <div className="form-container">
-        <AlertDialog open={this.state.showConfirmDialog}  yes={handleYes} cancel={handleCancel}/>
+        <AlertDialog open={this.state.showConfirmDialog} yes={handleYes} cancel={handleCancel} />
         {this.state.toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
         {/* <Link to="/menu/">
           <div>
@@ -174,10 +179,10 @@ class Form extends React.Component<formProps, FormState> {
           </div>
         </Link> */}
         {formDefinition ? getOdkFormRenderer() : <div style={{ marginTop: '10%' }}>
-            <Typography color="secondary" component="h1" variant="h4" align="center">
-                Couldn't Found Form Definition
+          <Typography color="secondary" component="h1" variant="h4" align="center">
+            Couldn't Found Form Definition
             </Typography>
-          </div>}
+        </div>}
       </div>
     );
   }
@@ -189,7 +194,7 @@ class Form extends React.Component<formProps, FormState> {
 
   private generateUid = () => {
     // @ts-ignore: Unreachable code error
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c: any) =>
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c: any) =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
   };

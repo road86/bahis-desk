@@ -646,9 +646,8 @@ const signIn = async (event, userData) => {
     })
     .catch((error) => {
       // eslint-disable-next-line no-console
-      console.log(error);
       results = {
-        message: 'Un-authenticated User',
+        message: getErrorMessage(error),
         username: '',
       };
       mainWindow.send('formSubmissionResults', results);
@@ -659,6 +658,12 @@ const signIn = async (event, userData) => {
 
   db.close();
 };
+
+const getErrorMessage = (error) => {
+  electronLog.info(error.message);
+  if (error.message.includes("409")) return "Users credentials are not authorized or missing catchment area."
+  else return "Unauthenticated User.";
+}
 
 const populateGeoTable = (event, geoList) => {
   console.log(app.getPath("userData"));
@@ -1027,7 +1032,7 @@ const getDBTablesEndpoint = (time) => {
 const startAppSync = (event, name) => {
   electronLog.info('--------- || App Sync Started || ------------------');
   electronLog.info('----------|| Below API will be called || -----------');
-  
+
 
   try {
     //  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
