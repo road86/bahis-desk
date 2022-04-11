@@ -51,6 +51,8 @@ interface FilterProps {
   resetFiltersActionCreator: typeof resetFilters;
   appLanguage: string;
   listId: string;
+  columnDefinition: any;
+  datasource: any;
 }
 
 // interface FilterState {
@@ -61,19 +63,19 @@ interface FilterProps {
 reducerRegistry.register(filterReducerName, filterReducer);
 
 function Filter(props: FilterProps) {
-// class Filter extends React.Component<FilterProps, FilterState> {
-//   public state = { isEnvSet: false };
+  // class Filter extends React.Component<FilterProps, FilterState> {
+  //   public state = { isEnvSet: false };
   const [isEnvSet, setIsEnvSet] = React.useState<boolean>(false);
-//   public componentDidMount() {
-    
-//   }
+  //   public componentDidMount() {
+
+  //   }
 
   React.useEffect(() => {
     props.resetFiltersActionCreator();
     setIsEnvSet(true);
-  },[])
+  }, [])
 
-  
+
   const renderTypeEvaluator = (filterItem: FilterItem, filterIndex: number, appLanguage: string, listId: string) => {
     switch (filterItem.type) {
       case FILTER_TEXT_TYPE: {
@@ -110,6 +112,8 @@ function Filter(props: FilterProps) {
             filterItem={filterItem as FilterSingleSelectItem}
             appLanguage={appLanguage}
             listId={listId}
+            columnDefinition={props.columnDefinition}
+            datasource={props.datasource}
           />
         );
       }
@@ -146,14 +150,14 @@ function Filter(props: FilterProps) {
   const { definition, appLanguage, listId } = props;
   return (
     <Accordion defaultExpanded>
-      <AccordionSummary  expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          className={classes.root}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1a-content"
+        id="panel1a-header"
+        className={classes.root}>
         Filter
       </AccordionSummary>
       <AccordionDetails>
-        <div style={{ paddingLeft: '5%', paddingRight: '5%'}}>
+        <div style={{ paddingLeft: '5%', paddingRight: '5%' }}>
           <Row id="menu-body">
             {isEnvSet &&
               definition.map((filterItem, index) => (
@@ -168,9 +172,9 @@ function Filter(props: FilterProps) {
           <Button className={classes.resetButton} size="sm" onClick={(e: any) => resetFilterHandler(e)}>
             Reset
           </Button>
-      </div>
+        </div>
       </AccordionDetails>
-    </Accordion> 
+    </Accordion>
   );
 }
 

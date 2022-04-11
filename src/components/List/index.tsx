@@ -99,6 +99,8 @@ function List(props: ListProps) {
                     onSubmitHandler={setFiltersValue}
                     appLanguage={appLanguage}
                     listId={listId}
+                    columnDefinition={columnDefinition}
+                    datasource={datasource}
                   />
                 </Col>
               </Row>

@@ -113,7 +113,7 @@ export interface ListTableState {
 reducerRegistry.register(ListTableReducerName, ListTableReducer);
 
 /**
- * --------------------------- || NEED TO KNOW STUFF BEFORE YOU START DEBUGGING THIS COMPONENT || ----------------------------------
+ * --------------------------- || STUFF YOU NEED TO KNOW BEFORE YOU START DEBUGGING THIS COMPONENT || ----------------------------------
  * 
  * All the list come from an API (/get-api/list-def/). there is a table in the database named 'lists'. it contains all the list data.
  *  'lists' table has many columns amongst two major columns are  Datasource and Column Definition (CD).
@@ -235,18 +235,23 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         );
         setTotalRecordsActionCreator(totalRecordsResponse[0].count);
       }
+
+      const query1 = 'select * from ' +
+        datasource.query +
+        this.generateSqlWhereClause(filters) +
+        orderSqlTxt +
+        ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`;
+
+      const query2 = `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
+        this.generateSqlWhereClause(filters) +
+        orderSqlTxt +
+        ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`;
+
       const response = await ipcRenderer.sendSync(
         'fetch-query-data',
         datasource.type === '0'
-          ? 'select * from ' +
-          datasource.query +
-          this.generateSqlWhereClause(filters) +
-          orderSqlTxt +
-          ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`
-          : `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName}` +
-          this.generateSqlWhereClause(filters) +
-          orderSqlTxt +
-          ` limit ${pageSize} offset ${(pageSize * (newPageNumber - 1))}`,
+          ? query1
+          : query2,
       );
       setPageNumberActionCreator(newPageNumber);
       this.setState({

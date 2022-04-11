@@ -19,6 +19,8 @@ import {
 } from '../../../store/ducks/filter';
 import { FILTER_SINGLE_SELECT_TYPE } from '../constants';
 
+
+const OPTION_ID = 'opt_id';
 export interface FilterSingleSelectItem extends FilterItem {
   type: FILTER_SINGLE_SELECT_TYPE;
 }
@@ -32,6 +34,8 @@ export interface SingleSelectProps {
   appLanguage: string;
   listId: string;
   filtersValueObj: FiltersValueObj;
+  columnDefinition: any;
+  datasource: any;
 }
 
 export interface FilterOption {
@@ -49,7 +53,38 @@ export interface SingleSelectState {
 class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelectState> {
   public state = { filterOptions: [], filterDataset: [] };
 
-  public async componentDidMount() {
+
+  public getLookupOptions = async (column: any) => {
+    const { datasource } = this.props;
+    try {
+      if (column.lookup_definition == null) return;
+
+      const query = `with list_table as ( 
+        ${datasource.query}
+      ), lookup_table as (
+        ${column.lookup_definition.query}
+      ) select
+        list_table.id,
+        lookup_table.${column.lookup_definition.return_column},
+        lookup_table.${column.lookup_definition.match_column} as ${OPTION_ID}
+      from list_table left join lookup_table on list_table.${column.field_name} = lookup_table.${column.lookup_definition.match_column}`;
+
+      const resp: any = await ipcRenderer.sendSync('fetch-query-data', query);
+
+      let unqOb: any = {};
+      resp.forEach((e: any) => {
+        unqOb[`${e[column.lookup_definition.return_column]}`] = e[OPTION_ID];
+      });
+
+      const options = Object.keys(unqOb).map((k: any) => ({ label: k, value: unqOb[k] }));
+      return { filterOptions: options };
+
+    } catch (err) {
+      return { filterOptions: [] };
+    }
+  }
+
+  public getNormalOptions = async () => {
     const { filterItem, filtersValueObj, listId } = this.props;
     let dependency = filterItem.dependency
       ? typeof filterItem.dependency === 'string'
@@ -59,18 +94,34 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     dependency = [...dependency, filterItem.name];
     const response = await ipcRenderer.sendSync('fetch-filter-dataset', listId, dependency);
     const options = this.fetchOptionsFromDataset(filterItem, response, filtersValueObj);
-    this.setState({ ...this.state, filterDataset: response, filterOptions: options });
+    return { filterDataset: response, filterOptions: options };
   }
 
-  public componentDidUpdate() {
-    const { filterItem, filtersValueObj, value } = this.props;
-    const { filterOptions, filterDataset } = this.state;
-    const options = this.fetchOptionsFromDataset(filterItem, filterDataset, filtersValueObj);
+  public getFilterOptions = async () => {
+    const { filterItem, columnDefinition } = this.props;
+    const column = columnDefinition.find((cd: any) => cd.field_name == filterItem.name);
+    return column.lookup_definition ? await this.getLookupOptions(column) : await this.getNormalOptions();
+  }
+
+  public async componentDidMount() {
+
+    const result: any = await this.getFilterOptions();
+    console.log('new Options: ', result.filterOptions);
+    this.setState({ ...this.state, ...result });
+  }
+
+  public async componentDidUpdate() {
+    const { filterItem, value } = this.props;
+    const { filterOptions } = this.state;
+    const result: any = await this.getFilterOptions();
+    const options = result.filterOptions;
+
     if (JSON.stringify(options) !== JSON.stringify(filterOptions)) {
       const optionValues = options.map((option: FilterOption) => option.value);
       const newValues = (value || []).filter(
         (valueItem) => valueItem && valueItem !== '' && optionValues.includes(valueItem),
       );
+
       this.props.setFilterValueActionCreator(
         filterItem.name,
         newValues,
@@ -83,8 +134,9 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
   public render() {
     const { filterItem, appLanguage, value } = this.props;
     const { filterOptions } = this.state;
+    console.log('filter options: ', this.state.filterOptions);
     return (
-      <FormGroup style={{ marginBottom: 0}}>
+      <FormGroup style={{ marginBottom: 0 }}>
         <Row>
           <Col md={3}>
             <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
