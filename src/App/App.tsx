@@ -14,6 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Box, CircularProgress, Typography } from '@material-ui/core';
 import * as React from 'react';
+import { Suspense } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router';
@@ -22,11 +23,12 @@ import BounceLoader from 'react-spinners/BounceLoader';
 import { Col, Row, Container } from 'reactstrap';
 import { Store } from 'redux';
 import AppRegister from '../components/AppRegister';
-import Form from '../components/Form';
+// import Form from '../components/Form';
 import FormDetails from '../components/FormDetails';
 import List from '../components/List';
 import ListProfile from '../components/ListProfile';
 import Loading from '../components/Loading';
+import ErrorBoundary from '../components/page/ErrorBoundary';
 import Header from '../components/page/Header';
 import SubmittedForm from '../components/SubmittedForm';
 import Menu from '../containers/Menu';
@@ -35,6 +37,7 @@ import { getCurrentMenu, MenuItem, MODULE_TYPE, FORM_TYPE } from '../store/ducks
 import './App.css';
 import { GEOLOC_ENDPOINT } from './constant';
 import { appStyles } from './styles';
+const Form = React.lazy(() => import('../components/Form'));
 
 library.add(
   faUser,
@@ -137,7 +140,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
     ipcRenderer.on('update_available', () => {
       console.log('ipcRenderer on update_available');
-      ipcRenderer.removeAllListeners('update_available');    
+      ipcRenderer.removeAllListeners('update_available');
     });
 
     ipcRenderer.on('update-downloading', () => {
@@ -206,52 +209,56 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   return (
     <React.Fragment>
       <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
-        {!headerExcludedURLs.includes(location.pathname) && (
-          <Header handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname}/>
-        )}
+        {/* {!headerExcludedURLs.includes(location.pathname) && ( */}
+        <Header showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
+        {/* )} */}
         <div className={classes.offset} />
         <Row id="main-page-container">
-            <Col>
-              {/* Production hack. Sets the router to home url on app startup */}
-              <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
-              <Switch>
-                <Route exact={true} path="/">
-                  <Loading />
-                </Route>
-                <Route exact={true} path="/signup/">
-                  <AppRegister csv={csv} />
-                </Route>
-                <Route exact={true} path="/menu/">
-                  <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
-                </Route>
-                <Route exact={true} path="/form/:id">
-                  <Container>
-                    <Form appLanguage={'English'}/>
-                  </Container>
-                </Route>
-                <Route exact={true} path="/formlist/:id">
-                  <Container>
-                    <SubmittedForm appLanguage={'English'}/>
-                  </Container>
-                </Route>
-                <Route exact={true} path="/submittedDetails/:id">
-                  <Container>
-                    <FormDetails />
-                  </Container>
-                </Route>
-                <Route exact={true} path="/list/:id">
-                  <Container>
-                    <List appLanguage={'English'} />
-                  </Container>
-                </Route>
-                <Route exact={true} path="/listProfile/:id">
-                  <Container>
-                    <ListProfile />
-                  </Container>
-                </Route>
-              </Switch>
-            </Col>
-          </Row>
+          <Col>
+            {/* Production hack. Sets the router to home url on app startup */}
+            <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
+            <Switch>
+              <Route exact={true} path="/">
+                <Loading />
+              </Route>
+              <Route exact={true} path="/signup/">
+                <AppRegister csv={csv} />
+              </Route>
+              <Route exact={true} path="/menu/">
+                <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
+              </Route>
+              <Route exact={true} path="/form/:id">
+                <Container>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <ErrorBoundary>
+                      <Form appLanguage={'English'} />
+                    </ErrorBoundary>
+                  </Suspense>
+                </Container>
+              </Route>
+              <Route exact={true} path="/formlist/:id">
+                <Container>
+                  <SubmittedForm appLanguage={'English'} />
+                </Container>
+              </Route>
+              <Route exact={true} path="/submittedDetails/:id">
+                <Container>
+                  <FormDetails />
+                </Container>
+              </Route>
+              <Route exact={true} path="/list/:id">
+                <Container>
+                  <List appLanguage={'English'} />
+                </Container>
+              </Route>
+              <Route exact={true} path="/listProfile/:id">
+                <Container>
+                  <ListProfile />
+                </Container>
+              </Route>
+            </Switch>
+          </Col>
+        </Row>
       </LoadingOverlay>
       {loading ? (
         <Box

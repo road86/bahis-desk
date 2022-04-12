@@ -1,5 +1,5 @@
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import OdkFormRenderer from 'odkformrenderer';
+import OdkFormRenderer from 'odkformrenderer';
 
 import 'odkformrenderer/example/index.css';
 import queryString from 'query-string';
@@ -7,12 +7,10 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import './Form.css';
-import ErrorBoundary from '../page/ErrorBoundary';
-import { Suspense } from 'react';
 import { Alert } from 'reactstrap';
 import { Typography } from '@material-ui/core';
 import AlertDialog from './dialog';
-const OdkFormRenderer = React.lazy(() => import('odkformrenderer'));
+// const OdkFormRenderer = React.lazy(() => import('odkformrenderer'));
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 /** interface for Form URL params */
 interface FormURLParams {
@@ -154,11 +152,7 @@ class Form extends React.Component<formProps, FormState> {
     const getOdkFormRenderer = () => {
       try {
         return (
-          <Suspense fallback={<div>Loading...</div>}>
-            <ErrorBoundary>
-              <OdkFormRenderer {...props} />
-            </ErrorBoundary>
-          </Suspense>
+          <OdkFormRenderer {...props} />
         );
       } catch (e) {
         return null;
