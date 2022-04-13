@@ -1025,8 +1025,12 @@ const fetchDistrict = (event, divisionId) => {
  * @returns - success if sync successful
  */
 
+const formConfigEndpoint = (name, time) => {
+  return DB_TABLES_ENDPOINT.replace('?', time).replace('core_admin', name);
+};
+
 const _url = (url, username, time) => {
-  return url.replace('core_admin', username).replace('?', time);
+  return `${url.replace('core_admin', username)}?last_modified=${time}`;
 }
 
 const startAppSync = (event, name) => {
@@ -1040,7 +1044,7 @@ const startAppSync = (event, name) => {
     const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
     const time = log === undefined ? 0 : Math.round(log.time);
 
-    electronLog.info(`${_url(DB_TABLES_ENDPOINT, name, time)}`);
+    electronLog.info(`${formConfigEndpoint(name, time)}`);
     electronLog.info(`${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
     electronLog.info(`${_url(FORMS_ENDPOINT, name, time)}`);
     electronLog.info(`${_url(LISTS_ENDPOINT, name, time)}`);
@@ -1049,7 +1053,7 @@ const startAppSync = (event, name) => {
 
     axios
       .all([
-        axios.get(_url(DB_TABLES_ENDPOINT, name, time)),
+        axios.get(`${formConfigEndpoint(name, time)}`),
         axios.get(_url(APP_DEFINITION_ENDPOINT, name, time)),
         axios.get(_url(FORMS_ENDPOINT, name, time)),
         axios.get(_url(LISTS_ENDPOINT, name, time)),
