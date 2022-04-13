@@ -1100,7 +1100,7 @@ const startAppSync = (event, name) => {
             updateAppDefinition(moduleListRes.data);
           }
           if (formListRes.data) {
-            electronLog.info('---------------------|| FormListRes data ||---------------------');
+            electronLog.info('---------------------|| FormListRes data ||---------------------', 'total: ', formListRes.data.length);
             const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
             const newFormInsertionQuery = db.prepare(
               'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
@@ -1129,7 +1129,7 @@ const startAppSync = (event, name) => {
               }
             });
             if (listRes.data) {
-              electronLog.info('---------------------|| ListRes data ||---------------------');
+              electronLog.info('---------------------|| ListRes data ||---------------------', 'total: ', listRes.data.length);
               const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
               const newListInsertQuery = db.prepare(
                 'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
@@ -1157,7 +1157,7 @@ const startAppSync = (event, name) => {
               });
             }
             if (formChoice.data) {
-              electronLog.info('--------------------- || formChoice data ||---------------------');
+              electronLog.info('--------------------- || formChoice data ||---------------------', 'total: ', formChoice.data.length);
               const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE value_text = ? and field_name = ?');
 
               const insertQuery = db.prepare(

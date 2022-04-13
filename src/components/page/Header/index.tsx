@@ -28,12 +28,24 @@ function Header(props: HeaderProps) {
   const { setSyncOverlayHandler } = props;
   const classes = headerStyles();
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [appConfigSyncComplete, setAppConfigSyncComplete] = React.useState<boolean>(false);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
+
+  React.useEffect(() => {
+
+    if (appConfigSyncComplete) {
+      (async () => {
+        const user: any = await ipcRenderer.sendSync('fetch-username');
+        ipcRenderer.send('request-data-sync', user.username);
+      })();
+    }
+
+  }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
     if (isMobileMenuOpen) {
@@ -47,13 +59,14 @@ function Header(props: HeaderProps) {
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-      await ipcRenderer.send('request-data-sync', user.username);
-
+      if (!appConfigSyncComplete)
+        setAppConfigSyncComplete(true);
     });
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
       setSyncOverlayHandler(false);
+      setAppConfigSyncComplete(false);
     });
   };
 
