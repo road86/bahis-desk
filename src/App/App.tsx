@@ -1,4 +1,5 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
+
 import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons';
 import {
   faArrowLeft,
@@ -71,6 +72,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const [percentage, setPercentage] = React.useState<number>(0);
   const [csv, setCsv] = React.useState<any>({});
   const [lastSync, setLastSync] = React.useState<string>('never');
+  const [unsyncCount, setUnsyncCount] = React.useState<any>(0);
 
   const writeCsvToObj = (zip: any, csvFiles: any, i: number, tmpCsv: any) => {
     zip
@@ -169,7 +171,13 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     setLastSync(time);
   }
 
+  const updateUnsyncCount = async () => {
+    const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
+    setUnsyncCount(response[0].cnt);
+  }
+
   React.useEffect(() => {
+    updateUnsyncCount();
     setTimeout(() => {
       fetchLastSyncTime();
       if (navigator.onLine) {
@@ -210,7 +218,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     <React.Fragment>
       <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
         {/* {!headerExcludedURLs.includes(location.pathname) && ( */}
-        <Header showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
+        <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
         {/* )} */}
         <div className={classes.offset} />
         <Row id="main-page-container">
@@ -231,7 +239,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 <Container>
                   <Suspense fallback={<div>Loading...</div>}>
                     <ErrorBoundary>
-                      <Form appLanguage={'English'} />
+                      <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
                     </ErrorBoundary>
                   </Suspense>
                 </Container>

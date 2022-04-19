@@ -19,6 +19,7 @@ interface FormURLParams {
 
 interface formProps extends RouteComponentProps<FormURLParams> {
   appLanguage: string;
+  setUnsyncCount: any;
 }
 
 interface FormState {
@@ -98,6 +99,7 @@ class Form extends React.Component<formProps, FormState> {
 
     const handleYes = () => {
 
+
       const userInput = this.state.userInput;
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
@@ -115,6 +117,7 @@ class Form extends React.Component<formProps, FormState> {
         });
         setTimeout(() => {
           this.props.history.push('/menu/');
+          this.props.setUnsyncCount();
         }, 2010);
       }
     }

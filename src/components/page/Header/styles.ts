@@ -13,7 +13,7 @@ export const headerStyles = makeStyles((theme: Theme) =>
       marginLeft: `5px !important`,
       padding: `5px !important`,
       color: `${theme.palette.secondary.light} !important`,
-      backgroundColor: `${theme.palette.secondary.main} !important`,
+      // backgroundColor: `${theme.palette.secondary.main} !important`,
       borderRadius: `5px !important`,
     },
     backButton: {

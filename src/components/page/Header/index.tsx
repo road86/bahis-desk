@@ -4,7 +4,6 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import SyncIcon from '@material-ui/icons/Sync';
-
 import React from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
@@ -22,6 +21,8 @@ export interface HeaderProps {
   redirectToMenu: any;
   redirectToSubmitted: any;
   showContent: boolean;
+  unsyncCount: any;
+  updateUnsyncCount: any;
 }
 
 function Header(props: HeaderProps) {
@@ -67,6 +68,7 @@ function Header(props: HeaderProps) {
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
       setSyncOverlayHandler(false);
       setAppConfigSyncComplete(false);
+      setTimeout(() => props.updateUnsyncCount(), 4000);
     });
   };
 
@@ -85,6 +87,11 @@ function Header(props: HeaderProps) {
     }
   };
 
+  const getButtonColor = (): any => {
+    console.log('---------- || unsyncCount || ------------', props.unsyncCount);
+    return parseInt(props.unsyncCount) === 0 ? 'orange' : 'red';
+  }
+
   return (
     <div className={classes.grow}>
       <AppBar position="fixed" color="inherit" className={classes.appbar}>
@@ -97,7 +104,7 @@ function Header(props: HeaderProps) {
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>
                   Last Sync Date : {props.syncTime}
-                  <Button variant="contained" color="secondary" onClick={handleAppSync} className={classes.button}>
+                  <Button variant="contained" style={{ backgroundColor: getButtonColor() }} onClick={handleAppSync} className={classes.button}>
                     <SyncIcon style={{ paddingRight: 2 }} />Sync Now
               </Button>
                 </Typography>
