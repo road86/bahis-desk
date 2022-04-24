@@ -402,18 +402,18 @@ const fetchFormChoices = (event, formId) => {
     db.close();
 
   } catch (err) {
-    console.log('------------- error fetch form choices ------------------');
+    console.log('------------- error fetch form choices ------------------', err);
   } finally {
 
   }
 
 }
 
-const fetchFormDetails = (event, listId) => {
+const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const formData = db.prepare('SELECT * from data where data_id = ? limit 1').get(listId);
+    const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
     console.log(formData)
     if (formData != undefined) {
       // eslint-disable-next-line no-param-reassign
@@ -1075,14 +1075,11 @@ const startAppSync = (event, name) => {
       ])
       .then(
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
+          const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+          newLayoutQuery.run(new Date().getTime());
+
           if (formConfigRes.data) {
             electronLog.info('---------------------|| fromConfigRes data ||---------------------');
-            if (formConfigRes.data.length > 0) {
-              const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-              const maxUpdateTime = Math.max(...formConfigRes.data.map((obj) => obj.updated_at), 0);
-              newLayoutQuery.run(maxUpdateTime);
-            }
-
             formConfigRes.data.forEach((sqlObj) => {
               if (sqlObj.sql_script) {
                 try {

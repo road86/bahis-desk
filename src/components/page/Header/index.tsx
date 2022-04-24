@@ -103,7 +103,7 @@ function Header(props: HeaderProps) {
               </div>
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>
-                  Last Sync Date : {props.syncTime}
+                  Last Data Sync Date : {props.syncTime}
                   <Button variant="contained" style={{ backgroundColor: getButtonColor() }} onClick={handleAppSync} className={classes.button}>
                     <SyncIcon style={{ paddingRight: 2 }} />Sync Now
               </Button>

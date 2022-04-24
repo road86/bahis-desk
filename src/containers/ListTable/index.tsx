@@ -371,8 +371,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                                   return (
                                     <React.Fragment key={'action-field' + actionIndex}>
                                       {
-                                        actionObj.action_type === 'details' ? (
-                                          <Link key={'action-field' + actionIndex} to={`/listProfile/${this.props.listId}/?dataJson=${btoa(JSON.stringify(rowObj))}&detailspk=${actionObj.details_pk}`}
+                                        actionObj.action_type === 'details' ? ( 
+                                          <Link key={'action-field' + actionIndex} to={`/listProfile/${this.props.listId}/?dataJson=${btoa(JSON.stringify(rowObj))}&detailspk=${actionObj.details_pk}&xform_id=${actionObj.xform_id}`}
                                           >
                                             <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                           </Link>

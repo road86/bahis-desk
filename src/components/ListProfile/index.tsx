@@ -8,6 +8,7 @@ import queryString from 'query-string';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import { ActionDefinition } from '../../containers/ListTable';
 import FollowUpTable from './DataTable';
+import { createFormKeyValuePair } from '../../helpers/formUtils';
 
 
 
@@ -33,11 +34,28 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     const listId = match.params.id || '';
     const dataJson = queryString.parse(props.location.search).dataJson;
     const detailspk = queryString.parse(props.location.search).detailspk;
+    const xFormId = queryString.parse(props.location.search).xform_id;
     const formData = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
     const details = detailspk && typeof detailspk === 'string' ? detailspk : '';
+
+    const viewFormData = await ipcRenderer.sendSync('form-details', formData.instanceid, 'instanceid');
+
+    console.log('------------> viewFormData: ', viewFormData);
+    const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', viewFormData.formDetails.form_id);
+    const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', viewFormData.formDetails.form_id);
+
+    if (viewFormData != null) {
+      const { definition, field_names, formChoices } = formDefinitionObj;
+      let { data } = viewFormData.formDetails;
+      data = JSON.parse(data);
+      setFormData(
+        createFormKeyValuePair(JSON.parse(definition), JSON.parse(field_names), data, { simpleFormChoice, formChoices: JSON.parse(formChoices) })
+      );
+    }
+
     setDetailsPk(details);
     setDetailsPkValue(formData[details]);
-    setFormData(Object.entries(formData));
+
     const { columnDefinition } = await ipcRenderer.sendSync(
       'fetch-list-definition',
       listId,
@@ -52,6 +70,8 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     comUpdate();
   }, []);
 
+
+  console.log('----------> form data: ', formData);
   return (
     <div style={{ marginBottom: 20 }}>
       <hr className={classes.hrTag} />
@@ -81,21 +101,19 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {formData && formData.length && formData.map((rowObj: any, index: number) => {
-                    return (
-                      <React.Fragment key={'body_' + index}>
-                        {rowObj[1] && (
-                          <TableRow>
-                            <TableCell key={'col-label-1'} className="initialism text-uppercase text-nowrap">
-                              {rowObj[0].replace('_', ' ')}
-                            </TableCell>
-                            <TableCell key={'col-label-2'} className="initialism text-uppercase text-nowrap">
-                              {typeof rowObj[1] == 'string' ? rowObj[1] : JSON.stringify(rowObj[1])}
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
-                    )
+                  {formData.length && formData.map((rowObj: any, index: number) => {
+                    if (rowObj.label) {
+                      return (
+                        <TableRow>
+                          <TableCell key={'col-label-1' + index} style={{ verticalAlign: 'baseline' }}>
+                            {(typeof rowObj.label === 'object') ? rowObj.label['English'] : rowObj.label}
+                          </TableCell>
+                          <TableCell key={'col-label-2' + index} className="initialism text-uppercase" style={{ wordBreak: 'break-word' }}>
+                            {rowObj.value == null ? '--' : rowObj.value}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    } else return <></>
                   })}
                 </TableBody>
               </Table>
