@@ -1169,7 +1169,7 @@ const startAppSync = (event, name) => {
             }
             if (formChoice.data) {
               electronLog.info('--------------------- || formChoice data ||---------------------', 'total: ', formChoice.data.length);
-              const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE value_text = ? and field_name = ?');
+              const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ');
 
               const insertQuery = db.prepare(
                 'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
@@ -1181,9 +1181,9 @@ const startAppSync = (event, name) => {
 
               formChoice.data.forEach(async (formObj) => {
                 try {
-                  previousFormChoices.run(formObj.value_text, formObj.field_name);
+                  previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
                 } catch (err) {
-                  electronLog.info(' db form_choice insertion failed');
+                  electronLog.info(' db form_choice deletion failed');
                 }
 
                 try {
@@ -1194,7 +1194,7 @@ const startAppSync = (event, name) => {
                     formObj.field_name,
                     formObj.field_type);
                 } catch (err) {
-                  console.log(' ')
+                  electronLog.info(' db form_choice insertion failed')
                 }
               });
 

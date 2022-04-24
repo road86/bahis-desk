@@ -23,9 +23,12 @@ function FormDetails(props: RouteComponentProps<DetailsURLParams>) {
   const classes = useStyles();
 
   const comUpdate = async () => {
+
     const { match } = props;
-    const listId = match.params.id || '';
-    const formData = await ipcRenderer.sendSync('form-details', listId);
+    const dataId = match.params.id || '';
+
+    console.log('------------- || data id || ---------------------', dataId);
+    const formData = await ipcRenderer.sendSync('form-details', dataId);
     setUserData(formData.formDetails);
     let { data, form_id } = formData.formDetails;
     data = JSON.parse(data);
