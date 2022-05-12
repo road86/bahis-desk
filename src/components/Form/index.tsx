@@ -153,6 +153,8 @@ class Form extends React.Component<formProps, FormState> {
 
     // const goBack = () => this.props.history.goBack();
     const getOdkFormRenderer = () => {
+
+      console.log('-------> odk props: ', props);
       try {
         return (
           <OdkFormRenderer {...props} />

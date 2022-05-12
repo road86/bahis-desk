@@ -1077,6 +1077,7 @@ const startAppSync = (event, name) => {
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
           const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
           newLayoutQuery.run(new Date().getTime());
+          debugger;
 
           if (formConfigRes.data) {
             electronLog.info('---------------------|| fromConfigRes data ||---------------------');

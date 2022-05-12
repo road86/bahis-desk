@@ -15,6 +15,7 @@ import Loader from 'react-loader-spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils';
 import Filter from './Filter';
+import { makeLabelColumnPair } from '../../helpers/formUtils';
 
 /** interface for Form URL params */
 interface ListURLParams {
@@ -54,7 +55,6 @@ function SubmittedForm(props: ListProps) {
         labels = { ...labels, ...constructFieldWithLabel(ob.children[i], `${parent}${ob.name}/`) };
       else {
         if (ob.children[i].label) {
-          console.log('------------->> boom: ', ob);
           labels = {
             ...labels,
             [`${parent}${ob.name}/${ob.children[i].name}`]: {
@@ -80,11 +80,15 @@ function SubmittedForm(props: ListProps) {
     const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', formId);
 
     if (formDefinitionObj != null) {
-      const { field_names, formChoices } = formDefinitionObj;
+      const { field_names, formChoices, definition } = formDefinitionObj;
       const form = { name: '', children: JSON.parse(formDefinitionObj.definition).children }
       const result = constructFieldWithLabel(form, "");
       setFieldWithLabels(result);
-      setFieldNames(JSON.parse(field_names));
+
+      const labelColumnPair = makeLabelColumnPair(JSON.parse(definition), JSON.parse(field_names));
+      console.log('----------> Label Column Pair: ', labelColumnPair);
+
+      setFieldNames(labelColumnPair);
       setFormAllChoices({ simpleFormChoice, formChoices: JSON.parse(formChoices) })
     }
     fetchTableData(formId);

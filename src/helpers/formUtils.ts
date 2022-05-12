@@ -89,4 +89,36 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
     }
 }
 
-export { createFormKeyValuePair, getReadableValue };
+
+const makeLabelColumnPair = (definition: any, fieldNames: any) => {
+    const formData: any[] = [];
+    fieldNames.forEach((element: any) => {
+
+        let formField: any = {}
+        if (element.includes('/')) {
+            const fields = element.split('/');
+            let children = definition.children
+            for (let i = 0; i <= fields.length - 2; i++) {
+                const groupObj = children.find((obj: any) => obj.name == fields[i]);
+                if (groupObj) {
+                    children = groupObj.children;
+                }
+            }
+            formField = children.find((obj: any) => obj.name == fields[fields.length - 1]);
+        } else {
+            formField = definition.children.find((obj: any) => obj.name == element);
+        }
+        if (formField) {
+            console.log('----------------|| form field || ------------------');
+            console.log(formField);
+            formData.push({
+                label: formField.label,
+                value: element,
+            });
+        }
+
+    });
+    return formData;
+}
+
+export { createFormKeyValuePair, getReadableValue, makeLabelColumnPair };
