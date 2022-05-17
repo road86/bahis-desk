@@ -1,11 +1,21 @@
 
 ## Getting started
 
-### PC configueration for react project
-First, install node(version<14 && version>12)
-Second, install yarn globally
+### PC configuration
+We need node and yarn. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
 
-### PC configueration for bahis
+```
+nvm install 14.19.2
+nvm use 14.19.2
+```
+On windows install node in version 14.
+
+Next, install yarn globally:
+```
+npm install -g yarn 
+```
+
+### PC configuration for bahis
 Config node-gyp, follow this https://github.com/nodejs/node-gyp (just need the part gcc(linux)/visual studio tools(windows) add and python path config with npm)
 
 
@@ -25,6 +35,10 @@ yarn
 yarn electron-rebuild
 
 yarn start
+```
+In order to reset the database before the next build you need to remove the bahis files. On linux run:
+```
+rm -rf ~/.config/bahis  
 ```
 
 ### build setup file
