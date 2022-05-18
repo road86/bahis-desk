@@ -61,7 +61,7 @@
     "lodash-es": "^4.17.15",
     "macaddress": "^0.5.1",
     "moment": "^2.29.1",
-    "odkformrenderer": "git+ssh://git@github.com:road86/odk-form-renderer-v2-lib.git#develop",
+    "odkformrenderer": "git+https://github.com/road86/odk-form-renderer-v2-lib#develop",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-datepicker": "^2.10.1",
