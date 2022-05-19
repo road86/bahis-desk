@@ -44,6 +44,12 @@ for git release
 yarn release
 ```
 
+## Re-run of the app in dev mode
+
+```
+rm -rf ~/.config/bahis && yarn electron-rebuild && yarn start
+```
+
 ## Configuration
 
 The configurations are located in the `configs` directory and are split into two modules:
