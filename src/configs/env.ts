@@ -1,5 +1,8 @@
 /** This module handles settings taken from environment variables */
 
+export const SERVER_URL = process.env.BAHIS_SERVER;
+export type SERVER_URL= typeof WEBSITE_NAME;
+
 /** The website name */
 export const WEBSITE_NAME = process.env.REACT_APP_WEBSITE_NAME || 'OpenSRP';
 export type WEBSITE_NAME = typeof WEBSITE_NAME;
@@ -84,3 +87,5 @@ export type OPENSRP_API_BASE_URL = typeof OPENSRP_API_BASE_URL;
 /** the clients endpoint NOTE: does not end with / */
 export const OPENSRP_CLIENT_ENDPOINT = process.env.REACT_APP_OPENSRP_CLIENT_ENDPOINT || 'client/search';
 export type OPENSRP_CLIENT_ENDPOINT = typeof OPENSRP_CLIENT_ENDPOINT;
+
+export const GEOLOC_ENDPOINT = `${SERVER_URL}/bhmodule/catchment-data-sync/`;

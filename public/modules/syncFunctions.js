@@ -123,7 +123,9 @@ const saveNewCSVDataToTable = (rowData) => {
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchDataFromServer = async (username) => {
-  console.log('fetch call', username);
+  console.log('XIM1 fetch call of the user', username);
+  console.log('See database here',app.getPath("userData"));
+  
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
@@ -149,7 +151,7 @@ const fetchDataFromServer = async (username) => {
           const newDataRows = response.data;
           newDataRows.forEach((newDataRow) => {
             // eslint-disable-next-line no-console
-            console.log(newDataRow.id);
+            //console.log(newDataRow.id); //jesus f christ
             deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
             saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
           });

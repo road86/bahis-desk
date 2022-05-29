@@ -36,7 +36,7 @@ import Menu from '../containers/Menu';
 import { ipcRenderer } from '../services/ipcRenderer';
 import { getCurrentMenu, MenuItem, MODULE_TYPE, FORM_TYPE } from '../store/ducks/menu';
 import './App.css';
-import { GEOLOC_ENDPOINT } from './constant';
+import { GEOLOC_ENDPOINT } from '../configs/env';
 import { appStyles } from './styles';
 const Form = React.lazy(() => import('../components/Form'));
 
@@ -113,7 +113,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const fetchGeoLocation = async () => {
     const JSZip = require('jszip');
     const JSZipUtils = require('jszip-utils');
-
+    debugger;
     JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
       console.log(err);
       JSZip.loadAsync(data).then((zip: any) => {
@@ -126,6 +126,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const autoUpdateCheck = async () => {
     await ipcRenderer.send('auto-update');
     ipcRenderer.on('checking_for_update', () => {
+      debugger;
       console.log('ipcRenderer on checking_for_update');
       ipcRenderer.removeAllListeners('checking_for_update');
       // message.innerText = 'NO update is available';

@@ -19,7 +19,6 @@
 .env.test.local
 .env.production.local
 react-app-env.d.ts
-.env
 .vscode/
 .idea/
 
