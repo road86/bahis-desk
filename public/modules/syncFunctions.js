@@ -124,7 +124,7 @@ const saveNewCSVDataToTable = (rowData) => {
  */
 const fetchDataFromServer = async (username) => {
   console.log('XIM1 fetch call of the user', username);
-  console.log('See database here',app.getPath("userData"));
+  console.log('See database here', app.getPath("userData"));
   
   try {
     const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });

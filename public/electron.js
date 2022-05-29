@@ -27,41 +27,9 @@ const REACT_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/fmkadmap
 const REDUX_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
 // types of App states
-const APP_READY_STATE = 'ready';
-const APP_CLOSE_STATE = 'window-all-closed';
-const APP_ACTIVATE_STATE = 'activate';
 
 const cmd = process.argv[1];
 
-// types of channels
-const APP_DEFINITION_CHANNEL = 'fetch-app-definition';
-const FORM_SUBMISSION_CHANNEL = 'submit-form-response';
-const FORM_DEFINITION_CHANNEL = 'fetch-form-definition';
-const FORM_CHOICES_CHANNEL = 'fetch-form-choices';
-const LIST_DEFINITION_CHANNEL = 'fetch-list-definition';
-const SUBMITTED_FORM_DEFINITION_CHANNEL = 'submitted-form-definition'
-const FETCH_LIST_FOLLOWUP = 'fetch-list-followup'
-const QUERY_DATA_CHANNEL = 'fetch-query-data';
-const START_APP_CHANNEL = 'start-app-sync';
-const DATA_SYNC_CHANNEL = 'request-data-sync';
-const CSV_DATA_SYNC_CHANNEL = 'csv-data-sync';
-const FILTER_DATASET_CHANNEL = 'fetch-filter-dataset';
-const APP_RESTART_CHANNEL = 'request-app-restart';
-const SIGN_IN = 'sign-in';
-const WRITE_GEO_OBJECT = 'write-geo-object';
-const FETCH_DISTRICT = 'fetch-district';
-const FETCH_USERLIST = 'fetch-userlist';
-const FETCH_DIVISION = 'fetch-division';
-const FETCH_UPAZILA = 'fetch-upazila';
-const FETCH_USERNAME = 'fetch-username';
-const FETCH_IMAGE = 'fetch-image';
-const AUTO_UPDATE = 'auto-update';
-const FETCH_LAST_SYNC = 'fetch-last-sync';
-const EXPORT_XLSX = 'export-xlsx';
-const DELETE_INSTANCE = 'delete-instance';
-const FORM_DETAILS = 'form-details';
-const USER_DB_INFO = 'user-db-info';
-const LOGIN_OPERATION = 'login-operation';
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'foobar.db';
@@ -69,11 +37,12 @@ let mainWindow;
 let prevPercent = 0;
 let newPercent = 0;
 
+
 // App/** creates window on app ready */
-app.on(APP_READY_STATE, createWindow);
+app.on('ready', createWindow);
 
 /** adds window on app if window null */
-app.on(APP_ACTIVATE_STATE, () => {
+app.on('activate', () => {
   const isFirstRun = firstRun()
   if (isFirstRun || cmd == '--squirrel-firstrun') {
     afterInstallation();
@@ -158,10 +127,8 @@ function setUpNewDB() {
 // subscribes the App states with related processes
 
 /** removes window on app close */
-app.on(APP_CLOSE_STATE, () => {
-  if (process.platform !== 'darwin') {
+app.on('window-all-closed', () => {
     app.quit();
-  }
 });
 
 function sendStatusToWindow(text) {
@@ -1321,32 +1288,33 @@ const autoUpdate = (event) => {
   autoUpdater.checkForUpdates();
 };
 
+
 // subscribes the listeners to channels
-ipcMain.on(APP_DEFINITION_CHANNEL, fetchAppDefinition);
-ipcMain.on(FORM_SUBMISSION_CHANNEL, submitFormResponse);
-ipcMain.on(FORM_DEFINITION_CHANNEL, fetchFormDefinition);
-ipcMain.on(FORM_CHOICES_CHANNEL, fetchFormChoices);
-ipcMain.on(LIST_DEFINITION_CHANNEL, fetchListDefinition);
-ipcMain.on(SUBMITTED_FORM_DEFINITION_CHANNEL, fetchFormListDefinition);
-ipcMain.on(FETCH_LIST_FOLLOWUP, fetchFollowupFormData);
-ipcMain.on(QUERY_DATA_CHANNEL, fetchQueryData);
-ipcMain.on(START_APP_CHANNEL, startAppSync);
-ipcMain.on(DATA_SYNC_CHANNEL, requestDataSync);
-ipcMain.on(CSV_DATA_SYNC_CHANNEL, csvDataSync);
-ipcMain.on(FILTER_DATASET_CHANNEL, fetchFilterDataset);
-ipcMain.on(APP_RESTART_CHANNEL, requestRestartApp);
-ipcMain.on(SIGN_IN, signIn);
-ipcMain.on(WRITE_GEO_OBJECT, populateGeoTable);
-ipcMain.on(FETCH_USERLIST, fetchUserList);
-ipcMain.on(FETCH_DIVISION, fetchDivision);
-ipcMain.on(FETCH_DISTRICT, fetchDistrict);
-ipcMain.on(FETCH_UPAZILA, fetchUpazila);
-ipcMain.on(FETCH_IMAGE, fetchImage);
-ipcMain.on(FETCH_USERNAME, fetchUsername);
-ipcMain.on(FETCH_LAST_SYNC, fetchLastSyncTime);
-ipcMain.on(AUTO_UPDATE, autoUpdate);
-ipcMain.on(EXPORT_XLSX, exportExcel);
-ipcMain.on(DELETE_INSTANCE, deleteData)
-ipcMain.on(FORM_DETAILS, fetchFormDetails);
-ipcMain.on(USER_DB_INFO, getUserDBInfo);
-ipcMain.on(LOGIN_OPERATION, loginOperation);
+ipcMain.on('fetch-app-definition', fetchAppDefinition);
+ipcMain.on('submit-form-response', submitFormResponse);
+ipcMain.on('fetch-form-definition', fetchFormDefinition);
+ipcMain.on('fetch-form-choices', fetchFormChoices);
+ipcMain.on('fetch-list-definition', fetchListDefinition);
+ipcMain.on('submitted-form-definition', fetchFormListDefinition);
+ipcMain.on('fetch-list-followup', fetchFollowupFormData);
+ipcMain.on('fetch-query-data', fetchQueryData);
+ipcMain.on('start-app-sync', startAppSync);
+ipcMain.on('request-data-sync', requestDataSync);
+ipcMain.on('csv-data-sync', csvDataSync);
+ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
+ipcMain.on('request-app-restart', requestRestartApp);
+ipcMain.on('sign-in', signIn);
+ipcMain.on('write-geo-object', populateGeoTable);
+ipcMain.on('fetch-userlist', fetchUserList);
+ipcMain.on('fetch-division', fetchDivision);
+ipcMain.on('fetch-district', fetchDistrict);
+ipcMain.on('fetch-upazila', fetchUpazila);
+ipcMain.on('fetch-image', fetchImage);
+ipcMain.on('fetch-username', fetchUsername);
+ipcMain.on('fetch-last-sync', fetchLastSyncTime);
+ipcMain.on('auto-update', autoUpdate);
+ipcMain.on('export-xlsx', exportExcel);
+ipcMain.on('delete-instance', deleteData)
+ipcMain.on('form-details', fetchFormDetails);
+ipcMain.on('user-db-info', getUserDBInfo);
+ipcMain.on('login-operation', loginOperation);
