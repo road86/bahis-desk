@@ -32,7 +32,9 @@ const cmd = process.argv[1];
 
 
 const { app, BrowserWindow, ipcMain } = electron;
-const DB_NAME = 'foobar.db';
+const DB_NAME = 'bahis.db';
+const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+
 let mainWindow;
 let prevPercent = 0;
 let newPercent = 0;
@@ -58,11 +60,11 @@ function afterInstallation() {
     message: 'Current version is up-to-date.',
   });
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     fs.unlink(path.join(app.getPath("userData"), DB_NAME), function (err) {
       if (err) return console.log(err);
     });
-    db.close();
+    
   } catch (err) {
     console.log('App Setup!!!!');
   }
@@ -101,9 +103,8 @@ function createWindow() {
 function prepareDb() {
   try {
     electronLog.info('------- || Creating New Database || ----------------');
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     // })
-    db.close();
+    
   } catch (err) {
     setUpNewDB();
     // eslint-disable-next-line no-console
@@ -116,18 +117,16 @@ function prepareDb() {
 /** sets up new databse. Creates tables that are required */
 function setUpNewDB() {
   electronLog.info(`------- || ${path.join(app.getPath("userData"))}  ${DB_NAME} || ----------------`);
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME));
-  // const db = new Database(DB_NAME);
-  // const db = new Database(DB_NAME);
   console.log('new db setup call');
   db.exec(queries);
-  db.close();
+  
 }
 
 // subscribes the App states with related processes
 
 /** removes window on app close */
 app.on('window-all-closed', () => {
+    db.close();
     app.quit();
 });
 
@@ -264,7 +263,6 @@ const extractPossibleFieldNames = (xformJsn) => {
 const fetchFilterDataset = (event, listId, filterColumns) => {
   electronLog.info(`------- || fetchFilterDataset ${event} ${listId} ${filterColumns} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
     // console.log(listDefinition);
     const datasource = JSON.parse(listDefinition.datasource);
@@ -291,10 +289,10 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
 const fetchAppDefinition = (event) => {
   electronLog.info(`------- || fetchAppDefinition ${event} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     // eslint-disable-next-line no-param-reassign
     event.returnValue = db.prepare('SELECT definition from app where app_id=1').get().definition;
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
@@ -311,7 +309,6 @@ const submitFormResponse = (event, response) => {
   electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
 
   deleteDataWithInstanceId(JSON.parse(response.data)['meta/instanceID'], response.formId)
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
   event.returnValue = {
     username: fetchedUsername.username,
@@ -320,7 +317,7 @@ const submitFormResponse = (event, response) => {
   const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
   insert.run(response, fetchedUsername.username, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
-  db.close();
+  
 };
 
 /** fetches the form definition
@@ -331,7 +328,7 @@ const submitFormResponse = (event, response) => {
 const fetchFormDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormDefinition ${event} ${formId} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const formDefinitionObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
     if (formDefinitionObj != undefined) {
       const choiceDefinition = formDefinitionObj.choice_definition ? JSON.parse(formDefinitionObj.choice_definition) : {};
@@ -351,7 +348,7 @@ const fetchFormDefinition = (event, formId) => {
     } else {
       event.returnValue = null;
     }
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
 
@@ -361,12 +358,12 @@ const fetchFormDefinition = (event, formId) => {
 
 const fetchFormChoices = (event, formId) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
 
     electronLog.info(`------- || fetchFormChoices  ${formId} || ----------------`);
     const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ${formId} `).all();
     event.returnValue = formchoices;
-    db.close();
+    
 
   } catch (err) {
     console.log('------------- error fetch form choices ------------------', err);
@@ -379,7 +376,7 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
     console.log(formData)
     if (formData != undefined) {
@@ -388,7 +385,7 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
     } else {
       event.returnValue = null;
     }
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
@@ -404,7 +401,7 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
 const fetchListDefinition = (event, listId) => {
   electronLog.info(`------- || fetchListDefinition, listId: ${listId} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const fetchedRows = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
     // eslint-disable-next-line no-param-reaFssign
     if (fetchedRows) {
@@ -418,7 +415,7 @@ const fetchListDefinition = (event, listId) => {
     } else {
       event.returnValue = null;
     }
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fethcListDefinition Error, listId: ${listId} || ----------------`);
@@ -428,12 +425,12 @@ const fetchListDefinition = (event, listId) => {
 const fetchFormListDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormListDefinition, listId: ${formId} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const query = 'SELECT * from data where form_id = "' + formId + '"';
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFormListDefinition, listId: ${formId} || ----------------`);
@@ -443,7 +440,7 @@ const fetchFormListDefinition = (event, formId) => {
 const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) => {
   electronLog.info(`------- || fetchFollowupFormData, formId: ${formId} ${detailsPk}, ${pkValue}, ${constraint} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     let query;
     if (constraint == 'equal') {
       query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$." + detailsPk + "') = '" + pkValue + "'";
@@ -453,7 +450,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFollowupFormData, formId: ${formId} || ----------------`);
@@ -468,11 +465,11 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
 const fetchQueryData = (event, queryString) => {
   electronLog.info(`------- || fetchQueryData, formId: ${queryString} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFQueryData Error, formId: ${err} || ----------------`);
@@ -483,8 +480,6 @@ const loginOperation = async (event, obj) => {
 
   const db_path = path.join(app.getPath("userData"), DB_NAME);
   fsExtra.removeSync(db_path);
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME));
-  // const db = new Database(DB_NAME);
   console.log('new db setup call after delete previous user data');
   db.exec(queries);
 
@@ -511,7 +506,7 @@ const loginOperation = async (event, obj) => {
     userInfo: data,
     // message: ""
   };
-  db.close();
+  
 
 }
 
@@ -530,8 +525,6 @@ const signIn = async (event, userData) => {
     mac = mac;
     console.log(mac);
   });
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-  // const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const query =
     'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
@@ -578,7 +571,6 @@ const signIn = async (event, userData) => {
         console.log('sign in successfull: ');
         // if a user has signed in for the first time
         if (userInfo === undefined) {
-          const db = new Database(path.join(app.getPath("userData"), DB_NAME));
           const insertStmt = db.prepare(
             `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           );
@@ -638,7 +630,7 @@ const signIn = async (event, userData) => {
 
     });
 
-  db.close();
+  
 };
 
 const getErrorMessage = (error) => {
@@ -649,7 +641,6 @@ const getErrorMessage = (error) => {
 
 const populateGeoTable = (event, geoList) => {
   console.log(app.getPath("userData"));
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   const geoData = geoList ? geoList['catchment-area.csv'] : [];
   // console.log('call', geoData);
   db.prepare('DELETE FROM geo').run();
@@ -679,13 +670,11 @@ const populateGeoTable = (event, geoList) => {
     //   insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
     // });
   }
-  db.close();
+  
 };
 
 const populateCatchment = (catchments) => {
   electronLog.info(`------- || populateCatchment: ${catchments.length} || ----------------`);
-
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
   db.prepare('DELETE FROM geo_cluster').run();
   const geoData = catchments ? catchments : [];
   // console.log('call', geoData);
@@ -707,12 +696,10 @@ const populateCatchment = (catchments) => {
 
     insertMany(geoData);
   }
-  db.close();
+  
 };
 
 const populateModuleImage = (module) => {
-  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-
   const insertStmt = db.prepare(
     `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (@module_id, @image_name, @directory_name)`,
   );
@@ -742,20 +729,20 @@ const populateModuleImage = (module) => {
       download
         .image(options)
         .then(({ filename }) => {
-          const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+      
           const insertStmt = db.prepare(
             `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
           );
           insertStmt.run(module.name, module.img_id, filename);
-          db.close();
+          
         })
         .catch((err) => {
-          const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+      
           const insertStmt = db.prepare(
             `INSERT INTO module_image (module_id, image_name, directory_name) VALUES (?, ?, ?)`,
           );
           insertStmt.run(module.name, module.img_id, '');
-          db.close();
+          
         });
     }
   } else {
@@ -766,7 +753,7 @@ const populateModuleImage = (module) => {
     });
   }
 
-  db.close();
+  
   for (let i = 0; i < module.children.length; i++) {
     populateModuleImage(module.children[i]);
   }
@@ -826,16 +813,15 @@ const updateAppDefinition = (appDefinition) => {
   });
 
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     // const layoutDeleteQuery = db.prepare('DELETE FROM app WHERE app_id = 2');
     // layoutDeleteQuery.run();
     const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
     newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
-    db.close()
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    // db.close();
+    // 
   }
 }
 
@@ -884,24 +870,24 @@ const exportExcel = (event, excelData) => {
 const fetchUsername = (event) => {
   electronLog.info(`------- || fetchUsername: ${event} || ----------------`);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedUsername);
     event.returnValue = {
       username: fetchedUsername.username,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchUsername Error: ${err} || ----------------`);
-    // db.close();
+    // 
   }
 };
 
 const fetchLastSyncTime = (event) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     console.log(last_updated);
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
@@ -911,21 +897,21 @@ const fetchLastSyncTime = (event) => {
     event.returnValue = {
       lastSync: updated,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchLastSyncTime Error: ${err} || ----------------`);
-    // db.close();
+    // 
   }
 };
 
 const fetchImage = (event, moduleId) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const query = 'SELECT directory_name FROM module_image where module_id="' + moduleId + '"';
     const fetchedRows = db.prepare(query).get();
     event.returnValue = fetchedRows != null ? fetchedRows.directory_name : '';
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
   }
@@ -933,59 +919,59 @@ const fetchImage = (event, moduleId) => {
 
 const fetchUserList = (event) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const fetchedRows = db.prepare('SELECT DISTINCT	username, name FROM users').all();
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedRows);
     event.returnValue = {
       users: fetchedRows,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    db.close();
+    
   }
 }
 
 const fetchDivision = (event) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const fetchedRows = db.prepare('SELECT DISTINCT	div_id, division FROM geo').all();
     // eslint-disable-next-line no-param-reassign
     console.log(fetchedRows);
     event.returnValue = {
       division: fetchedRows,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    db.close();
+    
   }
 };
 
 const fetchUpazila = (event, divisionId, districtId) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const query =
       'SELECT DISTINCT upz_id, upazila FROM geo WHERE div_id = "' + divisionId + '" AND dis_id = "' + districtId + '"';
     const fetchedRows = db.prepare(query).all();
     event.returnValue = {
       upazila: fetchedRows,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    db.close();
+    
   }
 };
 
 const fetchDistrict = (event, divisionId) => {
   // console.log(divisionId);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const query = 'SELECT DISTINCT dis_id, district FROM geo WHERE div_id = "' + divisionId + '"';
     const fetchedRows = db.prepare(query).all();
     // eslint-disable-next-line no-param-reassign
@@ -993,11 +979,11 @@ const fetchDistrict = (event, divisionId) => {
     event.returnValue = {
       district: fetchedRows,
     };
-    db.close();
+    
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
-    db.close();
+    
   }
 };
 
@@ -1020,8 +1006,6 @@ const startAppSync = (event, name) => {
 
 
   try {
-    //  const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
     const time = log === undefined ? 0 : Math.round(log.time);
 
@@ -1173,7 +1157,7 @@ const startAppSync = (event, name) => {
           let message = 'done';
           mainWindow.send('formSyncComplete', message);
           electronLog.info('App Sync Complete');
-          db.close();
+          
         }),
       )
       .catch((err) => {
@@ -1223,7 +1207,7 @@ const requestDataSync = async (event, username) => {
  */
 const csvDataSync = async (username) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"';
     const info = db.prepare(tableExistStmt).get();
     if (info && info.name == 'csv_sync_log') {
@@ -1243,7 +1227,7 @@ const csvDataSync = async (username) => {
 const getUserDBInfo = (event) => {
 
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
+
     const query = `with division as (
                       select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
                   ), district as (

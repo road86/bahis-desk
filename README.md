@@ -63,7 +63,7 @@ There is some leak in UI code that might give an error saying that there are too
 ```
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
-
+(https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
 ## Configuration
 
 The configurations are located in the `configs` directory and are split into two modules:
