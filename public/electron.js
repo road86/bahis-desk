@@ -15,7 +15,6 @@ const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
-const DB = require('better-sqlite3-helper');
 const fsExtra = require('fs-extra')
 const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
 
@@ -26,10 +25,7 @@ const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT,
 const REACT_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.8.2_0';
 const REDUX_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
-// types of App states
-
 const cmd = process.argv[1];
-
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'bahis.db';
@@ -104,11 +100,11 @@ function prepareDb() {
   try {
     electronLog.info('------- || Creating New Database || ----------------');
     // })
-    
-  } catch (err) {
     setUpNewDB();
     // eslint-disable-next-line no-console
     electronLog.info('-------- || Database Setup!!!! || ----------');
+  } catch (err) {
+
   }
 }
 
@@ -529,7 +525,8 @@ const signIn = async (event, userData) => {
     'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
   // const info = userInfo.user_id;
-
+  console.log("XIM1 userInfo")
+  console.log(userInfo)
   // if a user has signed in before then no need to call signin-api
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
