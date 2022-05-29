@@ -1,5 +1,10 @@
 1. sync doest seem to wrok for data with dev
 
+To run with dev (or other server) run:
+```
+rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://bahis2-dev.net" && yarn start
+```
+
 Last Data Sync Date: never even though there is an entry in csv_syn_log
 i can see taht after a manual syn the unix timesamp is updated in the table but doesnt refresh in the app
 
@@ -8,6 +13,62 @@ the parent location data should be automatically pre-filled.
 each sync with or without data shows in the table but never in the heading. checking on server
 
 seems data is not on the server
+Added to staff table and can see locally but sync button remained red after sync:
+```
+14:51:30.949 › ------- || fetchUsername: [object Object] || ----------------
+[1] { username: 'ghatail' }
+[1] 14:51:30.951 › --------- || App Sync Started || ------------------
+[1] 14:51:30.951 › ----------|| Below API will be called || -----------
+[1] 14:51:30.953 › http://www.bahis2-dev.net/bhmodule/ghatail/get/form-config/1653814213334/
+[1] 14:51:30.953 › http://www.bahis2-dev.net/bhmodule/ghatail/get-api/module-list/?last_modified=1653814213334
+[1] 14:51:30.954 › http://www.bahis2-dev.net/bhmodule/ghatail/get-api/form-list/?last_modified=1653814213334
+[1] 14:51:30.954 › http://www.bahis2-dev.net/bhmodule/ghatail/get-api/list-def/?last_modified=1653814213334
+[1] 14:51:30.954 › http://www.bahis2-dev.net/bhmodule/ghatail/get-api/form-choices/?last_modified=1653814213334
+[1] 14:51:30.954 › -----------------------------------------------------
+[1] 14:51:34.818 › ---------------------|| fromConfigRes data ||---------------------
+[1] 14:51:34.819 › ---------------------|| moduleListRes data ||---------------------
+[1] 14:51:35.234 › ------- || populateCatchment: 317 || ----------------
+[1] 14:51:35.330 › ---------------------|| FormListRes data ||--------------------- total:  0
+[1] 14:51:35.331 › ---------------------|| ListRes data ||--------------------- total:  0
+[1] 14:51:35.332 › --------------------- || formChoice data ||--------------------- total:  0
+[1] 14:51:35.333 › ----------------------------|| total form choice data ||---------------------
+[1] 14:51:35.334 › 0
+[1] fetch call ghatail
+[1] http://www.bahis2-dev.net/bhmodule/system-data-sync/ghatail/?last_modified=1653814214507.0
+[1] 14:51:35.344 › App Sync Complete
+[1] 14:51:35.421 › ------- || fetchUsername: [object Object] || ----------------
+[1] { username: 'ghatail' }
+[1] XIM1 fetch call of the user ghatail
+[1] See database here /home/mix/.config/bahis
+[1] 14:51:35.428 › --------- || Data count URL http://www.bahis2-dev.net/bhmodule/form/ghatail/data-sync-count/?last_modified=1653814184932.0 || ------------------
+[1] 14:51:35.565 › ---------- || Data Sync Started || -------------------
+[1] 14:51:35.700 › ----------|| call 1: http://www.bahis2-dev.net/bhmodule/form/ghatail/data-sync-paginated/?last_modified=1653814184932.0&page_no=1&page_length=100 ||------------------
+[1] 14:51:35.701 › -------- || data saved into database || ------------
+[1] [ 1 ]
+[1] 14:51:35.702 › --------|| total server call: 1 
+[1] 14:51:35.703 › ------- || Data Sync Complete || --------------
+[1] send data ghatail
+[1] fetch call ghatail
+[1] http://www.bahis2-dev.net/bhmodule/system-data-sync/ghatail/?last_modified=1653814295471.0
+[1] ----------------------------------- complete data sync ----------------------------------------
+[1] { last_updated: '1653814184932.0' }
+[1] 14:51:35.753 › ------- || last sync time: 1653814184932.0 || ----------------
+[1] { last_updated: '1653814184932.0' }
+[1] 14:51:35.767 › ------- || last sync time: 1653814184932.0 || ----------------
+[1] { last_updated: '1653814184932.0' }
+[1] 14:51:35.778 › ------- || last sync time: 1653814184932.0 || ----------------
+[1] 14:51:37.733 › ------- || fetchFormDefinition [object Object] 327 || ----------------
+[1] 14:51:37.738 › ------- || Choices for form 327:  [object Object] || ----------------
+[1] 14:51:37.752 › ------- || fetchFormChoices  327 || ----------------
+[1] 14:51:37.814 › ------- || fetchFormListDefinition, listId: 327 || ----------------
+[1] [ { username: 'ghatail', name: 'ghatail ulo' } ]
+[1] 14:51:39.761 › ------- || fetchQueryData, formId: select count(*) as cnt from data where status != 1 || ----------------
+[1] 14:51:39.772 › ------- || fetchQueryData, formId: select count(*) as cnt from data where status != 1 || ----------------
+[1] 14:51:39.783 › ------- || fetchQueryData, formId: select count(*) as cnt from data where status != 1 || ----------------
+```
+no errors in log...
+
+
 
 Tried sync with BCC server, I get:
 ```
