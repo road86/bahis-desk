@@ -88,7 +88,6 @@ const labelLookup = (props: any) => {
 const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
 
   //  it means that value has been selected from csv-list.
-  // debugger;
   if (formField && formField.control && formField.control.appearance && formField.control.appearance.includes('search')) {
     const processedStringArray = formField.control.appearance.match(
       /\([^\)]+\)/i

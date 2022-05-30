@@ -20,8 +20,6 @@ const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT,
 
 
 // DEV EXTENSIONS
-
-// extension paths
 const REACT_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.8.2_0';
 const REDUX_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
 
@@ -83,7 +81,7 @@ function createWindow() {
       contextIsolation: false,
     },
   });
-  mainWindow.maximize();
+  //mainWindow.maximize(); TODO uncomment
   // mainWindow.setBackgroundColor('#FF0000');
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -304,7 +302,7 @@ const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
 
-  deleteDataWithInstanceId(JSON.parse(response.data)['meta/instanceID'], response.formId)
+  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
   const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
   event.returnValue = {
     username: fetchedUsername.username,
@@ -524,9 +522,6 @@ const signIn = async (event, userData) => {
   const query =
     'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
-  // const info = userInfo.user_id;
-  console.log("XIM1 userInfo")
-  console.log(userInfo)
   // if a user has signed in before then no need to call signin-api
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
@@ -542,7 +537,6 @@ const signIn = async (event, userData) => {
     mac_address: mac,
     upazila: 202249,
   };
-  // console.log(data);
   electronLog.info('----------- || Attempt To Signin || -----------------');
   electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
   electronLog.info(JSON.stringify(data));
@@ -870,7 +864,7 @@ const fetchUsername = (event) => {
 
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
-    console.log(fetchedUsername);
+    console.log("XIM2, we fetched", fetchedUsername);
     event.returnValue = {
       username: fetchedUsername.username,
     };
@@ -1025,7 +1019,6 @@ const startAppSync = (event, name) => {
         axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
           const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
           newLayoutQuery.run(new Date().getTime());
-          debugger;
 
           if (formConfigRes.data) {
             electronLog.info('---------------------|| fromConfigRes data ||---------------------');
@@ -1151,9 +1144,9 @@ const startAppSync = (event, name) => {
           }
           csvDataSync(name);
           // eslint-disable-next-line no-param-reassign
-          let message = 'done';
+          let message = 'CSV data sync done';
           mainWindow.send('formSyncComplete', message);
-          electronLog.info('App Sync Complete');
+          electronLog.info('CSV App Sync Complete');
           
         }),
       )
@@ -1164,10 +1157,10 @@ const startAppSync = (event, name) => {
         } else {
           message = 'done'
         }
-        console.log(err);
+        //console.log(err);
         electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------`, err);
 
-        mainWindow.send('formSyncComplete', message);
+        //mainWindow.send('formSyncComplete', message);
         // eslint-disable-next-line no-console
         console.log('Axios FAILED in startAppSync');
       });
@@ -1190,9 +1183,9 @@ const startAppSync = (event, name) => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const requestDataSync = async (event, username) => {
-  await fetchDataFromServer(username);
-  const msg = await sendDataToServer(username);
-  csvDataSync(username);
+  await fetchDataFromServer(db, username);
+  const msg = await sendDataToServer(db, username);
+  csvDataSync(db, username);
   mainWindow.send('dataSyncComplete', msg);
   console.log('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;
@@ -1203,16 +1196,16 @@ const requestDataSync = async (event, username) => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const csvDataSync = async (username) => {
+  console.log("XIM1 csvDataSync")
   try {
-
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"';
     const info = db.prepare(tableExistStmt).get();
     if (info && info.name == 'csv_sync_log') {
-      fetchCsvDataFromServer(username);
+      fetchCsvDataFromServer(db, username);
     } else {
       console.log('info', info);
       db.prepare('CREATE TABLE csv_sync_log( time TEXT)').run();
-      fetchCsvDataFromServer(username);
+      fetchCsvDataFromServer(db, username);
     }
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -1249,7 +1242,7 @@ const getUserDBInfo = (event) => {
 
 const deleteData = (event, instanceId, formId) => {
   console.log(instanceId, formId);
-  deleteDataWithInstanceId(instanceId.toString(), formId);
+  deleteDataWithInstanceId(db, instanceId.toString(), formId);
   event.returnValue = {
     status: 'successful',
   };
@@ -1266,7 +1259,8 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdate = (event) => {
   console.log('check update call');
-  autoUpdater.checkForUpdates();
+  console.log('Temporarily XIM1 hidden');
+  //autoUpdater.checkForUpdates();
 };
 
 

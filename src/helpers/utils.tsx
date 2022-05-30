@@ -52,7 +52,6 @@ export const exportToExcel = (excelData: any) => {
 };
 
 export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: any, choiceList: any) => {
-  debugger;
   const excelData = [];
   let excelTabs: any = {};
   console.log(filteredColumns, tableData, choiceList);
@@ -91,7 +90,6 @@ export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: a
   for (let item of Object.keys(excelTabs)) {
     excelTabs[item] = XLSX.utils.json_to_sheet(excelTabs[item]);
   }
-  debugger;
   const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = { Sheets: { data: ws, ...excelTabs }, SheetNames: ['data', ...Object.keys(excelTabs)] };
   const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });

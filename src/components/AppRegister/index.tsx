@@ -18,12 +18,7 @@ import AlertDialog from './Dialog';
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {`App Version ${packageJson.version}`}{' Copyright © '}
-      <Link color="inherit" href="https://www.mpower-social.com/">
-        mPower Social Enterprise
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
+      {`App Version ${packageJson.version}`}
     </Typography>
   );
 }
@@ -88,21 +83,34 @@ function AppRegister(props: any) {
       }
     });
   };
-
+//here trouble is brewing
   const syncAppModule = async () => {
+    console.log("XIM Send fetch-username")
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    setLoadComplete(false);
+    console.log("XIM stage 2")
+    //setLoadComplete(false);
+    console.log("XIM stage 3")
     await ipcRenderer.send('start-app-sync', user.username);
+    console.log("XIM stage 4")
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      console.log('check', event, args);
+      //console.log('check events and args', event, args);
+      console.log('check args', args);
+      console.log(args);
+      console.log(typeof(args));
+      console.log("XIM stage 5")
       setLoadComplete(true);
-      if (args === 'done') {
+      console.log("XIM stage 6")
+      if (args.includes('done')) {
+        console.log("XIM stage 7")
+
         props.history.push({
           pathname: '/menu/',
           state: { username: args.username },
         });
+        console.log("XIM stage 8")
       } else {
-        setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
+        console.log("XIM stage 9")
+        setToastContent({ severity: 'Error', msg: "XIM2 Couldn't sync app" });
       }
     });
   };

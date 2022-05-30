@@ -65,6 +65,7 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-datepicker": "^2.10.1",
+    "react-devtools": "^4.24.6",
     "react-dom": "^17.0.2",
     "react-export-excel": "^0.5.3",
     "react-floating-action-button": "^1.0.5",
@@ -93,10 +94,10 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "bahisMP",
-        "repo": "bahis_mpower",
-        "private": true,
-        "token": "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",
+        "owner": "road86",
+        "repo": "bahis-desk",
+        "private": false,
+        "token": "",
         "releaseType": "release"
       }
     ],
@@ -112,7 +113,7 @@
       "deleteAppDataOnUninstall": true,
       "createDesktopShortcut": "always",
       "menuCategory": "bahis",
-      "license": "license.txt",
+      "license": "LICENSE",
       "allowToChangeInstallationDirectory": true
     }
   },

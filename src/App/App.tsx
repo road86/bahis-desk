@@ -113,7 +113,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const fetchGeoLocation = async () => {
     const JSZip = require('jszip');
     const JSZipUtils = require('jszip-utils');
-    debugger;
     JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
       console.log(err);
       JSZip.loadAsync(data).then((zip: any) => {
@@ -126,7 +125,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const autoUpdateCheck = async () => {
     await ipcRenderer.send('auto-update');
     ipcRenderer.on('checking_for_update', () => {
-      debugger;
       console.log('ipcRenderer on checking_for_update');
       ipcRenderer.removeAllListeners('checking_for_update');
       // message.innerText = 'NO update is available';
