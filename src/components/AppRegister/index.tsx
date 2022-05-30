@@ -1,6 +1,5 @@
 import { Avatar, Grid, Snackbar, useTheme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Typist from 'react-typist';
@@ -126,7 +125,7 @@ function AppRegister(props: any) {
       autoHideDuration={3000}
       onClose={snackbarClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      key={'top' + 'center'}
+      key={'topcenter'}
     >
       <Alert severity={response.severity}>{response.msg}</Alert>
     </Snackbar>

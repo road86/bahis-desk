@@ -1,6 +1,5 @@
 import { ipcRenderer } from '../services/ipcRenderer';
 import * as XLSX from 'xlsx';
-import _ from 'lodash';
 
 /** Interface for an object that is allowed to have any property */
 export interface FlexObject {
@@ -60,6 +59,7 @@ export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: a
     const data = JSON.parse(row.data);
     console.log('-------> data: ', data);
 
+    //TODO   Line 63:20:    Unnecessarily computed property ['instance id'] found  no-useless-computed-key
     let newRow = { ['instance id']: row.instanceid };
     for (let k of Object.keys(data)) {
 
@@ -117,7 +117,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
       console.log('--------------choices -------------------');
       console.log(csvChoices);
       console.log('--------csvname :', csvName);
-      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim());
       console.log('--------result :', result);
       if (result === undefined) return ' -- ';
       else {
@@ -132,7 +132,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
     for (let i = 0; i < choices.simpleFormChoice.length; i++) {
       const choice = choices.simpleFormChoice[i];
 
-      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
+      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
         return getFormLabel(choice.value_label);
       }
     }

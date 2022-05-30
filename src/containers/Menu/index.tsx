@@ -144,7 +144,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 
   const updateAppDefinition = (appDefinition: any) => {
     let update = function (module: any) {
-      if (module.xform_id != '') {
+      if (module.xform_id !== '') {
         const formModule = {
           xform_id: module.xform_id,
           name: module.name,

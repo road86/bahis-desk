@@ -175,7 +175,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     let lookupTableForLabel: any = {};
     await columnDefinition.forEach(async (column) => {
 
-      if ('lookup_definition' in column && column.lookup_definition && (column.lookup_definition.lookup_type == "datasource" || column.lookup_definition.lookup_type == "table")) {
+      if ('lookup_definition' in column && column.lookup_definition && (column.lookup_definition.lookup_type === "datasource" || column.lookup_definition.lookup_type === "table")) {
         const query = `with list_table as ( 
             ${datasource.query}
           ), lookup_table as (
@@ -192,7 +192,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
       }
 
-      if ('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type == "label") {
+      if ('lookup_definition' in column && column.lookup_definition && column.lookup_definition.lookup_type === "label") {
         const form_id: any = column.lookup_definition.form_id;
         const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', form_id);
         const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', form_id);
@@ -450,7 +450,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
     const preFormJsn: any = {};
     let metainstanceIdFormField = '';
     mapping.forEach((item: MappingObj) => {
-      if (item.column.toLocaleLowerCase() == 'meta_instanceid') metainstanceIdFormField = item.form_field;
+      if (item.column.toLocaleLowerCase() === 'meta_instanceid') metainstanceIdFormField = item.form_field;
       preFormJsn[item.form_field] = listRowData[item.column];
     });
     const metaInstanceId = Object.keys(listRowData).find((item) => (item && String(item).toLocaleLowerCase() === 'meta_instanceid'));

@@ -16,8 +16,8 @@ export default function LookUp(props: any) {
 
   const { columnDef } = props;
   let result = null;
-  if ('lookup_definition' in columnDef && columnDef.lookup_definition != undefined) {
-    result = ((columnDef.lookup_definition.lookup_type == "datasource") || (columnDef.lookup_definition.lookup_type == "table"))
+  if ('lookup_definition' in columnDef && columnDef.lookup_definition !== undefined) {
+    result = ((columnDef.lookup_definition.lookup_type === "datasource") || (columnDef.lookup_definition.lookup_type === "table"))
       ? datasourceLookup(props) : labelLookup(props);
   }
   // console.log('---- >>> lookup result: ', result);
@@ -47,7 +47,7 @@ const datasourceLookup = (props: any) => {
 
 const labelLookup = (props: any) => {
   const { columnDef, rowValue, lookupTableForLabel } = props;
-  if (Object.keys(lookupTableForLabel).length == 0) return null;
+  if (Object.keys(lookupTableForLabel).length === 0) return null;
 
   console.log('------------ || label lookup ');
   console.log('the column: ', columnDef.field_name);
@@ -56,7 +56,7 @@ const labelLookup = (props: any) => {
 
   const { simpleFormChoice, formChoices } = lookupTableForLabel[columnDef.lookup_definition.form_id];
   let { definition } = lookupTableForLabel[columnDef.lookup_definition.form_id];
-  const exist = JSON.parse(definition.field_names).find((obj: any) => obj.replace('/', '_').toLowerCase() == columnDef.field_name);
+  const exist = JSON.parse(definition.field_names).find((obj: any) => obj.replace('/', '_').toLowerCase() === columnDef.field_name);
 
   console.log('exist: ', exist);
   if (exist) {
@@ -66,15 +66,15 @@ const labelLookup = (props: any) => {
       const fields = exist.split('/');
       let children = definition.children
       for (let i = 0; i <= fields.length - 2; i++) {
-        const groupObj = children.find((obj: any) => obj.name == fields[i]);
+        const groupObj = children.find((obj: any) => obj.name === fields[i]);
         if (groupObj) {
           children = groupObj.children;
         }
       }
 
-      formField = children.find((obj: any) => obj.name == fields[fields.length - 1]);
+      formField = children.find((obj: any) => obj.name === fields[fields.length - 1]);
     } else {
-      formField = definition.children.find((obj: any) => obj.name == exist);
+      formField = definition.children.find((obj: any) => obj.name === exist);
     }
     if (formField) {
       return getReadableValue(rowValue[columnDef.field_name], formField, { simpleFormChoice, formChoices })
@@ -103,7 +103,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
       console.log('--------------choices -------------------');
       console.log(csvChoices);
       console.log('--------csvname :', csvName);
-      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim());
       console.log('--------result :', result);
       if (result === undefined) return ' -- ';
       else {
@@ -118,8 +118,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
     for (let i = 0; i < choices.simpleFormChoice.length; i++) {
       const choice = choices.simpleFormChoice[i];
 
-      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
-        choice.value_label = choice.value_label;
+      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
         if (typeof choice.value_label === 'string') return choice.value_label;
         else if (typeof choice.value_label === 'object') {
           return choice.value_label.English;

@@ -50,7 +50,7 @@ const getSearchDBProperties = (question: any, path: any) => {
       if (ques.control !== undefined && ques.control.appearance !== undefined && ques.control.appearance.includes("searchDB")) {
         properties.push([questionPath, pickSearchDBVariable(ques.control.appearance)]);
       }
-      if (ques.type == 'group' || ques.type == 'survey') {
+      if (ques.type === 'group' || ques.type === 'survey') {
         const result = getSearchDBProperties(ques, questionPath);
         properties = properties.concat(result);
       }
@@ -104,7 +104,7 @@ class Form extends React.Component<formProps, FormState> {
       // tslint:disable-next-line: no-console
       if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
         const inputJson = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
-        const metaId = inputJson != null && (inputJson['meta/instanceID'] != null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : `${this.state.userInfo.users[0].username}-${this.generateUid()}`;
+        const metaId = inputJson !== null && (inputJson['meta/instanceID'] !== null || inputJson['meta/instanceID'] != 'undefined' || inputJson['meta/instanceID'] != '') ? props.userInputJson['meta/instanceID'] : `${this.state.userInfo.users[0].username}-${this.generateUid()}`;
         const { match } = this.props;
         const formId = match.params.id || '';
         ipcRenderer.send('submit-form-response', {
@@ -190,6 +190,10 @@ class Form extends React.Component<formProps, FormState> {
   //     .toString(16)
   //     .substring(1);
   // };
+
+  //TODO do it properly
+  //  Line 197:62:   Unexpected mix of '&' and '>>'  
+  //     no-mixed-operators
 
   private generateUid = () => {
     // @ts-ignore: Unreachable code error

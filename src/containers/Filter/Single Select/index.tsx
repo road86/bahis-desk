@@ -99,7 +99,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
 
   public getFilterOptions = async () => {
     const { filterItem, columnDefinition } = this.props;
-    const column = columnDefinition.find((cd: any) => cd.field_name == filterItem.name);
+    const column = columnDefinition.find((cd: any) => cd.field_name === filterItem.name);
     return column.lookup_definition ? await this.getLookupOptions(column) : await this.getNormalOptions();
   }
 

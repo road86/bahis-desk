@@ -55,7 +55,7 @@ function Filter(props: FilterProps) {
     props.setUpdater(true)
     // const data = props.tableData;
     let filtered = props.tableData;
-    if (searchText != '' && selectedField != '') {
+    if (searchText !== '' && selectedField !== '') {
       const tableData = await ipcRenderer.sendSync(
         'fetch-list-followup',
         props.formId.toString(),
@@ -66,7 +66,7 @@ function Filter(props: FilterProps) {
       filtered = tableData.fetchedRows
     }
     if (submittedBy) {
-      filtered = filtered.filter((obj: any) => obj.submitted_by == submittedBy);
+      filtered = filtered.filter((obj: any) => obj.submitted_by === submittedBy);
     }
     if (condition && startDate) {
       switch (condition) {
@@ -141,7 +141,7 @@ function Filter(props: FilterProps) {
               <TextField
                 style={{ display: 'flex' }}
                 required={true}
-                disabled={selectedField == ''}
+                disabled={selectedField === ''}
                 name={searchText}
                 label={`Search ${selectedField.replace('/', ' ').replace('_', ' ').toUpperCase()}`}
                 variant="outlined"

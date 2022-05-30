@@ -166,7 +166,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const fetchLastSyncTime = async () => {
     const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
     //  setLastSync(syncTime);
-    const time = syncTime.lastSync != 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
+    const time = syncTime.lastSync !== 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
     setLastSync(time);
   }
 
@@ -222,8 +222,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         <div className={classes.offset} />
         <Row id="main-page-container">
           <Col>
-            {/* Production hack. Sets the router to home url on app startup */}
-            <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
+            <Redirect to="/" />
             <Switch>
               <Route exact={true} path="/">
                 <Loading />

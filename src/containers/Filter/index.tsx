@@ -69,6 +69,7 @@ function Filter(props: FilterProps) {
   //   public componentDidMount() {
 
   //   }
+  //TODO fix this mess:   Line 76:6:  React Hook React.useEffect has a missing dependency: 'props'. Either include it or remove the dependency array. However, 'props' will change when *any* prop changes, so the preferred fix is to destructure the 'props' object outside of the useEffect call and refer to those specific props inside React.useEffect  react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     props.resetFiltersActionCreator();

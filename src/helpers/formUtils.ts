@@ -5,21 +5,21 @@ const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, cho
     const formData: any[] = [];
     const userInput = Object.entries(data);
     fieldNames.forEach((element: any) => {
-        const exist = userInput.find((obj: any) => obj[0] == element);
+        const exist = userInput.find((obj: any) => obj[0] === element);
         if (exist) {
             let formField: any = {}
             if (exist[0].includes('/')) {
                 const fields = exist[0].split('/');
                 let children = definition.children
                 for (let i = 0; i <= fields.length - 2; i++) {
-                    const groupObj = children.find((obj: any) => obj.name == fields[i]);
+                    const groupObj = children.find((obj: any) => obj.name === fields[i]);
                     if (groupObj) {
                         children = groupObj.children;
                     }
                 }
-                formField = children.find((obj: any) => obj.name == fields[fields.length - 1]);
+                formField = children.find((obj: any) => obj.name === fields[fields.length - 1]);
             } else {
-                formField = definition.children.find((obj: any) => obj.name == exist[0]);
+                formField = definition.children.find((obj: any) => obj.name === exist[0]);
             }
             if (formField) {
                 console.log('----------------|| form field || ------------------');
@@ -51,7 +51,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
             console.log(formField, fieldValue);
             const csvChoices = choices.formChoices[`${csvName}.csv`];
 
-            let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+            let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim());
             console.log('--------result :', result);
             if (result === undefined) return ' -- ';
             else {
@@ -66,7 +66,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
         for (let i = 0; i < choices.simpleFormChoice.length; i++) {
             const choice = choices.simpleFormChoice[i];
 
-            if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
+            if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
                 // choice.value_label = JSON.parse(choice.value_label);
                 console.log('--- got it: ', formField.name, fieldValue);
                 if (typeof choice.value_label === 'string') {
@@ -99,14 +99,14 @@ const makeLabelColumnPair = (definition: any, fieldNames: any) => {
             const fields = element.split('/');
             let children = definition.children
             for (let i = 0; i <= fields.length - 2; i++) {
-                const groupObj = children.find((obj: any) => obj.name == fields[i]);
+                const groupObj = children.find((obj: any) => obj.name === fields[i]);
                 if (groupObj) {
                     children = groupObj.children;
                 }
             }
-            formField = children.find((obj: any) => obj.name == fields[fields.length - 1]);
+            formField = children.find((obj: any) => obj.name === fields[fields.length - 1]);
         } else {
-            formField = definition.children.find((obj: any) => obj.name == element);
+            formField = definition.children.find((obj: any) => obj.name === element);
         }
         if (formField) {
             console.log('----------------|| form field || ------------------');

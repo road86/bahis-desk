@@ -34,7 +34,8 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     const listId = match.params.id || '';
     const dataJson = queryString.parse(props.location.search).dataJson;
     const detailspk = queryString.parse(props.location.search).detailspk;
-    const xFormId = queryString.parse(props.location.search).xform_id;
+    //TODO remove xFormId is not used is it?
+    //const xFormId = queryString.parse(props.location.search).xform_id;
     const formData = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : null;
     const details = detailspk && typeof detailspk === 'string' ? detailspk : '';
 
@@ -65,6 +66,7 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
     setActionDefinition(action ? action.action_definition : []);
   }
 
+  //TODO ?!?!?!?!?!??!?
   React.useEffect(() => {
     console.log(' i am in the correct component. ');
     comUpdate();
