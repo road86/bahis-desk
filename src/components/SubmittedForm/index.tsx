@@ -223,9 +223,7 @@ function SubmittedForm(props: ListProps) {
       'delete-instance',
       instanceId, formId
     );
-    setTimeout(() => {
-      fetchTableData(formId);
-    }, 3000);
+    fetchTableData(formId);
   }
 
   React.useEffect(() => {

@@ -18,7 +18,9 @@ export function getNativeLanguageText(multiLanguageObject: FlexObject, languageI
   return multiLanguageObject[languageIdentifier] || '';
 }
 
+//the following function is never called
 export const appSync = async () => {
+  console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
   const user: any = await ipcRenderer.sendSync('fetch-username');
   await ipcRenderer.send('start-app-sync', user.username);
   ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
@@ -33,6 +35,7 @@ export const appSync = async () => {
 };
 
 export const dataSync = async () => {
+  console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
   const user: any = await ipcRenderer.sendSync('fetch-username');
   await ipcRenderer.send('request-data-sync', user.username);
   ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {

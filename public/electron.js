@@ -18,16 +18,10 @@ const firstRun = require('electron-first-run');
 const fsExtra = require('fs-extra')
 const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
 
-
-// DEV EXTENSIONS
-const REACT_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.8.2_0';
-const REDUX_EXTENSION_PATH = '/.config/google-chrome/Default/Extensions/lmhkpmbekcpmknklioeibfkpmmfibljd/2.17.0_0';
-
-const cmd = process.argv[1];
-
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'bahis.db';
-const db = new Database(path.join(app.getPath("userData"), DB_NAME));
+const dbfile = path.join(app.getPath("userData"), DB_NAME)
+const db = new Database(dbfile);
 
 let mainWindow;
 let prevPercent = 0;
@@ -35,16 +29,23 @@ let newPercent = 0;
 
 
 // App/** creates window on app ready */
-app.on('ready', createWindow);
+// app.on('ready', createWindow);
 
 /** adds window on app if window null */
-app.on('activate', () => {
+app.on('ready', () => {
   const isFirstRun = firstRun()
-  if (isFirstRun || cmd == '--squirrel-firstrun') {
+  if (isFirstRun) {
     afterInstallation();
+    console.log('Will create a DB on a first run');
+    prepareDb();
   }
-  if (mainWindow === null) {
-    createWindow();
+  createWindow();
+  //create a db if doesn't exist
+  if (!fs.existsSync(dbfile)){
+    console.log('Recreating DB');
+    prepareDb();
+  }else{
+    console.log('Using db in ', dbfile);
   }
 });
 
@@ -53,25 +54,25 @@ function afterInstallation() {
     title: 'No Updates',
     message: 'Current version is up-to-date.',
   });
+  //OK, what is the following?
   try {
-
+    console.log('What happens here?!?!?!')
     fs.unlink(path.join(app.getPath("userData"), DB_NAME), function (err) {
       if (err) return console.log(err);
     });
-    
   } catch (err) {
-    console.log('App Setup!!!!');
+    console.log(' w?E?E??? App Setup!!!!');
   }
 }
 
 /** creates the db and sets up the window in electron */
 function createWindow() {
-  // comment next line if react and redux dev extensions not installed
-  if (isDev) {
-    // addDevToolsExt();
-  }
-  console.log('create windo ');
-  prepareDb();
+
+
+  console.log('created window');
+
+
+
   mainWindow = new BrowserWindow({
     width: 900,
     height: 680,
@@ -81,42 +82,30 @@ function createWindow() {
       contextIsolation: false,
     },
   });
-  //mainWindow.maximize(); TODO uncomment
-  // mainWindow.setBackgroundColor('#FF0000');
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-  // autoUpdater.checkForUpdates();
+
+  if (isDev) {
+    mainWindow.setBackgroundColor('#FF0000');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.maximize();
+    autoUpdater.checkForUpdates();
+  }
+
+  //what does that do?
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-/** set up new db if not exists */
+/** set up new db */
 function prepareDb() {
-  try {
-    electronLog.info('------- || Creating New Database || ----------------');
-    // })
-    setUpNewDB();
-    // eslint-disable-next-line no-console
-    electronLog.info('-------- || Database Setup!!!! || ----------');
-  } catch (err) {
-
-  }
-}
-
-// DB utils
-
-/** sets up new databse. Creates tables that are required */
-function setUpNewDB() {
+  electronLog.info('------- || Creating New Database || ----------------');
   electronLog.info(`------- || ${path.join(app.getPath("userData"))}  ${DB_NAME} || ----------------`);
-  console.log('new db setup call');
+  console.log('Running initial queries');
   db.exec(queries);
-  
+  electronLog.info('-------- || Database setup finished !!!! || ----------');
 }
-
-// subscribes the App states with related processes
 
 /** removes window on app close */
 app.on('window-all-closed', () => {
@@ -205,12 +194,6 @@ autoUpdater.on('update-downloaded', () => {
 autoUpdater.on('checking-for-update', () => {
   sendStatusToWindow('checking_for_update...');
 });
-
-/** add the react and redux devtools to electron */
-function addDevToolsExt() {
-  BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REACT_EXTENSION_PATH));
-  BrowserWindow.addDevToolsExtension(path.join(os.homedir(), REDUX_EXTENSION_PATH));
-}
 
 // utils
 const parseFieldNames = (parentName, possibleNames, currentFormJsn) => {
@@ -322,7 +305,6 @@ const submitFormResponse = (event, response) => {
 const fetchFormDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormDefinition ${event} ${formId} || ----------------`);
   try {
-
     const formDefinitionObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
     if (formDefinitionObj != undefined) {
       const choiceDefinition = formDefinitionObj.choice_definition ? JSON.parse(formDefinitionObj.choice_definition) : {};
@@ -332,7 +314,6 @@ const fetchFormDefinition = (event, formId) => {
           const { query } = choiceDefinition[key];
           choices[`${key}.csv`] = db.prepare(query).all();
         } catch (err) {
-          // eslint-disable-next-line no-console
           electronLog.info(`------- || Choice Definition Error  ${err} || ----------------`);
         }
       });
@@ -341,47 +322,37 @@ const fetchFormDefinition = (event, formId) => {
       event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
     } else {
       event.returnValue = null;
+      electronLog.info(`------- || fetchFormDefinition problem, no such form with ${formId} || ----------------`);
+      electronLog.info(`------- || see 'SELECT * from forms where form_id = ? limit 1' || ----------------`);
+
     }
     
   } catch (err) {
-    // eslint-disable-next-line no-console
-
     electronLog.info(`------- || fetchFormDefinition Error  ${err} || ----------------`);
   }
 };
 
 const fetchFormChoices = (event, formId) => {
   try {
-
-
     electronLog.info(`------- || fetchFormChoices  ${formId} || ----------------`);
     const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ${formId} `).all();
     event.returnValue = formchoices;
-    
-
   } catch (err) {
     console.log('------------- error fetch form choices ------------------', err);
-  } finally {
-
   }
-
 }
 
 const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
-
     const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
     console.log(formData)
     if (formData != undefined) {
-      // eslint-disable-next-line no-param-reassign
       event.returnValue = { formDetails: formData };
     } else {
       event.returnValue = null;
     }
-    
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.log(err);
     electronLog.info(`------- || Fetch FormDetails  ${err} || ----------------`);
   }
@@ -552,13 +523,12 @@ const signIn = async (event, userData) => {
     })
     .then((response) => {
       let results = '';
-      console.log('-----------signin response --------------');
-      console.log(response);
-      electronLog.info('-------|| Signed In Successfully ||-----------');
-
+      // console.log('-----------signin response --------------');
+      // console.log(response);
 
       if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
         // if (response.status == 200 || response.status == 201) {
+        electronLog.info('-------|| Signed In Successfully ||-----------');
         console.log('sign in successfull: ');
         // if a user has signed in for the first time
         if (userInfo === undefined) {
@@ -618,10 +588,8 @@ const signIn = async (event, userData) => {
       mainWindow.send('formSubmissionResults', results);
       electronLog.info('-------|| Sign In Error ||-----------');
       electronLog.info(error);
-
     });
 
-  
 };
 
 const getErrorMessage = (error) => {
@@ -861,7 +829,6 @@ const exportExcel = (event, excelData) => {
 const fetchUsername = (event) => {
   electronLog.info(`------- || fetchUsername: ${event} || ----------------`);
   try {
-
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
     console.log("XIM2, we fetched", fetchedUsername);
@@ -995,19 +962,17 @@ const startAppSync = (event, name) => {
   electronLog.info('--------- || App Sync Started || ------------------');
   electronLog.info('----------|| Below API will be called || -----------');
 
+  const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
+  const time = log === undefined ? 0 : Math.round(log.time);
 
-  try {
-    const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
-    const time = log === undefined ? 0 : Math.round(log.time);
+  electronLog.info(`${formConfigEndpoint(name, time)}`);
+  electronLog.info(`${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
+  electronLog.info(`${_url(FORMS_ENDPOINT, name, time)}`);
+  electronLog.info(`${_url(LISTS_ENDPOINT, name, time)}`);
+  electronLog.info(`${_url(FORM_CHOICE_ENDPOINT, name, time)}`);
+  electronLog.info('-----------------------------------------------------');
 
-    electronLog.info(`${formConfigEndpoint(name, time)}`);
-    electronLog.info(`${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
-    electronLog.info(`${_url(FORMS_ENDPOINT, name, time)}`);
-    electronLog.info(`${_url(LISTS_ENDPOINT, name, time)}`);
-    electronLog.info(`${_url(FORM_CHOICE_ENDPOINT, name, time)}`);
-    electronLog.info('-----------------------------------------------------');
-
-    axios
+  axios
       .all([
         axios.get(`${formConfigEndpoint(name, time)}`),
         axios.get(_url(APP_DEFINITION_ENDPOINT, name, time)),
@@ -1144,38 +1109,13 @@ const startAppSync = (event, name) => {
           }
           csvDataSync(name);
           // eslint-disable-next-line no-param-reassign
-          let message = 'CSV data sync done';
-          mainWindow.send('formSyncComplete', message);
+          mainWindow.send('formSyncComplete', "this is info on CSV sync complete to window module?" );
           electronLog.info('CSV App Sync Complete');
-          
         }),
       )
       .catch((err) => {
-        let message = '';
-        if (time == 0) {
-          message = 'nope'
-        } else {
-          message = 'done'
-        }
-        //console.log(err);
-        electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------`, err);
-
-        //mainWindow.send('formSyncComplete', message);
-        // eslint-disable-next-line no-console
-        console.log('Axios FAILED in startAppSync');
+        electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n` , err);
       });
-  } catch (err) {
-    console.log('try catch');
-    let message = '';
-    if (time == 0) {
-      message = 'nope'
-    } else {
-      message = 'done'
-    }
-    mainWindow.send('formSyncComplete', message);
-    // eslint-disable-next-line no-console
-    // console.log(err);
-  }
 };
 
 /** starts data sync on request event
@@ -1199,8 +1139,8 @@ const requestDataSync = async (event, username) => {
 const csvDataSync = async (username) => {
   console.log("XIM1 csvDataSync")
   try {
-    const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"';
-    const info = db.prepare(tableExistStmt).get();
+    const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type=? AND name=?';
+    const info = db.prepare(tableExistStmt).get('table','csv_sync_log');
     if (info && info.name == 'csv_sync_log') {
       fetchCsvDataFromServer(db, username);
     } else {
@@ -1260,8 +1200,11 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdate = (event) => {
   console.log('check update call');
-  console.log('Temporarily XIM1 hidden');
-  //autoUpdater.checkForUpdates();
+  if(!isDev){
+    autoUpdater.checkForUpdates();
+  } else {
+  console.log('Not checking for updates in dev mode');
+  }
 };
 
 

@@ -110,6 +110,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       });
   };
 
+  //WHY THE HELL THIS IS IN FRONTEND? XIM
   const fetchGeoLocation = async () => {
     const JSZip = require('jszip');
     const JSZipUtils = require('jszip-utils');
@@ -175,18 +176,16 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     setUnsyncCount(response[0].cnt);
   }
 
+  //XIM
+  //what is setTimeout for?!
   React.useEffect(() => {
     updateUnsyncCount();
-    setTimeout(() => {
       fetchLastSyncTime();
       if (navigator.onLine) {
         // fetchGeoLocation();
         autoUpdateCheck();
-        setTimeout(() => {
           fetchGeoLocation();
-        }, 1000);
       }
-    }, 3000)
   }, []);
 
   const logout = () => {
@@ -199,7 +198,10 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   const gotoSubmittedData = () => {
     if (props.currentMenu) {
-      const xform_id = props.currentMenu.type === MODULE_TYPE && props.currentMenu.children[0].type === FORM_TYPE && props.currentMenu.children[0].xform_id;
+      const xform_id = props.currentMenu.type === MODULE_TYPE 
+      && props.currentMenu.children[0].type === FORM_TYPE 
+      && props.currentMenu.children[0].xform_id;
+
       if (xform_id) {
         props.history.push(`/formlist/${xform_id}`);
       } else {
@@ -308,6 +310,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   );
 };
 
+//XIM I presume all of the following is pointless
 /** connect the component to the store */
 
 /** Interface to describe props from mapStateToProps */

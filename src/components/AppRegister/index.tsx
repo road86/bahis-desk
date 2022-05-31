@@ -55,6 +55,7 @@ function AppRegister(props: any) {
     if (ans === 'delete') {
       await ipcRenderer.send('login-operation', loginArgs);
     } else {
+      console.log("peroformin loginggg operation sucesfullt?")
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
       syncAppModule();
     }
@@ -70,7 +71,7 @@ function AppRegister(props: any) {
     });
 
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-      console.log('check', event);
+      console.log('I was sent here from electron because of form submission results!?', event);
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
@@ -84,6 +85,7 @@ function AppRegister(props: any) {
   };
 //here trouble is brewing
   const syncAppModule = async () => {
+   // debugger;
     console.log("XIM Send fetch-username")
     const user: any = await ipcRenderer.sendSync('fetch-username');
     console.log("XIM stage 2")

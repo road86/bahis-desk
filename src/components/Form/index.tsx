@@ -70,6 +70,7 @@ class Form extends React.Component<formProps, FormState> {
     const formId = match.params.id || '';
     const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
     const userLocationInfo = await ipcRenderer.sendSync('user-db-info');
+    console.log("Because component did mount....")
     const userInfo = await ipcRenderer.sendSync('fetch-userlist');
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
@@ -115,10 +116,8 @@ class Form extends React.Component<formProps, FormState> {
           toastVisible: true,
           showConfirmDialog: false
         });
-        setTimeout(() => {
-          this.props.history.push('/menu/');
-          this.props.setUnsyncCount();
-        }, 2010);
+        this.props.history.push('/menu/');
+        this.props.setUnsyncCount();
       }
     }
 

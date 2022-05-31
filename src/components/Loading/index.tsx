@@ -19,9 +19,7 @@ class Loading extends React.Component<{}, LoadingState> {
     this.state = { isLoadComplete: false };
   }
   public async componentDidMount() {
-    setTimeout(() => {
       this.setState({ isLoadComplete: true });
-    }, 3000);
   }
 
   public render() {

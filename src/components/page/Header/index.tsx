@@ -41,6 +41,7 @@ function Header(props: HeaderProps) {
 
     if (appConfigSyncComplete) {
       (async () => {
+        console.log('In header fethich usenamge and requesting dat async')
         const user: any = await ipcRenderer.sendSync('fetch-username');
         ipcRenderer.send('request-data-sync', user.username);
       })();
@@ -54,12 +55,15 @@ function Header(props: HeaderProps) {
     }
     await setSyncOverlayHandler(true);
 
+    console.log("I assume Im here starting sync because someone pressed the bygttton");
     const user: any = await ipcRenderer.sendSync('fetch-username');
 
+    console.log("I assume Im here starting sync because 222 someone pressed the bygttton");
     await ipcRenderer.send('start-app-sync', user.username);
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
+      console.log("RUNNING on form sync complete from header page component");
       if (!appConfigSyncComplete)
         setAppConfigSyncComplete(true);
     });
@@ -68,7 +72,7 @@ function Header(props: HeaderProps) {
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
       setSyncOverlayHandler(false);
       setAppConfigSyncComplete(false);
-      setTimeout(() => props.updateUnsyncCount(), 4000);
+      props.updateUnsyncCount();
     });
   };
 
