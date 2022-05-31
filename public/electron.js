@@ -1183,6 +1183,7 @@ const startAppSync = (event, name) => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const requestDataSync = async (event, username) => {
+  console.log("requesting data sync...")
   await fetchDataFromServer(db, username);
   const msg = await sendDataToServer(db, username);
   csvDataSync(db, username);

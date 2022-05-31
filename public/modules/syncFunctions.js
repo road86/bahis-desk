@@ -7,6 +7,7 @@ const path = require('path');
 const { SERVER_URL } = require('../constants');
 const { update } = require('lodash');
 const electronLog = require('electron-log');
+const { convertCompilerOptionsFromJson } = require('typescript');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
@@ -349,6 +350,7 @@ const isNotArrayOfString = (testArray) => {
  */
 const sendDataToServer = async (db, username) => {
   console.log('send data', username);
+  
   try {
     const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
     const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
@@ -359,15 +361,23 @@ const sendDataToServer = async (db, username) => {
         // eslint-disable-next-line no-unused-vars
         let formData = JSON.parse(rowObj.data) || {};
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
+        
+        //What the hell is that?
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-          test_file: queries,
+          //test_file: queries,
         };
+
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
-        // console.log(apiFormData);
+        const jsondata = JSON.stringify(apiFormData)
+        console.log("url");
+        console.log(url);
+        console.log("jsondata");
+        console.log(jsondata);
+        
         await axios
-          .post(url, JSON.stringify(apiFormData), {
+          .post(url, jsondata, {
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
@@ -387,10 +397,12 @@ const sendDataToServer = async (db, username) => {
           })
           .catch((error) => {
             // eslint-disable-next-line no-console
-            // console.log(error);
+            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, err);
           });
       });
     } catch (err) {
+      electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
+
       // eslint-disable-next-line no-console
       // console.log(err);
     }
