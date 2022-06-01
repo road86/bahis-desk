@@ -42,7 +42,7 @@ function Header(props: HeaderProps) {
     if (appConfigSyncComplete) {
       (async () => {
         console.log('In header fethich usenamge and requesting dat async')
-        const user: any = await ipcRenderer.sendSync('fetch-username');
+        const user: any = await ipcRenderer.sendSync('fetch-username','appcinf end');
         ipcRenderer.send('request-data-sync', user.username);
       })();
     }
@@ -56,7 +56,7 @@ function Header(props: HeaderProps) {
     await setSyncOverlayHandler(true);
 
     console.log("I assume Im here starting sync because someone pressed the bygttton");
-    const user: any = await ipcRenderer.sendSync('fetch-username');
+    const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
 
     console.log("I assume Im here starting sync because 222 someone pressed the bygttton");
     await ipcRenderer.send('start-app-sync', user.username);

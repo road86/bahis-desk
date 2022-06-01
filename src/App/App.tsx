@@ -172,21 +172,22 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   }
 
   const updateUnsyncCount = async () => {
+    console.log("update Unsync Count");
     const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
     setUnsyncCount(response[0].cnt);
   }
 
   //XIM
   //what is setTimeout for?!
-  React.useEffect(() => {
-    updateUnsyncCount();
-      fetchLastSyncTime();
-      if (navigator.onLine) {
-        // fetchGeoLocation();
-        autoUpdateCheck();
-          fetchGeoLocation();
-      }
-  }, []);
+  // React.useEffect(() => {
+  //   updateUnsyncCount();
+  //     fetchLastSyncTime();
+  //     if (navigator.onLine) {
+  //       // fetchGeoLocation();
+  //       autoUpdateCheck();
+  //       fetchGeoLocation();
+  //     }
+  // }, []);
 
   const logout = () => {
     props.history.push('/signup/');

@@ -57,7 +57,7 @@ function AppRegister(props: any) {
     } else {
       console.log("peroformin loginggg operation sucesfullt?")
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-      syncAppModule();
+      syncAppModule("login operation");
     }
     setOpenAlert(false);
   }
@@ -71,23 +71,26 @@ function AppRegister(props: any) {
     });
 
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-      console.log('I was sent here from electron because of form submission results!?', event);
+      console.log('I was sent here from electron because of form submission results!? the form is signin?', event);
+      console.log('I was sent here from electron because of form submission results!? the form is signin?', args);
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
           setToastContent({ severity: 'Error', msg: args.message });
         } else {
-          setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-          syncAppModule();
+          setToastContent({ severity: 'Error', msg: 'Submitted and Logged In Successfully' });
+          //TODO first check that you are actually logged in you idiot
+          syncAppModule("form submissions");
         }
       }
     });
   };
 //here trouble is brewing
-  const syncAppModule = async () => {
+  const syncAppModule = async (whocallsme: string) => {
    // debugger;
+    console.log("who calls me is ",whocallsme);
     console.log("XIM Send fetch-username")
-    const user: any = await ipcRenderer.sendSync('fetch-username');
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'syncappmodule');
     console.log("XIM stage 2")
     //setLoadComplete(false);
     console.log("XIM stage 3")

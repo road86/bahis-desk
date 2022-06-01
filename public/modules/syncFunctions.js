@@ -186,10 +186,10 @@ const fetchDataFromServer = async (db, username) => {
  */
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
   try {
-    const dataDeleteStmt = 'delete from data where instanceid ="' + instanceId + '"';
+    const dataDeleteStmt = 'delete from data where instanceid =?';
     // const dataDeleteStmt = db.prepare(query);
     // console.log(deleteStmt);
-    const info = db.prepare(dataDeleteStmt).run();
+    const info = db.prepare(dataDeleteStmt).run(instanceId);
     if (info.changes > 0) {
       const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(formId);
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
@@ -276,8 +276,8 @@ const objToTable = (
   lastRepeatKeyName,
   possibleFieldNames,
 ) => {
-  let columnNames = '';
-  let fieldValues = '';
+  let columnNames = [];
+  let fieldValues = [];
   const repeatKeys = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const key in tableObj) {
@@ -287,8 +287,8 @@ const objToTable = (
       } else {
         let tmpColumnName = key.substring(lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0);
         tmpColumnName = tmpColumnName.replace('/', '_');
-        columnNames = `${columnNames + tmpColumnName}, `;
-        fieldValues = `${fieldValues}"${tableObj[key]}", `;
+        columnNames.push(tmpColumnName);
+        fieldValues.push(tableObj[key]);
       }
     }
   }
@@ -296,19 +296,25 @@ const objToTable = (
 
   if (columnNames !== '' || repeatKeys.length > 0) {
     if (instanceId) {
-      columnNames += 'instanceid, ';
-      fieldValues += `"${instanceId}", `;
+      columnNames.push('instanceid');
+      fieldValues.push(instanceId);
     }
     if (parentId) {
-      columnNames += `${parentTableName.substring(6)}_id, `;
-      fieldValues += `"${parentId}", `;
+      columnNames.push(`parentTableName.substring(6)}_id`);
+      fieldValues.push(parentId);
     }
-    const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
-      0,
-      columnNames.length - 2,
-    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;
+    actualTableName = `${tableName}_table`;
+    actualColumns = columnNames;
+    actualValues = fieldValues;
+    lenFields = columnNames.length;
+    sqliteplaceholder = ", ?".repeat(lenFields -1 );
+    actualColumnsString = actualColumns.join(',');
+    //betterSQLITE3 requires ? in place of values but column names and table name need to be defined at compilation time
+    const query = 'INSERT INTO '.concat(actualTableName,'(', actualColumnsString, ' ) ', 'VALUES ', '(?', sqliteplaceholder, ' )');
+
     try {
-      const successfulInsert = dbCon.prepare(query).run();
+      const successfulInsertprep = dbCon.prepare(query);
+      const successfulInsert = successfulInsertprep.run(actualValues);
       newParentId = successfulInsert.lastInsertRowid;
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -390,8 +396,8 @@ const sendDataToServer = async (db, username) => {
             if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
               JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
-                const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
-                updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
+                const updateDataIdQuery = db.prepare(`UPDATE ? SET instanceid = ? WHERE instanceid = ?`);
+                updateDataIdQuery.run(tableName,response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
               });
             }
           })

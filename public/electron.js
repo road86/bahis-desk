@@ -37,31 +37,24 @@ app.on('ready', () => {
   if (isFirstRun) {
     afterInstallation();
     console.log('Will create a DB on a first run');
-    prepareDb();
+    prepareDb(db);
   }
   createWindow();
   //create a db if doesn't exist
   if (!fs.existsSync(dbfile)){
     console.log('Recreating DB');
-    prepareDb();
+    prepareDb(db);
   }else{
     console.log('Using db in ', dbfile);
   }
 });
 
 function afterInstallation() {
-  dialog.showMessageBox({
-    title: 'No Updates',
-    message: 'Current version is up-to-date.',
-  });
-  //OK, what is the following?
-  try {
-    console.log('What happens here?!?!?!')
-    fs.unlink(path.join(app.getPath("userData"), DB_NAME), function (err) {
-      if (err) return console.log(err);
+  if (!isDev) {
+    dialog.showMessageBox({
+      title: 'No Updates',
+      message: 'Current version is up-to-date.',
     });
-  } catch (err) {
-    console.log(' w?E?E??? App Setup!!!!');
   }
 }
 
@@ -82,7 +75,9 @@ function createWindow() {
       contextIsolation: false,
     },
   });
-  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  //TODO TMP use prebuild react so we can change electron code during debug
+  //mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
 
   if (isDev) {
     mainWindow.setBackgroundColor('#FF0000');
@@ -103,7 +98,12 @@ function prepareDb() {
   electronLog.info('------- || Creating New Database || ----------------');
   electronLog.info(`------- || ${path.join(app.getPath("userData"))}  ${DB_NAME} || ----------------`);
   console.log('Running initial queries');
-  db.exec(queries);
+  try{
+    db.exec(queries);
+  }catch(err){
+    console.log("Failed setting up DB")
+    console.log(err)
+  }
   electronLog.info('-------- || Database setup finished !!!! || ----------');
 }
 
@@ -246,9 +246,9 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
     const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
     const filterDatasetQuery = db.prepare(
-      `with ${randomTableName} as (${datasourceQuery}) select ${filterColumns.toString()} from ${randomTableName} group by ${filterColumns.toString()}`,
+      `with ? as (?) select ? from ? group by ?`,
     );
-    const returnedRows = filterDatasetQuery.all();
+    const returnedRows = filterDatasetQuery.all(randomTableName, datasourceQuery, filterColumns.toString, randomTableName, filterColumns.toString());
     // eslint-disable-next-line no-param-reassign
     event.returnValue = returnedRows;
   } catch (err) {
@@ -335,7 +335,7 @@ const fetchFormDefinition = (event, formId) => {
 const fetchFormChoices = (event, formId) => {
   try {
     electronLog.info(`------- || fetchFormChoices  ${formId} || ----------------`);
-    const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ${formId} `).all();
+    const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
     event.returnValue = formchoices;
   } catch (err) {
     console.log('------------- error fetch form choices ------------------', err);
@@ -345,7 +345,7 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
-    const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
+    const formData = db.prepare(`SELECT * from data where ? = ? limit 1`).get(column,listId);
     console.log(formData)
     if (formData != undefined) {
       event.returnValue = { formDetails: formData };
@@ -391,8 +391,8 @@ const fetchFormListDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormListDefinition, listId: ${formId} || ----------------`);
   try {
 
-    const query = 'SELECT * from data where form_id = "' + formId + '"';
-    const fetchedRows = db.prepare(query).all();
+    const query = 'SELECT * from data where form_id = ?';
+    const fetchedRows = db.prepare(query).all(formId);
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
     
@@ -408,11 +408,11 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
 
     let query;
     if (constraint == 'equal') {
-      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$." + detailsPk + "') = '" + pkValue + "'";
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = ? and json_extract(data, '$.?') = ?";
     } else {
-      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = '" + formId + "' and json_extract(data, '$." + detailsPk + "') LIKE '%" + pkValue + "%'";
+      query = "SELECT data_id, submitted_by, submission_date, data from data where form_id = ? and json_extract(data, '$.?') LIKE '%?%'";
     }
-    const fetchedRows = db.prepare(query).all();
+    const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
     
@@ -465,7 +465,6 @@ const loginOperation = async (event, obj) => {
     data.email,
   );
   results = { username: data.user_name, message: '' };
-  // event.sender.send('formSubmissionResults', results);
   mainWindow.send('formSubmissionResults', results);
   event.returnValue = {
     userInfo: data,
@@ -488,7 +487,7 @@ const signIn = async (event, userData) => {
   let mac;
   macaddress.one(function (err, mac) {
     mac = mac;
-    console.log(mac);
+    // console.log(mac);
   });
   const query =
     'SELECT * from users limit 1';
@@ -496,7 +495,7 @@ const signIn = async (event, userData) => {
   // if a user has signed in before then no need to call signin-api
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
-    mainWindow.send('formSubmissionResults', results);
+    // mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
       // message: ""
@@ -511,6 +510,7 @@ const signIn = async (event, userData) => {
   electronLog.info('----------- || Attempt To Signin || -----------------');
   electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
   electronLog.info(JSON.stringify(data));
+  electronLog.info(`--------------------------`);
 
   await axios
     .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
@@ -528,8 +528,8 @@ const signIn = async (event, userData) => {
 
       if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
         // if (response.status == 200 || response.status == 201) {
-        electronLog.info('-------|| Signed In Successfully ||-----------');
-        console.log('sign in successfull: ');
+        electronLog.info('-------|| Signed In received a response! :)  ||-----------');
+
         // if a user has signed in for the first time
         if (userInfo === undefined) {
           const insertStmt = db.prepare(
@@ -548,13 +548,13 @@ const signIn = async (event, userData) => {
             data.email,
           );
           results = { username: response.data.user_name, message: '' };
-          // event.sender.send('formSubmissionResults', results);
           mainWindow.send('formSubmissionResults', results);
           event.returnValue = {
             userInfo: response.data,
             // message: ""
           };
         }
+        //the user has changed
         else if (userInfo && userInfo.username !== response.data.user_name) {
           results = {
             response: response.data,
@@ -562,6 +562,7 @@ const signIn = async (event, userData) => {
           };
           mainWindow.send('deleteTableDialogue', results);
         }
+        //if it is the same user
         else {
           results = { username: response.data.user_name, message: '' };
           mainWindow.send('formSubmissionResults', results);
@@ -570,7 +571,6 @@ const signIn = async (event, userData) => {
             // message: ""
           };
         }
-
       } else if (response.status == 409) {
         results = {
           message: 'Un-authenticated Really',
@@ -826,8 +826,8 @@ const exportExcel = (event, excelData) => {
   });
 }
 
-const fetchUsername = (event) => {
-  electronLog.info(`------- || fetchUsername: ${event} || ----------------`);
+const fetchUsername = (event,infowhere) => {
+  electronLog.info(`------- || fetchUsername: ${infowhere} || ----------------`);
   try {
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
@@ -866,8 +866,8 @@ const fetchLastSyncTime = (event) => {
 const fetchImage = (event, moduleId) => {
   try {
 
-    const query = 'SELECT directory_name FROM module_image where module_id="' + moduleId + '"';
-    const fetchedRows = db.prepare(query).get();
+    const query = 'SELECT directory_name FROM module_image where module_id=?';
+    const fetchedRows = db.prepare(query).get(moduleId);
     event.returnValue = fetchedRows != null ? fetchedRows.directory_name : '';
     
   } catch (err) {
@@ -1109,7 +1109,7 @@ const startAppSync = (event, name) => {
           }
           csvDataSync(name);
           // eslint-disable-next-line no-param-reassign
-          mainWindow.send('formSyncComplete', "this is info on CSV sync complete to window module?" );
+          mainWindow.send('formSyncComplete', "done" );//done is a keyword checked later
           electronLog.info('CSV App Sync Complete');
         }),
       )
