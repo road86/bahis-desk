@@ -76,7 +76,7 @@ function createWindow() {
     },
   });
   //TODO TMP use prebuild react so we can change electron code during debug
-  //mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  // mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
 
   if (isDev) {

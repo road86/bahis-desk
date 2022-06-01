@@ -367,10 +367,7 @@ const sendDataToServer = async (db, username) => {
         // eslint-disable-next-line no-unused-vars
         let formData = JSON.parse(rowObj.data) || {};
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
-        console.log("WWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYHYYYYYYYYYYYYYYY");
-        console.log(rowObj.form_id);
-        console.log(formData);
-        //What the hell is that?
+        //We are converting json to XML which is an alternative submission for xforms
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),

@@ -1,4 +1,6 @@
-const SERVER_URL = process.env.BAHIS_SERVER;
+//setting env variables for global builds do not work that well, temporarily hardcodeing
+//const SERVER_URL = process.env.BAHIS_SERVER;
+const SERVER_URL = 'http://www.bahis2-dev.net';
 
 // TODO Need to update /0/ at the end of DB_TABLES_ENDPOINT DYNAMICALLY
 const DB_TABLES_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/get/form-config/?/`;
