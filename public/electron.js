@@ -1011,7 +1011,8 @@ const startAppSync = (event, name) => {
               electronLog.info('Previous Layout does not exist');
             }
             db.prepare('DELETE FROM module_image').run();
-            populateModuleImage(moduleListRes.data);
+            //TODO images not working yet
+            //populateModuleImage(moduleListRes.data);
             populateCatchment(moduleListRes.data.catchment_area);
             // const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             // newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));

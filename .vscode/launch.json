@@ -15,6 +15,7 @@
         "env": {
 //            "BAHIS_SERVER": "http://www.bahis2-dev.net"
             "BAHIS_SERVER": "http://localhost"
+            // "BAHIS_SERVER": "http://bahis.dls.gov.bd"
 
         }
       }

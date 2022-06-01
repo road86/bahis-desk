@@ -367,7 +367,9 @@ const sendDataToServer = async (db, username) => {
         // eslint-disable-next-line no-unused-vars
         let formData = JSON.parse(rowObj.data) || {};
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
-        
+        console.log("WWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYWHYYYYYYYYYYYYYYYHYYYYYYYYYYYYYYY");
+        console.log(rowObj.form_id);
+        console.log(formData);
         //What the hell is that?
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
@@ -377,9 +379,9 @@ const sendDataToServer = async (db, username) => {
 
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
         const jsondata = JSON.stringify(apiFormData)
-        console.log("url");
+        console.log("url",url);
         console.log(url);
-        console.log("jsondata");
+        console.log("jsondata",jsondata);
         console.log(jsondata);
         
         await axios
@@ -403,7 +405,7 @@ const sendDataToServer = async (db, username) => {
           })
           .catch((error) => {
             // eslint-disable-next-line no-console
-            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, err);
+            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
           });
       });
     } catch (err) {
@@ -431,7 +433,7 @@ const convertJsonToXml = (jsnObj, formIdString) => {
     const jsnPath = jsnKey.split('/');
     assignJsnValue(modifiedJsnObj, jsnPath, 0, jsnObj[jsnKey]);
   });
-  let xmlString = "<?xml version='1.0'?>";
+  let xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
   xmlString += `<${formIdString} id="${formIdString}">`;
   Object.keys(modifiedJsnObj).forEach((mkey) => {
     xmlString += generateIndividualXml(mkey, modifiedJsnObj[mkey]);
