@@ -1,6 +1,5 @@
 import { Avatar, Grid, Snackbar, useTheme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Typist from 'react-typist';
@@ -18,12 +17,7 @@ import AlertDialog from './Dialog';
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {`App Version ${packageJson.version}`}{' Copyright © '}
-      <Link color="inherit" href="https://www.mpower-social.com/">
-        mPower Social Enterprise
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
+      {`App Version ${packageJson.version}`}
     </Typography>
   );
 }
@@ -61,8 +55,9 @@ function AppRegister(props: any) {
     if (ans === 'delete') {
       await ipcRenderer.send('login-operation', loginArgs);
     } else {
+      console.log("peroformin loginggg operation sucesfullt?")
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-      syncAppModule();
+      syncAppModule("login operation");
     }
     setOpenAlert(false);
   }
@@ -76,33 +71,50 @@ function AppRegister(props: any) {
     });
 
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-      console.log('check', event);
+      console.log('I was sent here from electron because of form submission results!? the form is signin?', event);
+      console.log('I was sent here from electron because of form submission results!? the form is signin?', args);
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
           setToastContent({ severity: 'Error', msg: args.message });
         } else {
-          setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-          syncAppModule();
+          setToastContent({ severity: 'Error', msg: 'Submitted and Logged In Successfully' });
+          //TODO first check that you are actually logged in you idiot
+          syncAppModule("form submissions");
         }
       }
     });
   };
-
-  const syncAppModule = async () => {
-    const user: any = await ipcRenderer.sendSync('fetch-username');
-    setLoadComplete(false);
+//here trouble is brewing
+  const syncAppModule = async (whocallsme: string) => {
+   // debugger;
+    console.log("who calls me is ",whocallsme);
+    console.log("XIM Send fetch-username")
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'syncappmodule');
+    console.log("XIM stage 2")
+    //setLoadComplete(false);
+    console.log("XIM stage 3")
     await ipcRenderer.send('start-app-sync', user.username);
+    console.log("XIM stage 4")
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      console.log('check', event, args);
+      //console.log('check events and args', event, args);
+      console.log('check args', args);
+      console.log(args);
+      console.log(typeof(args));
+      console.log("XIM stage 5")
       setLoadComplete(true);
-      if (args === 'done') {
+      console.log("XIM stage 6")
+      if (args.includes('done')) {
+        console.log("XIM stage 7")
+
         props.history.push({
           pathname: '/menu/',
           state: { username: args.username },
         });
+        console.log("XIM stage 8")
       } else {
-        setToastContent({ severity: 'Error', msg: "Couldn't sync app" });
+        console.log("XIM stage 9")
+        setToastContent({ severity: 'Error', msg: "XIM2 Couldn't sync app" });
       }
     });
   };
@@ -118,7 +130,7 @@ function AppRegister(props: any) {
       autoHideDuration={3000}
       onClose={snackbarClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      key={'top' + 'center'}
+      key={'topcenter'}
     >
       <Alert severity={response.severity}>{response.msg}</Alert>
     </Snackbar>

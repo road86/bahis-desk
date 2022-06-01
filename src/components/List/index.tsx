@@ -50,7 +50,8 @@ function List(props: ListProps) {
       'fetch-list-definition',
       listId,
     );
-    if (response != null || response != undefined) {
+    //Maybe this wont work with === ? 
+    if (response !== null || response !== undefined) {
       const { columnDefinition, filterDefinition, datasource, listHeader } = response;
 
       setDataSource(datasource ? JSON.parse(datasource) : null);

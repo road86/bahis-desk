@@ -54,7 +54,7 @@ function ModuleMenuItem(props: ModuleMenuItemProps) {
                   src={
                     imageSrc
                       ? require(`../../../../${imageSrc}`)
-                      : require('../../../../src/assets/images/logo.png')
+                      : require('../../../assets/images/debuglogo.png')
                   }
                   className={classes.iconClass}
                   alt={props.menuItem.name}

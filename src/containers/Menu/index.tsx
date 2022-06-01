@@ -78,54 +78,6 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     }
     return null;
   };
-  // // tslint:disable-next-line: variable-name
-  // private onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
-  //   this.props.setPrevMenuActionCreator();
-  // };
-
-  // tslint:disable-next-line: variable-name
-  // const onSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-  //   // console.log(userName);
-  //   await props.setSyncOverlayHandler(true);
-
-  //   const user: any = await ipcRenderer.sendSync('fetch-username');
-  //   await ipcRenderer.send('request-data-sync', user.username);
-  //   ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
-  //     console.log('data check', event, args);
-  //     props.setSyncOverlayHandler(false);
-  //     setAlertOpen(true);
-  //     await delay(1000);
-  //     setAlertOpen(false);
-  //     return args;
-  //   });
-  // };
-
-  // const appSync = async () => {
-  //   const user: any = await ipcRenderer.sendSync('fetch-username');
-  //   await ipcRenderer.send('start-app-sync', user.username);
-  //   ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-  //     console.log('nahid check', event, args);
-  //     // return args;
-  //     if (args) {
-  //       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-  //       props.setMenuItemActionCreator(JSON.parse(newMenuItem));
-  //     } else {
-  //       return false;
-  //     }
-  //     props.setSyncOverlayHandler(false);
-  //     setAlertOpen(true);
-  //     await delay(1000);
-  //     setAlertOpen(false);
-  //   });
-  // };
-
-  // tslint:disable-next-line: variable-name
-  // const onAppSyncHandler = async (_event: React.MouseEvent<HTMLButtonElement>) => {
-  //   props.resetMenuActionCreator();
-  //   // console.log(userName);
-  //   props.setSyncOverlayHandler(true);
-  //   await appSync();
-  // };
 
   const compUpdate = async () => {
     // const user: any = await ipcRenderer.sendSync('fetch-username');
@@ -144,7 +96,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 
   const updateAppDefinition = (appDefinition: any) => {
     let update = function (module: any) {
-      if (module.xform_id != '') {
+      if (module.xform_id !== '') {
         const formModule = {
           xform_id: module.xform_id,
           name: module.name,

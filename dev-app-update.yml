@@ -1,7 +1,7 @@
 provider: "github"
-owner: "bahisMP"
-repo: "bahis_mpower"
-private: true
-token: "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"
+owner: "road86"
+repo: "bahis-desk"
+private: false
+token: ""
 releaseType: release
 electronVersion: 6.1.12

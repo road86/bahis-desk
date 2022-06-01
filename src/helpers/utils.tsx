@@ -1,6 +1,5 @@
 import { ipcRenderer } from '../services/ipcRenderer';
 import * as XLSX from 'xlsx';
-import _ from 'lodash';
 
 /** Interface for an object that is allowed to have any property */
 export interface FlexObject {
@@ -19,8 +18,10 @@ export function getNativeLanguageText(multiLanguageObject: FlexObject, languageI
   return multiLanguageObject[languageIdentifier] || '';
 }
 
+//the following function is never called
 export const appSync = async () => {
-  const user: any = await ipcRenderer.sendSync('fetch-username');
+  console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+  const user: any = await ipcRenderer.sendSync('fetch-username','aaa');
   await ipcRenderer.send('start-app-sync', user.username);
   ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
     console.log('check', event, args);
@@ -34,7 +35,8 @@ export const appSync = async () => {
 };
 
 export const dataSync = async () => {
-  const user: any = await ipcRenderer.sendSync('fetch-username');
+  console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+  const user: any = await ipcRenderer.sendSync('fetch-username','bbbb');
   await ipcRenderer.send('request-data-sync', user.username);
   ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
     console.log('check', event, args);
@@ -52,7 +54,6 @@ export const exportToExcel = (excelData: any) => {
 };
 
 export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: any, choiceList: any) => {
-  debugger;
   const excelData = [];
   let excelTabs: any = {};
   console.log(filteredColumns, tableData, choiceList);
@@ -61,6 +62,7 @@ export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: a
     const data = JSON.parse(row.data);
     console.log('-------> data: ', data);
 
+    //TODO   Line 63:20:    Unnecessarily computed property ['instance id'] found  no-useless-computed-key
     let newRow = { ['instance id']: row.instanceid };
     for (let k of Object.keys(data)) {
 
@@ -91,7 +93,6 @@ export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: a
   for (let item of Object.keys(excelTabs)) {
     excelTabs[item] = XLSX.utils.json_to_sheet(excelTabs[item]);
   }
-  debugger;
   const ws = XLSX.utils.json_to_sheet(excelData);
   const wb = { Sheets: { data: ws, ...excelTabs }, SheetNames: ['data', ...Object.keys(excelTabs)] };
   const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -119,7 +120,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
       console.log('--------------choices -------------------');
       console.log(csvChoices);
       console.log('--------csvname :', csvName);
-      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() == String(fieldValue).trim());
+      let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim());
       console.log('--------result :', result);
       if (result === undefined) return ' -- ';
       else {
@@ -134,7 +135,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
     for (let i = 0; i < choices.simpleFormChoice.length; i++) {
       const choice = choices.simpleFormChoice[i];
 
-      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() == String(fieldValue).trim()) {
+      if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
         return getFormLabel(choice.value_label);
       }
     }

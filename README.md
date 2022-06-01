@@ -21,13 +21,8 @@ Config node-gyp, follow this https://github.com/nodejs/node-gyp (just need the p
 
 ### Running the web-app
 
-First, copy the included `.env.sample` into `.env`
 
-```sh
-cp .env.sample .env
-```
-
-Next install packages using yarn and then start the app:
+Install packages using yarn and then start the app:
 
 ```sh
 yarn
@@ -61,9 +56,14 @@ yarn release
 ## Re-run of the app in dev mode
 
 ```
-rm -rf ~/.config/bahis && yarn electron-rebuild && yarn start
+rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && yarn start
 ```
 
+There is some leak in UI code that might give an error saying that there are too many watchers. Try this 
+```
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+```
+(https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
 ## Configuration
 
 The configurations are located in the `configs` directory and are split into two modules:

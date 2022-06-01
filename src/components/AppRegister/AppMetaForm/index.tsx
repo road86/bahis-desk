@@ -60,7 +60,12 @@ export default function AppMetaForm(props: AppMetaFormProps) {
       setUpazilaList(upazilaList.upazila);
     }
   };
-
+  // fix this mess? TODO
+  /*  Line 66:6:  React Hook React.useEffect has
+  a missing dependency: 'compUpdate'. 
+  Either include it or remove the dependency array  
+  react-hooks/exhaustive-deps
+  */
   React.useEffect(() => {
     compUpdate();
   }, []);

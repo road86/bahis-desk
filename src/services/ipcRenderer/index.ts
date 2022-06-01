@@ -6,4 +6,3 @@ declare global {
 
 const electron = window.require('electron');
 export const ipcRenderer = electron.ipcRenderer;
-// export const ipcRenderer = window.require('electron').ipcRenderer;

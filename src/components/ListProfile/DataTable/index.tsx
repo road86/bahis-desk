@@ -195,7 +195,7 @@ function FollowUpTable(props: ListProps) {
                                 <TableCell key={'data-field-' + colIndex} colSpan={colObj.action_definition.length } style={{ display: 'flex', justifyContent: 'center' }}>
                                 {colObj.action_definition.map((actionObj: ActionDefinition, actionIndex: number) => {
                                     return (
-                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}>
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData !== undefined ? `/submittedDetails/${rowObj.data_id}`: '/'}>
                                             <Button  variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                         </Link>
                                     )

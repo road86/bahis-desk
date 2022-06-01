@@ -223,9 +223,7 @@ function SubmittedForm(props: ListProps) {
       'delete-instance',
       instanceId, formId
     );
-    setTimeout(() => {
-      fetchTableData(formId);
-    }, 3000);
+    fetchTableData(formId);
   }
 
   React.useEffect(() => {
@@ -360,7 +358,7 @@ function SubmittedForm(props: ListProps) {
                                     if (rowObj['status'] === 0 && (actionObj.form_title === 'edit' || actionObj.form_title === 'delete')) {
                                       if (actionObj.form_title === 'edit') {
                                         return (
-                                          <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}` : '/'}
+                                          <Link key={'action-field' + actionIndex} to={actionObj.formData !== undefined ? `/form/${actionObj.xform_id}/?dataJson=${btoa(rowObj[actionObj.formData])}` : '/'}
                                           >
                                             <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                           </Link>
@@ -379,7 +377,7 @@ function SubmittedForm(props: ListProps) {
                                       }
                                     } else if (actionObj.form_title === 'view') {
                                       return (
-                                        <Link key={'action-field' + actionIndex} to={actionObj.formData != undefined ? `/submittedDetails/${rowObj.data_id}` : '/'}
+                                        <Link key={'action-field' + actionIndex} to={actionObj.formData !== undefined ? `/submittedDetails/${rowObj.data_id}` : '/'}
                                         >
                                           <Button variant="contained" color={'secondary'} style={{ color: '#EBFDED', marginRight: 5, whiteSpace: 'nowrap' }}> {actionObj.label[appLanguage]} </Button>
                                         </Link>

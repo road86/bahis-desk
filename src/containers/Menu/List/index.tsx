@@ -46,7 +46,7 @@ function ListMenuItem(props: ListMenuItemProps) {
                   src={
                     imageSource
                       ? require(`../../../../${imageSource}`)
-                      : require('../../../../src/assets/images/logo.png')
+                      : require('../../../assets/images/debuglogo.png')
                   }
                   className={classes.iconClass}
                   alt={props.menuItem.name}

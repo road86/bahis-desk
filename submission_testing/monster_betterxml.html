@@ -1,0 +1,2812 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="robots" content="NONE,NOARCHIVE">
+  <title>ConnectionError at /bhmodule/ghatail/submission/</title>
+  <style type="text/css">
+    html * { padding:0; margin:0; }
+    body * { padding:10px 20px; }
+    body * * { padding:0; }
+    body { font:small sans-serif; }
+    body>div { border-bottom:1px solid #ddd; }
+    h1 { font-weight:normal; }
+    h2 { margin-bottom:.8em; }
+    h2 span { font-size:80%; color:#666; font-weight:normal; }
+    h3 { margin:1em 0 .5em 0; }
+    h4 { margin:0 0 .5em 0; font-weight: normal; }
+    code, pre { font-size: 100%; white-space: pre-wrap; }
+    table { border:1px solid #ccc; border-collapse: collapse; width:100%; background:white; }
+    tbody td, tbody th { vertical-align:top; padding:2px 3px; }
+    thead th {
+      padding:1px 6px 1px 3px; background:#fefefe; text-align:left;
+      font-weight:normal; font-size:11px; border:1px solid #ddd;
+    }
+    tbody th { width:12em; text-align:right; color:#666; padding-right:.5em; }
+    table.vars { margin:5px 0 2px 40px; }
+    table.vars td, table.req td { font-family:monospace; }
+    table td.code { width:100%; }
+    table td.code pre { overflow:hidden; }
+    table.source th { color:#666; }
+    table.source td { font-family:monospace; white-space:pre; border-bottom:1px solid #eee; }
+    ul.traceback { list-style-type:none; color: #222; }
+    ul.traceback li.frame { padding-bottom:1em; color:#666; }
+    ul.traceback li.user { background-color:#e0e0e0; color:#000 }
+    div.context { padding:10px 0; overflow:hidden; }
+    div.context ol { padding-left:30px; margin:0 10px; list-style-position: inside; }
+    div.context ol li { font-family:monospace; white-space:pre; color:#777; cursor:pointer; }
+    div.context ol li pre { display:inline; }
+    div.context ol.context-line li { color:#505050; background-color:#dfdfdf; }
+    div.context ol.context-line li span { position:absolute; right:32px; }
+    .user div.context ol.context-line li { background-color:#bbb; color:#000; }
+    .user div.context ol li { color:#666; }
+    div.commands { margin-left: 40px; }
+    div.commands a { color:#555; text-decoration:none; }
+    .user div.commands a { color: black; }
+    #summary { background: #ffc; }
+    #summary h2 { font-weight: normal; color: #666; }
+    #explanation { background:#eee; }
+    #template, #template-not-exist { background:#f6f6f6; }
+    #template-not-exist ul { margin: 0 0 0 20px; }
+    #unicode-hint { background:#eee; }
+    #traceback { background:#eee; }
+    #requestinfo { background:#f6f6f6; padding-left:120px; }
+    #summary table { border:none; background:transparent; }
+    #requestinfo h2, #requestinfo h3 { position:relative; margin-left:-100px; }
+    #requestinfo h3 { margin-bottom:-1em; }
+    .error { background: #ffc; }
+    .specific { color:#cc3300; font-weight:bold; }
+    h2 span.commands { font-size:.7em;}
+    span.commands a:link {color:#5E5694;}
+    pre.exception_value { font-family: sans-serif; color: #666; font-size: 1.5em; margin: 10px 0 10px 0; }
+  </style>
+  
+  <script type="text/javascript">
+  //<!--
+    function getElementsByClassName(oElm, strTagName, strClassName){
+        // Written by Jonathan Snook, http://www.snook.ca/jon; Add-ons by Robert Nyman, http://www.robertnyman.com
+        var arrElements = (strTagName == "*" && document.all)? document.all :
+        oElm.getElementsByTagName(strTagName);
+        var arrReturnElements = new Array();
+        strClassName = strClassName.replace(/\-/g, "\-");
+        var oRegExp = new RegExp("(^|\s)" + strClassName + "(\s|$)");
+        var oElement;
+        for(var i=0; i<arrElements.length; i++){
+            oElement = arrElements[i];
+            if(oRegExp.test(oElement.className)){
+                arrReturnElements.push(oElement);
+            }
+        }
+        return (arrReturnElements)
+    }
+    function hideAll(elems) {
+      for (var e = 0; e < elems.length; e++) {
+        elems[e].style.display = 'none';
+      }
+    }
+    window.onload = function() {
+      hideAll(getElementsByClassName(document, 'table', 'vars'));
+      hideAll(getElementsByClassName(document, 'ol', 'pre-context'));
+      hideAll(getElementsByClassName(document, 'ol', 'post-context'));
+      hideAll(getElementsByClassName(document, 'div', 'pastebin'));
+    }
+    function toggle() {
+      for (var i = 0; i < arguments.length; i++) {
+        var e = document.getElementById(arguments[i]);
+        if (e) {
+          e.style.display = e.style.display == 'none' ? 'block': 'none';
+        }
+      }
+      return false;
+    }
+    function varToggle(link, id) {
+      toggle('v' + id);
+      var s = link.getElementsByTagName('span')[0];
+      var uarr = String.fromCharCode(0x25b6);
+      var darr = String.fromCharCode(0x25bc);
+      s.textContent = s.textContent == uarr ? darr : uarr;
+      return false;
+    }
+    function switchPastebinFriendly(link) {
+      s1 = "Switch to copy-and-paste view";
+      s2 = "Switch back to interactive view";
+      link.textContent = link.textContent.trim() == s1 ? s2: s1;
+      toggle('browserTraceback', 'pastebinTraceback');
+      return false;
+    }
+    //-->
+  </script>
+  
+</head>
+<body>
+<div id="summary">
+  <h1>ConnectionError at /bhmodule/ghatail/submission/</h1>
+  <pre class="exception_value">(&#39;Connection aborted.&#39;, error(99, &#39;Cannot assign requested address&#39;))</pre>
+  <table class="meta">
+
+    <tr>
+      <th>Request Method:</th>
+      <td>POST</td>
+    </tr>
+    <tr>
+      <th>Request URL:</th>
+      <td>http://www.bahis2-dev.net/bhmodule/ghatail/submission/</td>
+    </tr>
+
+    <tr>
+      <th>Django Version:</th>
+      <td>1.8.19</td>
+    </tr>
+
+    <tr>
+      <th>Exception Type:</th>
+      <td>ConnectionError</td>
+    </tr>
+
+
+    <tr>
+      <th>Exception Value:</th>
+      <td><pre>(&#39;Connection aborted.&#39;, error(99, &#39;Cannot assign requested address&#39;))</pre></td>
+    </tr>
+
+
+    <tr>
+      <th>Exception Location:</th>
+      <td>/opt/envbahis/lib/python2.7/site-packages/requests/adapters.py in send, line 407</td>
+    </tr>
+
+    <tr>
+      <th>Python Executable:</th>
+      <td>/uwsgi-2.0.20/uwsgi</td>
+    </tr>
+    <tr>
+      <th>Python Version:</th>
+      <td>2.7.18</td>
+    </tr>
+    <tr>
+      <th>Python Path:</th>
+      <td><pre>[&#39;/opt/envbahis/lib/python2.7/site-packages/savReaderWriter&#39;,
+ &#39;/opt/envbahis/lib/python2.7/site-packages/savReaderWriter/cWriterow&#39;,
+ &#39;.&#39;,
+ &#39;&#39;,
+ &#39;/src_bahis/env&#39;,
+ &#39;/src_bahis/kobocat&#39;,
+ &#39;/usr/lib/python2.7&#39;,
+ &#39;/usr/lib/python2.7/plat-x86_64-linux-gnu&#39;,
+ &#39;/usr/lib/python2.7/lib-tk&#39;,
+ &#39;/usr/lib/python2.7/lib-old&#39;,
+ &#39;/usr/lib/python2.7/lib-dynload&#39;,
+ &#39;/opt/envbahis/lib/python2.7/site-packages&#39;,
+ &#39;/opt/envbahis/src/django-digest&#39;,
+ &#39;/opt/envbahis/src/pyxform&#39;,
+ &#39;/opt/envbahis/src/formpack/src&#39;,
+ &#39;/opt/envbahis/src/python-json2xlsclient&#39;]</pre></td>
+    </tr>
+    <tr>
+      <th>Server time:</th>
+      <td>Wed, 1 Jun 2022 07:35:14 -0400</td>
+    </tr>
+  </table>
+</div>
+
+
+
+
+<div id="traceback">
+  <h2>Traceback <span class="commands"><a href="#" onclick="return switchPastebinFriendly(this);">
+    Switch to copy-and-paste view</a></span>
+  </h2>
+  
+  <div id="browserTraceback">
+    <ul class="traceback">
+      
+        <li class="frame django">
+          <code>/opt/envbahis/lib/python2.7/site-packages/django/core/handlers/base.py</code> in <code>get_response</code>
+
+          
+            <div class="context" id="c139744111621456">
+              
+                <ol start="125" class="pre-context" id="pre139744111621456">
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    response = middleware_method(request, callback, callback_args, callback_kwargs)</pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    if response:</pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                        break</pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>            if response is None:</pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                wrapped_callback = self.make_view_atomic(callback)</pre></li>
+                
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                try:</pre></li>
+                
+                </ol>
+              
+              <ol start="132" class="context-line">
+                <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>
+                                response = wrapped_callback(request, *callback_args, **callback_kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='133' class="post-context" id="post139744111621456">
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                except Exception as e:</pre></li>
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    # If the view raised an exception, run it through exception</pre></li>
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    # middleware, and if the exception middleware returns a</pre></li>
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    # response, use that. Otherwise, reraise the exception.</pre></li>
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                    for middleware_method in self._exception_middleware:</pre></li>
+                  
+                  <li onclick="toggle('pre139744111621456', 'post139744111621456')"><pre>                        response = middleware_method(request, e)</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744111621456')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744111621456">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>e</td>
+                    <td class="code"><pre>ConnectionError(ProtocolError(&#39;Connection aborted.&#39;, error(99, &#39;Cannot assign requested address&#39;)),)</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>callback_args</td>
+                    <td class="code"><pre>()</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>resolver_match</td>
+                    <td class="code"><pre>ResolverMatch(func=onadata.apps.bh_module.views_forms.submission_request, args=(), kwargs={&#39;username&#39;: u&#39;ghatail&#39;}, url_name=submission_request, app_name=None, namespaces=[&#39;bh_module&#39;])</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>middleware_method</td>
+                    <td class="code"><pre>&lt;bound method RevisionMiddleware.process_exception of &lt;reversion.middleware.RevisionMiddleware object at 0x7f18b9f0c050&gt;&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>self</td>
+                    <td class="code"><pre>&lt;django.core.handlers.wsgi.WSGIHandler object at 0x7f18d37e8090&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>request</td>
+                    <td class="code"><pre>&quot;&lt;WSGIRequest\npath:/bhmodule/ghatail/submission/,\nGET:&lt;QueryDict: {}&gt;,\nPOST:&lt;QueryDict: {}&gt;,\nCOOKIES:{},\nMETA:{&#39;CONTENT_LENGTH&#39;: &#39;371&#39;,\n &#39;CONTENT_TYPE&#39;: &#39;application/json&#39;,\n u&#39;CSRF_COOKIE&#39;: u&#39;PutmHaLZZxRggwWpWjzj9kxph95M2k3M&#39;,\n &#39;DOCUMENT_ROOT&#39;: &#39;/etc/nginx/html&#39;,\n &#39;HTTP_ACCEPT&#39;: &#39;*/*&#39;,\n &#39;HTTP_CONTENT_LENGTH&#39;: &#39;371&#39;,\n &#39;HTTP_CONTENT_TYPE&#39;: &#39;application/json&#39;,\n &#39;HTTP_HOST&#39;: &#39;www.bahis2-dev.net&#39;,\n &#39;HTTP_USER_AGENT&#39;: &#39;curl/7.79.1&#39;,\n &#39;PATH_INFO&#39;: u&#39;/bhmodule/ghatail/submission/&#39;,\n &#39;QUERY_STRING&#39;: &#39;&#39;,\n &#39;REMOTE_ADDR&#39;: &#39;103.112.53.239&#39;,\n &#39;REMOTE_PORT&#39;: &#39;54156&#39;,\n &#39;REQUEST_METHOD&#39;: &#39;POST&#39;,\n &#39;REQUEST_SCHEME&#39;: &#39;http&#39;,\n &#39;REQUEST_URI&#39;: &#39;/bhmodule/ghatail/submission/&#39;,\n u&#39;SCRIPT_NAME&#39;: u&#39;&#39;,\n &#39;SERVER_NAME&#39;: &#39;localhost&#39;,\n &#39;SERVER_PORT&#39;: &#39;80&#39;,\n &#39;SERVER_PROTOCOL&#39;: &#39;HTTP/1.1&#39;,\n &#39;uwsgi.node&#39;: &#39;dbf0e90e3d58&#39;,\n &#39;uwsgi.version&#39;: &#39;2.0.20&#39;,\n &#39;wsgi.errors&#39;: &lt;open file &#39;wsgi_errors&#39;, mode &#39;w&#39; at 0x7f18b9f56420&gt;,\n &#39;wsgi.file_wrapper&#39;: &lt;built-in function uwsgi_sendfile&gt;,\n &#39;wsgi.input&#39;: &lt;uwsgi._Input object at 0x7f18b6bf9590&gt;,\n &#39;wsgi.multiprocess&#39;: False,\n &#39;wsgi.multithread&#39;: False,\n &#39;wsgi.run_once&#39;: False,\n &#39;wsgi.url_scheme&#39;: &#39;http&#39;,\n &#39;wsgi.version&#39;: (1, 0)}&gt;&quot;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>callback</td>
+                    <td class="code"><pre>&lt;function submission_request at 0x7f18b98684d0&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>wrapped_callback</td>
+                    <td class="code"><pre>&lt;function submission_request at 0x7f18b98684d0&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>resolver</td>
+                    <td class="code"><pre>&lt;RegexURLResolver &#39;onadata.apps.main.urls&#39; (None:None) ^/&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>callback_kwargs</td>
+                    <td class="code"><pre>{&#39;username&#39;: u&#39;ghatail&#39;}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>response</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>urlconf</td>
+                    <td class="code"><pre>&#39;onadata.apps.main.urls&#39;</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame django">
+          <code>/opt/envbahis/lib/python2.7/site-packages/django/views/decorators/csrf.py</code> in <code>wrapped_view</code>
+
+          
+            <div class="context" id="c139744159828720">
+              
+                <ol start="51" class="pre-context" id="pre139744159828720">
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    &quot;&quot;&quot;</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    Marks a view function as being exempt from the CSRF view protection.</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    &quot;&quot;&quot;</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    # We could just do view_func.csrf_exempt = True, but decorators</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    # are nicer if they don&#39;t have side-effects, so we return a new</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    # function.</pre></li>
+                
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    def wrapped_view(*args, **kwargs):</pre></li>
+                
+                </ol>
+              
+              <ol start="58" class="context-line">
+                <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>
+                    return view_func(*args, **kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='59' class="post-context" id="post139744159828720">
+                  
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    wrapped_view.csrf_exempt = True</pre></li>
+                  
+                  <li onclick="toggle('pre139744159828720', 'post139744159828720')"><pre>    return wraps(view_func, assigned=available_attrs(view_func))(wrapped_view)</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159828720')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159828720">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>args</td>
+                    <td class="code"><pre>(&lt;WSGIRequest: POST &#39;/bhmodule/ghatail/submission/&#39;&gt;,)</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>view_func</td>
+                    <td class="code"><pre>&lt;function submission_request at 0x7f18b9868450&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>kwargs</td>
+                    <td class="code"><pre>{&#39;username&#39;: u&#39;ghatail&#39;}</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>./onadata/apps/bh_module/views_forms.py</code> in <code>submission_request</code>
+
+          
+            <div class="context" id="c139744159827520">
+              
+                <ol start="628" class="pre-context" id="pre139744159827520">
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    xml_string = json.loads(body.encode(&#39;utf-8&#39;))[&#39;xml_submission_file&#39;]</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    xml = ET.fromstring(xml_string)</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    xml_file = StringIO.StringIO(xml_string)</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    sub_url = &#39;http://&#39; + str(request.META[&#39;SERVER_NAME&#39;]) + &#39;:&#39; + str(</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>        request.META[&#39;SERVER_PORT&#39;]) + &#39;/&#39; + username + &#39;/submission&#39;</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    print sub_url</pre></li>
+                
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    files = {&#39;xml_submission_file&#39;: xml_file}</pre></li>
+                
+                </ol>
+              
+              <ol start="635" class="context-line">
+                <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>
+                r = requests.post(sub_url, files=files)</pre> <span>...</span></li></ol>
+              
+                <ol start='636' class="post-context" id="post139744159827520">
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    message = {&#39;status&#39;: r.status_code, &#39;message&#39;: r.text}</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    root = ET.fromstring(r.text)</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    instance_data = None</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>    if r.status_code == 201:</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>        for child in root:</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827520', 'post139744159827520')"><pre>            instance_string = child.attrib</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159827520')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159827520">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>files</td>
+                    <td class="code"><pre>{&#39;xml_submission_file&#39;: &lt;StringIO.StringIO instance at 0x7f18b7f7dcd0&gt;}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>xml</td>
+                    <td class="code"><pre>&lt;Element &#39;staff&#39; at 0x7f18b9f06790&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>xml_string</td>
+                    <td class="code"><pre>u&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;&lt;staff id=&quot;staff&quot;&gt;&lt;division&gt;30&lt;/division&gt;&lt;district&gt;3093&lt;/district&gt;&lt;upazila&gt;309328&lt;/upazila&gt;&lt;staffid&gt;43434&lt;/staffid&gt;&lt;staffname&gt;ddddfffd&lt;/staffname&gt;&lt;meta&gt;&lt;instanceID&gt;ghatail-10e5e774-eab1-4cb1-9139-0d379114cfa6&lt;/instanceID&gt;&lt;/meta&gt;&lt;formhub&gt;&lt;uuid&gt;ec0e6ae182b242b1a88738ee90aaae10&lt;/uuid&gt;&lt;/formhub&gt;&lt;/staff&gt;&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>xml_file</td>
+                    <td class="code"><pre>&lt;StringIO.StringIO instance at 0x7f18b7f7dcd0&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>sub_url</td>
+                    <td class="code"><pre>u&#39;http://localhost:80/ghatail/submission&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>request</td>
+                    <td class="code"><pre>&quot;&lt;WSGIRequest\npath:/bhmodule/ghatail/submission/,\nGET:&lt;QueryDict: {}&gt;,\nPOST:&lt;QueryDict: {}&gt;,\nCOOKIES:{},\nMETA:{&#39;CONTENT_LENGTH&#39;: &#39;371&#39;,\n &#39;CONTENT_TYPE&#39;: &#39;application/json&#39;,\n u&#39;CSRF_COOKIE&#39;: u&#39;PutmHaLZZxRggwWpWjzj9kxph95M2k3M&#39;,\n &#39;DOCUMENT_ROOT&#39;: &#39;/etc/nginx/html&#39;,\n &#39;HTTP_ACCEPT&#39;: &#39;*/*&#39;,\n &#39;HTTP_CONTENT_LENGTH&#39;: &#39;371&#39;,\n &#39;HTTP_CONTENT_TYPE&#39;: &#39;application/json&#39;,\n &#39;HTTP_HOST&#39;: &#39;www.bahis2-dev.net&#39;,\n &#39;HTTP_USER_AGENT&#39;: &#39;curl/7.79.1&#39;,\n &#39;PATH_INFO&#39;: u&#39;/bhmodule/ghatail/submission/&#39;,\n &#39;QUERY_STRING&#39;: &#39;&#39;,\n &#39;REMOTE_ADDR&#39;: &#39;103.112.53.239&#39;,\n &#39;REMOTE_PORT&#39;: &#39;54156&#39;,\n &#39;REQUEST_METHOD&#39;: &#39;POST&#39;,\n &#39;REQUEST_SCHEME&#39;: &#39;http&#39;,\n &#39;REQUEST_URI&#39;: &#39;/bhmodule/ghatail/submission/&#39;,\n u&#39;SCRIPT_NAME&#39;: u&#39;&#39;,\n &#39;SERVER_NAME&#39;: &#39;localhost&#39;,\n &#39;SERVER_PORT&#39;: &#39;80&#39;,\n &#39;SERVER_PROTOCOL&#39;: &#39;HTTP/1.1&#39;,\n &#39;uwsgi.node&#39;: &#39;dbf0e90e3d58&#39;,\n &#39;uwsgi.version&#39;: &#39;2.0.20&#39;,\n &#39;wsgi.errors&#39;: &lt;open file &#39;wsgi_errors&#39;, mode &#39;w&#39; at 0x7f18b9f56420&gt;,\n &#39;wsgi.file_wrapper&#39;: &lt;built-in function uwsgi_sendfile&gt;,\n &#39;wsgi.input&#39;: &lt;uwsgi._Input object at 0x7f18b6bf9590&gt;,\n &#39;wsgi.multiprocess&#39;: False,\n &#39;wsgi.multithread&#39;: False,\n &#39;wsgi.run_once&#39;: False,\n &#39;wsgi.url_scheme&#39;: &#39;http&#39;,\n &#39;wsgi.version&#39;: (1, 0)}&gt;&quot;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>username</td>
+                    <td class="code"><pre>u&#39;ghatail&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>body</td>
+                    <td class="code"><pre>&#39;{&quot;xml_submission_file&quot;:&quot;&lt;?xml version=\\&quot;1.0\\&quot; encoding=\\&quot;UTF-8\\&quot; ?&gt;&lt;staff id=\\&quot;staff\\&quot;&gt;&lt;division&gt;30&lt;/division&gt;&lt;district&gt;3093&lt;/district&gt;&lt;upazila&gt;309328&lt;/upazila&gt;&lt;staffid&gt;43434&lt;/staffid&gt;&lt;staffname&gt;ddddfffd&lt;/staffname&gt;&lt;meta&gt;&lt;instanceID&gt;ghatail-10e5e774-eab1-4cb1-9139-0d379114cfa6&lt;/instanceID&gt;&lt;/meta&gt;&lt;formhub&gt;&lt;uuid&gt;ec0e6ae182b242b1a88738ee90aaae10&lt;/uuid&gt;&lt;/formhub&gt;&lt;/staff&gt;&quot;}&#39;</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>/opt/envbahis/lib/python2.7/site-packages/requests/api.py</code> in <code>post</code>
+
+          
+            <div class="context" id="c139744159829120">
+              
+                <ol start="85" class="pre-context" id="pre139744159829120">
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    &quot;&quot;&quot;Sends a POST request. Returns :class:`Response` object.</pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    :param url: URL for the new :class:`Request` object.</pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.</pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    :param \*\*kwargs: Optional arguments that ``request`` takes.</pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    &quot;&quot;&quot;</pre></li>
+                
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre></pre></li>
+                
+                </ol>
+              
+              <ol start="92" class="context-line">
+                <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>
+                return request(&#39;post&#39;, url, data=data, **kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='93' class="post-context" id="post139744159829120">
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>def put(url, data=None, **kwargs):</pre></li>
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    &quot;&quot;&quot;Sends a PUT request. Returns :class:`Response` object.</pre></li>
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159829120', 'post139744159829120')"><pre>    :param url: URL for the new :class:`Request` object.</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159829120')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159829120">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>url</td>
+                    <td class="code"><pre>u&#39;http://localhost:80/ghatail/submission&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>data</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>kwargs</td>
+                    <td class="code"><pre>{&#39;files&#39;: {&#39;xml_submission_file&#39;: &lt;StringIO.StringIO instance at 0x7f18b7f7dcd0&gt;}}</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>/opt/envbahis/lib/python2.7/site-packages/requests/api.py</code> in <code>request</code>
+
+          
+            <div class="context" id="c139744159826880">
+              
+                <ol start="41" class="pre-context" id="pre139744159826880">
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>      &gt;&gt;&gt; import requests</pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>      &gt;&gt;&gt; req = requests.request(&#39;GET&#39;, &#39;http://httpbin.org/get&#39;)</pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>      &lt;Response [200]&gt;</pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>    &quot;&quot;&quot;</pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>    session = sessions.Session()</pre></li>
+                
+                </ol>
+              
+              <ol start="48" class="context-line">
+                <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>
+                return session.request(method=method, url=url, **kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='49' class="post-context" id="post139744159826880">
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>def get(url, **kwargs):</pre></li>
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>    &quot;&quot;&quot;Sends a GET request. Returns :class:`Response` object.</pre></li>
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159826880', 'post139744159826880')"><pre>    :param url: URL for the new :class:`Request` object.</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159826880')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159826880">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>url</td>
+                    <td class="code"><pre>u&#39;http://localhost:80/ghatail/submission&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>session</td>
+                    <td class="code"><pre>&lt;requests.sessions.Session object at 0x7f18b930e550&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>method</td>
+                    <td class="code"><pre>&#39;post&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>kwargs</td>
+                    <td class="code"><pre>{&#39;data&#39;: None,
+ &#39;files&#39;: {&#39;xml_submission_file&#39;: &lt;StringIO.StringIO instance at 0x7f18b7f7dcd0&gt;}}</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>/opt/envbahis/lib/python2.7/site-packages/requests/sessions.py</code> in <code>request</code>
+
+          
+            <div class="context" id="c139744159826000">
+              
+                <ol start="444" class="pre-context" id="pre139744159826000">
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        # Send the request.</pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        send_kwargs = {</pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>            &#39;timeout&#39;: timeout,</pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>            &#39;allow_redirects&#39;: allow_redirects,</pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        }</pre></li>
+                
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        send_kwargs.update(settings)</pre></li>
+                
+                </ol>
+              
+              <ol start="451" class="context-line">
+                <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>
+                    resp = self.send(prep, **send_kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='452' class="post-context" id="post139744159826000">
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        return resp</pre></li>
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>    def get(self, url, **kwargs):</pre></li>
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre>        &quot;&quot;&quot;Sends a GET request. Returns :class:`Response` object.</pre></li>
+                  
+                  <li onclick="toggle('pre139744159826000', 'post139744159826000')"><pre></pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159826000')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159826000">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>files</td>
+                    <td class="code"><pre>{&#39;xml_submission_file&#39;: &lt;StringIO.StringIO instance at 0x7f18b7f7dcd0&gt;}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>cookies</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>stream</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>settings</td>
+                    <td class="code"><pre>{&#39;cert&#39;: None, &#39;proxies&#39;: {}, &#39;stream&#39;: False, &#39;verify&#39;: True}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>url</td>
+                    <td class="code"><pre>u&#39;http://localhost:80/ghatail/submission&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>verify</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>self</td>
+                    <td class="code"><pre>&lt;requests.sessions.Session object at 0x7f18b930e550&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>req</td>
+                    <td class="code"><pre>&lt;Request [POST]&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>auth</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>prep</td>
+                    <td class="code"><pre>&lt;PreparedRequest [POST]&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>headers</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>cert</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>params</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>timeout</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>hooks</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>send_kwargs</td>
+                    <td class="code"><pre>{&#39;allow_redirects&#39;: True,
+ &#39;cert&#39;: None,
+ &#39;proxies&#39;: {},
+ &#39;stream&#39;: False,
+ &#39;timeout&#39;: None,
+ &#39;verify&#39;: True}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>allow_redirects</td>
+                    <td class="code"><pre>True</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>proxies</td>
+                    <td class="code"><pre>{}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>data</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>method</td>
+                    <td class="code"><pre>&#39;post&#39;</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>/opt/envbahis/lib/python2.7/site-packages/requests/sessions.py</code> in <code>send</code>
+
+          
+            <div class="context" id="c139744159828160">
+              
+                <ol start="550" class="pre-context" id="pre139744159828160">
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        # Get the appropriate adapter to use</pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        adapter = self.get_adapter(url=request.url)</pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        # Start time (approximately) of the request</pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        start = datetime.utcnow()</pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        # Send the request</pre></li>
+                
+                </ol>
+              
+              <ol start="557" class="context-line">
+                <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>
+                    r = adapter.send(request, **kwargs)</pre> <span>...</span></li></ol>
+              
+                <ol start='558' class="post-context" id="post139744159828160">
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        # Total elapsed time of the request (approximately)</pre></li>
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        r.elapsed = datetime.utcnow() - start</pre></li>
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        # Response manipulation hooks</pre></li>
+                  
+                  <li onclick="toggle('pre139744159828160', 'post139744159828160')"><pre>        r = dispatch_hook(&#39;response&#39;, hooks, r, **kwargs)</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159828160')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159828160">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>stream</td>
+                    <td class="code"><pre>False</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>verify</td>
+                    <td class="code"><pre>True</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>adapter</td>
+                    <td class="code"><pre>&lt;requests.adapters.HTTPAdapter object at 0x7f18b930e390&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>request</td>
+                    <td class="code"><pre>&lt;PreparedRequest [POST]&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>start</td>
+                    <td class="code"><pre>datetime.datetime(2022, 6, 1, 11, 35, 14, 668993)</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>cert</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>hooks</td>
+                    <td class="code"><pre>{&#39;response&#39;: []}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>timeout</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>kwargs</td>
+                    <td class="code"><pre>{&#39;cert&#39;: None, &#39;proxies&#39;: {}, &#39;stream&#39;: False, &#39;timeout&#39;: None, &#39;verify&#39;: True}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>allow_redirects</td>
+                    <td class="code"><pre>True</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>proxies</td>
+                    <td class="code"><pre>{}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>self</td>
+                    <td class="code"><pre>&lt;requests.sessions.Session object at 0x7f18b930e550&gt;</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+        <li class="frame user">
+          <code>/opt/envbahis/lib/python2.7/site-packages/requests/adapters.py</code> in <code>send</code>
+
+          
+            <div class="context" id="c139744159827200">
+              
+                <ol start="400" class="pre-context" id="pre139744159827200">
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                    low_conn.close()</pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                    raise</pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                else:</pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                    # All is well, return the connection to the pool.</pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                    conn._put_conn(low_conn)</pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre></pre></li>
+                
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>        except (ProtocolError, socket.error) as err:</pre></li>
+                
+                </ol>
+              
+              <ol start="407" class="context-line">
+                <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>
+                        raise ConnectionError(err, request=request)</pre> <span>...</span></li></ol>
+              
+                <ol start='408' class="post-context" id="post139744159827200">
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>        except MaxRetryError as e:</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>            if isinstance(e.reason, ConnectTimeoutError):</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>                raise ConnectTimeout(e, request=request)</pre></li>
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre></pre></li>
+                  
+                  <li onclick="toggle('pre139744159827200', 'post139744159827200')"><pre>            raise ConnectionError(e, request=request)</pre></li>
+                  
+              </ol>
+              
+            </div>
+          
+
+          
+            <div class="commands">
+                
+                    <a href="#" onclick="return varToggle(this, '139744159827200')"><span>&#x25b6;</span> Local vars</a>
+                
+            </div>
+            <table class="vars" id="v139744159827200">
+              <thead>
+                <tr>
+                  <th>Variable</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                  <tr>
+                    <td>proxies</td>
+                    <td class="code"><pre>{}</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>stream</td>
+                    <td class="code"><pre>False</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>err</td>
+                    <td class="code"><pre>ProtocolError(&#39;Connection aborted.&#39;, error(99, &#39;Cannot assign requested address&#39;))</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>url</td>
+                    <td class="code"><pre>&#39;/ghatail/submission&#39;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>verify</td>
+                    <td class="code"><pre>True</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>self</td>
+                    <td class="code"><pre>&lt;requests.adapters.HTTPAdapter object at 0x7f18b930e390&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>request</td>
+                    <td class="code"><pre>&lt;PreparedRequest [POST]&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>cert</td>
+                    <td class="code"><pre>None</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>timeout</td>
+                    <td class="code"><pre>&lt;requests.packages.urllib3.util.timeout.Timeout object at 0x7f18b8e4c750&gt;</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>chunked</td>
+                    <td class="code"><pre>False</pre></td>
+                  </tr>
+                
+                  <tr>
+                    <td>conn</td>
+                    <td class="code"><pre>&lt;requests.packages.urllib3.connectionpool.HTTPConnectionPool object at 0x7f18b67abc10&gt;</pre></td>
+                  </tr>
+                
+              </tbody>
+            </table>
+          
+        </li>
+      
+    </ul>
+  </div>
+  
+  <form action="http://dpaste.com/" name="pasteform" id="pasteform" method="post">
+
+  <div id="pastebinTraceback" class="pastebin">
+    <input type="hidden" name="language" value="PythonConsole">
+    <input type="hidden" name="title"
+      value="ConnectionError at /bhmodule/ghatail/submission/">
+    <input type="hidden" name="source" value="Django Dpaste Agent">
+    <input type="hidden" name="poster" value="Django">
+    <textarea name="content" id="traceback_area" cols="140" rows="25">
+Environment:
+
+
+Request Method: POST
+Request URL: http://www.bahis2-dev.net/bhmodule/ghatail/submission/
+
+Django Version: 1.8.19
+Python Version: 2.7.18
+Installed Applications:
+(&#39;django.contrib.auth&#39;,
+ &#39;django.contrib.contenttypes&#39;,
+ &#39;django.contrib.sessions&#39;,
+ &#39;django.contrib.sites&#39;,
+ &#39;django.contrib.messages&#39;,
+ &#39;django.contrib.staticfiles&#39;,
+ &#39;django.contrib.humanize&#39;,
+ &#39;django.contrib.admin&#39;,
+ &#39;django.contrib.admindocs&#39;,
+ &#39;django.contrib.gis&#39;,
+ &#39;registration&#39;,
+ &#39;reversion&#39;,
+ &#39;django_nose&#39;,
+ &#39;django_digest&#39;,
+ &#39;corsheaders&#39;,
+ &#39;oauth2_provider&#39;,
+ &#39;rest_framework&#39;,
+ &#39;rest_framework.authtoken&#39;,
+ &#39;taggit&#39;,
+ &#39;readonly&#39;,
+ &#39;onadata.apps.logger&#39;,
+ &#39;onadata.apps.viewer&#39;,
+ &#39;onadata.apps.main&#39;,
+ &#39;onadata.apps.restservice&#39;,
+ &#39;onadata.apps.api&#39;,
+ &#39;guardian&#39;,
+ &#39;djcelery&#39;,
+ &#39;onadata.apps.stats&#39;,
+ &#39;onadata.apps.sms_support&#39;,
+ &#39;onadata.libs&#39;,
+ &#39;onadata.apps.survey_report&#39;,
+ &#39;onadata.apps.export&#39;,
+ &#39;pure_pagination&#39;,
+ &#39;onadata.apps.usermodule&#39;,
+ &#39;django_unused&#39;,
+ &#39;onadata.apps.bh_module&#39;,
+ &#39;onadata.apps.formmodule&#39;,
+ &#39;onadata.apps.reportsmodule&#39;)
+Installed Middleware:
+(&#39;onadata.koboform.redirect_middleware.ConditionalRedirects&#39;,
+ &#39;reversion.middleware.RevisionMiddleware&#39;,
+ &#39;django.contrib.sessions.middleware.SessionMiddleware&#39;,
+ &#39;django.middleware.locale.LocaleMiddleware&#39;,
+ &#39;django.middleware.common.CommonMiddleware&#39;,
+ &#39;onadata.libs.utils.middleware.LocaleMiddlewareWithTweaks&#39;,
+ &#39;onadata.libs.utils.middleware.BrokenClientMiddleware&#39;,
+ &#39;django.middleware.csrf.CsrfViewMiddleware&#39;,
+ &#39;corsheaders.middleware.CorsMiddleware&#39;,
+ &#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;,
+ &#39;django.contrib.messages.middleware.MessageMiddleware&#39;,
+ &#39;onadata.libs.utils.middleware.HTTPResponseNotAllowedMiddleware&#39;,
+ &#39;readonly.middleware.DatabaseReadOnlyMiddleware&#39;)
+
+
+Traceback:
+File "/opt/envbahis/lib/python2.7/site-packages/django/core/handlers/base.py" in get_response
+  132.                     response = wrapped_callback(request, *callback_args, **callback_kwargs)
+File "/opt/envbahis/lib/python2.7/site-packages/django/views/decorators/csrf.py" in wrapped_view
+  58.         return view_func(*args, **kwargs)
+File "./onadata/apps/bh_module/views_forms.py" in submission_request
+  635.     r = requests.post(sub_url, files=files)
+File "/opt/envbahis/lib/python2.7/site-packages/requests/api.py" in post
+  92.     return request(&#39;post&#39;, url, data=data, **kwargs)
+File "/opt/envbahis/lib/python2.7/site-packages/requests/api.py" in request
+  48.     return session.request(method=method, url=url, **kwargs)
+File "/opt/envbahis/lib/python2.7/site-packages/requests/sessions.py" in request
+  451.         resp = self.send(prep, **send_kwargs)
+File "/opt/envbahis/lib/python2.7/site-packages/requests/sessions.py" in send
+  557.         r = adapter.send(request, **kwargs)
+File "/opt/envbahis/lib/python2.7/site-packages/requests/adapters.py" in send
+  407.             raise ConnectionError(err, request=request)
+
+Exception Type: ConnectionError at /bhmodule/ghatail/submission/
+Exception Value: (&#39;Connection aborted.&#39;, error(99, &#39;Cannot assign requested address&#39;))
+</textarea>
+  <br><br>
+  <input type="submit" value="Share this traceback on a public Web site">
+  </div>
+</form>
+</div>
+
+
+
+<div id="requestinfo">
+  <h2>Request information</h2>
+
+
+  <h3 id="get-info">GET</h3>
+  
+    <p>No GET data</p>
+  
+
+  <h3 id="post-info">POST</h3>
+  
+    <p>No POST data</p>
+  
+  <h3 id="files-info">FILES</h3>
+  
+    <p>No FILES data</p>
+  
+
+
+  <h3 id="cookie-info">COOKIES</h3>
+  
+    <p>No cookie data</p>
+  
+
+  <h3 id="meta-info">META</h3>
+  <table class="req">
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+        <tr>
+          <td>wsgi.multiprocess</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SCRIPT_NAME</td>
+          <td class="code"><pre>u&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REQUEST_METHOD</td>
+          <td class="code"><pre>&#39;POST&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PATH_INFO</td>
+          <td class="code"><pre>u&#39;/bhmodule/ghatail/submission/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SERVER_PROTOCOL</td>
+          <td class="code"><pre>&#39;HTTP/1.1&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>QUERY_STRING</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CONTENT_LENGTH</td>
+          <td class="code"><pre>&#39;371&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>HTTP_USER_AGENT</td>
+          <td class="code"><pre>&#39;curl/7.79.1&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SERVER_NAME</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REMOTE_ADDR</td>
+          <td class="code"><pre>&#39;103.112.53.239&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.url_scheme</td>
+          <td class="code"><pre>&#39;http&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SERVER_PORT</td>
+          <td class="code"><pre>&#39;80&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>uwsgi.node</td>
+          <td class="code"><pre>&#39;dbf0e90e3d58&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DOCUMENT_ROOT</td>
+          <td class="code"><pre>&#39;/etc/nginx/html&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>HTTP_CONTENT_LENGTH</td>
+          <td class="code"><pre>&#39;371&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.input</td>
+          <td class="code"><pre>&lt;uwsgi._Input object at 0x7f18b6bf9590&gt;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>HTTP_HOST</td>
+          <td class="code"><pre>&#39;www.bahis2-dev.net&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.multithread</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>HTTP_CONTENT_TYPE</td>
+          <td class="code"><pre>&#39;application/json&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REQUEST_URI</td>
+          <td class="code"><pre>&#39;/bhmodule/ghatail/submission/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>HTTP_ACCEPT</td>
+          <td class="code"><pre>&#39;*/*&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.version</td>
+          <td class="code"><pre>(1, 0)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.run_once</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.errors</td>
+          <td class="code"><pre>&lt;open file &#39;wsgi_errors&#39;, mode &#39;w&#39; at 0x7f18b9f56420&gt;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REMOTE_PORT</td>
+          <td class="code"><pre>&#39;54156&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REQUEST_SCHEME</td>
+          <td class="code"><pre>&#39;http&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>uwsgi.version</td>
+          <td class="code"><pre>&#39;2.0.20&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CONTENT_TYPE</td>
+          <td class="code"><pre>&#39;application/json&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>wsgi.file_wrapper</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE</td>
+          <td class="code"><pre>u&#39;PutmHaLZZxRggwWpWjzj9kxph95M2k3M&#39;</pre></td>
+        </tr>
+      
+    </tbody>
+  </table>
+
+
+  <h3 id="settings-info">Settings</h3>
+  <h4>Using settings module <code>kobocat_settings</code></h4>
+  <table class="req">
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+        <tr>
+          <td>TEMPLATED_EMAIL_TEMPLATE_DIR</td>
+          <td class="code"><pre>&#39;templated_email/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOFORM_SERVER_PROTOCOL</td>
+          <td class="code"><pre>&#39;http&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_SESSION_EXPIRY_TIME</td>
+          <td class="code"><pre>21600</pre></td>
+        </tr>
+      
+        <tr>
+          <td>COMPRESS</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_THOUSAND_SEPARATOR</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBO_SERVER</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_SECURE</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGE_CODE</td>
+          <td class="code"><pre>&#39;en-us&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ROOT_URLCONF</td>
+          <td class="code"><pre>&#39;onadata.apps.main.urls&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERYD_TASK_TIME_LIMIT</td>
+          <td class="code"><pre>2100</pre></td>
+        </tr>
+      
+        <tr>
+          <td>BROKER_URL</td>
+          <td class="code"><pre>&#39;amqp://admin:admin@192.168.19.119:5672/dyn&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FORM_TABLE_SCHEMA</td>
+          <td class="code"><pre>&#39;core&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>BASE_DIR</td>
+          <td class="code"><pre>&#39;/src_bahis&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SILENCED_SYSTEM_CHECKS</td>
+          <td class="code"><pre>[]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ACCOUNT_ACTIVATION_DAYS</td>
+          <td class="code"><pre>1</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SWAGGER_SETTINGS</td>
+          <td class="code"><pre>{&#39;api_version&#39;: &#39;1.0&#39;,
+ &#39;enabled_methods&#39;: [&#39;get&#39;, &#39;post&#39;, &#39;put&#39;, &#39;patch&#39;, &#39;delete&#39;],
+ &#39;exclude_namespaces&#39;: []}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_SERIALIZER</td>
+          <td class="code"><pre>&#39;django.contrib.sessions.serializers.JSONSerializer&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>STATIC_ROOT</td>
+          <td class="code"><pre>&#39;/src_bahis/kobocat/onadata/static&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REGISTRATION_OPEN</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ALLOWED_HOSTS</td>
+          <td class="code"><pre>&#39;*&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>GOOGLE_CLIENT_ID</td>
+          <td class="code"><pre>&#39;617113120802.onadata.apps.googleusercontent.com&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MESSAGE_STORAGE</td>
+          <td class="code"><pre>&#39;django.contrib.messages.storage.fallback.FallbackStorage&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>RECAPTCHA_PRIVATE_KEY</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_SUBJECT_PREFIX</td>
+          <td class="code"><pre>&#39;[Django] &#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SERVER_EMAIL</td>
+          <td class="code"><pre>&#39;root@localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_HSTS_SECONDS</td>
+          <td class="code"><pre>0</pre></td>
+        </tr>
+      
+        <tr>
+          <td>STATICFILES_FINDERS</td>
+          <td class="code"><pre>(&#39;django.contrib.staticfiles.finders.FileSystemFinder&#39;,
+ &#39;django.contrib.staticfiles.finders.AppDirectoriesFinder&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_CACHE_ALIAS</td>
+          <td class="code"><pre>&#39;default&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_DOMAIN</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_NAME</td>
+          <td class="code"><pre>&#39;sessionid&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TIME_INPUT_FORMATS</td>
+          <td class="code"><pre>(&#39;%H:%M:%S&#39;, &#39;%H:%M:%S.%f&#39;, &#39;%H:%M&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_REDIRECT_EXEMPT</td>
+          <td class="code"><pre>[]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATABASES</td>
+          <td class="code"><pre>{&#39;default&#39;: {&#39;ATOMIC_REQUESTS&#39;: False,
+             &#39;AUTOCOMMIT&#39;: True,
+             &#39;CONN_MAX_AGE&#39;: 0,
+             &#39;ENGINE&#39;: &#39;django.contrib.gis.db.backends.postgis&#39;,
+             &#39;HOST&#39;: &#39;pgdb&#39;,
+             &#39;NAME&#39;: &#39;coredb&#39;,
+             &#39;OPTIONS&#39;: {&#39;options&#39;: &#39;-c search_path=public,instance,core,custom&#39;},
+             &#39;PASSWORD&#39;: u&#39;********************&#39;,
+             &#39;PORT&#39;: &#39;5432&#39;,
+             &#39;TEST&#39;: {&#39;CHARSET&#39;: None,
+                      &#39;COLLATION&#39;: None,
+                      &#39;MIRROR&#39;: None,
+                      &#39;NAME&#39;: None},
+             &#39;TIME_ZONE&#39;: &#39;UTC&#39;,
+             &#39;USER&#39;: &#39;kobo&#39;}}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_SSL_KEYFILE</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_DEBUG</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_UPLOAD_DIRECTORY_PERMISSIONS</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_TZ</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>RECAPTCHA_PUBLIC_KEY</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_UPLOAD_PERMISSIONS</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MONGO_DB</td>
+          <td class="code"><pre>Database(MongoClient(&#39;mongodb&#39;, 27017), u&#39;coredb&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_UPLOAD_HANDLERS</td>
+          <td class="code"><pre>(&#39;django.core.files.uploadhandler.MemoryFileUploadHandler&#39;,
+ &#39;django.core.files.uploadhandler.TemporaryFileUploadHandler&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_PREVIEW</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_CONTENT_TYPE</td>
+          <td class="code"><pre>&#39;text/html&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>IMG_FILE_TYPE</td>
+          <td class="code"><pre>&#39;jpg&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_LOADERS</td>
+          <td class="code"><pre>(&#39;django.template.loaders.filesystem.Loader&#39;,
+ &#39;django.template.loaders.app_directories.Loader&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>APPEND_SLASH</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FIRST_DAY_OF_WEEK</td>
+          <td class="code"><pre>0</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CURRENT_FILE</td>
+          <td class="code"><pre>&#39;/src_bahis/kobocat/onadata/settings/common.py&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_TABLESPACE</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>YEAR_MONTH_FORMAT</td>
+          <td class="code"><pre>&#39;F Y&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>THUMB_CONF</td>
+          <td class="code"><pre>{&#39;large&#39;: {&#39;size&#39;: 1280, &#39;suffix&#39;: &#39;-large&#39;},
+ &#39;medium&#39;: {&#39;size&#39;: 640, &#39;suffix&#39;: &#39;-medium&#39;},
+ &#39;small&#39;: {&#39;size&#39;: 240, &#39;suffix&#39;: &#39;-small&#39;}}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MONGO_DATABASE</td>
+          <td class="code"><pre>{&#39;HOST&#39;: &#39;mongodb&#39;,
+ &#39;NAME&#39;: &#39;coredb&#39;,
+ &#39;PASSWORD&#39;: u&#39;********************&#39;,
+ &#39;PORT&#39;: 27017,
+ &#39;USER&#39;: &#39;&#39;}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CACHES</td>
+          <td class="code"><pre>{&#39;default&#39;: {&#39;BACKEND&#39;: &#39;django.core.cache.backends.locmem.LocMemCache&#39;}}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_PATH</td>
+          <td class="code"><pre>&#39;/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>WEB_SERVER</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FORM_BUILDER_SERVER</td>
+          <td class="code"><pre>&#39;localhost/form-renderer&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOFORM_LOGIN_AUTOREDIRECT</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_CONTENT_TYPE_NOSNIFF</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBO_MODULE_URL</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_I18N</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CORS_ALLOW_CREDENTIALS</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECRET_KEY</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CORS_ORIGIN_WHITELIST</td>
+          <td class="code"><pre>(&#39;dev.ona.io&#39;,)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_INSTANCE</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_INDEX_TABLESPACE</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>GOOGLE_STEP2_URI</td>
+          <td class="code"><pre>&#39;http://ona.io/gwelcome&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOGGING_CONFIG</td>
+          <td class="code"><pre>&#39;logging.config.dictConfig&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SIGNING_BACKEND</td>
+          <td class="code"><pre>&#39;django.core.signing.TimestampSigner&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>THUMB_ORDER</td>
+          <td class="code"><pre>[&#39;large&#39;, &#39;medium&#39;, &#39;small&#39;]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOFORM_URL</td>
+          <td class="code"><pre>&#39;http://localhost:8000&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>RECAPTCHA_USE_SSL</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOCAT_INTERNAL_HOSTNAME</td>
+          <td class="code"><pre>&#39;kc.docker.internal&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>WSGI_APPLICATION</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATABASE_ROUTERS</td>
+          <td class="code"><pre>[]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>X_FRAME_OPTIONS</td>
+          <td class="code"><pre>&#39;SAMEORIGIN&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_NAME</td>
+          <td class="code"><pre>&#39;csrftoken&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_SURVEY_PATH</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>OAUTH2_PROVIDER</td>
+          <td class="code"><pre>{&#39;SCOPES&#39;: {&#39;groups&#39;: &#39;Access to your groups&#39;,
+            &#39;read&#39;: &#39;Read scope&#39;,
+            &#39;write&#39;: &#39;Write scope&#39;}}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FORCE_SCRIPT_NAME</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_X_FORWARDED_HOST</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_ETAGS</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERY_ALWAYS_EAGER</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_TIMEOUT</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_SSL_HOST</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_CHARSET</td>
+          <td class="code"><pre>&#39;utf-8&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_SECURE</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_BROWSER_XSS_FILTER</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_DOMAIN</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERYD_TASK_SOFT_TIME_LIMIT</td>
+          <td class="code"><pre>1800</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEBUG</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MONGO_CONNECTION</td>
+          <td class="code"><pre>MongoClient(&#39;mongodb&#39;, 27017)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>INTERNAL_IPS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_FILE_STORAGE</td>
+          <td class="code"><pre>&#39;django.core.files.storage.FileSystemStorage&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>INSTALLED_APPS</td>
+          <td class="code"><pre>(&#39;django.contrib.auth&#39;,
+ &#39;django.contrib.contenttypes&#39;,
+ &#39;django.contrib.sessions&#39;,
+ &#39;django.contrib.sites&#39;,
+ &#39;django.contrib.messages&#39;,
+ &#39;django.contrib.staticfiles&#39;,
+ &#39;django.contrib.humanize&#39;,
+ &#39;django.contrib.admin&#39;,
+ &#39;django.contrib.admindocs&#39;,
+ &#39;django.contrib.gis&#39;,
+ &#39;registration&#39;,
+ &#39;reversion&#39;,
+ &#39;django_nose&#39;,
+ &#39;django_digest&#39;,
+ &#39;corsheaders&#39;,
+ &#39;oauth2_provider&#39;,
+ &#39;rest_framework&#39;,
+ &#39;rest_framework.authtoken&#39;,
+ &#39;taggit&#39;,
+ &#39;readonly&#39;,
+ &#39;onadata.apps.logger&#39;,
+ &#39;onadata.apps.viewer&#39;,
+ &#39;onadata.apps.main&#39;,
+ &#39;onadata.apps.restservice&#39;,
+ &#39;onadata.apps.api&#39;,
+ &#39;guardian&#39;,
+ &#39;djcelery&#39;,
+ &#39;onadata.apps.stats&#39;,
+ &#39;onadata.apps.sms_support&#39;,
+ &#39;onadata.libs&#39;,
+ &#39;onadata.apps.survey_report&#39;,
+ &#39;onadata.apps.export&#39;,
+ &#39;pure_pagination&#39;,
+ &#39;onadata.apps.usermodule&#39;,
+ &#39;django_unused&#39;,
+ &#39;onadata.apps.bh_module&#39;,
+ &#39;onadata.apps.formmodule&#39;,
+ &#39;onadata.apps.reportsmodule&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGES_BIDI</td>
+          <td class="code"><pre>(&#39;he&#39;, &#39;ar&#39;, &#39;fa&#39;, &#39;ur&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>USE_L10N</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_VALIDATION_STATUSES</td>
+          <td class="code"><pre>[{&#39;color&#39;: &#39;#ff0000&#39;,
+  &#39;label&#39;: &#39;Not Approved&#39;,
+  &#39;uid&#39;: &#39;validation_status_not_approved&#39;},
+ {&#39;color&#39;: &#39;#00ff00&#39;,
+  &#39;label&#39;: &#39;Approved&#39;,
+  &#39;uid&#39;: &#39;validation_status_approved&#39;},
+ {&#39;color&#39;: &#39;#0000ff&#39;, &#39;label&#39;: &#39;On Hold&#39;, &#39;uid&#39;: &#39;validation_status_on_hold&#39;}]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_HSTS_INCLUDE_SUBDOMAINS</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>STATICFILES_DIRS</td>
+          <td class="code"><pre>(&#39;/src_bahis/kobocat/onadata/../../kobocat-template/static&#39;,)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KPI_URL</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ZIP_EXPORT_COUNTDOWN</td>
+          <td class="code"><pre>86400</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PREPEND_WWW</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_PROXY_SSL_HEADER</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PASSWORD_RESET_TIMEOUT_DAYS</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>BINARY_SELECT_MULTIPLES</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGE_COOKIE_AGE</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_HTTPONLY</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TESTING_MODE</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEBUG_PROPAGATE_EXCEPTIONS</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>BROKER_BACKEND</td>
+          <td class="code"><pre>&#39;librabbitmq&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MEDIA_URL</td>
+          <td class="code"><pre>&#39;/media/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_PROTOCOL</td>
+          <td class="code"><pre>&#39;https&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MONTH_DAY_FORMAT</td>
+          <td class="code"><pre>&#39;F j&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOGIN_URL</td>
+          <td class="code"><pre>&#39;/usermodule/login/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_EXPIRE_AT_BROWSER_CLOSE</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REGISTRATION_REQUIRE_CAPTCHA</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_CHARSET</td>
+          <td class="code"><pre>&#39;utf-8&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOFORM_SERVER</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TIME_FORMAT</td>
+          <td class="code"><pre>&#39;P&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOFORM_SERVER_PORT</td>
+          <td class="code"><pre>&#39;8000&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEST_USERNAME</td>
+          <td class="code"><pre>&#39;bob&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_OVERRIDE_ROOT_DIR</td>
+          <td class="code"><pre>&#39;/src_bahis/kobocat/onadata/../../kobocat-template&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>AUTH_USER_MODEL</td>
+          <td class="code"><pre>&#39;auth.User&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATE_INPUT_FORMATS</td>
+          <td class="code"><pre>(&#39;%Y-%m-%d&#39;,
+ &#39;%m/%d/%Y&#39;,
+ &#39;%m/%d/%y&#39;,
+ &#39;%b %d %Y&#39;,
+ &#39;%b %d, %Y&#39;,
+ &#39;%d %b %Y&#39;,
+ &#39;%d %b, %Y&#39;,
+ &#39;%B %d %Y&#39;,
+ &#39;%B %d, %Y&#39;,
+ &#39;%d %B %Y&#39;,
+ &#39;%d %B, %Y&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>AUTHENTICATION_BACKENDS</td>
+          <td class="code"><pre>(&#39;django.contrib.auth.backends.ModelBackend&#39;,
+ &#39;guardian.backends.ObjectPermissionBackend&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_HOST_PASSWORD</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>AUTH_PROFILE_MODULE</td>
+          <td class="code"><pre>&#39;onadata.apps.main.UserProfile&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGE_COOKIE_DOMAIN</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CACHE_MIDDLEWARE_ALIAS</td>
+          <td class="code"><pre>&#39;default&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_SAVE_EVERY_REQUEST</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ADMIN_MEDIA_PREFIX</td>
+          <td class="code"><pre>&#39;/static/admin/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>NUMBER_GROUPING</td>
+          <td class="code"><pre>0</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SHARE_PROJECT_SUBJECT</td>
+          <td class="code"><pre>&#39;{} Ona Project has been shared with you.&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_ENGINE</td>
+          <td class="code"><pre>&#39;django.contrib.sessions.backends.db&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>STATICFILES_STORAGE</td>
+          <td class="code"><pre>&#39;django.contrib.staticfiles.storage.StaticFilesStorage&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_FAILURE_VIEW</td>
+          <td class="code"><pre>&#39;django.views.csrf.csrf_failure&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_PATH</td>
+          <td class="code"><pre>&#39;/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOGIN_REDIRECT_URL</td>
+          <td class="code"><pre>&#39;/usermodule/login/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_INSTANCE_IFRAME</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PROJECT_ROOT</td>
+          <td class="code"><pre>&#39;/src_bahis/kobocat/onadata&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DECIMAL_SEPARATOR</td>
+          <td class="code"><pre>&#39;.&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CACHE_MIDDLEWARE_KEY_PREFIX</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_OFFLINE_SURVEYS</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOCALE_PATHS</td>
+          <td class="code"><pre>(&#39;/src_bahis/kobocat/onadata/onadata.apps.main/locale&#39;,)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PRINT_EXCEPTION</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_STRING_IF_INVALID</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_VERSION</td>
+          <td class="code"><pre>&#39;legacy&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>IS_EXIST_BRANCH</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOGOUT_URL</td>
+          <td class="code"><pre>&#39;/accounts/logout/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_USE_TLS</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_DIRS</td>
+          <td class="code"><pre>(&#39;/src_bahis/kobocat/onadata/../../kobocat-template/templates&#39;,
+ &#39;/src_bahis/kobocat/onadata/libs/templates&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REQUIRE_AUTHENTICATION_TO_SEE_FORMS_AND_SUBMIT_DATA_DEFAULT</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SUPPORTED_MEDIA_UPLOAD_TYPES</td>
+          <td class="code"><pre>[&#39;image/jpeg&#39;,
+ &#39;image/png&#39;,
+ &#39;image/svg+xml&#39;,
+ &#39;audio/mpeg&#39;,
+ &#39;video/3gpp&#39;,
+ &#39;audio/wav&#39;,
+ &#39;audio/x-m4a&#39;,
+ &#39;audio/mp3&#39;,
+ &#39;text/csv&#39;,
+ &#39;application/zip&#39;]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FIXTURE_DIRS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_HOST</td>
+          <td class="code"><pre>&#39;localhost&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATE_FORMAT</td>
+          <td class="code"><pre>&#39;N j, Y&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_INSTANCE_IFRAME_URL</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MEDIA_ROOT</td>
+          <td class="code"><pre>&#39;/src_bahis/kobocat/onadata/media/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_EXCEPTION_REPORTER_FILTER</td>
+          <td class="code"><pre>&#39;django.views.debug.SafeExceptionReporterFilter&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ADMINS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FORMAT_MODULE_PATH</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_FROM_EMAIL</td>
+          <td class="code"><pre>&#39;noreply@ona.io&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>THOUSAND_SEPARATOR</td>
+          <td class="code"><pre>&#39;,&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>REST_FRAMEWORK</td>
+          <td class="code"><pre>{&#39;DEFAULT_AUTHENTICATION_CLASSES&#39;: (&#39;onadata.libs.authentication.DigestAuthentication&#39;,
+                                    &#39;oauth2_provider.ext.rest_framework.OAuth2Authentication&#39;,
+                                    &#39;rest_framework.authentication.SessionAuthentication&#39;,
+                                    &#39;rest_framework.authentication.TokenAuthentication&#39;,
+                                    &#39;onadata.libs.authentication.HttpsOnlyBasicAuthentication&#39;),
+ &#39;DEFAULT_MODEL_SERIALIZER_CLASS&#39;: &#39;rest_framework.serializers.HyperlinkedModelSerializer&#39;,
+ &#39;DEFAULT_PERMISSION_CLASSES&#39;: [&#39;rest_framework.permissions.AllowAny&#39;],
+ &#39;DEFAULT_RENDERER_CLASSES&#39;: (&#39;rest_framework.renderers.JSONRenderer&#39;,
+                              &#39;rest_framework_jsonp.renderers.JSONPRenderer&#39;,
+                              &#39;rest_framework.renderers.BrowsableAPIRenderer&#39;,
+                              &#39;rest_framework_xml.renderers.XMLRenderer&#39;,
+                              &#39;rest_framework_csv.renderers.CSVRenderer&#39;),
+ &#39;VIEW_DESCRIPTION_FUNCTION&#39;: &#39;onadata.apps.api.tools.get_view_description&#39;,
+ &#39;VIEW_NAME_FUNCTION&#39;: &#39;onadata.apps.api.tools.get_view_name&#39;}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_ONLINE_SURVEYS</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATETIME_FORMAT</td>
+          <td class="code"><pre>&#39;N j, Y, P&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>NA_REP</td>
+          <td class="code"><pre>&#39;n/a&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_FILE_PATH</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SYSTEM_TABLE</td>
+          <td class="code"><pre>[&#39;geo_cluster&#39;]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOCAT_URL</td>
+          <td class="code"><pre>&#39;https://kc.kobotoolbox.org&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_URL</td>
+          <td class="code"><pre>&#39;https://enketo.kobotoolbox.org&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MIDDLEWARE_CLASSES</td>
+          <td class="code"><pre>(&#39;onadata.koboform.redirect_middleware.ConditionalRedirects&#39;,
+ &#39;reversion.middleware.RevisionMiddleware&#39;,
+ &#39;django.contrib.sessions.middleware.SessionMiddleware&#39;,
+ &#39;django.middleware.locale.LocaleMiddleware&#39;,
+ &#39;django.middleware.common.CommonMiddleware&#39;,
+ &#39;onadata.libs.utils.middleware.LocaleMiddlewareWithTweaks&#39;,
+ &#39;onadata.libs.utils.middleware.BrokenClientMiddleware&#39;,
+ &#39;django.middleware.csrf.CsrfViewMiddleware&#39;,
+ &#39;corsheaders.middleware.CorsMiddleware&#39;,
+ &#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;,
+ &#39;django.contrib.messages.middleware.MessageMiddleware&#39;,
+ &#39;onadata.libs.utils.middleware.HTTPResponseNotAllowedMiddleware&#39;,
+ &#39;readonly.middleware.DatabaseReadOnlyMiddleware&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SITE_ID</td>
+          <td class="code"><pre>&#39;1&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DISALLOWED_USER_AGENTS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ALLOWED_INCLUDE_ROOTS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>GOOGLE_CLIENT_SECRET</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_PREVIEW_URL</td>
+          <td class="code"><pre>&#39;https://enketo.kobotoolbox.org/webform/preview&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SOUTH_MIGRATION_MODULES</td>
+          <td class="code"><pre>{&#39;onadata.apps.api&#39;: &#39;onadata.apps.api.south_migrations&#39;,
+ &#39;onadata.apps.logger&#39;: &#39;onadata.apps.logger.south_migrations&#39;,
+ &#39;onadata.apps.main&#39;: &#39;onadata.apps.main.south_migrations&#39;,
+ &#39;onadata.apps.restservice&#39;: &#39;onadata.apps.restservice.south_migrations&#39;,
+ &#39;onadata.apps.stats&#39;: &#39;onadata.apps.stats.south_migrations&#39;,
+ &#39;onadata.apps.viewer&#39;: &#39;onadata.apps.viewer.south_migrations&#39;,
+ &#39;reversion&#39;: &#39;reversion.south_migrations&#39;,
+ &#39;taggit&#39;: &#39;taggit.south_migrations&#39;}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LOGGING</td>
+          <td class="code"><pre>{&#39;disable_existing_loggers&#39;: False,
+ &#39;filters&#39;: {&#39;require_debug_false&#39;: {&#39;()&#39;: &#39;django.utils.log.RequireDebugFalse&#39;},
+             &#39;skip_suspicious_operations&#39;: {&#39;()&#39;: &#39;django.utils.log.CallbackFilter&#39;,
+                                            &#39;callback&#39;: &lt;function skip_suspicious_operations at 0x7f18d3990bd0&gt;}},
+ &#39;formatters&#39;: {&#39;simple&#39;: {&#39;format&#39;: &#39;%(levelname)s %(message)s&#39;},
+                &#39;verbose&#39;: {&#39;format&#39;: &#39;%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s&#39;}},
+ &#39;handlers&#39;: {&#39;audit&#39;: {&#39;class&#39;: &#39;onadata.libs.utils.log.AuditLogHandler&#39;,
+                        &#39;formatter&#39;: &#39;verbose&#39;,
+                        &#39;level&#39;: &#39;DEBUG&#39;,
+                        &#39;model&#39;: &#39;onadata.apps.main.models.audit.AuditLog&#39;},
+              &#39;console&#39;: {&#39;class&#39;: &#39;logging.StreamHandler&#39;,
+                          &#39;formatter&#39;: &#39;verbose&#39;,
+                          &#39;level&#39;: &#39;DEBUG&#39;,
+                          &#39;stream&#39;: &lt;open file &#39;&lt;stdout&gt;&#39;, mode &#39;w&#39; at 0x7f18d4c5a1e0&gt;},
+              &#39;mail_admins&#39;: {&#39;class&#39;: &#39;django.utils.log.AdminEmailHandler&#39;,
+                              &#39;filters&#39;: [&#39;require_debug_false&#39;,
+                                          &#39;skip_suspicious_operations&#39;],
+                              &#39;level&#39;: &#39;ERROR&#39;}},
+ &#39;loggers&#39;: {&#39;audit_logger&#39;: {&#39;handlers&#39;: [&#39;audit&#39;],
+                              &#39;level&#39;: &#39;DEBUG&#39;,
+                              &#39;propagate&#39;: True},
+             &#39;console_logger&#39;: {&#39;handlers&#39;: [&#39;console&#39;],
+                                &#39;level&#39;: &#39;DEBUG&#39;,
+                                &#39;propagate&#39;: True},
+             &#39;django.request&#39;: {&#39;handlers&#39;: [&#39;mail_admins&#39;, &#39;console&#39;],
+                                &#39;level&#39;: &#39;DEBUG&#39;,
+                                &#39;propagate&#39;: True}},
+ &#39;version&#39;: 1}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DEFAULT_CONTENT_LENGTH</td>
+          <td class="code"><pre>10000000</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SHORT_DATE_FORMAT</td>
+          <td class="code"><pre>&#39;m/d/Y&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATES</td>
+          <td class="code"><pre>[]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEST_RUNNER</td>
+          <td class="code"><pre>&#39;django_nose.NoseTestSuiteRunner&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ROOT</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERYD_MAX_TASKS_PER_CHILD</td>
+          <td class="code"><pre>7</pre></td>
+        </tr>
+      
+        <tr>
+          <td>IGNORABLE_404_URLS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SECURE_SSL_REDIRECT</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TIME_ZONE</td>
+          <td class="code"><pre>&#39;America/New_York&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CORS_ORIGIN_ALLOW_ALL</td>
+          <td class="code"><pre>True</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_UPLOAD_MAX_MEMORY_SIZE</td>
+          <td class="code"><pre>2621440</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MANAGERS</td>
+          <td class="code"><pre>()</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_BACKEND</td>
+          <td class="code"><pre>&#39;django.core.mail.backends.smtp.EmailBackend&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ANONYMOUS_USER_ID</td>
+          <td class="code"><pre>-1</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERYD_MAX_CONCURRENCY</td>
+          <td class="code"><pre>6</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGE_COOKIE_NAME</td>
+          <td class="code"><pre>&#39;django_language&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>NOSE_ARGS</td>
+          <td class="code"><pre>[&#39;--with-fixture-bundling&#39;]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_USE_SSL</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEMPLATE_CONTEXT_PROCESSORS</td>
+          <td class="code"><pre>(&#39;onadata.koboform.context_processors.koboform_integration&#39;,
+ &#39;django.contrib.auth.context_processors.auth&#39;,
+ &#39;django.core.context_processors.debug&#39;,
+ &#39;django.core.context_processors.i18n&#39;,
+ &#39;django.core.context_processors.media&#39;,
+ &#39;django.core.context_processors.static&#39;,
+ &#39;django.core.context_processors.tz&#39;,
+ &#39;django.core.context_processors.request&#39;,
+ &#39;django.contrib.messages.context_processors.messages&#39;,
+ &#39;readonly.context_processors.readonly&#39;,
+ &#39;onadata.apps.main.context_processors.google_analytics&#39;,
+ &#39;onadata.apps.main.context_processors.site_name&#39;,
+ &#39;onadata.apps.main.context_processors.base_url&#39;,
+ &#39;onadata.apps.usermodule.context_processors.additional_menu_items&#39;,
+ &#39;onadata.apps.usermodule.context_processors.can_configure&#39;,
+ &#39;onadata.apps.usermodule.context_processors.is_admin&#39;,
+ &#39;onadata.apps.usermodule.context_processors.care_viewer&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEST_HTTP_HOST</td>
+          <td class="code"><pre>&#39;testserver.com&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MIGRATION_MODULES</td>
+          <td class="code"><pre>{}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>MONGO_CONNECTION_URL</td>
+          <td class="code"><pre>&#39;mongodb://mongodb:27017&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SESSION_COOKIE_AGE</td>
+          <td class="code"><pre>1209600</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SETTINGS_MODULE</td>
+          <td class="code"><pre>&#39;kobocat_settings&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_INSTANCE_PATH</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PROJECT_KEY_NAME</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGES</td>
+          <td class="code"><pre>((&#39;af&#39;, &#39;Afrikaans&#39;),
+ (&#39;ar&#39;, &#39;Arabic&#39;),
+ (&#39;ast&#39;, &#39;Asturian&#39;),
+ (&#39;az&#39;, &#39;Azerbaijani&#39;),
+ (&#39;bg&#39;, &#39;Bulgarian&#39;),
+ (&#39;be&#39;, &#39;Belarusian&#39;),
+ (&#39;bn&#39;, &#39;Bengali&#39;),
+ (&#39;br&#39;, &#39;Breton&#39;),
+ (&#39;bs&#39;, &#39;Bosnian&#39;),
+ (&#39;ca&#39;, &#39;Catalan&#39;),
+ (&#39;cs&#39;, &#39;Czech&#39;),
+ (&#39;cy&#39;, &#39;Welsh&#39;),
+ (&#39;da&#39;, &#39;Danish&#39;),
+ (&#39;de&#39;, &#39;German&#39;),
+ (&#39;el&#39;, &#39;Greek&#39;),
+ (&#39;en&#39;, &#39;English&#39;),
+ (&#39;en-au&#39;, &#39;Australian English&#39;),
+ (&#39;en-gb&#39;, &#39;British English&#39;),
+ (&#39;eo&#39;, &#39;Esperanto&#39;),
+ (&#39;es&#39;, &#39;Spanish&#39;),
+ (&#39;es-ar&#39;, &#39;Argentinian Spanish&#39;),
+ (&#39;es-mx&#39;, &#39;Mexican Spanish&#39;),
+ (&#39;es-ni&#39;, &#39;Nicaraguan Spanish&#39;),
+ (&#39;es-ve&#39;, &#39;Venezuelan Spanish&#39;),
+ (&#39;et&#39;, &#39;Estonian&#39;),
+ (&#39;eu&#39;, &#39;Basque&#39;),
+ (&#39;fa&#39;, &#39;Persian&#39;),
+ (&#39;fi&#39;, &#39;Finnish&#39;),
+ (&#39;fr&#39;, &#39;French&#39;),
+ (&#39;fy&#39;, &#39;Frisian&#39;),
+ (&#39;ga&#39;, &#39;Irish&#39;),
+ (&#39;gl&#39;, &#39;Galician&#39;),
+ (&#39;he&#39;, &#39;Hebrew&#39;),
+ (&#39;hi&#39;, &#39;Hindi&#39;),
+ (&#39;hr&#39;, &#39;Croatian&#39;),
+ (&#39;hu&#39;, &#39;Hungarian&#39;),
+ (&#39;ia&#39;, &#39;Interlingua&#39;),
+ (&#39;id&#39;, &#39;Indonesian&#39;),
+ (&#39;io&#39;, &#39;Ido&#39;),
+ (&#39;is&#39;, &#39;Icelandic&#39;),
+ (&#39;it&#39;, &#39;Italian&#39;),
+ (&#39;ja&#39;, &#39;Japanese&#39;),
+ (&#39;ka&#39;, &#39;Georgian&#39;),
+ (&#39;kk&#39;, &#39;Kazakh&#39;),
+ (&#39;km&#39;, &#39;Khmer&#39;),
+ (&#39;kn&#39;, &#39;Kannada&#39;),
+ (&#39;ko&#39;, &#39;Korean&#39;),
+ (&#39;lb&#39;, &#39;Luxembourgish&#39;),
+ (&#39;lt&#39;, &#39;Lithuanian&#39;),
+ (&#39;lv&#39;, &#39;Latvian&#39;),
+ (&#39;mk&#39;, &#39;Macedonian&#39;),
+ (&#39;ml&#39;, &#39;Malayalam&#39;),
+ (&#39;mn&#39;, &#39;Mongolian&#39;),
+ (&#39;mr&#39;, &#39;Marathi&#39;),
+ (&#39;my&#39;, &#39;Burmese&#39;),
+ (&#39;nb&#39;, &#39;Norwegian Bokmal&#39;),
+ (&#39;ne&#39;, &#39;Nepali&#39;),
+ (&#39;nl&#39;, &#39;Dutch&#39;),
+ (&#39;nn&#39;, &#39;Norwegian Nynorsk&#39;),
+ (&#39;os&#39;, &#39;Ossetic&#39;),
+ (&#39;pa&#39;, &#39;Punjabi&#39;),
+ (&#39;pl&#39;, &#39;Polish&#39;),
+ (&#39;pt&#39;, &#39;Portuguese&#39;),
+ (&#39;pt-br&#39;, &#39;Brazilian Portuguese&#39;),
+ (&#39;ro&#39;, &#39;Romanian&#39;),
+ (&#39;ru&#39;, &#39;Russian&#39;),
+ (&#39;sk&#39;, &#39;Slovak&#39;),
+ (&#39;sl&#39;, &#39;Slovenian&#39;),
+ (&#39;sq&#39;, &#39;Albanian&#39;),
+ (&#39;sr&#39;, &#39;Serbian&#39;),
+ (&#39;sr-latn&#39;, &#39;Serbian Latin&#39;),
+ (&#39;sv&#39;, &#39;Swedish&#39;),
+ (&#39;sw&#39;, &#39;Swahili&#39;),
+ (&#39;ta&#39;, &#39;Tamil&#39;),
+ (&#39;te&#39;, &#39;Telugu&#39;),
+ (&#39;th&#39;, &#39;Thai&#39;),
+ (&#39;tr&#39;, &#39;Turkish&#39;),
+ (&#39;tt&#39;, &#39;Tatar&#39;),
+ (&#39;udm&#39;, &#39;Udmurt&#39;),
+ (&#39;uk&#39;, &#39;Ukrainian&#39;),
+ (&#39;ur&#39;, &#39;Urdu&#39;),
+ (&#39;vi&#39;, &#39;Vietnamese&#39;),
+ (&#39;zh-cn&#39;, &#39;Simplified Chinese&#39;),
+ (&#39;zh-hans&#39;, &#39;Simplified Chinese&#39;),
+ (&#39;zh-hant&#39;, &#39;Traditional Chinese&#39;),
+ (&#39;zh-tw&#39;, &#39;Traditional Chinese&#39;))</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_ENDPOINT_SURVEYS</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>FILE_UPLOAD_TEMP_DIR</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_AGE</td>
+          <td class="code"><pre>31449600</pre></td>
+        </tr>
+      
+        <tr>
+          <td>STATIC_URL</td>
+          <td class="code"><pre>&#39;/static/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_PORT</td>
+          <td class="code"><pre>25</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ONADATA_DIR</td>
+          <td class="code"><pre>&#39;./onadata&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_OFFLINE_SURVEYS</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>SHORT_DATETIME_FORMAT</td>
+          <td class="code"><pre>&#39;m/d/Y P&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CELERY_RESULT_BACKEND</td>
+          <td class="code"><pre>&#39;amqp&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>TEST_NON_SERIALIZED_APPS</td>
+          <td class="code"><pre>[]</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ENKETO_API_TOKEN</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>PASSWORD_HASHERS</td>
+          <td class="code"><pre>u&#39;********************&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>ABSOLUTE_URL_OVERRIDES</td>
+          <td class="code"><pre>{}</pre></td>
+        </tr>
+      
+        <tr>
+          <td>LANGUAGE_COOKIE_PATH</td>
+          <td class="code"><pre>&#39;/&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CACHE_MIDDLEWARE_SECONDS</td>
+          <td class="code"><pre>600</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_SSL_CERTFILE</td>
+          <td class="code"><pre>None</pre></td>
+        </tr>
+      
+        <tr>
+          <td>CSRF_COOKIE_HTTPONLY</td>
+          <td class="code"><pre>False</pre></td>
+        </tr>
+      
+        <tr>
+          <td>DATETIME_INPUT_FORMATS</td>
+          <td class="code"><pre>(&#39;%Y-%m-%d %H:%M:%S&#39;,
+ &#39;%Y-%m-%d %H:%M:%S.%f&#39;,
+ &#39;%Y-%m-%d %H:%M&#39;,
+ &#39;%Y-%m-%d&#39;,
+ &#39;%m/%d/%Y %H:%M:%S&#39;,
+ &#39;%m/%d/%Y %H:%M:%S.%f&#39;,
+ &#39;%m/%d/%Y %H:%M&#39;,
+ &#39;%m/%d/%Y&#39;,
+ &#39;%m/%d/%y %H:%M:%S&#39;,
+ &#39;%m/%d/%y %H:%M:%S.%f&#39;,
+ &#39;%m/%d/%y %H:%M&#39;,
+ &#39;%m/%d/%y&#39;)</pre></td>
+        </tr>
+      
+        <tr>
+          <td>KOBOCAT_PUBLIC_HOSTNAME</td>
+          <td class="code"><pre>&#39;kc.kobotoolbox.org&#39;</pre></td>
+        </tr>
+      
+        <tr>
+          <td>EMAIL_HOST_USER</td>
+          <td class="code"><pre>&#39;&#39;</pre></td>
+        </tr>
+      
+    </tbody>
+  </table>
+
+</div>
+
+  <div id="explanation">
+    <p>
+      You're seeing this error because you have <code>DEBUG = True</code> in your
+      Django settings file. Change that to <code>False</code>, and Django will
+      display a standard page generated by the handler for this status code.
+    </p>
+  </div>
+
+</body>
+</html>

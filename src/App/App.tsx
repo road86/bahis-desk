@@ -36,7 +36,7 @@ import Menu from '../containers/Menu';
 import { ipcRenderer } from '../services/ipcRenderer';
 import { getCurrentMenu, MenuItem, MODULE_TYPE, FORM_TYPE } from '../store/ducks/menu';
 import './App.css';
-import { GEOLOC_ENDPOINT } from './constant';
+import { GEOLOC_ENDPOINT } from '../configs/env';
 import { appStyles } from './styles';
 const Form = React.lazy(() => import('../components/Form'));
 
@@ -110,10 +110,10 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       });
   };
 
+  //WHY THE HELL THIS IS IN FRONTEND? XIM
   const fetchGeoLocation = async () => {
     const JSZip = require('jszip');
     const JSZipUtils = require('jszip-utils');
-
     JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
       console.log(err);
       JSZip.loadAsync(data).then((zip: any) => {
@@ -167,28 +167,27 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const fetchLastSyncTime = async () => {
     const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
     //  setLastSync(syncTime);
-    const time = syncTime.lastSync != 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
+    const time = syncTime.lastSync !== 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
     setLastSync(time);
   }
 
   const updateUnsyncCount = async () => {
+    console.log("update Unsync Count");
     const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
     setUnsyncCount(response[0].cnt);
   }
 
-  React.useEffect(() => {
-    updateUnsyncCount();
-    setTimeout(() => {
-      fetchLastSyncTime();
-      if (navigator.onLine) {
-        // fetchGeoLocation();
-        autoUpdateCheck();
-        setTimeout(() => {
-          fetchGeoLocation();
-        }, 1000);
-      }
-    }, 3000)
-  }, []);
+  //XIM
+  //what is setTimeout for?!
+  // React.useEffect(() => {
+  //   updateUnsyncCount();
+  //     fetchLastSyncTime();
+  //     if (navigator.onLine) {
+  //       // fetchGeoLocation();
+  //       autoUpdateCheck();
+  //       fetchGeoLocation();
+  //     }
+  // }, []);
 
   const logout = () => {
     props.history.push('/signup/');
@@ -200,7 +199,10 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   const gotoSubmittedData = () => {
     if (props.currentMenu) {
-      const xform_id = props.currentMenu.type === MODULE_TYPE && props.currentMenu.children[0].type === FORM_TYPE && props.currentMenu.children[0].xform_id;
+      const xform_id = props.currentMenu.type === MODULE_TYPE 
+      && props.currentMenu.children[0].type === FORM_TYPE 
+      && props.currentMenu.children[0].xform_id;
+
       if (xform_id) {
         props.history.push(`/formlist/${xform_id}`);
       } else {
@@ -223,8 +225,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         <div className={classes.offset} />
         <Row id="main-page-container">
           <Col>
-            {/* Production hack. Sets the router to home url on app startup */}
-            <span>{window.location.pathname.includes('index.html') && <Redirect to="/" />}</span>
+            <Redirect to="/" />
             <Switch>
               <Route exact={true} path="/">
                 <Loading />
@@ -310,6 +311,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   );
 };
 
+//XIM I presume all of the following is pointless
 /** connect the component to the store */
 
 /** Interface to describe props from mapStateToProps */

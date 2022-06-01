@@ -7,6 +7,7 @@ const path = require('path');
 const { SERVER_URL } = require('../constants');
 const { update } = require('lodash');
 const electronLog = require('electron-log');
+const { convertCompilerOptionsFromJson } = require('typescript');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
 const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
@@ -29,10 +30,9 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
-const fetchCsvDataFromServer = async (username) => {
-  console.log('fetch call', username);
+const fetchCsvDataFromServer = async (db, username) => {
+  console.log('fetchCsvData call', username);
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
     const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
     const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
@@ -44,8 +44,8 @@ const fetchCsvDataFromServer = async (username) => {
         newDataRows.forEach((newDataRow) => {
           // eslint-disable-next-line no-console
           if (newDataRow.data) {
-            deleteCSVDataWithPk(newDataRow.primary_key, newDataRow, newDataRow.table_name);
-            saveNewCSVDataToTable(newDataRow);
+            deleteCSVDataWithPk(db, newDataRow.primary_key, newDataRow, newDataRow.table_name);
+            saveNewCSVDataToTable(db, newDataRow);
           }
         });
         const newLayoutQuery = db.prepare('INSERT INTO csv_sync_log(time) VALUES(?)');
@@ -68,9 +68,8 @@ const fetchCsvDataFromServer = async (username) => {
  * @param {string} pkList
  * @param {string} rowData
  */
-const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
+const deleteCSVDataWithPk = (db, pkList, rowData, tableName) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     rowData.data.forEach((rowObj) => {
       let sqlWhereClause = `delete from ${rowData.table_name} where `;
       pkList.forEach((filterName) => {
@@ -83,7 +82,6 @@ const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
       console.log(dataDeleteStmt);
       db.prepare(dataDeleteStmt).run();
     })
-    db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
@@ -93,9 +91,8 @@ const deleteCSVDataWithPk = (pkList, rowData, tableName) => {
 /** saves new cvs data to table
  * @param {object} rowData - the userinput object containing field values that need to be saved
  */
-const saveNewCSVDataToTable = (rowData) => {
+const saveNewCSVDataToTable = (db, rowData) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     let keys = '';
     let values = '';
     Object.keys(rowData.data[0]).forEach((filterName) => {
@@ -122,10 +119,11 @@ const saveNewCSVDataToTable = (rowData) => {
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
-const fetchDataFromServer = async (username) => {
-  console.log('fetch call', username);
+const fetchDataFromServer = async (db, username) => {
+  console.log('XIM1 fetch call of the user', username);
+  console.log('See database here', app.getPath("userData"));
+  
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
     const url = DATA_SYNC_PAGINATED.replace('core_admin', username);
@@ -149,9 +147,9 @@ const fetchDataFromServer = async (username) => {
           const newDataRows = response.data;
           newDataRows.forEach((newDataRow) => {
             // eslint-disable-next-line no-console
-            console.log(newDataRow.id);
-            deleteDataWithInstanceId(newDataRow.id.toString(), newDataRow.xform_id);
-            saveNewDataToTable(newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
+            //console.log(newDataRow.id); //jesus f christ
+            deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
+            saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
           });
 
           electronLog.info('-------- || data saved into database || ------------');
@@ -186,13 +184,12 @@ const fetchDataFromServer = async (username) => {
  * @param {string} instanceId
  * @param {string} formId
  */
-const deleteDataWithInstanceId = (instanceId, formId) => {
+const deleteDataWithInstanceId = (db, instanceId, formId) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
-    const dataDeleteStmt = 'delete from data where instanceid ="' + instanceId + '"';
+    const dataDeleteStmt = 'delete from data where instanceid =?';
     // const dataDeleteStmt = db.prepare(query);
     // console.log(deleteStmt);
-    const info = db.prepare(dataDeleteStmt).run();
+    const info = db.prepare(dataDeleteStmt).run(instanceId);
     if (info.changes > 0) {
       const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(formId);
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
@@ -206,7 +203,6 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
         }
       });
     }
-    db.close();
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log(err);
@@ -218,9 +214,8 @@ const deleteDataWithInstanceId = (instanceId, formId) => {
  * @param {string} formId - the unique form id
  * @param {object} userInput - the userinput object containing field values that need to be saved
  */
-const saveNewDataToTable = (instanceId, formId, userInput) => {
+const saveNewDataToTable = (db, instanceId, formId, userInput) => {
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const date = userInput._submission_time ? new Date(userInput._submission_time).toISOString() : new Date().toISOString();
 
     const insertStmt = db.prepare(
@@ -281,8 +276,8 @@ const objToTable = (
   lastRepeatKeyName,
   possibleFieldNames,
 ) => {
-  let columnNames = '';
-  let fieldValues = '';
+  let columnNames = [];
+  let fieldValues = [];
   const repeatKeys = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const key in tableObj) {
@@ -292,8 +287,8 @@ const objToTable = (
       } else {
         let tmpColumnName = key.substring(lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0);
         tmpColumnName = tmpColumnName.replace('/', '_');
-        columnNames = `${columnNames + tmpColumnName}, `;
-        fieldValues = `${fieldValues}"${tableObj[key]}", `;
+        columnNames.push(tmpColumnName);
+        fieldValues.push(tableObj[key]);
       }
     }
   }
@@ -301,19 +296,25 @@ const objToTable = (
 
   if (columnNames !== '' || repeatKeys.length > 0) {
     if (instanceId) {
-      columnNames += 'instanceid, ';
-      fieldValues += `"${instanceId}", `;
+      columnNames.push('instanceid');
+      fieldValues.push(instanceId);
     }
     if (parentId) {
-      columnNames += `${parentTableName.substring(6)}_id, `;
-      fieldValues += `"${parentId}", `;
+      columnNames.push(`parentTableName.substring(6)}_id`);
+      fieldValues.push(parentId);
     }
-    const query = `INSERT INTO ${tableName}_table (${columnNames.substr(
-      0,
-      columnNames.length - 2,
-    )}) VALUES (${fieldValues.substr(0, fieldValues.length - 2)})`;
+    actualTableName = `${tableName}_table`;
+    actualColumns = columnNames;
+    actualValues = fieldValues;
+    lenFields = columnNames.length;
+    sqliteplaceholder = ", ?".repeat(lenFields -1 );
+    actualColumnsString = actualColumns.join(',');
+    //betterSQLITE3 requires ? in place of values but column names and table name need to be defined at compilation time
+    const query = 'INSERT INTO '.concat(actualTableName,'(', actualColumnsString, ' ) ', 'VALUES ', '(?', sqliteplaceholder, ' )');
+
     try {
-      const successfulInsert = dbCon.prepare(query).run();
+      const successfulInsertprep = dbCon.prepare(query);
+      const successfulInsert = successfulInsertprep.run(actualValues);
       newParentId = successfulInsert.lastInsertRowid;
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -353,10 +354,10 @@ const isNotArrayOfString = (testArray) => {
 /** sends data to server
  * @returns {string} - success if suceess; otherwise failed
  */
-const sendDataToServer = async (username) => {
+const sendDataToServer = async (db, username) => {
   console.log('send data', username);
+  
   try {
-    const db = new Database(path.join(app.getPath("userData"), DB_NAME), { fileMustExist: true });
     const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
     const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
     try {
@@ -366,15 +367,22 @@ const sendDataToServer = async (username) => {
         // eslint-disable-next-line no-unused-vars
         let formData = JSON.parse(rowObj.data) || {};
         formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
+        //We are converting json to XML which is an alternative submission for xforms
         const apiFormData = {
           xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
           // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-          test_file: queries,
+          //test_file: queries,
         };
+
         const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
-        // console.log(apiFormData);
+        const jsondata = JSON.stringify(apiFormData)
+        console.log("url",url);
+        console.log(url);
+        console.log("jsondata",jsondata);
+        console.log(jsondata);
+        
         await axios
-          .post(url, JSON.stringify(apiFormData), {
+          .post(url, jsondata, {
             headers: {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
@@ -387,17 +395,19 @@ const sendDataToServer = async (username) => {
             if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
               JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
-                const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
-                updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
+                const updateDataIdQuery = db.prepare(`UPDATE ? SET instanceid = ? WHERE instanceid = ?`);
+                updateDataIdQuery.run(tableName,response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
               });
             }
           })
           .catch((error) => {
             // eslint-disable-next-line no-console
-            // console.log(error);
+            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
           });
       });
     } catch (err) {
+      electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
+
       // eslint-disable-next-line no-console
       // console.log(err);
     }
@@ -420,7 +430,7 @@ const convertJsonToXml = (jsnObj, formIdString) => {
     const jsnPath = jsnKey.split('/');
     assignJsnValue(modifiedJsnObj, jsnPath, 0, jsnObj[jsnKey]);
   });
-  let xmlString = "<?xml version='1.0'?>";
+  let xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
   xmlString += `<${formIdString} id="${formIdString}">`;
   Object.keys(modifiedJsnObj).forEach((mkey) => {
     xmlString += generateIndividualXml(mkey, modifiedJsnObj[mkey]);
