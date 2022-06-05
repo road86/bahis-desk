@@ -94,7 +94,7 @@
         "owner": "road86",
         "repo": "bahis-desk",
         "private": false,
-        "releaseType": "pre-release"
+        "releaseType": "prerelease"
       }
     ],
     "win": {
