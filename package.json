@@ -1,6 +1,6 @@
 {
   "name": "bahis",
-  "version": "2.0.0-alpha-2-bahis2.dev.net",
+  "version": "2.0.0-alpha-3-bahis2.dev.net",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
