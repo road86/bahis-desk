@@ -598,40 +598,6 @@ const getErrorMessage = (error) => {
   else return "Unauthenticated User.";
 }
 
-const populateGeoTable = (event, geoList) => {
-  console.log("Populating geo data");
-  console.log(app.getPath("userData"));
-  const geoData = geoList ? geoList['catchment-area.csv'] : [];
-  // console.log('call', geoData);
-  db.prepare('DELETE FROM geo').run();
-  if (geoData.length) {
-    const insertStmt = db.prepare(
-      `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (@div_id, @division, @dis_id, @district, @upz_id, @upazila)`,
-    );
-
-    const insertMany = db.transaction((geos) => {
-      // console.log(geos);
-      for (const geo of geos)
-        insertStmt.run({
-          div_id: geo.division,
-          division: geo.division_label,
-          dis_id: geo.district,
-          district: geo.dist_label,
-          upz_id: geo.upazila,
-          upazila: geo.upazila_label,
-        });
-    });
-
-    insertMany(geoData);
-    // geoData.forEach(response => {
-    //   const insertStmt = db.prepare(
-    //     `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (?, ?, ?, ?, ?, ?)`
-    //   );
-    //   insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
-    // });
-  }
-  
-};
 
 const populateCatchment = (catchments) => {
   electronLog.info(`------- || populateCatchment: ${catchments.length} || ----------------`);
@@ -1196,7 +1162,6 @@ ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
 ipcMain.on('request-app-restart', requestRestartApp);
 ipcMain.on('sign-in', signIn);
-ipcMain.on('write-geo-object', populateGeoTable);
 ipcMain.on('fetch-userlist', fetchUserList);
 ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
