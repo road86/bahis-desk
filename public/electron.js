@@ -3,8 +3,7 @@
 const electron = require('electron');
 const electronLog = require('electron-log');
 const path = require('path');
-const isDev = true;
-//const isDev = require('electron-is-dev');
+const isDev = require('electron-is-dev');
 const Database = require('better-sqlite3');
 const os = require('os');
 const axios = require('axios');
@@ -77,8 +76,8 @@ function createWindow() {
     },
   });
   //TODO TMP use prebuild react so we can change electron code during debug
-  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-  // mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
+  // mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
 
   if (isDev) {
     mainWindow.setBackgroundColor('#FF0000');
