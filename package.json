@@ -3,7 +3,6 @@
   "version": "2.0.0-alpha-2-bahis2.dev.net",
   "private": false,
   "main": "public/electron.js",
-  "homepage": "https://github.com/road86/bahis-desk",
   "author": "community",
   "dependencies": {
     "@date-io/date-fns": "1.x",
@@ -96,7 +95,7 @@
         "owner": "road86",
         "repo": "bahis-desk",
         "private": false,
-        "releaseType": "release"
+        "releaseType": "pre-release"
       }
     ],
     "win": {
