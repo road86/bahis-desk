@@ -36,7 +36,6 @@ import Menu from '../containers/Menu';
 import { ipcRenderer } from '../services/ipcRenderer';
 import { getCurrentMenu, MenuItem, MODULE_TYPE, FORM_TYPE } from '../store/ducks/menu';
 import './App.css';
-import { GEOLOC_ENDPOINT } from '../configs/env';
 import { appStyles } from './styles';
 const Form = React.lazy(() => import('../components/Form'));
 
@@ -73,55 +72,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const [csv, setCsv] = React.useState<any>({});
   const [lastSync, setLastSync] = React.useState<string>('never');
   const [unsyncCount, setUnsyncCount] = React.useState<any>(0);
-
-  const writeCsvToObj = (zip: any, csvFiles: any, i: number, tmpCsv: any) => {
-    zip
-      .file(csvFiles[i])
-      .async('text')
-      .then(function success(txt: any) {
-        // console.log(txt);
-        const arr = txt.split('\n');
-        const jsonObj = [];
-        const headers = arr[0].split(',');
-        for (let n = 1; n < arr.length - 1; n++) {
-          const data = arr[n].split(',');
-          const obj: any = {};
-          for (let j = 0; j < data.length; j++) {
-            const key: any = headers[j].trim();
-            obj[key] = data[j].trim();
-          }
-          jsonObj.push(obj);
-        }
-
-        tmpCsv[csvFiles[i]] = jsonObj;
-
-        i++;
-        if (i < csvFiles.length) {
-          return writeCsvToObj(zip, csvFiles, i, tmpCsv);
-        } else {
-          if (tmpCsv !== {}) {
-            setCsv({
-              csv: tmpCsv,
-            });
-            ipcRenderer.send('write-geo-object', tmpCsv);
-          }
-        }
-        return tmpCsv;
-      });
-  };
-
-  //WHY THE HELL THIS IS IN FRONTEND? XIM
-  const fetchGeoLocation = async () => {
-    const JSZip = require('jszip');
-    const JSZipUtils = require('jszip-utils');
-    JSZipUtils.getBinaryContent(GEOLOC_ENDPOINT, (err: any, data: any) => {
-      console.log(err);
-      JSZip.loadAsync(data).then((zip: any) => {
-        const csvFiles = Object.keys(zip.files);
-        writeCsvToObj(zip, csvFiles, 0, {});
-      });
-    });
-  };
 
   const autoUpdateCheck = async () => {
     await ipcRenderer.send('auto-update');
@@ -177,17 +127,14 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     setUnsyncCount(response[0].cnt);
   }
 
-  //XIM
-  //what is setTimeout for?!
-  // React.useEffect(() => {
-  //   updateUnsyncCount();
-  //     fetchLastSyncTime();
-  //     if (navigator.onLine) {
-  //       // fetchGeoLocation();
-  //       autoUpdateCheck();
-  //       fetchGeoLocation();
-  //     }
-  // }, []);
+  React.useEffect(() => {
+    updateUnsyncCount();
+      fetchLastSyncTime();
+      if (navigator.onLine) {
+        //XIM todo, not sure why it is not just called from inside electron?
+        autoUpdateCheck();
+      }
+  }, []);
 
   const logout = () => {
     props.history.push('/signup/');
@@ -218,7 +165,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   return (
     <React.Fragment>
-      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
+      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Synchronising WHAT?">
         {/* {!headerExcludedURLs.includes(location.pathname) && ( */}
         <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
         {/* )} */}

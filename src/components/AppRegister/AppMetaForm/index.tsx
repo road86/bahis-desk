@@ -31,31 +31,28 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   const onChangeHandler = async (event: any) => {
     setFieldValueHandler(event.target.name, event.target.value);
     if (event.target.name === 'division') {
-      const districtList: any = await ipcRenderer.sendSync('fetch-district', event.target.value);
+      const districtList: any = await ipcRenderer.sendSync('fetch-geo', "district", userInput.division);
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
     } else if (event.target.name === 'district') {
-      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, event.target.value);
+      const upazilaList: any = await ipcRenderer.sendSync('fetch-geo', "upazila", userInput.division, userInput.district);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }
   };
-  const division = 'division';
-  const district = 'district';
-  const upazila = 'upazila';
 
   const compUpdate = async () => {
-    const divisionList: any = await ipcRenderer.sendSync('fetch-division');
+    const divisionList: any = await ipcRenderer.sendSync('fetch-geo', "division");
     setDivisionList(divisionList.division);
     if (userInput.division !== '') {
-      const districtList: any = await ipcRenderer.sendSync('fetch-district', userInput.division);
+      const districtList: any = await ipcRenderer.sendSync('fetch-geo', "district", userInput.division);
       // console.log(divisionList, typeof divisionList)
       setDistrictList(districtList.district);
       setUpazilaList([]);
     }
     if (userInput.district !== '') {
-      const upazilaList: any = await ipcRenderer.sendSync('fetch-upazila', userInput.division, userInput.district);
+      const upazilaList: any = await ipcRenderer.sendSync('fetch-geo', "upazila", userInput.division, userInput.district);
       // console.log(divisionList, typeof divisionList)
       setUpazilaList(upazilaList.upazila);
     }
@@ -67,7 +64,8 @@ export default function AppMetaForm(props: AppMetaFormProps) {
   react-hooks/exhaustive-deps
   */
   React.useEffect(() => {
-    compUpdate();
+    // compUpdate();
+    console.log("Printing it 3432x");
   }, []);
 
   return (
@@ -83,13 +81,13 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id={division}
-            name={division}
+            id={"division"}
+            name={"division"}
             label="Division"
             variant="outlined"
             onChange={onChangeHandler}
-            value={userInput[division] || ''}
-            error={submitted && userInput[division] === undefined}
+            value={userInput["division"] || ''}
+            error={submitted && userInput["division"] === undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -105,13 +103,13 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id={district}
-            name={district}
+            id={"district"}
+            name={"district"}
             label="District"
             variant="outlined"
             onChange={onChangeHandler}
-            value={userInput[district] || ''}
-            error={submitted && userInput[district] === undefined}
+            value={userInput["district"] || ''}
+            error={submitted && userInput["district"] === undefined}
           >
             <MenuItem value="">
               <em>None</em>
@@ -127,13 +125,13 @@ export default function AppMetaForm(props: AppMetaFormProps) {
           <TextField
             select={true}
             required={true}
-            id={upazila}
+            id={"upazila"}
             label="Upazila"
-            name={upazila}
+            name={"upazila"}
             variant="outlined"
             onChange={onChangeHandler}
-            value={userInput[upazila] || ''}
-            error={submitted && userInput[upazila] === undefined}
+            value={userInput["upazila"] || ''}
+            error={submitted && userInput["upazila"] === undefined}
           >
             <MenuItem value="">
               <em>None</em>

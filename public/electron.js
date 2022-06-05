@@ -284,8 +284,8 @@ const fetchAppDefinition = (event) => {
 const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
-
-  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
+  //why on earth would you delete any data when you want to submit a record?
+  // deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
   const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
   event.returnValue = {
     username: fetchedUsername.username,
@@ -598,39 +598,6 @@ const getErrorMessage = (error) => {
   else return "Unauthenticated User.";
 }
 
-const populateGeoTable = (event, geoList) => {
-  console.log(app.getPath("userData"));
-  const geoData = geoList ? geoList['catchment-area.csv'] : [];
-  // console.log('call', geoData);
-  db.prepare('DELETE FROM geo').run();
-  if (geoData.length) {
-    const insertStmt = db.prepare(
-      `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (@div_id, @division, @dis_id, @district, @upz_id, @upazila)`,
-    );
-
-    const insertMany = db.transaction((geos) => {
-      // console.log(geos);
-      for (const geo of geos)
-        insertStmt.run({
-          div_id: geo.division,
-          division: geo.division_label,
-          dis_id: geo.district,
-          district: geo.dist_label,
-          upz_id: geo.upazila,
-          upazila: geo.upazila_label,
-        });
-    });
-
-    insertMany(geoData);
-    // geoData.forEach(response => {
-    //   const insertStmt = db.prepare(
-    //     `INSERT INTO geo (div_id, division, dis_id, district, upz_id, upazila) VALUES (?, ?, ?, ?, ?, ?)`
-    //   );
-    //   insertStmt.run(response.division, response.division_label, response.district, response.dist_label, response.upazila, response.upazila_label);
-    // });
-  }
-  
-};
 
 const populateCatchment = (catchments) => {
   electronLog.info(`------- || populateCatchment: ${catchments.length} || ----------------`);
@@ -892,56 +859,27 @@ const fetchUserList = (event) => {
   }
 }
 
-const fetchDivision = (event) => {
-  try {
-
+const fetchGeo = (event, level, divisionId, districtId) => {
+  console.log("Fetchin geodata");
+  if (level==="division"){
     const fetchedRows = db.prepare('SELECT DISTINCT	div_id, division FROM geo').all();
-    // eslint-disable-next-line no-param-reassign
-    console.log(fetchedRows);
     event.returnValue = {
       division: fetchedRows,
     };
-    
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    
-  }
-};
 
-const fetchUpazila = (event, divisionId, districtId) => {
-  try {
-
-    const query =
-      'SELECT DISTINCT upz_id, upazila FROM geo WHERE div_id = "' + divisionId + '" AND dis_id = "' + districtId + '"';
-    const fetchedRows = db.prepare(query).all();
-    event.returnValue = {
-      upazila: fetchedRows,
-    };
-    
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    
-  }
-};
-
-const fetchDistrict = (event, divisionId) => {
-  // console.log(divisionId);
-  try {
-
-    const query = 'SELECT DISTINCT dis_id, district FROM geo WHERE div_id = "' + divisionId + '"';
-    const fetchedRows = db.prepare(query).all();
-    // eslint-disable-next-line no-param-reassign
-    // console.log(fetchedRows, query);
+  } else if (level==="district"){
+    const query = 'SELECT DISTINCT dis_id, district FROM geo WHERE div_id = ?';
+    const fetchedRows = db.prepare(query).all(divisionId);
     event.returnValue = {
       district: fetchedRows,
     };
-    
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err);
-    
+  } else { //upazila
+    const query =
+      'SELECT DISTINCT upz_id, upazila FROM geo WHERE div_id = ? AND dis_id = ?';
+    const fetchedRows = db.prepare(query).all(divisionId,districtId);
+    event.returnValue = {
+      upazila: fetchedRows,
+    };
   }
 };
 
@@ -1224,11 +1162,8 @@ ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
 ipcMain.on('request-app-restart', requestRestartApp);
 ipcMain.on('sign-in', signIn);
-ipcMain.on('write-geo-object', populateGeoTable);
 ipcMain.on('fetch-userlist', fetchUserList);
-ipcMain.on('fetch-division', fetchDivision);
-ipcMain.on('fetch-district', fetchDistrict);
-ipcMain.on('fetch-upazila', fetchUpazila);
+ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
 ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('fetch-last-sync', fetchLastSyncTime);

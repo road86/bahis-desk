@@ -298,7 +298,6 @@ function SubmittedForm(props: ListProps) {
                 color={theme.palette.primary.dark}
                 height={40}
                 width={100}
-                timeout={3000} // 3 secs
               />
               <Typist cursor={{ hideWhenDone: true }}>
                 <span className="loader-title"> BAHIS </span>
