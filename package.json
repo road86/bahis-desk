@@ -54,8 +54,6 @@
     "history": "^4.9.0",
     "image-downloader": "^4.0.2",
     "jest-fetch-mock": "^2.1.2",
-    "jszip": "^3.6.0",
-    "jszip-utils": "^0.1.0",
     "lodash": "^4.17.15",
     "lodash-es": "^4.17.15",
     "macaddress": "^0.5.1",
@@ -174,6 +172,7 @@
     "react-test-renderer": "^16.8.6",
     "redux-testkit": "^1.0.6",
     "source-map-explorer": "^2.5.2",
-    "wait-on": "^3.3.0"
+    "wait-on": "^3.3.0",
+    "electron-rebuild": "^2.3.2"
   }
 }
