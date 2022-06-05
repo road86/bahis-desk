@@ -187,7 +187,6 @@ const fetchDataFromServer = async (db, username) => {
  * @param {string} formId
  */
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
-  console.log("WHY THE FUCK AM I DELTEING ANY DATA HERE?!?!!?")
   try {
     const dataDeleteStmt = 'delete from data where instanceid =?';
     // const dataDeleteStmt = db.prepare(query);
