@@ -1,3 +1,0 @@
-SELECT name FROM sqlite_master WHERE type="table" AND name="csv_sync_log"
-
-SqliteError {code: 'SQLITE_ERROR', message: 'no such column: table', stack: 'SqliteError: no such column: table    at Dat…ctions (internal/process/task_queues.js:93:5)'}

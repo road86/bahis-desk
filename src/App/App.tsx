@@ -79,7 +79,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       .file(csvFiles[i])
       .async('text')
       .then(function success(txt: any) {
-        // console.log(txt);
+        console.log(txt);
         const arr = txt.split('\n');
         const jsonObj = [];
         const headers = arr[0].split(',');
@@ -177,17 +177,15 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     setUnsyncCount(response[0].cnt);
   }
 
-  //XIM
-  //what is setTimeout for?!
-  // React.useEffect(() => {
-  //   updateUnsyncCount();
-  //     fetchLastSyncTime();
-  //     if (navigator.onLine) {
-  //       // fetchGeoLocation();
-  //       autoUpdateCheck();
-  //       fetchGeoLocation();
-  //     }
-  // }, []);
+  React.useEffect(() => {
+    updateUnsyncCount();
+      fetchLastSyncTime();
+      if (navigator.onLine) {
+        // fetchGeoLocation();
+        autoUpdateCheck();
+        fetchGeoLocation();
+      }
+  }, []);
 
   const logout = () => {
     props.history.push('/signup/');
@@ -218,7 +216,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   return (
     <React.Fragment>
-      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Syncing">
+      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Synchronising WHAT?">
         {/* {!headerExcludedURLs.includes(location.pathname) && ( */}
         <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
         {/* )} */}

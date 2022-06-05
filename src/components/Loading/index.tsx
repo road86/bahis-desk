@@ -32,15 +32,14 @@ class Loading extends React.Component<{}, LoadingState> {
             color={theme.palette.primary.dark}
             height={100}
             width={100}
-            timeout={3000} // 3 secs
           />
           <Typist cursor={{ hideWhenDone: true }}>
-            <span className="loader-title"> BAHIS </span>
+            <span className="loader-title"> DLS BAHIS 2</span>
             <br />
             <span className="loader-subtitle">
-              Welcome
+              Welcome to BAHIS 2 
               <Typist.Backspace count={7} delay={500} />
-              Loading{' '}
+              Loading {' '}
               <span className="blink-one">
                 .
                 <span className="blink-two">

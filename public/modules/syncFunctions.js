@@ -148,7 +148,9 @@ const fetchDataFromServer = async (db, username) => {
           newDataRows.forEach((newDataRow) => {
             // eslint-disable-next-line no-console
             //console.log(newDataRow.id); //jesus f christ
-            deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
+            
+            //someone went mad here:
+            // deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
             saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
           });
 
@@ -185,6 +187,7 @@ const fetchDataFromServer = async (db, username) => {
  * @param {string} formId
  */
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
+  console.log("WHY THE FUCK AM I DELTEING ANY DATA HERE?!?!!?")
   try {
     const dataDeleteStmt = 'delete from data where instanceid =?';
     // const dataDeleteStmt = db.prepare(query);
@@ -282,7 +285,10 @@ const objToTable = (
   // eslint-disable-next-line no-restricted-syntax
   for (const key in tableObj) {
     if (possibleFieldNames.includes(key)) {
-      if (Array.isArray(tableObj[key]) && tableObj[key].length > 0 && isNotArrayOfString(tableObj[key])) {
+      current_entry = tableObj[key];
+      current_entry_array = Array.isArray(current_entry);
+      current_entry_nonzero = current_entry.length > 0;
+      if (current_entry_array && current_entry_nonzero) {
         repeatKeys.push(key);
       } else {
         let tmpColumnName = key.substring(lastRepeatKeyName.length ? lastRepeatKeyName.length + 1 : 0);
@@ -300,7 +306,7 @@ const objToTable = (
       fieldValues.push(instanceId);
     }
     if (parentId) {
-      columnNames.push(`parentTableName.substring(6)}_id`);
+      columnNames.push(`${parentTableName.substring(6)}_id`);
       fieldValues.push(parentId);
     }
     actualTableName = `${tableName}_table`;

@@ -38,7 +38,7 @@ function Header(props: HeaderProps) {
   };
 
   React.useEffect(() => {
-
+    console.log("when does it run?")
     if (appConfigSyncComplete) {
       (async () => {
         console.log('In header fethich usenamge and requesting dat async')
@@ -50,20 +50,19 @@ function Header(props: HeaderProps) {
   }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
+    console.log("Starting clicked sync");
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
     await setSyncOverlayHandler(true);
 
-    console.log("I assume Im here starting sync because someone pressed the bygttton");
     const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
 
-    console.log("I assume Im here starting sync because 222 someone pressed the bygttton");
     await ipcRenderer.send('start-app-sync', user.username);
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-      console.log("RUNNING on form sync complete from header page component");
+      console.log("Finished clicked sync");
       if (!appConfigSyncComplete)
         setAppConfigSyncComplete(true);
     });
@@ -103,7 +102,7 @@ function Header(props: HeaderProps) {
           {props.showContent ? (
             <React.Fragment>
               <div className={classes.menuButton}>
-                <Avatar variant="square" src="/icon.png" />
+                <Avatar variant="square" src="/../../../assets/images/debuglogo.png" />
               </div>
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>

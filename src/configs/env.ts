@@ -1,6 +1,7 @@
 /** This module handles settings taken from environment variables */
 
-export const SERVER_URL = process.env.BAHIS_SERVER;
+// export const SERVER_URL = process.env.BAHIS_SERVER;
+export const SERVER_URL = "http://localhost";
 export type SERVER_URL= typeof SERVER_URL;
 
 export const GEOLOC_ENDPOINT = `${SERVER_URL}/bhmodule/catchment-data-sync/`;
