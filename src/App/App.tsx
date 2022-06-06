@@ -73,6 +73,8 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const [lastSync, setLastSync] = React.useState<string>('never');
   const [unsyncCount, setUnsyncCount] = React.useState<any>(0);
 
+<<<<<<< HEAD
+=======
   const autoUpdateCheck = async () => {
     await ipcRenderer.send('auto-update');
     ipcRenderer.on('checking_for_update', () => {
@@ -113,6 +115,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
       setPercentage(data);
     });
   };
+>>>>>>> master
 
   const fetchLastSyncTime = async () => {
     const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
@@ -129,11 +132,15 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   React.useEffect(() => {
     updateUnsyncCount();
+<<<<<<< HEAD
+    fetchLastSyncTime();
+=======
       fetchLastSyncTime();
       if (navigator.onLine) {
         //XIM todo, not sure why it is not just called from inside electron?
         autoUpdateCheck();
       }
+>>>>>>> master
   }, []);
 
   const logout = () => {

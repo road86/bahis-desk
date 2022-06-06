@@ -184,11 +184,6 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     </React.Fragment>
   );
 
-  // tslint:disable-next-line: variable-name
-  // private appUpdateHandler = (_event: React.MouseEvent<HTMLButtonElement>) => {
-  //   // ipcRenderer.sendSync('request-app-restart');
-  //   ipcRenderer.sendSync('auto-update');
-  // };
 }
 
 /** connect the component to the store */
