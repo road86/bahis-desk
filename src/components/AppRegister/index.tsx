@@ -70,8 +70,6 @@ function AppRegister(props: any) {
     });
 
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-      console.log('I was sent here from electron because of form submission results!? the form is signin?', event);
-      console.log('I was sent here from electron because of form submission results!? the form is signin?', args);
       if (args !== undefined) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {

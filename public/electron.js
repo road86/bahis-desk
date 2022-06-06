@@ -10,6 +10,9 @@ const axios = require('axios');
 const { dialog } = require('electron');
 var macaddress = require('macaddress');
 const { autoUpdater } = require('electron-updater');
+autoUpdater.logger = electronLog;
+autoUpdater.logger.transports.file.level = "info";
+
 const { random } = require('lodash');
 const download = require('image-downloader');
 const fs = require('fs');
@@ -38,7 +41,10 @@ app.on('ready', () => {
     afterInstallation();
     console.log('Will create a DB on a first run');
     prepareDb(db);
+  } else { //we don't check for auto update on the first run, apparently that can cause problems
+    autoUpdateBahis();
   }
+
   createWindow();
   //create a db if doesn't exist
   if (!fs.existsSync(dbfile)){
@@ -51,10 +57,6 @@ app.on('ready', () => {
 
 function afterInstallation() {
   if (!isDev) {
-    dialog.showMessageBox({
-      title: 'No Updates',
-      message: 'Current version is up-to-date.',
-    });
   }
 }
 
@@ -76,15 +78,14 @@ function createWindow() {
     },
   });
   //TODO TMP use prebuild react so we can change electron code during debug
-  // mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-  mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
+  // mainWindow.loadURL(`file://${path.join(__dirname, '../build/index.html')}`);
+  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
 
   if (isDev) {
     mainWindow.setBackgroundColor('#FF0000');
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.maximize();
-    autoUpdater.checkForUpdates();
   }
 
   //what does that do?
@@ -116,84 +117,6 @@ app.on('window-all-closed', () => {
 function sendStatusToWindow(text) {
   mainWindow.send(text, text);
 }
-
-autoUpdater.autoDownload = false;
-
-autoUpdater.on('error', (error) => {
-
-  electronLog.info('-------------------- || Error Occured in Auto Updater Library|| ------------------------');
-  electronLog.info(error);
-  // dialog.showErrorBox('Error: ', error == null ? 'unknown' : (error.stack || error).toString());
-});
-
-autoUpdater.on('update-available', () => {
-  sendStatusToWindow('update_available');
-  dialog.showMessageBox(
-    {
-      type: 'info',
-      title: 'Found Updates',
-      message: 'Found updates, do you want update now?',
-      buttons: ['Sure', 'No'],
-    }).then(result => {
-      if (result.response === 0) {
-        console.log('check downloading');
-
-        sendStatusToWindow('update-downloading');
-        autoUpdater.downloadUpdate();
-      } else if (result.response === 1) {
-        // bound to buttons array
-        console.log("Cancel button clicked.");
-      }
-    },
-      // (buttonIndex) => {
-      //   console.log('button', buttonIndex);
-      //   if (buttonIndex === 0) {
-      //     console.log('check downloading');
-      //     sendStatusToWindow('update-downloading');
-      //     autoUpdater.downloadUpdate();
-      //   }
-      //   // else {
-      //   //   updater.enabled = true
-      //   //   updater = null
-      //   // }
-      // },
-    );
-});
-
-autoUpdater.on('update-not-available', () => {
-  // sendStatusToWindow('update_not_available');
-  // dialog.showMessageBox({
-  //   title: 'No Updates',
-  //   message: 'Current version is up-to-date.',
-  // });
-  // updater.enabled = true
-  // updater = null
-});
-
-autoUpdater.on('download-progress', (progressObj) => {
-  let percent = Math.round(progressObj.percent);
-  if (percent - prevPercent >= 1) {
-    prevPercent = newPercent;
-    newPercent = percent;
-    mainWindow.send('download_progress', percent);
-  }
-  // sendStatusToWindow(log_message);
-})
-
-autoUpdater.on('update-downloaded', () => {
-  sendStatusToWindow('update_downloaded');
-  dialog.showMessageBox(
-    {
-      title: 'Install Updates',
-      message: 'Updates downloaded, application will be quit for update...',
-    }).then(() => {
-      setImmediate(() => autoUpdater.quitAndInstall());
-    });
-});
-
-autoUpdater.on('checking-for-update', () => {
-  sendStatusToWindow('checking_for_update...');
-});
 
 // utils
 const parseFieldNames = (parentName, possibleNames, currentFormJsn) => {
@@ -1137,12 +1060,17 @@ const requestRestartApp = async (_event) => {
   app.exit();
 };
 
-const autoUpdate = (event) => {
-  console.log('check update call');
+const autoUpdateBahis = (event) => {
+  console.log('Checking for the app software updates call');
+  autoUpdater.checkForUpdatesAndNotify();
   if(!isDev){
-    autoUpdater.checkForUpdates();
+    dialog.showMessageBox({
+      title: 'Check bahis autoupdate',
+      message: 'hmm',
+    });
+    autoUpdater.checkForUpdatesAndNotify();
   } else {
-  console.log('Not checking for updates in dev mode');
+    console.log('ups: Not checking for updates in dev mode');
   }
 };
 
@@ -1167,7 +1095,6 @@ ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
 ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('fetch-last-sync', fetchLastSyncTime);
-ipcMain.on('auto-update', autoUpdate);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData)
 ipcMain.on('form-details', fetchFormDetails);

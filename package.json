@@ -44,10 +44,6 @@
     "cross-blob": "^1.2.0",
     "cross-env": "^6.0.0",
     "date-fns": "^2.22.1",
-    "electron-first-run": "^3.0.0",
-    "electron-is-dev": "^1.1.0",
-    "electron-log": "^4.4.6",
-    "electron-updater": "^4.0.4",
     "eslint": "^7.23.0",
     "fetch-mock": "^7.3.9",
     "form-data": "^3.0.0",
@@ -84,7 +80,11 @@
     "to-array-buffer": "^3.2.0",
     "typeface-roboto": "^0.0.75",
     "typescript": "^3.5.3",
-    "xlsx": "^0.17.0"
+    "xlsx": "^0.17.0",
+    "electron-first-run": "^3.0.0",
+    "electron-is-dev": "^1.1.0",
+    "electron-log": "^4.4.6",
+    "electron-updater": "^4.0.4"
   },
   "build": {
     "appId": "com.electron.bahis",
@@ -93,8 +93,7 @@
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-        "private": false,
-        "releaseType": "pre-release"
+        "releaseType": "prerelease"
       }
     ],
     "win": {
@@ -119,10 +118,10 @@
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder",
-    "build": "yarn react-build && yarn electron-build",
+    "build": "rm -rf ./dist && yarn react-build && yarn electron-build",
     "release": "yarn react-build && yarn electron-build --p always --win",
-    "win-build": "yarn react-build && yarn electron-build --win",
-    "linux-build": "yarn react-build && yarn electron-build --linux",
+    "win-build": "rm -rf ./dist && yarn react-build && yarn electron-build --win",
+    "linux-build": "rm -rf ./dist && yarn react-build && yarn electron-build --linux",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "lint-js": "eslint 'src/**/*.{js,jsx}'",
     "lint-ts": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
@@ -173,7 +172,6 @@
     "react-test-renderer": "^16.8.6",
     "redux-testkit": "^1.0.6",
     "source-map-explorer": "^2.5.2",
-    "wait-on": "^3.3.0",
-    "electron-rebuild": "^2.3.2"
+    "wait-on": "^3.3.0"
   }
 }
