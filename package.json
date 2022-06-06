@@ -93,10 +93,6 @@
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-<<<<<<< HEAD
-=======
-        "private": false,
->>>>>>> master
         "releaseType": "prerelease"
       }
     ],
