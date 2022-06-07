@@ -1062,12 +1062,7 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdateBahis = (event) => {
   console.log('Checking for the app software updates call');
-  autoUpdater.checkForUpdatesAndNotify();
   if(!isDev){
-    dialog.showMessageBox({
-      title: 'Check bahis autoupdate',
-      message: 'hmm',
-    });
     autoUpdater.checkForUpdatesAndNotify();
   } else {
     console.log('ups: Not checking for updates in dev mode');
