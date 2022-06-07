@@ -18,13 +18,12 @@ const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
-const fsExtra = require('fs-extra')
 const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'bahis.db';
 const dbfile = path.join(app.getPath("userData"), DB_NAME)
-const db = new Database(dbfile);
+let db = new Database(dbfile);
 
 let mainWindow;
 let prevPercent = 0;
@@ -48,7 +47,9 @@ app.on('ready', () => {
   createWindow();
   //create a db if doesn't exist
   if (!fs.existsSync(dbfile)){
+    db.close();
     console.log('Recreating DB');
+    db = new Database(dbfile);
     prepareDb(db);
   }else{
     console.log('Using db in ', dbfile);
@@ -97,7 +98,6 @@ function createWindow() {
 /** set up new db */
 function prepareDb() {
   electronLog.info('------- || Creating New Database || ----------------');
-  electronLog.info(`------- || ${path.join(app.getPath("userData"))}  ${DB_NAME} || ----------------`);
   console.log('Running initial queries');
   try{
     db.exec(queries);
@@ -364,13 +364,17 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
-const loginOperation = async (event, obj) => {
+const changeUser = async (event, obj) => {
 
-  const db_path = path.join(app.getPath("userData"), DB_NAME);
-  fsExtra.removeSync(db_path);
+  let mac;
+  macaddress.one(function (err, mac) {
+    mac = mac;
+  });
+  db.close();
+  fs.unlinkSync(dbfile);
   console.log('new db setup call after delete previous user data');
-  db.exec(queries);
-
+  db = new Database(dbfile);
+  prepareDb();
   const { response, userData } = obj;
   const insertStmt = db.prepare(
     `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -379,7 +383,7 @@ const loginOperation = async (event, obj) => {
   insertStmt.run(
     userData.username,
     userData.password,
-    '70:66:55:b0:13:6b',
+    mac, 
     Math.round(new Date().getTime()),
     data.name,
     data.role,
@@ -1094,4 +1098,4 @@ ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData)
 ipcMain.on('form-details', fetchFormDetails);
 ipcMain.on('user-db-info', getUserDBInfo);
-ipcMain.on('login-operation', loginOperation);
+ipcMain.on('change-user', changeUser);

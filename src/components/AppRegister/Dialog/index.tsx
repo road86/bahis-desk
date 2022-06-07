@@ -18,7 +18,7 @@ export default function AlertDialog(props: any) {
         <DialogTitle id="alert-dialog-title"> <p style={{color: 'black'}}>Login Warning</p> </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-          A different user has loggedin before, Continue with this user will delete previous data. Are you sure you want to delete the data ?
+          A different user has logged in before, Continue with this user will delete previous data. Are you sure you want to delete the data ?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
