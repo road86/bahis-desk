@@ -1,7 +1,7 @@
 
 ## Getting started
 
-### PC configuration
+### PC configuration Linux
 We need node and yarn. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
 
 ```
@@ -15,8 +15,10 @@ Next, install yarn globally:
 npm install -g yarn 
 ```
 
-### PC configuration for bahis
-Config node-gyp, follow this https://github.com/nodejs/node-gyp (just need the part gcc(linux)/visual studio tools(windows) add and python path config with npm)
+### PC configuration Windows 
+https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi
+
+Please tick to install all additional tools with "chocolatey" that should cover all of the other requirements (visual studio, python etc.)
 
 
 ### Running the web-app
@@ -26,8 +28,6 @@ Install packages using yarn and then start the app:
 
 ```sh
 yarn
-
-yarn electron-rebuild
 
 yarn start
 ```
@@ -46,11 +46,6 @@ yarn win-build
 for linux
 ```sh
 yarn linux-build
-```
-
-for git release 
-```sh
-yarn release
 ```
 
 ## Re-run of the app in dev mode
