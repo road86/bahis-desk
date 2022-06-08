@@ -51,12 +51,11 @@ function AppRegister(props: any) {
     setUserEntry({ ...userEntry, [fieldName]: fieldValue });
   };
 
-  const performLoginOperation = async (ans: any) => {
+  const performChangeUserOperation = async (ans: any) => {
     if (ans === 'delete') {
-      await ipcRenderer.send('login-operation', loginArgs);
+      await ipcRenderer.send('change-user', loginArgs);
     } else {
-      setToastContent({ severity: 'Error', msg: 'Logged In Successfully' });
-      syncAppModule();
+      setToastContent({ severity: 'Error', msg: 'Logged In Successfully without changing the user' });
     }
     setOpenAlert(false);
   }
@@ -177,7 +176,7 @@ function AppRegister(props: any) {
           </Typist>
         </div>
       )}
-      <AlertDialog open={openAlert} handleClick={(e: any) => performLoginOperation(e)} />
+      <AlertDialog open={openAlert} handleClick={(e: any) => performChangeUserOperation(e)} />
     </Grid>
   );
 }

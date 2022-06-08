@@ -197,8 +197,8 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
       tableMapping.forEach((tableName) => {
         try {
-          const deleteStmt = 'delete from "' + tableName + '" where instanceid ="' + instanceId + '"';
-          db.prepare(deleteStmt).run();
+          const deleteStmt = `delete from ${tableName} where instanceid = ?`;
+          db.prepare(deleteStmt).run(instanceId);
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err);
@@ -400,8 +400,8 @@ const sendDataToServer = async (db, username) => {
             if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
               JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
-                const updateDataIdQuery = db.prepare(`UPDATE ? SET instanceid = ? WHERE instanceid = ?`);
-                updateDataIdQuery.run(tableName,response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
+                const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
+                updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
               });
             }
           })

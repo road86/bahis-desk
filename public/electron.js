@@ -18,13 +18,12 @@ const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
-const fsExtra = require('fs-extra')
 const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'bahis.db';
 const dbfile = path.join(app.getPath("userData"), DB_NAME)
-const db = new Database(dbfile);
+let db = new Database(dbfile);
 
 let mainWindow;
 let prevPercent = 0;
@@ -48,7 +47,9 @@ app.on('ready', () => {
   createWindow();
   //create a db if doesn't exist
   if (!fs.existsSync(dbfile)){
+    db.close();
     console.log('Recreating DB');
+    db = new Database(dbfile);
     prepareDb(db);
   }else{
     console.log('Using db in ', dbfile);
@@ -97,7 +98,6 @@ function createWindow() {
 /** set up new db */
 function prepareDb() {
   electronLog.info('------- || Creating New Database || ----------------');
-  electronLog.info(`------- || ${path.join(app.getPath("userData"))}  ${DB_NAME} || ----------------`);
   console.log('Running initial queries');
   try{
     db.exec(queries);
@@ -207,15 +207,15 @@ const fetchAppDefinition = (event) => {
 const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
-  //why on earth would you delete any data when you want to submit a record?
-  // deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
-  const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
+  //The following deletes a record when editing an existing entry and replacing it with a new one
+  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
+  const fetchedUsername = getCurrentUser();
   event.returnValue = {
-    username: fetchedUsername.username,
+    username: fetchedUsername,
   };
   const date = new Date().toISOString();
   const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
-  insert.run(response, fetchedUsername.username, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
+  insert.run(response, fetchedUsername, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
   
 };
@@ -268,7 +268,7 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
-    const formData = db.prepare(`SELECT * from data where ? = ? limit 1`).get(column,listId);
+    const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
     console.log(formData)
     if (formData != undefined) {
       event.returnValue = { formDetails: formData };
@@ -310,12 +310,19 @@ const fetchListDefinition = (event, listId) => {
   }
 };
 
+function getCurrentUser(){
+    const query = 'SELECT username from users LIMIT 1';
+    const fetchedRow = db.prepare(query).get();
+    return fetchedRow.username;
+};
+
+
 const fetchFormListDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormListDefinition, listId: ${formId} || ----------------`);
   try {
-
-    const query = 'SELECT * from data where form_id = ?';
-    const fetchedRows = db.prepare(query).all(formId);
+    userName = getCurrentUser();
+    const query = 'SELECT * from data where form_id = ? and submitted_by = ?';
+    const fetchedRows = db.prepare(query).all(formId, userName);
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
     
@@ -353,7 +360,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
 const fetchQueryData = (event, queryString) => {
   electronLog.info(`------- || fetchQueryData, formId: ${queryString} || ----------------`);
   try {
-
+    console.log(queryString);
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
@@ -364,13 +371,17 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
-const loginOperation = async (event, obj) => {
+const changeUser = async (event, obj) => {
 
-  const db_path = path.join(app.getPath("userData"), DB_NAME);
-  fsExtra.removeSync(db_path);
+  let mac;
+  macaddress.one(function (err, mac) {
+    mac = mac;
+  });
+  db.close();
+  fs.unlinkSync(dbfile);
   console.log('new db setup call after delete previous user data');
-  db.exec(queries);
-
+  db = new Database(dbfile);
+  prepareDb();
   const { response, userData } = obj;
   const insertStmt = db.prepare(
     `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -379,7 +390,7 @@ const loginOperation = async (event, obj) => {
   insertStmt.run(
     userData.username,
     userData.password,
-    '70:66:55:b0:13:6b',
+    mac, 
     Math.round(new Date().getTime()),
     data.name,
     data.role,
@@ -1062,12 +1073,7 @@ const requestRestartApp = async (_event) => {
 
 const autoUpdateBahis = (event) => {
   console.log('Checking for the app software updates call');
-  autoUpdater.checkForUpdatesAndNotify();
   if(!isDev){
-    dialog.showMessageBox({
-      title: 'Check bahis autoupdate',
-      message: 'hmm',
-    });
     autoUpdater.checkForUpdatesAndNotify();
   } else {
     console.log('ups: Not checking for updates in dev mode');
@@ -1099,4 +1105,4 @@ ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData)
 ipcMain.on('form-details', fetchFormDetails);
 ipcMain.on('user-db-info', getUserDBInfo);
-ipcMain.on('login-operation', loginOperation);
+ipcMain.on('change-user', changeUser);
