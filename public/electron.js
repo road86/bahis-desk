@@ -310,12 +310,19 @@ const fetchListDefinition = (event, listId) => {
   }
 };
 
+function getCurrentUser(){
+    const query = 'SELECT username from users LIMIT 1';
+    const fetchedRow = db.prepare(query).get();
+    return fetchedRow.username;
+};
+
+
 const fetchFormListDefinition = (event, formId) => {
   electronLog.info(`------- || fetchFormListDefinition, listId: ${formId} || ----------------`);
   try {
-
-    const query = 'SELECT * from data where form_id = ?';
-    const fetchedRows = db.prepare(query).all(formId);
+    userName = getCurrentUser();
+    const query = 'SELECT * from data where form_id = ? and submitted_by = ?';
+    const fetchedRows = db.prepare(query).all(formId, userName);
     // eslint-disable-next-line no-param-reaFssign
     event.returnValue = { fetchedRows };
     
@@ -353,7 +360,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
 const fetchQueryData = (event, queryString) => {
   electronLog.info(`------- || fetchQueryData, formId: ${queryString} || ----------------`);
   try {
-
+    console.log(queryString);
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
