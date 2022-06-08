@@ -207,15 +207,15 @@ const fetchAppDefinition = (event) => {
 const submitFormResponse = (event, response) => {
   // eslint-disable-next-line no-console
   electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
-  //why on earth would you delete any data when you want to submit a record?
-  // deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
-  const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
+  //The following deletes a record when editing an existing entry and replacing it with a new one
+  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
+  const fetchedUsername = getCurrentUser();
   event.returnValue = {
-    username: fetchedUsername.username,
+    username: fetchedUsername,
   };
   const date = new Date().toISOString();
   const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
-  insert.run(response, fetchedUsername.username, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
+  insert.run(response, fetchedUsername, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
   
 };

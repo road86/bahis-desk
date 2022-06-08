@@ -197,8 +197,8 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
       tableMapping.forEach((tableName) => {
         try {
-          const deleteStmt = 'delete from "' + tableName + '" where instanceid ="' + instanceId + '"';
-          db.prepare(deleteStmt).run();
+          const deleteStmt = `delete from ${tableName} where instanceid = ?`;
+          db.prepare(deleteStmt).run(instanceId);
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err);
