@@ -268,7 +268,7 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
-    const formData = db.prepare(`SELECT * from data where ? = ? limit 1`).get(column,listId);
+    const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
     console.log(formData)
     if (formData != undefined) {
       event.returnValue = { formDetails: formData };
