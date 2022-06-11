@@ -68,7 +68,6 @@ function List(props: ListProps) {
   }
 
   React.useEffect(() => {
-    comUpdate()
   }, [])
 
   const setFiltersValue = (filtersValue: any) => {
@@ -84,46 +83,9 @@ function List(props: ListProps) {
   return (
     <React.Fragment>
       {
-        columnDefinition && filterDefinition ? (
-          <div>
-            <hr className={classes.hrTag} />
-            <div style={{ textAlign: 'center' }}>
-              <h3 className={classes.header}> {getNativeLanguageText(listHeader, appLanguage)} </h3>
-            </div>
-            <hr className={classes.hrTag} />
-            {filterDefinition && listId !== '' && (
-              <Row>
-                <Col>
-                  <Filter
-                    definition={filterDefinition}
-                    choices={FILTER_CHOICES}
-                    onSubmitHandler={setFiltersValue}
-                    appLanguage={appLanguage}
-                    listId={listId}
-                    columnDefinition={columnDefinition}
-                    datasource={datasource}
-                  />
-                </Col>
-              </Row>
-            )}
-            {columnDefinition && datasource && (
-              <Row>
-                <Col>
-                  <ListTable
-                    listId={listId}
-                    columnDefinition={columnDefinition}
-                    datasource={datasource}
-                    filters={filtersValue}
-                  />
-                </Col>
-              </Row>
-            )}
-          </div>
-        ) : (
           <Typography color="secondary" component="h1" variant="h4" align="center" style={{ marginTop: '10%' }}>
-            Couldn't Found List Definition
+            Customisable lists are not available yet. We are working hard to provide this feature for you as soon as possible. 
           </Typography>
-        )
       }
     </React.Fragment>
   );
