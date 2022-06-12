@@ -1,6 +1,6 @@
 {
   "name": "bahis",
-  "version": "2.0.0-beta-1",
+  "version": "2.0.0-beta-1-dev",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
@@ -93,7 +93,7 @@
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-        "releaseType": "release"
+        "releaseType": "prerelease"
       }
     ],
     "win": {
