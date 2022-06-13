@@ -5,6 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import SyncIcon from '@material-ui/icons/Sync';
 import React from 'react';
+import { useState } from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../../services/ipcRenderer';
@@ -33,6 +34,8 @@ function Header(props: HeaderProps) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
 
+  const [isDisabled, setDisabled] = useState(false);
+
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
@@ -50,11 +53,11 @@ function Header(props: HeaderProps) {
   }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
-    console.log("Starting clicked sync");
+    setDisabled(true);
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
-    await setSyncOverlayHandler(true);
+    // await setSyncOverlayHandler(true);
 
     const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
 
@@ -72,6 +75,7 @@ function Header(props: HeaderProps) {
       setSyncOverlayHandler(false);
       setAppConfigSyncComplete(false);
       props.updateUnsyncCount();
+      setDisabled(false);
     });
   };
 
@@ -92,7 +96,7 @@ function Header(props: HeaderProps) {
 
   const getButtonColor = (): any => {
     console.log('---------- || unsyncCount || ------------', props.unsyncCount);
-    return parseInt(props.unsyncCount) === 0 ? 'orange' : 'red';
+    return parseInt(props.unsyncCount) === 0 ? "secondary" : 'red';
   }
 
   return (
@@ -107,8 +111,12 @@ function Header(props: HeaderProps) {
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>
                   Last Data Sync Date : {props.syncTime}
-                  <Button variant="contained" style={{ backgroundColor: getButtonColor() }} onClick={handleAppSync} className={classes.button}>
-                    <SyncIcon style={{ paddingRight: 2 }} />Sync Now
+                  <Button variant="contained" 
+                   style={{backgroundColor: getButtonColor()}}
+                   onClick={handleAppSync} 
+                   className={classes.button} 
+                   disabled={isDisabled} >
+                   Sync Now 
               </Button>
                 </Typography>
               </div>
