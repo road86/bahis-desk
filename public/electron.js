@@ -427,14 +427,15 @@ const signIn = async (event, userData) => {
     'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
   // if a user has signed in before then no need to call signin-api
+  // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
-    // mainWindow.send('formSubmissionResults', results);
+    mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
-      // message: ""
+      message: ''
     };
-  }
+  } else {
   const data = {
     username: userData.username,
     password: userData.password,
@@ -457,8 +458,6 @@ const signIn = async (event, userData) => {
     })
     .then((response) => {
       let results = '';
-      // console.log('-----------signin response --------------');
-      // console.log(response);
 
       if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
         // if (response.status == 200 || response.status == 201) {
@@ -505,9 +504,9 @@ const signIn = async (event, userData) => {
             // message: ""
           };
         }
-      } else if (response.status == 409) {
+      } else {
         results = {
-          message: 'Un-authenticated Really',
+          message: 'Cannot log in, did you provide correct username and password?',
           username: '',
         };
         mainWindow.send('formSubmissionResults', results);
@@ -523,7 +522,7 @@ const signIn = async (event, userData) => {
       electronLog.info('-------|| Sign In Error ||-----------');
       electronLog.info(error);
     });
-
+  }
 };
 
 const getErrorMessage = (error) => {
