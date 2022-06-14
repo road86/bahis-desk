@@ -168,10 +168,13 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
     const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
-    const filterDatasetQuery = db.prepare(
-      `with ? as (?) select ? from ? group by ?`,
-    );
-    const returnedRows = filterDatasetQuery.all(randomTableName, datasourceQuery, filterColumns.toString, randomTableName, filterColumns.toString());
+    const a = filterColumns.toString();
+
+    sqliteplaceholder = ", ?".repeat(filterColumns -1 );
+    const filterDatasetQueryTxt = 'with '.concat(randomTableName,' as (', datasourceQuery, ' ) select ?', sqliteplaceholder, ' from ', randomTableName, ' group by ?', sqliteplaceholder);
+
+    const filterDatasetQuery = db.prepare(filterDatasetQueryTxt);
+    const returnedRows = filterDatasetQuery.all(a,a );
     // eslint-disable-next-line no-param-reassign
     event.returnValue = returnedRows;
   } catch (err) {
@@ -367,6 +370,7 @@ const fetchQueryData = (event, queryString) => {
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFQueryData Error, formId: ${err} || ----------------`);
+    event.returnValue = []; //lack of return here was hanging the frontend which incorectly used sendSync
   }
 };
 

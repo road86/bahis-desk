@@ -62,6 +62,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   // const [username, setUsername] = React.useState<string>('');
   // const [appData, setAppData] = React.useState<any>({});
 
+
   const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
     if (menuItem.type === MODULE_TYPE) {
       return <ModuleMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
