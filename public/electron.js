@@ -364,7 +364,6 @@ const fetchQueryData = (event, queryString) => {
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
-    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFQueryData Error, formId: ${err} || ----------------`);
@@ -743,25 +742,13 @@ const fetchUsername = (event,infowhere) => {
   }
 };
 
-const fetchLastSyncTime = (event) => {
-  try {
+ipcMain.handle('fetch-last-sync', async () => {
+  const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+  const result = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
 
-    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    console.log(last_updated);
-    const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    // eslint-disable-next-line no-param-reassign
-
-    electronLog.info(`------- || last sync time: ${updated} || ----------------`);
-    event.returnValue = {
-      lastSync: updated,
-    };
-    
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    electronLog.info(`------- || fetchLastSyncTime Error: ${err} || ----------------`);
-    // 
-  }
-};
+  electronLog.info(`JUST GOT A LAST SYNC TIME ----------------`);
+  return result
+})
 
 const fetchImage = (event, moduleId) => {
   try {
@@ -997,9 +984,8 @@ const startAppSync = (event, name) => {
 const requestDataSync = async (event, username) => {
   console.log("requesting data sync...")
   await fetchDataFromServer(db, username);
-  const msg = await sendDataToServer(db, username);
+  const msg = await sendDataToServer(db, username, mainWindow);
   csvDataSync(db, username);
-  mainWindow.send('dataSyncComplete', msg);
   console.log('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;
 };
@@ -1099,7 +1085,6 @@ ipcMain.on('fetch-userlist', fetchUserList);
 ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
 ipcMain.on('fetch-username', fetchUsername);
-ipcMain.on('fetch-last-sync', fetchLastSyncTime);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData)
 ipcMain.on('form-details', fetchFormDetails);

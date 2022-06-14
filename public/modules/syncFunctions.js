@@ -359,7 +359,7 @@ const isNotArrayOfString = (testArray) => {
 /** sends data to server
  * @returns {string} - success if suceess; otherwise failed
  */
-const sendDataToServer = async (db, username) => {
+const sendDataToServer = async (db, username, mainWindow) => {
   console.log('send data', username);
   
   try {
@@ -367,6 +367,15 @@ const sendDataToServer = async (db, username) => {
     const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
     try {
       const notSyncRows = notSyncRowsQuery.all() || [];
+      const noRowsToSync = notSyncRows.length;
+      electronLog.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
+      let noRowsSynced = 0;
+
+
+      if (noRowsSynced == noRowsToSync) {
+        mainWindow.send('dataSyncComplete', "no rows to sync");
+      }
+
       notSyncRows.forEach(async (rowObj) => {
         const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
         // eslint-disable-next-line no-unused-vars
@@ -403,6 +412,13 @@ const sendDataToServer = async (db, username) => {
                 const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
                 updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
               });
+            }
+
+            electronLog.info(`------- || UFF GOT A RESPONSE NOW|| ----------------`);
+            //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
+            noRowsSynced = noRowsSynced + 1;
+            if (noRowsSynced == noRowsToSync){
+              mainWindow.send('dataSyncComplete', "synchronised");
             }
           })
           .catch((error) => {
