@@ -62,8 +62,8 @@ function Header(props: HeaderProps) {
     const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
 
     await ipcRenderer.send('request-data-sync', user.username);
-    // setDisabledSyncConfig(true);
-    // await ipcRenderer.send('start-app-sync', user.username);
+    setDisabledSyncConfig(true);
+    await ipcRenderer.send('start-app-sync', user.username);
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
@@ -115,7 +115,7 @@ function Header(props: HeaderProps) {
               </div>
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>
-                  Last Data Sync Date : {props.syncTime}
+                  Time of last data submission: {props.syncTime}
                   <Button variant="contained" 
                    style={{backgroundColor: getButtonColor()}}
                    onClick={handleAppSync} 
