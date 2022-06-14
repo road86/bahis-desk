@@ -43,7 +43,6 @@ export interface MenuProps {
   currentMenu: MenuItem | null;
   isBackPossible: boolean;
   appLanguage: string;
-  setSyncOverlayHandler: any;
 }
 
 // export interface MenuState {

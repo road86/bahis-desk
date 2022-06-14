@@ -5,15 +5,16 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import SyncIcon from '@material-ui/icons/Sync';
 import React from 'react';
+import { useState } from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import { isPrevMenuEmpty, setPrevMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
 
+
 export interface HeaderProps {
   handleLogout: any;
-  setSyncOverlayHandler: any;
   syncTime: string;
   setPrevMenuActionCreator: any;
   isBackPossible: boolean;
@@ -21,57 +22,64 @@ export interface HeaderProps {
   redirectToMenu: any;
   redirectToSubmitted: any;
   showContent: boolean;
-  unsyncCount: any;
+  unsyncCount: number;
   updateUnsyncCount: any;
+  fetchLastSyncTime: any;
 }
 
 function Header(props: HeaderProps) {
-  const { setSyncOverlayHandler } = props;
+
   const classes = headerStyles();
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<null | HTMLElement>(null);
   const [appConfigSyncComplete, setAppConfigSyncComplete] = React.useState<boolean>(false);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  const [isDisabledSyncConfig, setDisabledSyncConfig] = useState(false);
+  const [isDisabledSyncData, setDisabledSyncData] = useState(false);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
 
-  React.useEffect(() => {
-    console.log("when does it run?")
-    if (appConfigSyncComplete) {
-      (async () => {
-        console.log('In header fethich usenamge and requesting dat async')
-        const user: any = await ipcRenderer.sendSync('fetch-username','appcinf end');
-        ipcRenderer.send('request-data-sync', user.username);
-      })();
-    }
+  // React.useEffect(() => {
+  //   console.log("when does it run?")
+  //   if (appConfigSyncComplete) {
+  //     (async () => {
+  //       console.log('In header fethich usenamge and requesting dat async')
+  //       const user: any = await ipcRenderer.sendSync('fetch-username','appcinf end');
+  //       ipcRenderer.send('request-data-sync', user.username);
+  //     })();
+  //   }
 
-  }, [appConfigSyncComplete]);
+  // }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
-    console.log("Starting clicked sync");
+    setDisabledSyncData(true);
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
-    await setSyncOverlayHandler(true);
 
     const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
 
-    await ipcRenderer.send('start-app-sync', user.username);
+    await ipcRenderer.send('request-data-sync', user.username);
+    // setDisabledSyncConfig(true);
+    // await ipcRenderer.send('start-app-sync', user.username);
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
       console.log("Finished clicked sync");
+      setDisabledSyncConfig(false);
+      props.fetchLastSyncTime();
       if (!appConfigSyncComplete)
         setAppConfigSyncComplete(true);
     });
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
-      setSyncOverlayHandler(false);
       setAppConfigSyncComplete(false);
+      setDisabledSyncData(false);
       props.updateUnsyncCount();
+      props.fetchLastSyncTime();
     });
   };
 
@@ -91,8 +99,9 @@ function Header(props: HeaderProps) {
   };
 
   const getButtonColor = (): any => {
+    console.log('Getting button colour');
     console.log('---------- || unsyncCount || ------------', props.unsyncCount);
-    return parseInt(props.unsyncCount) === 0 ? 'orange' : 'red';
+    return props.unsyncCount === 0 ? "orange" : "red";
   }
 
   return (
@@ -107,8 +116,12 @@ function Header(props: HeaderProps) {
               <div>
                 <Typography className={classes.title} variant="body2" noWrap={true}>
                   Last Data Sync Date : {props.syncTime}
-                  <Button variant="contained" style={{ backgroundColor: getButtonColor() }} onClick={handleAppSync} className={classes.button}>
-                    <SyncIcon style={{ paddingRight: 2 }} />Sync Now
+                  <Button variant="contained" 
+                   style={{backgroundColor: getButtonColor()}}
+                   onClick={handleAppSync} 
+                   className={classes.button} 
+                   disabled={isDisabledSyncConfig || isDisabledSyncData} >
+                   Sync Now 
               </Button>
                 </Typography>
               </div>
