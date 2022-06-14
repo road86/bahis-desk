@@ -23,6 +23,8 @@ function Copyright() {
   );
 }
 
+
+
 function AppRegister(props: any) {
   // const { history } = props;
   const theme = useTheme();
@@ -85,21 +87,13 @@ function AppRegister(props: any) {
       }
     });
   };
-//here trouble is brewing
+//Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    await ipcRenderer.send('start-app-sync', user.username);
-    ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      setLoadComplete(true);
-      if (args.includes('done')) {
         props.history.push({
           pathname: '/menu/',
-          state: { username: args.username },
+          state: { username: user },
         });
-      } else {
-        setToastContent({ severity: 'Error', msg: "Oh no! Couldn't sync app" });
-      }
-    });
   };
 
   const snackbarClose = () => {

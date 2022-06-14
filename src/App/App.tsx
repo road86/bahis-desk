@@ -69,7 +69,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const headerExcludedURLs = ['/', '/signup/'];
   const [percentage, setPercentage] = React.useState<number>(0);
   const [csv, setCsv] = React.useState<any>({});
-  const [lastSync, setLastSync] = React.useState<string>('never');
+  const [lastSync, setLastSync] = React.useState<string>('Please synchronise the app after logging in: ');
   const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
 
 
@@ -121,7 +121,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 <Loading />
               </Route>
               <Route exact={true} path="/signup/">
-                <AppRegister csv={csv} />
+                <AppRegister />
               </Route>
               <Route exact={true} path="/menu/">
                 <Menu appLanguage={'English'} />
