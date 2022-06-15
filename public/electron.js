@@ -1083,7 +1083,6 @@ ipcMain.on('start-app-sync', startAppSync);
 ipcMain.on('request-data-sync', requestDataSync);
 ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
-ipcMain.on('request-app-restart', requestRestartApp);
 ipcMain.on('sign-in', signIn);
 ipcMain.on('fetch-userlist', fetchUserList);
 ipcMain.on('fetch-geo', fetchGeo);

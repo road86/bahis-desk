@@ -59,9 +59,9 @@ function AppRegister(props: any) {
       await ipcRenderer.send('change-user', loginArgs);
     } else {
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully without changing the user' });
+      setDisabled(false);
     }
     setOpenAlert(false);
-    setDisabled(false);
   }
 
 
@@ -90,11 +90,27 @@ function AppRegister(props: any) {
   };
 //Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
   const syncAppModule = async () => {
+
+
     const user: any = await ipcRenderer.sendSync('fetch-username');
+    const isAppDef: any = await ipcRenderer.sendSync('fetch-query-data', 'SELECT * from app');
+
+    if (isAppDef.length !== 0) {
         props.history.push({
           pathname: '/menu/',
           state: { username: user },
         });
+    } else {
+      const user: any = await ipcRenderer.sendSync('fetch-username');
+      await ipcRenderer.send('start-app-sync', user.username);
+      
+      ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+        props.history.push({
+          pathname: '/menu/',
+          state: { username: user }
+        });
+      });
+    }
   };
 
   const snackbarClose = () => {

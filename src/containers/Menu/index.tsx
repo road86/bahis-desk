@@ -80,9 +80,6 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   };
 
   const compUpdate = async () => {
-    // const user: any = await ipcRenderer.sendSync('fetch-username');
-    // this.setState({ username: user.username });
-    // setUsername(user.username);
     const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
