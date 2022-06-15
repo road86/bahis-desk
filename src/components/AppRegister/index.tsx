@@ -61,6 +61,7 @@ function AppRegister(props: any) {
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully without changing the user' });
     }
     setOpenAlert(false);
+    setDisabled(false);
   }
 
 
