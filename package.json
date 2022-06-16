@@ -1,6 +1,6 @@
 {
-  "name": "devbahis",
-  "version": "2.0.0-beta-3-dev",
+  "name": "bahis",
+  "version": "2.0.0-beta-3",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
@@ -87,13 +87,13 @@
     "electron-updater": "^4.0.4"
   },
   "build": {
-    "appId": "com.electron.devbahis",
+    "appId": "com.electron.bahis",
     "publish": [
       {
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-        "releaseType": "prerelease"
+        "releaseType": "release"
       }
     ],
     "win": {
