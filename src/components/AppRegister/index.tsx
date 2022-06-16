@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import React from 'react';
+import {useState} from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -21,6 +22,8 @@ function Copyright() {
     </Typography>
   );
 }
+
+
 
 function AppRegister(props: any) {
   // const { history } = props;
@@ -56,11 +59,14 @@ function AppRegister(props: any) {
       await ipcRenderer.send('change-user', loginArgs);
     } else {
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully without changing the user' });
+      setDisabled(false);
     }
     setOpenAlert(false);
   }
 
+
   const handleSignIn = async () => {
+    setDisabled(true);
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
       console.log('in delete table dialogue: ', event, args);
@@ -73,29 +79,38 @@ function AppRegister(props: any) {
         setToastVisible(true);
         if (args.message !== '' && args.username === '') {
           setToastContent({ severity: 'Error', msg: args.message });
+          setDisabled(false);
         } else {
-          setToastContent({ severity: 'Error', msg: 'Submitted and Logged In Successfully' });
+          setToastContent({ severity: 'Error', msg: 'Submitted and Logged In Successfully. Please wait...' });
           //TODO first check that you are actually logged in you idiot
           syncAppModule();
         }
       }
     });
   };
-//here trouble is brewing
+//Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
   const syncAppModule = async () => {
+
+
     const user: any = await ipcRenderer.sendSync('fetch-username');
-    await ipcRenderer.send('start-app-sync', user.username);
-    ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-      setLoadComplete(true);
-      if (args.includes('done')) {
+    const isAppDef: any = await ipcRenderer.sendSync('fetch-query-data', 'SELECT * from app');
+
+    if (isAppDef.length !== 0) {
         props.history.push({
           pathname: '/menu/',
-          state: { username: args.username },
+          state: { username: user },
         });
-      } else {
-        setToastContent({ severity: 'Error', msg: "Oh no! Couldn't sync app" });
-      }
-    });
+    } else {
+      const user: any = await ipcRenderer.sendSync('fetch-username');
+      await ipcRenderer.send('start-app-sync', user.username);
+      
+      ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+        props.history.push({
+          pathname: '/menu/',
+          state: { username: user }
+        });
+      });
+    }
   };
 
   const snackbarClose = () => {
@@ -106,7 +121,7 @@ function AppRegister(props: any) {
   const toast = (response: any) => (
     <Snackbar
       open={toastVisible}
-      autoHideDuration={3000}
+      autoHideDuration={7000}
       onClose={snackbarClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}
@@ -114,6 +129,8 @@ function AppRegister(props: any) {
       <Alert severity={response.severity}>{response.msg}</Alert>
     </Snackbar>
   );
+
+  const [isDisabled, setDisabled] = useState(false);
 
   return (
     <Grid container={true} spacing={3} direction="row" justify="center" alignItems="center">
@@ -131,7 +148,7 @@ function AppRegister(props: any) {
             </Grid>
             <Grid item={true} style={{ marginTop: 20 }}>
               <Typography component="h1" variant="h4" align="center">
-                Sign In
+                Please sign in
               </Typography>
             </Grid>
             <React.Fragment>
@@ -143,7 +160,7 @@ function AppRegister(props: any) {
 
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
-                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button}>
+                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button} disabled={isDisabled} >
                   Sign In
                 </Button>
               </div>

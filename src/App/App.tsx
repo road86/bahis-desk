@@ -66,18 +66,16 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const classes = appStyles();
   const { location } = props;
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [isOverlayPresent, setSyncOverlay] = React.useState<boolean>(false);
   const headerExcludedURLs = ['/', '/signup/'];
   const [percentage, setPercentage] = React.useState<number>(0);
   const [csv, setCsv] = React.useState<any>({});
-  const [lastSync, setLastSync] = React.useState<string>('never');
-  const [unsyncCount, setUnsyncCount] = React.useState<any>(0);
+  const [lastSync, setLastSync] = React.useState<string>('Please synchronise the app after logging in: ');
+  const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
 
 
   const fetchLastSyncTime = async () => {
-    const syncTime: any = await ipcRenderer.sendSync('fetch-last-sync');
-    //  setLastSync(syncTime);
-    const time = syncTime.lastSync !== 0 ? new Date(Math.round(syncTime.lastSync)).toLocaleString() : 'never';
+    const syncTime: number = await ipcRenderer.invoke('fetch-last-sync');
+    const time = syncTime !== 0 ? new Date(Math.round(syncTime)).toLocaleString() : 'never';
     setLastSync(time);
   }
 
@@ -87,10 +85,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     setUnsyncCount(response[0].cnt);
   }
 
-  React.useEffect(() => {
-    updateUnsyncCount();
-    fetchLastSyncTime();
-  }, []);
 
   const logout = () => {
     props.history.push('/signup/');
@@ -114,16 +108,9 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     }
   }
 
-  const setSync = (data: boolean) => {
-    setSyncOverlay(data);
-    fetchLastSyncTime();
-  };
-
   return (
     <React.Fragment>
-      <LoadingOverlay className="sync-overlay" active={isOverlayPresent} spinner={<BounceLoader />} text="Synchronising...">
-        {/* {!headerExcludedURLs.includes(location.pathname) && ( */}
-        <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} setSyncOverlayHandler={setSync} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} />
+        <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} fetchLastSyncTime={fetchLastSyncTime} />
         {/* )} */}
         <div className={classes.offset} />
         <Row id="main-page-container">
@@ -134,10 +121,10 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 <Loading />
               </Route>
               <Route exact={true} path="/signup/">
-                <AppRegister csv={csv} />
+                <AppRegister />
               </Route>
               <Route exact={true} path="/menu/">
-                <Menu appLanguage={'English'} setSyncOverlayHandler={setSyncOverlay} />
+                <Menu appLanguage={'English'} />
               </Route>
               <Route exact={true} path="/form/:id">
                 <Container>
@@ -171,7 +158,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
             </Switch>
           </Col>
         </Row>
-      </LoadingOverlay>
       {loading ? (
         <Box
           position="fixed"

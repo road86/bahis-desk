@@ -43,7 +43,6 @@ export interface MenuProps {
   currentMenu: MenuItem | null;
   isBackPossible: boolean;
   appLanguage: string;
-  setSyncOverlayHandler: any;
 }
 
 // export interface MenuState {
@@ -63,6 +62,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   // const [username, setUsername] = React.useState<string>('');
   // const [appData, setAppData] = React.useState<any>({});
 
+
   const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
     if (menuItem.type === MODULE_TYPE) {
       return <ModuleMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
@@ -80,9 +80,6 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   };
 
   const compUpdate = async () => {
-    // const user: any = await ipcRenderer.sendSync('fetch-username');
-    // this.setState({ username: user.username });
-    // setUsername(user.username);
     const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');

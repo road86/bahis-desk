@@ -168,10 +168,13 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
     const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
-    const filterDatasetQuery = db.prepare(
-      `with ? as (?) select ? from ? group by ?`,
-    );
-    const returnedRows = filterDatasetQuery.all(randomTableName, datasourceQuery, filterColumns.toString, randomTableName, filterColumns.toString());
+    const a = filterColumns.toString();
+
+    sqliteplaceholder = ", ?".repeat(filterColumns -1 );
+    const filterDatasetQueryTxt = 'with '.concat(randomTableName,' as (', datasourceQuery, ' ) select ?', sqliteplaceholder, ' from ', randomTableName, ' group by ?', sqliteplaceholder);
+
+    const filterDatasetQuery = db.prepare(filterDatasetQueryTxt);
+    const returnedRows = filterDatasetQuery.all(a,a );
     // eslint-disable-next-line no-param-reassign
     event.returnValue = returnedRows;
   } catch (err) {
@@ -364,10 +367,10 @@ const fetchQueryData = (event, queryString) => {
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
-    
   } catch (err) {
     // eslint-disable-next-line no-console
     electronLog.info(`------- || fetchFQueryData Error, formId: ${err} || ----------------`);
+    event.returnValue = []; //lack of return here was hanging the frontend which incorectly used sendSync
   }
 };
 
@@ -427,14 +430,15 @@ const signIn = async (event, userData) => {
     'SELECT * from users limit 1';
   const userInfo = db.prepare(query).get();
   // if a user has signed in before then no need to call signin-api
+  // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
     results = { username: userData.username, message: '' };
-    // mainWindow.send('formSubmissionResults', results);
+    mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
-      // message: ""
+      message: ''
     };
-  }
+  } else {
   const data = {
     username: userData.username,
     password: userData.password,
@@ -457,8 +461,6 @@ const signIn = async (event, userData) => {
     })
     .then((response) => {
       let results = '';
-      // console.log('-----------signin response --------------');
-      // console.log(response);
 
       if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
         // if (response.status == 200 || response.status == 201) {
@@ -505,9 +507,9 @@ const signIn = async (event, userData) => {
             // message: ""
           };
         }
-      } else if (response.status == 409) {
+      } else {
         results = {
-          message: 'Un-authenticated Really',
+          message: 'Cannot log in, did you provide correct username and password?',
           username: '',
         };
         mainWindow.send('formSubmissionResults', results);
@@ -523,7 +525,7 @@ const signIn = async (event, userData) => {
       electronLog.info('-------|| Sign In Error ||-----------');
       electronLog.info(error);
     });
-
+  }
 };
 
 const getErrorMessage = (error) => {
@@ -744,25 +746,13 @@ const fetchUsername = (event,infowhere) => {
   }
 };
 
-const fetchLastSyncTime = (event) => {
-  try {
+ipcMain.handle('fetch-last-sync', async () => {
+  const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+  const result = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
 
-    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    console.log(last_updated);
-    const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    // eslint-disable-next-line no-param-reassign
-
-    electronLog.info(`------- || last sync time: ${updated} || ----------------`);
-    event.returnValue = {
-      lastSync: updated,
-    };
-    
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    electronLog.info(`------- || fetchLastSyncTime Error: ${err} || ----------------`);
-    // 
-  }
-};
+  electronLog.info(`JUST GOT A LAST SYNC TIME ----------------`);
+  return result
+})
 
 const fetchImage = (event, moduleId) => {
   try {
@@ -998,9 +988,8 @@ const startAppSync = (event, name) => {
 const requestDataSync = async (event, username) => {
   console.log("requesting data sync...")
   await fetchDataFromServer(db, username);
-  const msg = await sendDataToServer(db, username);
+  const msg = await sendDataToServer(db, username, mainWindow);
   csvDataSync(db, username);
-  mainWindow.send('dataSyncComplete', msg);
   console.log('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;
 };
@@ -1094,13 +1083,11 @@ ipcMain.on('start-app-sync', startAppSync);
 ipcMain.on('request-data-sync', requestDataSync);
 ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
-ipcMain.on('request-app-restart', requestRestartApp);
 ipcMain.on('sign-in', signIn);
 ipcMain.on('fetch-userlist', fetchUserList);
 ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
 ipcMain.on('fetch-username', fetchUsername);
-ipcMain.on('fetch-last-sync', fetchLastSyncTime);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData)
 ipcMain.on('form-details', fetchFormDetails);
