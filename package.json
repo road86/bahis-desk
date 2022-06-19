@@ -1,6 +1,6 @@
 {
   "name": "devbahis",
-  "version": "2.0.0-beta-4-dev",
+  "version": "2.0.0-dev",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
