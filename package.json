@@ -1,6 +1,6 @@
 {
   "name": "bahis",
-  "version": "2.0.0-beta-3",
+  "version": "2.0.0",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
