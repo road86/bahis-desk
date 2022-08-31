@@ -96,6 +96,8 @@ function Header(props: HeaderProps) {
     } else {
       props.setPrevMenuActionCreator();
     }
+    // allow re-sync after clicking back button for now. It will however wait for the sync to complete, not sure how that works
+    setDisabledSyncData(false);
   };
 
   const getButtonColor = (): any => {
