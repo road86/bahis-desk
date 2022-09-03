@@ -376,7 +376,9 @@ const sendDataToServer = async (db, username, mainWindow) => {
         mainWindow.send('dataSyncComplete', "no rows to sync");
       }
 
-      notSyncRows.forEach(async (rowObj) => {
+      derdelay = 500 //POST request getting to server at the same time make it lock. Introducing this delay at least we will not be blocking few requests of our own and over time synchronise all of the data
+      notSyncRows.forEach(async (rowObj, index) => {
+
         const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
         // eslint-disable-next-line no-unused-vars
         let formData = JSON.parse(rowObj.data) || {};
@@ -394,7 +396,8 @@ const sendDataToServer = async (db, username, mainWindow) => {
         console.log(url);
         console.log("jsondata",jsondata);
         console.log(jsondata);
-        
+       
+        setTimeout(async function() {  
         await axios
           .post(url, jsondata, {
             headers: {
@@ -424,7 +427,8 @@ const sendDataToServer = async (db, username, mainWindow) => {
           .catch((error) => {
             // eslint-disable-next-line no-console
             electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
-          });
+          })
+        }, index * derdelay);
       });
     } catch (err) {
       electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
