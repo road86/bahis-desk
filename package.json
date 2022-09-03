@@ -1,5 +1,5 @@
 {
-  "name": "devbahis",
+  "name": "bahis",
   "version": "2.0.3",
   "private": false,
   "main": "public/electron.js",
@@ -93,7 +93,7 @@
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-        "releaseType": "prerelease"
+        "releaseType": "release"
       }
     ],
     "win": {
