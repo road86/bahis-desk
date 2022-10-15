@@ -1,6 +1,6 @@
 //setting env variables for global builds do not work that well, temporarily hardcodeing
 //const SERVER_URL = process.env.BAHIS_SERVER;
-const SERVER_URL = 'http://bahis2-dev.net'; //dev
+const SERVER_URL = 'http://www.bahis2-dev.net'; //dev
 // const SERVER_URL = 'http://bahis.dls.gov.bd'; //production
 //const SERVER_URL = 'http://localhost';
 
