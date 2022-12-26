@@ -69,6 +69,9 @@ yarn win-build
 rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && yarn start
 ```
 
+## Problems
+
+### crashes
 There is some leak in UI code that might give an error saying that there are too many watchers. Try this
 
 ```
@@ -76,6 +79,15 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 ```
 
 (https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
+
+### 
+If `yarn electron .` fails saying "better_sqlite3.node' was compiled against a different Node.js", try 
+
+```
+yarn add electron-rebuild --dev
+yarn electron-rebuild
+```
+(https://github.com/road86/bahis-desk/issues/27)
 
 ## Configuration
 
