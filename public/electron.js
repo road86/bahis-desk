@@ -18,7 +18,16 @@ const download = require('image-downloader');
 const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
-const { SERVER_URL, DB_TABLES_ENDPOINT, APP_DEFINITION_ENDPOINT, FORMS_ENDPOINT, LISTS_ENDPOINT, SIGN_IN_ENDPOINT, FORM_CHOICE_ENDPOINT } = require('./constants');
+const {
+  SERVER_URL,
+  DB_TABLES_ENDPOINT,
+  CATCHMENT_DEFINITION_ENDPOINT,
+  APP_DEFINITION_ENDPOINT,
+  FORMS_ENDPOINT,
+  LISTS_ENDPOINT,
+  SIGN_IN_ENDPOINT,
+  FORM_CHOICE_ENDPOINT,
+} = require('./constants');
 
 const { app, BrowserWindow, ipcMain } = electron;
 const DB_NAME = 'bahis.db';
@@ -38,7 +47,7 @@ app.on('ready', () => {
   const isFirstRun = firstRun()
   if (isFirstRun) {
     afterInstallation();
-    console.log('Will create a DB on a first run');
+    electronLog.info('Will create a DB on a first run');
     prepareDb(db);
   } else { //we don't check for auto update on the first run, apparently that can cause problems
     autoUpdateBahis();
@@ -48,11 +57,11 @@ app.on('ready', () => {
   //create a db if doesn't exist
   if (!fs.existsSync(dbfile)){
     db.close();
-    console.log('Recreating DB');
+    electronLog.info('Recreating DB');
     db = new Database(dbfile);
     prepareDb(db);
   }else{
-    console.log('Using db in ', dbfile);
+    electronLog.info('Using db in ', dbfile);
   }
 });
 
@@ -65,7 +74,7 @@ function afterInstallation() {
 function createWindow() {
 
 
-  console.log('created window');
+  electronLog.info('created window');
 
 
 
@@ -96,14 +105,14 @@ function createWindow() {
 }
 
 /** set up new db */
-function prepareDb() {
+function prepareDb(db) {
   electronLog.info('------- || Creating New Database || ----------------');
-  console.log('Running initial queries');
+  electronLog.info('Running initial queries');
   try{
     db.exec(queries);
   }catch(err){
-    console.log("Failed setting up DB")
-    console.log(err)
+    electronLog.info("Failed setting up DB")
+    electronLog.info(err)
   }
   electronLog.info('-------- || Database setup finished !!!! || ----------');
 }
@@ -164,7 +173,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
   electronLog.info(`------- || fetchFilterDataset ${event} ${listId} ${filterColumns} || ----------------`);
   try {
     const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId);
-    // console.log(listDefinition);
+    // electronLog.info(listDefinition);
     const datasource = JSON.parse(listDefinition.datasource);
     const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
     const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
@@ -198,7 +207,7 @@ const fetchAppDefinition = (event) => {
     
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    electronLog.info(err);
     electronLog.info(`------- || fetchAppDefinition Error ${err} || ----------------`);
   }
 };
@@ -264,7 +273,7 @@ const fetchFormChoices = (event, formId) => {
     const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
     event.returnValue = formchoices;
   } catch (err) {
-    console.log('------------- error fetch form choices ------------------', err);
+    electronLog.info('------------- error fetch form choices ------------------', err);
   }
 }
 
@@ -272,14 +281,14 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
   electronLog.info(`------- || fetchFormDetails  ${event} ${listId} || ----------------`);
   try {
     const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
-    console.log(formData)
+    electronLog.info(formData)
     if (formData != undefined) {
       event.returnValue = { formDetails: formData };
     } else {
       event.returnValue = null;
     }
   } catch (err) {
-    console.log(err);
+    electronLog.info(err);
     electronLog.info(`------- || Fetch FormDetails  ${err} || ----------------`);
   }
 };
@@ -363,7 +372,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
 const fetchQueryData = (event, queryString) => {
   electronLog.info(`------- || fetchQueryData, formId: ${queryString} || ----------------`);
   try {
-    console.log(queryString);
+    electronLog.info(queryString);
     const fetchedRows = db.prepare(queryString).all();
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
@@ -382,7 +391,7 @@ const changeUser = async (event, obj) => {
   });
   db.close();
   fs.unlinkSync(dbfile);
-  console.log('new db setup call after delete previous user data');
+  electronLog.info('new db setup call after delete previous user data');
   db = new Database(dbfile);
   prepareDb(db);
   const { response, userData } = obj;
@@ -402,8 +411,9 @@ const changeUser = async (event, obj) => {
     data.email,
   );
 
-  electronLog.log(`Created db, now synchronising catchments for ${data.user_name}`);
-  synchroniseCatchments(data.user_name, Math.round(new Date().getTime()));
+  electronLog.log(`Created db, now synchronising form config and catchments for ${data.user_name}`);
+  await synchroniseFormConfig(data.user_name, 0);
+  await synchroniseCatchments(data.user_name, 0);
 
   results = { username: data.user_name, message: '' };
   mainWindow.send('formSubmissionResults', results);
@@ -413,8 +423,67 @@ const changeUser = async (event, obj) => {
   };
 };
 
+const synchroniseFormConfig = async (name, time) => {
+  electronLog.info('----------------- || Synchronising FormConfig || ----------------------------');
+  electronLog.info(`${formConfigEndpoint(name, time)}`);
+
+  await axios.get(`${formConfigEndpoint(name, time)}`).then((formConfigRes) => {
+    const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+    newLayoutQuery.run(new Date().getTime());
+
+    if (formConfigRes.data) {
+      electronLog.info('---------------------|| formConfigRes data ||---------------------');
+      formConfigRes.data.forEach((sqlObj) => {
+        if (sqlObj.sql_script) {
+          try {
+            db.exec(sqlObj.sql_script);
+          } catch (err) {
+            electronLog.info('---------------------|| formConfigRes FAILED ||---------------------');
+            electronLog.info('Error: ', err.message);
+          }
+        }
+      });
+      electronLog.info('---------------------|| formConfigRes SUCCESS ||---------------------');
+    }
+  });
+};
+
 const synchroniseCatchments = async (name, time) => {
   electronLog.info(`----------------- || Synchronising Catchments || ----------------------------`);
+  electronLog.info(_url(CATCHMENT_DEFINITION_ENDPOINT, name, time));
+  await axios
+    .get(_url(CATCHMENT_DEFINITION_ENDPOINT, name, time))
+    .then((catchmentListRes) => {
+      const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+      newLayoutQuery.run(new Date().getTime());
+
+      if (catchmentListRes.data) {
+        electronLog.info('---------------------|| catchmentListRes data ||---------------------');
+        const layoutDeleteQuery = db.prepare('DELETE FROM app');
+
+        try {
+          layoutDeleteQuery.run();
+        } catch (error) {
+          electronLog.info('Previous Layout does not exist');
+          electronLog.info(error);
+        }
+        populateCatchment(catchmentListRes.data);
+      }
+      csvDataSync(name);
+      mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
+      electronLog.info('CSV App Sync Complete');
+    })
+    .catch((error) => {
+      electronLog.info(
+        `----------------- || Synchronising Catchments FAIL|| ----------------------------\n`,
+        error.message,
+      );
+    });
+  electronLog.info(`----------------- || Synchronising Catchments SUCCESS || ----------------------------`);
+};
+
+const synchroniseModules = async (name, time) => {
+  electronLog.info(`----------------- || Synchronising Modules || ----------------------------`);
   axios
     .get(_url(APP_DEFINITION_ENDPOINT, name, time))
     .then((moduleListRes) => {
@@ -442,9 +511,9 @@ const synchroniseCatchments = async (name, time) => {
       electronLog.info('CSV App Sync Complete');
     })
     .catch((error) => {
-      electronLog.info(`----------------- || Synchronising Catchments FAIL|| ----------------------------\n`, error);
+      electronLog.info(`----------------- || Synchronising Modules FAIL|| ----------------------------\n`, error);
     });
-    electronLog.info(`----------------- || Synchronising Catchments SUCCESS || ----------------------------`);
+  electronLog.info(`----------------- || Synchronising Modules SUCCESS || ----------------------------`);
 };
 
 // ------------ NOTE ------------
@@ -460,7 +529,7 @@ const signIn = async (event, userData) => {
   let mac;
   macaddress.one(function (err, mac) {
     mac = mac;
-    // console.log(mac);
+    // electronLog.info(mac);
   });
   const query =
     'SELECT * from users limit 1';
@@ -520,8 +589,9 @@ const signIn = async (event, userData) => {
               data.email,
             );
 
-            electronLog.log(`Created db, now synchronising catchments for ${data.user_name}`);
-            synchroniseCatchments(data.user_name, Math.round(new Date().getTime()));
+            electronLog.log(`Created db, now synchronising form config and catchments for ${data.user_name}`);
+            synchroniseFormConfig(data.user_name, 0);
+            synchroniseCatchments(data.user_name, 0);
 
             results = { username: data.user_name, message: '' };
             mainWindow.send('formSubmissionResults', results);
@@ -579,14 +649,14 @@ const populateCatchment = (catchments) => {
   electronLog.info(`------- || populateCatchment: ${catchments.length} || ----------------`);
   db.prepare('DELETE FROM geo_cluster').run();
   const geoData = catchments ? catchments : [];
-  // console.log('call', geoData);
+  // electronLog.info('call', geoData);
   if (geoData.length) {
     const insertStmt = db.prepare(
       `INSERT INTO geo_cluster (value, name, loc_type , parent) VALUES (@value, @name, @loc_type, @parent)`,
     );
 
     const insertMany = db.transaction((geos) => {
-      // console.log(geos);
+      // electronLog.info(geos);
       for (const geo of geos)
         insertStmt.run({
           value: geo.value.toString(),
@@ -662,6 +732,8 @@ const populateModuleImage = (module) => {
 };
 
 const updateAppDefinition = (appDefinition) => {
+  electronLog.info(`------- || fetchAppDefinition || ----------------`);
+  electronLog.info(appDefinition);
   let update = function (module) {
     if (module.xform_id != '') {
       const formModule = {
@@ -722,7 +794,7 @@ const updateAppDefinition = (appDefinition) => {
     newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    electronLog.info(err);
     // 
   }
 }
@@ -737,7 +809,7 @@ const exportExcel = (event, excelData) => {
   ).then(result => {
     filename = result.filePath;
     if (filename === undefined) {
-      console.log(filename);
+      electronLog.info(filename);
       dialog.showMessageBox({
         title: 'Download Updates',
         message: 'couldn\'t create a file.',
@@ -774,7 +846,7 @@ const fetchUsername = (event,infowhere) => {
   try {
     const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get();
     // eslint-disable-next-line no-param-reassign
-    console.log("XIM2, we fetched", fetchedUsername);
+    electronLog.info("XIM2, we fetched", fetchedUsername);
     event.returnValue = {
       username: fetchedUsername.username,
     };
@@ -811,20 +883,20 @@ const fetchUserList = (event) => {
 
     const fetchedRows = db.prepare('SELECT DISTINCT	username, name FROM users').all();
     // eslint-disable-next-line no-param-reassign
-    console.log(fetchedRows);
+    electronLog.info(fetchedRows);
     event.returnValue = {
       users: fetchedRows,
     };
     
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    electronLog.info(err);
     
   }
 }
 
 const fetchGeo = (event, level, divisionId, districtId) => {
-  console.log("Fetchin geodata");
+  electronLog.info("Fetchin geodata");
   if (level==="division"){
     const fetchedRows = db.prepare('SELECT DISTINCT	div_id, division FROM geo').all();
     event.returnValue = {
@@ -867,7 +939,6 @@ const startAppSync = (event, name) => {
   const log = db.prepare('SELECT * from app_log order by time desc limit 1').get();
   const time = log === undefined ? 0 : Math.round(log.time);
 
-  electronLog.info(`${formConfigEndpoint(name, time)}`);
   electronLog.info(`${_url(FORMS_ENDPOINT, name, time)}`);
   electronLog.info(`${_url(LISTS_ENDPOINT, name, time)}`);
   electronLog.info(`${_url(FORM_CHOICE_ENDPOINT, name, time)}`);
@@ -875,31 +946,14 @@ const startAppSync = (event, name) => {
 
   axios
     .all([
-      axios.get(`${formConfigEndpoint(name, time)}`),
       axios.get(_url(FORMS_ENDPOINT, name, time)),
       axios.get(_url(LISTS_ENDPOINT, name, time)),
       axios.get(_url(FORM_CHOICE_ENDPOINT, name, time)),
     ])
     .then(
-      axios.spread((formConfigRes, formListRes, listRes, formChoice) => {
+      axios.spread((formListRes, listRes, formChoice) => {
         const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
         newLayoutQuery.run(new Date().getTime());
-
-        if (formConfigRes.data) {
-          electronLog.info('---------------------|| formConfigRes data ||---------------------');
-          formConfigRes.data.forEach((sqlObj) => {
-            if (sqlObj.sql_script) {
-              try {
-                db.exec(sqlObj.sql_script);
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                electronLog.info('---------------------|| formConfigRes FAILED ||---------------------');
-                electronLog.info('Error: ', err);
-              }
-            }
-          });
-          electronLog.info('---------------------|| formConfigRes SUCCESS ||---------------------');
-        }
         if (formListRes.data) {
           electronLog.info(
             '---------------------|| FormListRes data ||---------------------',
@@ -1012,6 +1066,9 @@ const startAppSync = (event, name) => {
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
     });
+
+  // We synchronise modules later because of time outs
+  synchroniseModules(name, time);
 };
 
 /** starts data sync on request event
@@ -1019,11 +1076,11 @@ const startAppSync = (event, name) => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const requestDataSync = async (event, username) => {
-  console.log("requesting data sync...")
+  electronLog.info("requesting data sync...")
   await fetchDataFromServer(db, username);
   const msg = await sendDataToServer(db, username, mainWindow);
   csvDataSync(db, username);
-  console.log('----------------------------------- complete data sync ----------------------------------------');
+  electronLog.info('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;
 };
 
@@ -1032,14 +1089,14 @@ const requestDataSync = async (event, username) => {
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
 const csvDataSync = async (username) => {
-  console.log("XIM1 csvDataSync")
+  electronLog.info("XIM1 csvDataSync")
   try {
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type=? AND name=?';
     const info = db.prepare(tableExistStmt).get('table','csv_sync_log');
     if (info && info.name == 'csv_sync_log') {
       fetchCsvDataFromServer(db, username);
     } else {
-      console.log('info', info);
+      electronLog.info('info', info);
       db.prepare('CREATE TABLE csv_sync_log( time TEXT)').run();
       fetchCsvDataFromServer(db, username);
     }
@@ -1077,7 +1134,7 @@ const getUserDBInfo = (event) => {
 }
 
 const deleteData = (event, instanceId, formId) => {
-  console.log(instanceId, formId);
+  electronLog.info(instanceId, formId);
   deleteDataWithInstanceId(db, instanceId.toString(), formId);
   event.returnValue = {
     status: 'successful',
@@ -1094,11 +1151,11 @@ const requestRestartApp = async (_event) => {
 };
 
 const autoUpdateBahis = (event) => {
-  console.log('Checking for the app software updates call');
+  electronLog.info('Checking for the app software updates call');
   if(!isDev){
     autoUpdater.checkForUpdatesAndNotify();
   } else {
-    console.log('ups: Not checking for updates in dev mode');
+    electronLog.info('ups: Not checking for updates in dev mode');
   }
 };
 

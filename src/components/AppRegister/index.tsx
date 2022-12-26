@@ -121,7 +121,7 @@ function AppRegister(props: any) {
   const toast = (response: any) => (
     <Snackbar
       open={toastVisible}
-      autoHideDuration={7000}
+      autoHideDuration={20000}
       onClose={snackbarClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}

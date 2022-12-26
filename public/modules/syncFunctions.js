@@ -24,9 +24,7 @@ CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, subm
 CREATE TABLE app_log( time TEXT);
 CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT NOT NULL, image_name TEXT NOT NULL, directory_name TEXT );
 CREATE TABLE form_choices( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);
-CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);
-CREATE TABLE geo_cluster( id INTEGER PRIMARY KEY AUTOINCREMENT, value INTEGER NOT NULL, name TEXT NOT NULL, loc_type INTEGER NOT NULL , parent INTEGER NOT NULL);`;
-
+CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
 
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
@@ -243,7 +241,7 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
  */
 const parseAndSaveToFlatTables = (dbConnection, formId, userInput, instanceId) => {
   const formObj = dbConnection.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
-  if (formObj != 'undefined') {
+  if (formObj !== undefined) {
     const formDefinition = JSON.parse(formObj.definition);
     const formFieldNames = JSON.parse(formObj.field_names);
     const userInputObj = JSON.parse(userInput);
