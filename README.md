@@ -1,51 +1,66 @@
+# Getting started
 
-## Getting started
+## PC configuration
 
-### PC configuration Linux
+### Linux
+
 We need node and yarn. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
 
-```
+```bash
 nvm install 14.19.2
 nvm use 14.19.2
 ```
-On windows install node in version 14.
 
 Next, install yarn globally:
-```
-npm install -g yarn 
+
+```bash
+npm install -g yarn
 ```
 
-### PC configuration Windows 
-https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi
+### Windows
+
+On windows install node in version 14, which you can download [here](https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi).
 
 Please tick to install all additional tools with "chocolatey" that should cover all of the other requirements (visual studio, python etc.)
 
+## Running the web-app locally
 
-### Running the web-app
-
+### Linux and Windows
 
 Install packages using yarn and then start the app:
 
-```sh
-yarn
+```bash
+yarn install
 
-yarn start
-```
-In order to reset the database before the next build you need to remove the bahis files. On linux run:
-```
-rm -rf ~/.config/bahis  
+yarn react-start
 ```
 
-### build setup file
+In a second terminal, start electron with:
 
-for windows
-```sh
-yarn win-build
+```bash
+yarn electron .
 ```
 
-for linux
-```sh
+In order to reset the database before the next build you need to remove the bahis files, e.g. on linux:
+
+```bash
+rm -rf ~/.config/bahis
+```
+
+Changes made should auto-render.
+
+## Building the app for distribution
+
+### For Linux
+
+```bash
 yarn linux-build
+```
+
+### For Windows
+
+```bash
+yarn win-build
 ```
 
 ## Re-run of the app in dev mode
@@ -54,11 +69,14 @@ yarn linux-build
 rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && yarn start
 ```
 
-There is some leak in UI code that might give an error saying that there are too many watchers. Try this 
+There is some leak in UI code that might give an error saying that there are too many watchers. Try this
+
 ```
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
+
 (https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
+
 ## Configuration
 
 The configurations are located in the `configs` directory and are split into two modules:

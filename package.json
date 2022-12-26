@@ -87,6 +87,7 @@
     "electron-updater": "^4.0.4"
   },
   "build": {
+    "extends": null,
     "appId": "com.electron.bahis",
     "publish": [
       {

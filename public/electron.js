@@ -384,7 +384,7 @@ const changeUser = async (event, obj) => {
   fs.unlinkSync(dbfile);
   console.log('new db setup call after delete previous user data');
   db = new Database(dbfile);
-  prepareDb();
+  prepareDb(db);
   const { response, userData } = obj;
   const insertStmt = db.prepare(
     `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -401,15 +401,51 @@ const changeUser = async (event, obj) => {
     data.branch,
     data.email,
   );
+
+  electronLog.log(`Created db, now synchronising catchments for ${data.user_name}`);
+  synchroniseCatchments(data.user_name, Math.round(new Date().getTime()));
+
   results = { username: data.user_name, message: '' };
   mainWindow.send('formSubmissionResults', results);
   event.returnValue = {
     userInfo: data,
     // message: ""
   };
-  
+};
 
-}
+const synchroniseCatchments = async (name, time) => {
+  electronLog.info(`----------------- || Synchronising Catchments || ----------------------------`);
+  axios
+    .get(_url(APP_DEFINITION_ENDPOINT, name, time))
+    .then((moduleListRes) => {
+      const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+      newLayoutQuery.run(new Date().getTime());
+
+      if (moduleListRes.data) {
+        electronLog.info('---------------------|| moduleListRes data ||---------------------');
+        const layoutDeleteQuery = db.prepare('DELETE FROM app');
+
+        try {
+          layoutDeleteQuery.run();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          electronLog.info('Previous Layout does not exist');
+          electronLog.info(error);
+        }
+        db.prepare('DELETE FROM module_image').run();
+        populateCatchment(moduleListRes.data.catchment_area);
+        updateAppDefinition(moduleListRes.data);
+      }
+      csvDataSync(name);
+      // eslint-disable-next-line no-param-reassign
+      mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
+      electronLog.info('CSV App Sync Complete');
+    })
+    .catch((error) => {
+      electronLog.info(`----------------- || Synchronising Catchments FAIL|| ----------------------------\n`, error);
+    });
+    electronLog.info(`----------------- || Synchronising Catchments SUCCESS || ----------------------------`);
+};
 
 // ------------ NOTE ------------
 /**
@@ -450,81 +486,85 @@ const signIn = async (event, userData) => {
   electronLog.info(JSON.stringify(data));
   electronLog.info(`--------------------------`);
 
-  await axios
-    .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': '*',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => {
-      let results = '';
+    await axios
+      .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+          'Content-Type': 'application/json',
+        },
+      })
+      .then((response) => {
+        let results = '';
 
-      if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
-        // if (response.status == 200 || response.status == 201) {
-        electronLog.info('-------|| Signed In received a response! :)  ||-----------');
+        if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
+          // if (response.status == 200 || response.status == 201) {
+          electronLog.info('-------|| Signed In received a response! :)  ||-----------');
 
-        // if a user has signed in for the first time
-        if (userInfo === undefined) {
-          const insertStmt = db.prepare(
-            `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          );
-          const data = response.data;
-          insertStmt.run(
-            userData.username,
-            userData.password,
-            mac,
-            Math.round(new Date().getTime()),
-            data.name,
-            data.role,
-            data.organization,
-            data.branch,
-            data.email,
-          );
-          results = { username: response.data.user_name, message: '' };
-          mainWindow.send('formSubmissionResults', results);
-          event.returnValue = {
-            userInfo: response.data,
-            // message: ""
-          };
-        }
-        //the user has changed
-        else if (userInfo && userInfo.username !== response.data.user_name) {
+          // if a user has signed in for the first time
+          if (userInfo === undefined) {
+            const insertStmt = db.prepare(
+              `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            );
+            const data = response.data;
+            insertStmt.run(
+              userData.username,
+              userData.password,
+              mac,
+              Math.round(new Date().getTime()),
+              data.name,
+              data.role,
+              data.organization,
+              data.branch,
+              data.email,
+            );
+
+            electronLog.log(`Created db, now synchronising catchments for ${data.user_name}`);
+            synchroniseCatchments(data.user_name, Math.round(new Date().getTime()));
+
+            results = { username: data.user_name, message: '' };
+            mainWindow.send('formSubmissionResults', results);
+            event.returnValue = {
+              userInfo: response.data,
+              // message: ""
+            };
+          }
+          //the user has changed
+          else if (userInfo && userInfo.username !== response.data.user_name) {
+            results = {
+              response: response.data,
+              userData,
+            };
+            mainWindow.send('deleteTableDialogue', results);
+          }
+          //if it is the same user
+          else {
+            results = { username: response.data.user_name, message: '' };
+            mainWindow.send('formSubmissionResults', results);
+            event.returnValue = {
+              userInfo: response.data,
+              // message: ""
+            };
+          }
+        } else {
           results = {
-            response: response.data,
-            userData,
+            message: 'Cannot log in, did you provide correct username and password?',
+            username: '',
           };
-          mainWindow.send('deleteTableDialogue', results);
-        }
-        //if it is the same user
-        else {
-          results = { username: response.data.user_name, message: '' };
           mainWindow.send('formSubmissionResults', results);
-          event.returnValue = {
-            userInfo: response.data,
-            // message: ""
-          };
         }
-      } else {
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
         results = {
-          message: 'Cannot log in, did you provide correct username and password?',
+          message: getErrorMessage(error),
           username: '',
         };
         mainWindow.send('formSubmissionResults', results);
-      }
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      results = {
-        message: getErrorMessage(error),
-        username: '',
-      };
-      mainWindow.send('formSubmissionResults', results);
-      electronLog.info('-------|| Sign In Error ||-----------');
-      electronLog.info(error);
-    });
+        electronLog.info('-------|| Sign In Error ||-----------');
+        electronLog.info(error);
+      });
   }
 };
 
@@ -828,157 +868,150 @@ const startAppSync = (event, name) => {
   const time = log === undefined ? 0 : Math.round(log.time);
 
   electronLog.info(`${formConfigEndpoint(name, time)}`);
-  electronLog.info(`${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
   electronLog.info(`${_url(FORMS_ENDPOINT, name, time)}`);
   electronLog.info(`${_url(LISTS_ENDPOINT, name, time)}`);
   electronLog.info(`${_url(FORM_CHOICE_ENDPOINT, name, time)}`);
   electronLog.info('-----------------------------------------------------');
 
   axios
-      .all([
-        axios.get(`${formConfigEndpoint(name, time)}`),
-        axios.get(_url(APP_DEFINITION_ENDPOINT, name, time)),
-        axios.get(_url(FORMS_ENDPOINT, name, time)),
-        axios.get(_url(LISTS_ENDPOINT, name, time)),
-        axios.get(_url(FORM_CHOICE_ENDPOINT, name, time))
-      ])
-      .then(
-        axios.spread((formConfigRes, moduleListRes, formListRes, listRes, formChoice) => {
-          const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-          newLayoutQuery.run(new Date().getTime());
+    .all([
+      axios.get(`${formConfigEndpoint(name, time)}`),
+      axios.get(_url(FORMS_ENDPOINT, name, time)),
+      axios.get(_url(LISTS_ENDPOINT, name, time)),
+      axios.get(_url(FORM_CHOICE_ENDPOINT, name, time)),
+    ])
+    .then(
+      axios.spread((formConfigRes, formListRes, listRes, formChoice) => {
+        const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+        newLayoutQuery.run(new Date().getTime());
 
-          if (formConfigRes.data) {
-            electronLog.info('---------------------|| fromConfigRes data ||---------------------');
-            formConfigRes.data.forEach((sqlObj) => {
-              if (sqlObj.sql_script) {
-                try {
-                  db.exec(sqlObj.sql_script);
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  electronLog.info(sqlObj);
-                  electronLog.info('db data table operation failed', err);
-                  electronLog.info('Error: ', err);
-                }
-              }
-            });
-          }
-          if (moduleListRes.data) {
-            electronLog.info('---------------------|| moduleListRes data ||---------------------');
-            const layoutDeleteQuery = db.prepare('DELETE FROM app');
-
-            try {
-              layoutDeleteQuery.run();
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              electronLog.info('Previous Layout does not exist');
-            }
-            db.prepare('DELETE FROM module_image').run();
-            //TODO images not working yet
-            //populateModuleImage(moduleListRes.data);
-            populateCatchment(moduleListRes.data.catchment_area);
-            // const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
-            // newLayoutQuery.run('Bahis', JSON.stringify(moduleListRes.data));
-            updateAppDefinition(moduleListRes.data);
-          }
-          if (formListRes.data) {
-            electronLog.info('---------------------|| FormListRes data ||---------------------', 'total: ', formListRes.data.length);
-            const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
-            const newFormInsertionQuery = db.prepare(
-              'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
-            );
-            formListRes.data.forEach(async (formObj) => {
+        if (formConfigRes.data) {
+          electronLog.info('---------------------|| formConfigRes data ||---------------------');
+          formConfigRes.data.forEach((sqlObj) => {
+            if (sqlObj.sql_script) {
               try {
-                previousFormDeletionQuery.run(formObj.id);
+                db.exec(sqlObj.sql_script);
               } catch (err) {
                 // eslint-disable-next-line no-console
-                // electronLog.info('Deletion Failed ! Previous form not exists!!');
+                electronLog.info('---------------------|| formConfigRes FAILED ||---------------------');
+                electronLog.info('Error: ', err);
+              }
+            }
+          });
+          electronLog.info('---------------------|| formConfigRes SUCCESS ||---------------------');
+        }
+        if (formListRes.data) {
+          electronLog.info(
+            '---------------------|| FormListRes data ||---------------------',
+            'total: ',
+            formListRes.data.length,
+          );
+          const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
+          const newFormInsertionQuery = db.prepare(
+            'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
+          );
+          formListRes.data.forEach(async (formObj) => {
+            try {
+              previousFormDeletionQuery.run(formObj.id);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              // electronLog.info('Deletion Failed ! Previous form not exists!!');
+            }
+            try {
+              const fieldNames = extractPossibleFieldNames(formObj.form_definition);
+              newFormInsertionQuery.run(
+                formObj.id,
+                formObj.name,
+                JSON.stringify(formObj.form_definition),
+                JSON.stringify(formObj.choice_list),
+                formObj.form_uuid,
+                JSON.stringify(formObj.table_mapping),
+                JSON.stringify(fieldNames),
+              );
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              electronLog.info('db form insertion failed !!!', err);
+            }
+          });
+          if (listRes.data) {
+            electronLog.info(
+              '---------------------|| ListRes data ||---------------------',
+              'total: ',
+              listRes.data.length,
+            );
+            const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
+            const newListInsertQuery = db.prepare(
+              'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
+            );
+            listRes.data.forEach((listObj) => {
+              try {
+                previousListDeletionQuery.run(listObj.id);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                // electronLog.info('Deletion Failed ! Previous list not exists!!');
               }
               try {
-                const fieldNames = extractPossibleFieldNames(formObj.form_definition);
-                newFormInsertionQuery.run(
-                  formObj.id,
-                  formObj.name,
-                  JSON.stringify(formObj.form_definition),
-                  JSON.stringify(formObj.choice_list),
-                  formObj.form_uuid,
-                  JSON.stringify(formObj.table_mapping),
-                  JSON.stringify(fieldNames),
+                newListInsertQuery.run(
+                  listObj.id,
+                  listObj.list_name,
+                  JSON.stringify(listObj.list_header),
+                  JSON.stringify(listObj.datasource),
+                  JSON.stringify(listObj.filter_definition),
+                  JSON.stringify(listObj.column_definition),
                 );
               } catch (err) {
                 // eslint-disable-next-line no-console
-                electronLog.info('db form insertion failed !!!', err);
+                electronLog.info('db list insertion failed', err);
               }
             });
-            if (listRes.data) {
-              electronLog.info('---------------------|| ListRes data ||---------------------', 'total: ', listRes.data.length);
-              const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
-              const newListInsertQuery = db.prepare(
-                'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
-              );
-              listRes.data.forEach((listObj) => {
-                try {
-                  previousListDeletionQuery.run(listObj.id);
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  // electronLog.info('Deletion Failed ! Previous list not exists!!');
-                }
-                try {
-                  newListInsertQuery.run(
-                    listObj.id,
-                    listObj.list_name,
-                    JSON.stringify(listObj.list_header),
-                    JSON.stringify(listObj.datasource),
-                    JSON.stringify(listObj.filter_definition),
-                    JSON.stringify(listObj.column_definition),
-                  );
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  electronLog.info('db list insertion failed', err);
-                }
-              });
-            }
-            if (formChoice.data) {
-              electronLog.info('--------------------- || formChoice data ||---------------------', 'total: ', formChoice.data.length);
-              const previousFormChoices = db.prepare('DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ');
-
-              const insertQuery = db.prepare(
-                'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
-              );
-
-              electronLog.info('----------------------------|| total form choice data ||---------------------');
-              electronLog.info(formChoice.data.length);
-
-
-              formChoice.data.forEach(async (formObj) => {
-                try {
-                  previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
-                } catch (err) {
-                  electronLog.info(' db form_choice deletion failed');
-                }
-
-                try {
-                  insertQuery.run(
-                    formObj.value_text,
-                    String(formObj.xform_id),
-                    formObj.value_label,
-                    formObj.field_name,
-                    formObj.field_type);
-                } catch (err) {
-                  electronLog.info(' db form_choice insertion failed')
-                }
-              });
-
-            }
           }
-          csvDataSync(name);
-          // eslint-disable-next-line no-param-reassign
-          mainWindow.send('formSyncComplete', "done" );//done is a keyword checked later
-          electronLog.info('CSV App Sync Complete');
-        }),
-      )
-      .catch((err) => {
-        electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n` , err);
-      });
+          if (formChoice.data) {
+            electronLog.info(
+              '--------------------- || formChoice data ||---------------------',
+              'total: ',
+              formChoice.data.length,
+            );
+            const previousFormChoices = db.prepare(
+              'DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ',
+            );
+
+            const insertQuery = db.prepare(
+              'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
+            );
+
+            electronLog.info('----------------------------|| total form choice data ||---------------------');
+            electronLog.info(formChoice.data.length);
+
+            formChoice.data.forEach(async (formObj) => {
+              try {
+                previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
+              } catch (err) {
+                electronLog.info(' db form_choice deletion failed');
+              }
+
+              try {
+                insertQuery.run(
+                  formObj.value_text,
+                  String(formObj.xform_id),
+                  formObj.value_label,
+                  formObj.field_name,
+                  formObj.field_type,
+                );
+              } catch (err) {
+                electronLog.info(' db form_choice insertion failed');
+              }
+            });
+          }
+        }
+        csvDataSync(name);
+        // eslint-disable-next-line no-param-reassign
+        mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
+        electronLog.info('CSV App Sync Complete');
+      }),
+    )
+    .catch((err) => {
+      electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
+    });
 };
 
 /** starts data sync on request event
