@@ -30,12 +30,12 @@ CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchCsvDataFromServer = async (db, username) => {
-  console.log('fetchCsvData call', username);
+  electronLog.log('fetchCsvData call', username);
   try {
     const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
     const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
     const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
-    console.log(url);
+    electronLog.log(url);
     await axios
       .get(url)
       .then((response) => {
@@ -52,13 +52,13 @@ const fetchCsvDataFromServer = async (db, username) => {
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
-        console.log('axios error', error);
+        electronLog.log('axios error', error);
         return 'failed';
       });
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log('fetch err', err);
+    electronLog.log('fetch err', err);
     return 'failed';
   }
 };

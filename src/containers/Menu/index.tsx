@@ -82,8 +82,8 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   const compUpdate = async () => {
     const { currentMenu, setMenuItemActionCreator } = props;
     if (!currentMenu) {
+      console.log("No menu definition found, fetching")
       const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-      // console.log(newMenuItem);
       setMenuItemActionCreator(JSON.parse(newMenuItem));
       updateAppDefinition(JSON.parse(newMenuItem));
     }
@@ -151,7 +151,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 
 
   const { currentMenu, appLanguage } = props;
-  console.log(' ----> ', currentMenu);
+  console.log(' ----> currentMenu: ', currentMenu);
   return (
     <React.Fragment>
       <div className="menu-container">
