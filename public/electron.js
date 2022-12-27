@@ -198,17 +198,20 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns - the app definition json
  */
-const fetchAppDefinition = (event) => {
+const fetchAppDefinition = async (event) => {
   electronLog.info(`------- || fetchAppDefinition ${event} || ----------------`);
   try {
-
-    // eslint-disable-next-line no-param-reassign
-    event.returnValue = db.prepare('SELECT definition from app where app_id=1').get().definition;
-    
+    electronLog.info('running query');
+    const appResult = db.prepare('SELECT definition from app where app_id=1').get();
+    const appResultDefinition = appResult.definition;
+    if (appResultDefinition) {
+      return appResultDefinition;
+    } else {
+      return null;
+    }
   } catch (err) {
-    // eslint-disable-next-line no-console
-    electronLog.info(err);
     electronLog.info(`------- || fetchAppDefinition Error ${err} || ----------------`);
+    return null;
   }
 };
 
@@ -1160,7 +1163,7 @@ const autoUpdateBahis = (event) => {
 
 
 // subscribes the listeners to channels
-ipcMain.on('fetch-app-definition', fetchAppDefinition);
+ipcMain.handle('fetch-app-definition', fetchAppDefinition);
 ipcMain.on('submit-form-response', submitFormResponse);
 ipcMain.on('fetch-form-definition', fetchFormDefinition);
 ipcMain.on('fetch-form-choices', fetchFormChoices);
