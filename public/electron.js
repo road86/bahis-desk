@@ -373,7 +373,7 @@ const fetchQueryData = (event, queryString) => {
   electronLog.info(`------- || fetchQueryData, formId: ${queryString} || ----------------`);
   try {
     const fetchedRows = db.prepare(queryString).all();
-    electronLog.info(JSON.stringify(fetchedRows));
+    // electronLog.info(JSON.stringify(fetchedRows));
     // eslint-disable-next-line no-param-reassign
     event.returnValue = fetchedRows;
     electronLog.info('---------------------|| fetchQueryData SUCCESS ||---------------------');
