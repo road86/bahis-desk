@@ -88,12 +88,11 @@ function AppRegister(props: any) {
       }
     });
   };
-//Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
+  //Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
   const syncAppModule = async () => {
-
-
-    const user: any = await ipcRenderer.sendSync('fetch-username');
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'syncAppModule');
     const isAppDef: any = await ipcRenderer.sendSync('fetch-query-data', 'SELECT * from app');
+    console.log(JSON.stringify(isAppDef));
 
     if (isAppDef.length !== 0) {
         props.history.push({
@@ -101,10 +100,11 @@ function AppRegister(props: any) {
           state: { username: user },
         });
     } else {
-      const user: any = await ipcRenderer.sendSync('fetch-username');
+    //   const user: any = await ipcRenderer.sendSync('fetch-username');
       await ipcRenderer.send('start-app-sync', user.username);
       
       ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+        console.log("Finished first sync");
         props.history.push({
           pathname: '/menu/',
           state: { username: user }
