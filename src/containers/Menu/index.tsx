@@ -159,7 +159,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     const { currentMenu, setMenuItemActionCreator } = props;
     compUpdate(currentMenu, setMenuItemActionCreator);
     setAlertOpen(false);
-  });
+  }, [props]);
 
   const { currentMenu, appLanguage } = props;
   console.log(' ----> currentMenu: ', currentMenu);
