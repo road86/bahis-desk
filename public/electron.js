@@ -1103,9 +1103,8 @@ const csvDataSync = async (username) => {
 };
 
 const getUserDBInfo = (event) => {
-
+  // FIXME this function is actually about user location and is badly named
   try {
-
     const query = `with division as (
                       select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
                   ), district as (
@@ -1120,13 +1119,16 @@ const getUserDBInfo = (event) => {
                       join upazila on upazila.ca = division.ca`
 
     const info = db.prepare(query).get();
-
-    electronLog.info(`------- || userDB Info: ${info} || ----------------`);
-    event.returnValue = info;
+    if (info !== undefined) {
+      electronLog.info(`------- || userDB SUCCESS ${info} || ----------------`);
+      event.returnValue = info;
+    } else {
+      electronLog.info(`------- || userDB FAILED - undefined || ----------------`);
+    }
   } catch (err) {
-    electronLog.info(`------- || userDBInfo Error,: ${err} || ----------------`);
+    electronLog.info(`------- || userDBInfo FAILED ${err} || ----------------`);
   }
-}
+};
 
 const deleteData = (event, instanceId, formId) => {
   electronLog.info(instanceId, formId);
@@ -1174,7 +1176,7 @@ ipcMain.on('fetch-geo', fetchGeo);
 ipcMain.on('fetch-image', fetchImage);
 ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('export-xlsx', exportExcel);
-ipcMain.on('delete-instance', deleteData)
+ipcMain.on('delete-instance', deleteData);
 ipcMain.on('form-details', fetchFormDetails);
 ipcMain.on('user-db-info', getUserDBInfo);
 ipcMain.on('change-user', changeUser);
