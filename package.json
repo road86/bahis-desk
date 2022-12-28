@@ -51,7 +51,7 @@
     "history": "^4.9.0",
     "image-downloader": "^4.0.2",
     "jest-fetch-mock": "^2.1.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.15",
     "macaddress": "^0.5.1",
     "moment": "^2.29.1",
