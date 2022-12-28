@@ -425,7 +425,7 @@ const changeUser = async (event, obj) => {
 //   electronLog.info(JSON.stringify(obj));
   const { response, userData } = obj;
   configureFreshDatabase(response, userData, mac, event);
-  results = { username: response.user_name, message: '' };
+  results = { username: response.user_name, message: 'changeUser' };
   mainWindow.send('formSubmissionResults', results);
   event.returnValue = {
     userInfo: response,
@@ -505,16 +505,18 @@ const synchroniseModules = async (name, time) => {
         const layoutDeleteQuery = db.prepare('DELETE FROM app');
 
         try {
-          electronLog.info("clearing app layout")
+          electronLog.info('clearing app layout');
           layoutDeleteQuery.run();
         } catch (error) {
           // eslint-disable-next-line no-console
           electronLog.info('Previous Layout does not exist');
           electronLog.info(error);
         }
-        electronLog.info("clearing module_image")
+        electronLog.info('clearing module_image');
         db.prepare('DELETE FROM module_image').run();
         updateAppDefinition(moduleListRes.data);
+        // Tell the front end the sync is done
+        mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
       }
       electronLog.info(`----------------- || Synchronising Modules SUCCESS || ----------------------------`);
     })
@@ -533,6 +535,7 @@ const synchroniseModules = async (name, time) => {
  *    
  */
 const signIn = async (event, userData) => {
+  electronLog.info(`----------------- || electron-side signIn || ----------------------------`);
   let mac;
   macaddress.one(function (err, mac) {
     mac = mac;
@@ -544,7 +547,8 @@ const signIn = async (event, userData) => {
   // if a user has signed in before then no need to call signin-api
   // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
   if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
-    results = { username: userData.username, message: '' };
+    electronLog.log(`This is an offline-ready account.`);
+    results = { username: userData.username, message: 'signIn::local' };
     mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
@@ -582,7 +586,7 @@ const signIn = async (event, userData) => {
             electronLog.info('-------|| New user - setting up local db ||-----------');
             configureFreshDatabase(response.data, userData, mac, event);
             electronLog.info('-------|| Local db configured ||-----------');
-            results = { username: response.data.user_name, message: '' };
+            results = { username: response.data.user_name, message: 'signIn::firstTimeUser' };
             mainWindow.send('formSubmissionResults', results);
             event.returnValue = {
               userInfo: response.data,
@@ -601,7 +605,8 @@ const signIn = async (event, userData) => {
           //if it is the same user
           else {
             electronLog.info('-------|| Existing user ||-----------');
-            results = { username: response.data.user_name, message: '' };
+            // given the offline-ready stuff we do above... do we use this branch?
+            results = { username: response.data.user_name, message: 'signIn::offlineUser' };
             mainWindow.send('formSubmissionResults', results);
             event.returnValue = {
               userInfo: response.data,
@@ -1053,12 +1058,8 @@ const startAppSync = (event, name, time) => {
       synchroniseModules(name, last_sync_time);
     })
     .then(() => {
-      // Tell the front end the sync is done
-      mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
-    })
-    .then(() => {
-      // sync the csv Data ?
-      csvDataSync(name);
+        // sync the csv Data ?
+        csvDataSync(name);
     })
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
