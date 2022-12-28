@@ -431,10 +431,10 @@ const changeUser = async (event, obj) => {
   electronLog.info(JSON.stringify(obj));
   const { response, userData } = obj;
   configureFreshDatabase(response, userData, mac, event);
-  results = { username: data.user_name, message: '' };
+  results = { username: userData.username, message: '' };
   mainWindow.send('formSubmissionResults', results);
   event.returnValue = {
-    userInfo: data,
+    userInfo: userData,
     // message: ""
   };
 };
