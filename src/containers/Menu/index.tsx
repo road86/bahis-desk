@@ -46,7 +46,7 @@ export interface MenuProps {
 }
 
 // export interface MenuState {
-//   shouldAlertOpen: boolean;
+//   isSynchronisingAlertOpen: boolean;
 //   isDataAvailable: boolean;
 //   username: string;
 //   imageSrc: string;
@@ -110,32 +110,11 @@ const updateAppDefinition = (appDefinition: any) => {
   });
 };
 
-const compUpdate = async (currentMenu: MenuItem | null, setMenuItemActionCreator: any) => {
-  if (!currentMenu) {
-    console.log('No menu definition found, fetching');
-    ipcRenderer
-      .invoke('fetch-app-definition')
-      .then((newMenuItem: any) => {
-        if (newMenuItem) {
-          console.log('setting menu item action creator to new menu item');
-          setMenuItemActionCreator(JSON.parse(newMenuItem));
-          console.log('updating app definition to new menu item');
-          updateAppDefinition(JSON.parse(newMenuItem));
-          console.log('fetching menu definition suceeded');
-        }
-        console.log('fetching menu definition suceeded but menu was empty');
-      })
-      .catch((err: Error) => {
-        console.log('fetching menu definition failed');
-        console.log(err);
-      });
-  }
-};
-
 const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
   // class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
-  const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
+  // TODO this Alert should be part of the main app or the menu or something so it can happen across all screens
+  const [isSynchronisingAlertOpen, setSynchronisingAlertOpen] = React.useState<boolean>(false);
   // const [username, setUsername] = React.useState<string>('');
   // const [appData, setAppData] = React.useState<any>({});
 
@@ -155,10 +134,39 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     return null;
   };
 
+  const handleClose = () => {
+    setSynchronisingAlertOpen(false);
+  };
+
+  const compUpdate = async (currentMenu: MenuItem | null, setMenuItemActionCreator: any) => {
+    if (!currentMenu) {
+      console.log('No menu definition found, fetching');
+      ipcRenderer
+        .invoke('fetch-app-definition')
+        .then((newMenuItem: any) => {
+          if (newMenuItem) {
+            console.log('setting menu item action creator to new menu item');
+            setMenuItemActionCreator(JSON.parse(newMenuItem));
+            console.log('updating app definition to new menu item');
+            updateAppDefinition(JSON.parse(newMenuItem));
+            console.log('fetching menu definition suceeded');
+            setSynchronisingAlertOpen(false);
+          }
+          console.log('fetching menu definition suceeded but menu was empty');
+        })
+        .catch((err: Error) => {
+          console.log('fetching menu definition failed');
+          console.log(err);
+        });
+    } else {
+      setSynchronisingAlertOpen(false);
+    }
+  };
+
   React.useEffect(() => {
     const { currentMenu, setMenuItemActionCreator } = props;
+    setSynchronisingAlertOpen(true);
     compUpdate(currentMenu, setMenuItemActionCreator);
-    setAlertOpen(false);
   }, [props]);
 
   const { currentMenu, appLanguage } = props;
@@ -166,7 +174,12 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
   return (
     <React.Fragment>
       <div className="menu-container">
-        {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
+        {isSynchronisingAlertOpen && (
+          <Alert severity="info" onClose={handleClose}>
+            Attempting to sync modules. This may take some time. If nothing happens after five minutes try hitting the
+            Sync Now.
+          </Alert>
+        )}
 
         <Row id="menu-body">
           {currentMenu &&
