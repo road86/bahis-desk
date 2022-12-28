@@ -15,7 +15,7 @@ import { headerStyles } from './styles';
 
 export interface HeaderProps {
   handleLogout: any;
-  syncTime: string;
+  syncTime: string | null;
   setPrevMenuActionCreator: any;
   isBackPossible: boolean;
   pathName: string;
@@ -115,28 +115,39 @@ function Header(props: HeaderProps) {
               <div className={classes.menuButton}>
                 <Avatar variant="square" src="/../../../assets/images/debuglogo.png" />
               </div>
-              <div>
-                <Typography className={classes.title} variant="body2" noWrap={true}>
-                  Time of last data submission: {props.syncTime}
-                  <Button variant="contained" 
-                   style={{backgroundColor: getButtonColor()}}
-                   onClick={handleAppSync} 
-                   className={classes.button} 
-                   disabled={isDisabledSyncConfig || isDisabledSyncData} >
-                   Sync Now 
-              </Button>
-                </Typography>
+              <div className="syncBar">
+                {props.syncTime && (
+                  <Typography className={classes.title} variant="body2" noWrap={true}>
+                    Time of last data submission: {props.syncTime}
+                  </Typography>
+                )}
+
+                {!props.syncTime && (
+                  <Typography className={classes.title} variant="body2" noWrap={true}>
+                    Please synchronise the app after logging in.
+                  </Typography>
+                )}
+
+                <Button
+                  variant="contained"
+                  style={{ backgroundColor: getButtonColor() }}
+                  onClick={handleAppSync}
+                  className={classes.button}
+                  disabled={isDisabledSyncConfig || isDisabledSyncData}
+                >
+                  Sync Now
+                </Button>
               </div>
               <div className={classes.sectionDesktop}>
-
-                {props.isBackPossible && <Button variant="contained" color="primary" onClick={onBackHandler} className={classes.backButton}>
-                  <FontAwesomeIcon icon={['fas', 'chevron-left']} style={{ marginRight: 3 }} />Back
+                {props.isBackPossible && (
+                  <Button variant="contained" color="primary" onClick={onBackHandler} className={classes.backButton}>
+                    <FontAwesomeIcon icon={['fas', 'chevron-left']} style={{ marginRight: 3 }} />
+                    Back
                   </Button>
-                }
+                )}
               </div>
             </React.Fragment>
           ) : null}
-
         </Toolbar>
       </AppBar>
     </div>
