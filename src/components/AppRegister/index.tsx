@@ -92,7 +92,7 @@ function AppRegister(props: any) {
   const syncAppModule = async () => {
     const user: any = await ipcRenderer.sendSync('fetch-username', 'syncAppModule');
     const isAppDef: any = await ipcRenderer.sendSync('fetch-query-data', 'SELECT * from app');
-    console.log(JSON.stringify(isAppDef));
+    // console.log(JSON.stringify(isAppDef));
 
     if (isAppDef.length !== 0) {
         props.history.push({
