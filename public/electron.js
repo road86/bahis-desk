@@ -201,16 +201,17 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
 const fetchAppDefinition = async (event) => {
   electronLog.info(`------- || fetchAppDefinition ${event} || ----------------`);
   try {
-    electronLog.info('running query');
     const appResult = db.prepare('SELECT definition from app where app_id=1').get();
     const appResultDefinition = appResult.definition;
     if (appResultDefinition) {
+      electronLog.info(`------- || fetchAppDefinition SUCCESS || ----------------`);
       return appResultDefinition;
     } else {
+      electronLog.info(`------- || fetchAppDefinition FAILED - undefined || ----------------`);
       return null;
     }
   } catch (err) {
-    electronLog.info(`------- || fetchAppDefinition Error ${err} || ----------------`);
+    electronLog.info(`------- || fetchAppDefinition FAILED ${err} || ----------------`);
     return null;
   }
 };
@@ -388,18 +389,10 @@ const fetchQueryData = (event, queryString) => {
   }
 };
 
-const configureFreshDatabase = async (data, userData, mac, event) => {
+const configureFreshDatabase = async (data, userData, mac) => {
   const insertStmt = db.prepare(
     `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
-  electronLog.info('data:');
-  electronLog.info(JSON.stringify(data.name));
-  electronLog.info(JSON.stringify(data.role));
-  electronLog.info(JSON.stringify(data.organization));
-  electronLog.info(JSON.stringify(data.branch));
-  electronLog.info(JSON.stringify(data.email));
-  electronLog.info('userData:');
-  electronLog.info(JSON.stringify(userData));
   insertStmt.run(
     data.user_name,
     userData.password,
@@ -413,8 +406,9 @@ const configureFreshDatabase = async (data, userData, mac, event) => {
   );
 
   electronLog.log(`Created db with user details, now synchronising form config and catchments for ${data.user_name}`);
-  synchroniseFormConfig(data.user_name, 0);
-  await synchroniseCatchments(data.user_name, 0);
+  await synchroniseFormConfig(data.user_name, 0).then(() => {
+    synchroniseCatchments(data.user_name, 0);
+  });
 };
 
 const changeUser = async (event, obj) => {
@@ -427,23 +421,23 @@ const changeUser = async (event, obj) => {
   electronLog.info('new db setup call after delete previous user data');
   db = new Database(dbfile);
   prepareDb(db);
-  electronLog.info('obj:');
-  electronLog.info(JSON.stringify(obj));
+//   electronLog.info('obj:');
+//   electronLog.info(JSON.stringify(obj));
   const { response, userData } = obj;
   configureFreshDatabase(response, userData, mac, event);
-  results = { username: userData.username, message: '' };
+  results = { username: response.user_name, message: '' };
   mainWindow.send('formSubmissionResults', results);
   event.returnValue = {
-    userInfo: userData,
+    userInfo: response,
     // message: ""
   };
 };
 
-const synchroniseFormConfig = (name, time) => {
+const synchroniseFormConfig = async (name, time) => {
   electronLog.info(`----------------- || Synchronising FormConfig (time: ${time}) || ----------------------------`);
-  electronLog.info(`${formConfigEndpoint(name, time)}`);
+  electronLog.info(`api url: ${formConfigEndpoint(name, time)}`);
 
-  axios.get(`${formConfigEndpoint(name, time)}`).then((formConfigRes) => {
+  await axios.get(`${formConfigEndpoint(name, time)}`).then((formConfigRes) => {
     // we never log the time this was run, as we currently only run it on DB creation
     // We will need to log this when we make it possible for users to resync this?
     // Or will we? Maybe we always use time === 0
@@ -471,7 +465,7 @@ const synchroniseFormConfig = (name, time) => {
 
 const synchroniseCatchments = async (name, time) => {
   electronLog.info(`----------------- || Synchronising Catchments (time: ${time}) || ----------------------------`);
-  electronLog.info(_url(CATCHMENT_DEFINITION_ENDPOINT, name, time));
+  electronLog.info(`api url: ${_url(CATCHMENT_DEFINITION_ENDPOINT, name, time)}`);
   await axios
     .get(_url(CATCHMENT_DEFINITION_ENDPOINT, name, time))
     .then((catchmentListRes) => {
@@ -499,7 +493,7 @@ const synchroniseCatchments = async (name, time) => {
 
 const synchroniseModules = async (name, time) => {
   electronLog.info(`----------------- || Synchronising Modules (time: ${time})|| ----------------------------`);
-  electronLog.info(_url(APP_DEFINITION_ENDPOINT, name, time));
+  electronLog.info(`api url: ${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
   axios
     .get(_url(APP_DEFINITION_ENDPOINT, name, time))
     .then((moduleListRes) => {
@@ -565,7 +559,6 @@ const signIn = async (event, userData) => {
   };
   electronLog.info('----------- || Attempt To Signin || -----------------');
   electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
-  electronLog.info(JSON.stringify(data));
   electronLog.info(`--------------------------`);
 
     await axios
@@ -1097,7 +1090,7 @@ const csvDataSync = async (username) => {
     if (info && info.name == 'csv_sync_log') {
       fetchCsvDataFromServer(db, username);
     } else {
-      electronLog.info('info', info);
+      electronLog.info('I think that csv_sync_log table does not exist so I will create it');
       db.prepare('CREATE TABLE csv_sync_log( time TEXT)').run();
       fetchCsvDataFromServer(db, username);
     }
