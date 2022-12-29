@@ -4,8 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
-import React from 'react';
-import {useState} from 'react';
+import React, { useState } from 'react';
 import { withRouter } from 'react-router';
 import { Alert } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -59,14 +58,15 @@ function AppRegister(props: any) {
       await ipcRenderer.send('change-user', loginArgs);
     } else {
       setToastContent({ severity: 'Error', msg: 'Logged In Successfully without changing the user' });
-      setDisabled(false);
+      setSignInButtonDisabled(false);
     }
     setOpenAlert(false);
   }
 
 
   const handleSignIn = async () => {
-    setDisabled(true);
+    console.log(`----------------- || client-side handleSignIn || ----------------------------`);
+    setSignInButtonDisabled(true);
     await ipcRenderer.send('sign-in', userInput);
     ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
       console.log('in delete table dialogue: ', event, args);
@@ -77,23 +77,65 @@ function AppRegister(props: any) {
     ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
       if (args !== undefined) {
         setToastVisible(true);
-        if (args.message !== '' && args.username === '') {
-          setToastContent({ severity: 'Error', msg: args.message });
-          setDisabled(false);
+        if (args.username === '') {
+          if (args.message === '') {
+            setToastContent({
+              severity: 'error',
+              msg: 'Unknown failure, please try again. If this continues to happen please speak to support.',
+            });
+          } else {
+            setToastContent({ severity: 'error', msg: args.message });
+          }
+          setSignInButtonDisabled(false);
         } else {
-          setToastContent({ severity: 'Error', msg: 'Submitted and Logged In Successfully. Please wait...' });
+          switch (args.message) {
+            case 'signIn::local':
+              setToastContent({
+                severity: 'info',
+                msg:
+                  "Found an offline-ready account with those credentials. Logging you in.\nIf you are connected to the internet a data sync may occur automatically, which may take some time; if not, please use the 'Sync Now' button on the next screen.",
+              });
+              break;
+            case 'changeUser':
+              setToastContent({
+                severity: 'warning',
+                msg:
+                  'You requested a change of user database.\nThis is now configured but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+              });
+              break;
+            case 'signIn::firstTimeUser':
+              setToastContent({
+                severity: 'warning',
+                msg:
+                  'You are logging in for the first time.\nWe have now configured your database but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+              });
+              break;
+            case 'signIn::offlineUser':
+              setToastContent({
+                severity: 'info',
+                msg:
+                  "Found an offline-ready account with those credentials. Logging you in.\nIf you are connected to the internet a data sync may occur automatically, which may take some time; if not, please use the 'Sync Now' button on the next screen.",
+              });
+              break;
+            default:
+              setToastContent({
+                severity: 'error',
+                msg: `Possible unknown error while signing you in. Please close the app and try again.\n${args.message}`,
+              });
+              break;
+          }
           //TODO first check that you are actually logged in you idiot
           syncAppModule();
         }
       }
     });
   };
-//Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
+
+  //Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
   const syncAppModule = async () => {
-
-
-    const user: any = await ipcRenderer.sendSync('fetch-username');
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'syncAppModule');
     const isAppDef: any = await ipcRenderer.sendSync('fetch-query-data', 'SELECT * from app');
+    // console.log(JSON.stringify(isAppDef));
 
     if (isAppDef.length !== 0) {
         props.history.push({
@@ -101,10 +143,11 @@ function AppRegister(props: any) {
           state: { username: user },
         });
     } else {
-      const user: any = await ipcRenderer.sendSync('fetch-username');
+    //   const user: any = await ipcRenderer.sendSync('fetch-username');
       await ipcRenderer.send('start-app-sync', user.username);
       
       ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+        console.log("Finished first sync");
         props.history.push({
           pathname: '/menu/',
           state: { username: user }
@@ -115,22 +158,22 @@ function AppRegister(props: any) {
 
   const snackbarClose = () => {
     setToastVisible(false);
-    // props.history.push('/branch');
   };
 
   const toast = (response: any) => (
     <Snackbar
       open={toastVisible}
-      autoHideDuration={7000}
       onClose={snackbarClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}
     >
-      <Alert severity={response.severity}>{response.msg}</Alert>
+      <Alert onClose={snackbarClose} severity={response.severity}>
+        {response.msg}
+      </Alert>
     </Snackbar>
   );
 
-  const [isDisabled, setDisabled] = useState(false);
+  const [isSignInButtonDisabled, setSignInButtonDisabled] = useState(false);
 
   return (
     <Grid container={true} spacing={3} direction="row" justify="center" alignItems="center">
@@ -160,7 +203,7 @@ function AppRegister(props: any) {
 
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
-                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button} disabled={isDisabled} >
+                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button} disabled={isSignInButtonDisabled} >
                   Sign In
                 </Button>
               </div>
