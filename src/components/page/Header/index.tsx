@@ -133,7 +133,7 @@ function Header(props: HeaderProps) {
               <div className="syncBar">
                 {props.syncTime && (
                   <Typography className={classes.title} variant="body2" noWrap={true}>
-                    Time of last synchronisation: {props.syncTime}
+                    Time of last data submission: {props.syncTime}
                   </Typography>
                 )}
 
@@ -148,7 +148,7 @@ function Header(props: HeaderProps) {
                   style={{ backgroundColor: getButtonColor() }}
                   onClick={handleAppSync}
                   className={classes.button}
-                  disabled={isWaitingForFormSync || isWaitingForDataSync}
+                  disabled={isDisabledSyncConfig || isDisabledSyncData}
                 >
                   Sync Now
                 </Button>

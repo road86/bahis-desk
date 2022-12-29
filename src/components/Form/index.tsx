@@ -162,7 +162,7 @@ function Form(props: formProps) {
       ) : (
         <div style={{ marginTop: '10%' }}>
           <Typography color="secondary" component="h1" variant="h4" align="center">
-            Form is loading. If form does not render please Sync Now and then press Back and try again.
+            Could not find form definition
           </Typography>
         </div>
       )}

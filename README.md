@@ -27,11 +27,21 @@ Please tick to install all additional tools with "chocolatey" that should cover 
 
 ### Linux and Windows
 
-Install packages using yarn and then start the app:
+Install packages using yarn:
 
 ```bash
 yarn install
+```
 
+Build the electron app with:
+
+```bash
+yarn electron-build
+```
+
+Run the react app with:
+
+```
 yarn react-start
 ```
 
@@ -72,6 +82,7 @@ rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && ya
 ## Problems
 
 ### crashes
+
 There is some leak in UI code that might give an error saying that there are too many watchers. Try this
 
 ```
@@ -80,13 +91,15 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 
 (https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
 
-### 
-If `yarn electron .` fails saying "better_sqlite3.node' was compiled against a different Node.js", try 
+###
+
+If `yarn electron .` fails saying "better_sqlite3.node' was compiled against a different Node.js", try
 
 ```
 yarn add electron-rebuild --dev
 yarn electron-rebuild
 ```
+
 (https://github.com/road86/bahis-desk/issues/27)
 
 ## Configuration
