@@ -1,17 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import SyncIcon from '@material-ui/icons/Sync';
-import React from 'react';
-import { useState } from 'react';
+import { Avatar, Button, AppBar, Toolbar, Typography, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import { isPrevMenuEmpty, setPrevMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
-
 
 export interface HeaderProps {
   handleLogout: any;
@@ -28,14 +23,13 @@ export interface HeaderProps {
 }
 
 function Header(props: HeaderProps) {
-
   const classes = headerStyles();
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<null | HTMLElement>(null);
   const [appConfigSyncComplete, setAppConfigSyncComplete] = React.useState<boolean>(false);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  const [isDisabledSyncConfig, setDisabledSyncConfig] = useState(false);
-  const [isDisabledSyncData, setDisabledSyncData] = useState(false);
+  const [isWaitingForFormSync, setWaitingForFormSync] = useState(false);
+  const [isWaitingForDataSync, setWaitingForDataSync] = useState(false);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -54,35 +48,33 @@ function Header(props: HeaderProps) {
   // }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
-    setDisabledSyncData(true);
+    setWaitingForFormSync(true);
+    setWaitingForDataSync(true);
+
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
 
-    const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
-
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'sync button');
     await ipcRenderer.send('request-data-sync', user.username);
-    setDisabledSyncConfig(true);
     await ipcRenderer.send('start-app-sync', user.username);
 
-    // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-      console.log("Finished clicked sync");
-      setDisabledSyncConfig(false);
+      console.log('Finished clicked sync');
       props.fetchLastSyncTime();
-      if (!appConfigSyncComplete)
+      if (!appConfigSyncComplete) {
         setAppConfigSyncComplete(true);
+      }
+      setWaitingForFormSync(false);
     });
 
-    // tslint:disable-next-line: variable-name
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
       setAppConfigSyncComplete(false);
-      setDisabledSyncData(false);
       props.updateUnsyncCount();
       props.fetchLastSyncTime();
+      setWaitingForDataSync(false);
     });
   };
-
 
   // tslint:disable-next-line: variable-name
   const onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
@@ -97,18 +89,31 @@ function Header(props: HeaderProps) {
       props.setPrevMenuActionCreator();
     }
     // allow re-sync after clicking back button for now. It will however wait for the sync to complete, not sure how that works
-    setDisabledSyncData(false);
+    setWaitingForDataSync(false);
   };
 
   const getButtonColor = (): any => {
     console.log('Getting button colour');
     console.log('---------- || unsyncCount || ------------', props.unsyncCount);
-    return props.unsyncCount === 0 ? "orange" : "red";
-  }
+    return props.unsyncCount === 0 ? 'orange' : 'red';
+  };
+
+  const Toast = () => (
+    <Snackbar
+      open={isWaitingForFormSync || isWaitingForDataSync}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      key={'topcenter'}
+    >
+      <Alert severity="info">
+        Synchronising data. This requires a good internet connection and may take some time.
+      </Alert>
+    </Snackbar>
+  );
 
   return (
     <div className={classes.grow}>
       <AppBar position="fixed" color="inherit" className={classes.appbar}>
+        {(isWaitingForFormSync || isWaitingForDataSync) && <Toast />}
         <Toolbar className={classes.toolbar}>
           {props.showContent ? (
             <React.Fragment>
@@ -133,7 +138,7 @@ function Header(props: HeaderProps) {
                   style={{ backgroundColor: getButtonColor() }}
                   onClick={handleAppSync}
                   className={classes.button}
-                  disabled={isDisabledSyncConfig || isDisabledSyncData}
+                  disabled={isWaitingForFormSync || isWaitingForDataSync}
                 >
                   Sync Now
                 </Button>
