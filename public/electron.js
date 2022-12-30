@@ -494,12 +494,9 @@ const synchroniseCatchments = async (name, time) => {
 const synchroniseModules = async (name, time) => {
   electronLog.info(`----------------- || Synchronising Modules (time: ${time})|| ----------------------------`);
   electronLog.info(`api url: ${_url(APP_DEFINITION_ENDPOINT, name, time)}`);
-  axios
+  await axios
     .get(_url(APP_DEFINITION_ENDPOINT, name, time))
     .then((moduleListRes) => {
-      const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-      newLayoutQuery.run(new Date().getTime());
-
       if (moduleListRes.data) {
         electronLog.info('---------------------|| moduleListRes data ||---------------------');
         const layoutDeleteQuery = db.prepare('DELETE FROM app');
@@ -517,11 +514,155 @@ const synchroniseModules = async (name, time) => {
         updateAppDefinition(moduleListRes.data);
         // Tell the front end the sync is done
         mainWindow.send('formSyncComplete', 'done'); //done is a keyword checked later
+        electronLog.info(`----------------- || Synchronising Modules SUCCESS || ----------------------------`);
+      } else {
+        electronLog.info(`----------------- || Synchronising Modules FAIL - no data || ----------------------------`);
       }
-      electronLog.info(`----------------- || Synchronising Modules SUCCESS || ----------------------------`);
     })
     .catch((error) => {
       electronLog.info(`----------------- || Synchronising Modules FAIL|| ----------------------------\n`, error);
+    });
+};
+
+const synchroniseFormChoices = async (name, time) => {
+  electronLog.info(`----------------- || Synchronising FormChoices (time: ${time})|| ----------------------------`);
+  electronLog.info(`api url: ${_url(FORM_CHOICE_ENDPOINT, name, time)}`);
+  await axios
+    .get(_url(FORM_CHOICE_ENDPOINT, name, time))
+    .then((formChoice) => {
+      if (formChoice.data) {
+        electronLog.info(
+          `--------------------- || formChoice data (time: ${time}; total: ${formChoice.data.length}) ||---------------------`,
+        );
+        const previousFormChoices = db.prepare(
+          'DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ',
+        );
+
+        const insertQuery = db.prepare(
+          'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
+        );
+
+        electronLog.info('----------------------------|| total form choice data ||---------------------');
+        electronLog.info(formChoice.data.length);
+
+        formChoice.data.forEach(async (formObj) => {
+          try {
+            previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
+          } catch (err) {
+            electronLog.info(' db form_choice deletion failed');
+          }
+
+          try {
+            insertQuery.run(
+              formObj.value_text,
+              String(formObj.xform_id),
+              formObj.value_label,
+              formObj.field_name,
+              formObj.field_type,
+            );
+          } catch (err) {
+            electronLog.info(' db form_choice insertion failed');
+          }
+        });
+        electronLog.info(`----------------- || Synchronising FormChoices SUCCESS || ----------------------------`);
+      } else {
+        electronLog.info(
+          `----------------- || Synchronising FormChoices FAIL - no data || ----------------------------`,
+        );
+      }
+    })
+    .catch((error) => {
+      electronLog.info(`----------------- || Synchronising FormChoices FAIL|| ----------------------------\n`, error);
+    });
+};
+
+const synchroniseLists = async (name, time) => {
+  electronLog.info(`----------------- || Synchronising Lists (time: ${time})|| ----------------------------`);
+  electronLog.info(`api url: ${_url(LISTS_ENDPOINT, name, time)}`);
+  await axios
+    .get(_url(LISTS_ENDPOINT, name, time))
+    .then((listRes) => {
+      if (listRes.data) {
+        electronLog.info(
+          `---------------------|| ListRes data (time: ${time}; total: ${listRes.data.length}) ||---------------------`,
+        );
+        const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
+        const newListInsertQuery = db.prepare(
+          'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
+        );
+        listRes.data.forEach((listObj) => {
+          try {
+            previousListDeletionQuery.run(listObj.id);
+          } catch (err) {
+            // electronLog.info('Deletion Failed ! Previous list not exists!!');
+          }
+          try {
+            newListInsertQuery.run(
+              listObj.id,
+              listObj.list_name,
+              JSON.stringify(listObj.list_header),
+              JSON.stringify(listObj.datasource),
+              JSON.stringify(listObj.filter_definition),
+              JSON.stringify(listObj.column_definition),
+            );
+          } catch (err) {
+            electronLog.info('db list insertion failed', err);
+          }
+        });
+        electronLog.info(`----------------- || Synchronising Lists SUCCESS || ----------------------------`);
+      } else {
+        electronLog.info(`----------------- || Synchronising Lists FAIL - no data || ----------------------------`);
+      }
+    })
+    .catch((error) => {
+      electronLog.info(`----------------- || Synchronising Lists FAIL|| ----------------------------\n`, error);
+    });
+};
+
+const synchroniseFormLists = async (name, time) => {
+  electronLog.info(`----------------- || Synchronising FormLists (time: ${time})|| ----------------------------`);
+  electronLog.info(`api url: ${_url(FORMS_ENDPOINT, name, time)}`);
+  await axios
+    .get(_url(FORMS_ENDPOINT, name, time))
+    .then((formListRes) => {
+      if (formListRes.data) {
+        electronLog.info(
+          `---------------------|| FormListRes data (time: ${time}; total: ${formListRes.data.length}) ||---------------------`,
+        );
+        const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
+        const newFormInsertionQuery = db.prepare(
+          'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
+        );
+        formListRes.data.forEach(async (formObj) => {
+          try {
+            previousFormDeletionQuery.run(formObj.id);
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            // electronLog.info('Deletion Failed ! Previous form not exists!!');
+          }
+          try {
+            const fieldNames = extractPossibleFieldNames(formObj.form_definition);
+            newFormInsertionQuery.run(
+              formObj.id,
+              formObj.name,
+              JSON.stringify(formObj.form_definition),
+              JSON.stringify(formObj.choice_list),
+              formObj.form_uuid,
+              JSON.stringify(formObj.table_mapping),
+              JSON.stringify(fieldNames),
+            );
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            electronLog.info('db form insertion failed !!!', err);
+          }
+        });
+        electronLog.info(`----------------- || Synchronising FormLists SUCCESS || ----------------------------`);
+      } else {
+        electronLog.info(`----------------- || Synchronising FormLists FAIL - no data || ----------------------------`);
+      }
+    })
+    .catch((error) => {
+      electronLog.info(`----------------- || Synchronising FormLists FAIL|| ----------------------------\n`, error);
     });
 };
 
@@ -931,7 +1072,6 @@ const _url = (url, username, time) => {
 
 const startAppSync = (event, name, time) => {
   electronLog.info('--------- || App Sync Started || ------------------');
-  electronLog.info('----------|| Below API will be called || -----------');
 
   let last_sync_time = 0;
   if (time === undefined) {
@@ -939,127 +1079,27 @@ const startAppSync = (event, name, time) => {
     last_sync_time = log === undefined ? 0 : Math.round(log.time);
   }
 
-  electronLog.info(`${_url(FORMS_ENDPOINT, name, last_sync_time)}`);
-  electronLog.info(`${_url(LISTS_ENDPOINT, name, last_sync_time)}`);
-  electronLog.info(`${_url(FORM_CHOICE_ENDPOINT, name, last_sync_time)}`);
-  electronLog.info('-----------------------------------------------------');
-
-  axios
-    .all([
-      axios.get(_url(FORMS_ENDPOINT, name, last_sync_time)),
-      axios.get(_url(LISTS_ENDPOINT, name, last_sync_time)),
-      axios.get(_url(FORM_CHOICE_ENDPOINT, name, last_sync_time)),
-    ])
-    .then(
-      axios.spread((formListRes, listRes, formChoice) => {
-        const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-        newLayoutQuery.run(new Date().getTime());
-        if (formListRes.data) {
-          electronLog.info(
-            `---------------------|| FormListRes data (time: ${last_sync_time}; total: ${formListRes.data.length}) ||---------------------`,
-          );
-          const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
-          const newFormInsertionQuery = db.prepare(
-            'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
-          );
-          formListRes.data.forEach(async (formObj) => {
-            try {
-              previousFormDeletionQuery.run(formObj.id);
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              // electronLog.info('Deletion Failed ! Previous form not exists!!');
-            }
-            try {
-              const fieldNames = extractPossibleFieldNames(formObj.form_definition);
-              newFormInsertionQuery.run(
-                formObj.id,
-                formObj.name,
-                JSON.stringify(formObj.form_definition),
-                JSON.stringify(formObj.choice_list),
-                formObj.form_uuid,
-                JSON.stringify(formObj.table_mapping),
-                JSON.stringify(fieldNames),
-              );
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              electronLog.info('db form insertion failed !!!', err);
-            }
-          });
-          if (listRes.data) {
-            electronLog.info(
-              `---------------------|| ListRes data (time: ${last_sync_time}; total: ${listRes.data.length}) ||---------------------`
-            );
-            const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
-            const newListInsertQuery = db.prepare(
-              'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
-            );
-            listRes.data.forEach((listObj) => {
-              try {
-                previousListDeletionQuery.run(listObj.id);
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                // electronLog.info('Deletion Failed ! Previous list not exists!!');
-              }
-              try {
-                newListInsertQuery.run(
-                  listObj.id,
-                  listObj.list_name,
-                  JSON.stringify(listObj.list_header),
-                  JSON.stringify(listObj.datasource),
-                  JSON.stringify(listObj.filter_definition),
-                  JSON.stringify(listObj.column_definition),
-                );
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                electronLog.info('db list insertion failed', err);
-              }
-            });
-          }
-          if (formChoice.data) {
-            electronLog.info(
-              `--------------------- || formChoice data (time: ${last_sync_time}; total: ${formChoice.data.length}) ||---------------------`
-            );
-            const previousFormChoices = db.prepare(
-              'DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ',
-            );
-
-            const insertQuery = db.prepare(
-              'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
-            );
-
-            electronLog.info('----------------------------|| total form choice data ||---------------------');
-            electronLog.info(formChoice.data.length);
-
-            formChoice.data.forEach(async (formObj) => {
-              try {
-                previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
-              } catch (err) {
-                electronLog.info(' db form_choice deletion failed');
-              }
-
-              try {
-                insertQuery.run(
-                  formObj.value_text,
-                  String(formObj.xform_id),
-                  formObj.value_label,
-                  formObj.field_name,
-                  formObj.field_type,
-                );
-              } catch (err) {
-                electronLog.info(' db form_choice insertion failed');
-              }
-            });
-          }
-        }
-      }),
-    )
+  synchroniseFormLists(name, last_sync_time)
+    .then(() => {
+      synchroniseLists(name, last_sync_time);
+    })
+    .then(() => {
+      synchroniseFormChoices(name, last_sync_time);
+    })
     .then(() => {
       // We synchronise modules after because of time outs
       synchroniseModules(name, last_sync_time);
     })
     .then(() => {
-        // sync the csv Data ?
-        csvDataSync(name);
+      // sync the csv Data ?
+      csvDataSync(name);
+    })
+    .then(() => {
+      // update the app log _only_ if everything else goes okay
+      // this means that if _anything_ fails, the user will basically
+      // have to do a full sync again next time
+      const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+      newLayoutQuery.run(new Date().getTime());
     })
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
