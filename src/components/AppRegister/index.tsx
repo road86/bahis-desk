@@ -94,14 +94,14 @@ function AppRegister(props: any) {
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You requested a change of user database.\nThis is now configured but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You requested a change of user database.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::firstTimeUser':
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You are logging in for the first time.\nWe have now configured your database but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You are logging in for the first time.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::offlineUser':
@@ -145,16 +145,6 @@ function AppRegister(props: any) {
         props.history.push({
           pathname: '/menu/',
           state: { username: user },
-        });
-    } else {
-    //   const user: any = await ipcRenderer.sendSync('fetch-username');
-      await ipcRenderer.send('start-app-sync', user.username);
-      
-      ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-        console.log("Finished first sync");
-        props.history.push({
-          pathname: '/menu/',
-          state: { username: user }
         });
       });
     }
@@ -203,7 +193,13 @@ function AppRegister(props: any) {
 
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
-                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button} disabled={isSignInButtonDisabled} >
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleSignIn}
+                  className={classes.button}
+                  disabled={isSignInButtonDisabled}
+                >
                   Sign In
                 </Button>
               </div>
