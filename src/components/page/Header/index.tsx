@@ -24,7 +24,7 @@ export interface HeaderProps {
   showContent: boolean;
   unsyncCount: number;
   updateUnsyncCount: any;
-  fetchLastSyncTime: any;
+  setLastSyncTime: any;
 }
 
 function Header(props: HeaderProps) {
@@ -55,11 +55,12 @@ function Header(props: HeaderProps) {
 
   const handleAppSync = async () => {
     setDisabledSyncData(true);
+    props.setLastSyncTime('Sync in progress');
     if (isMobileMenuOpen) {
       handleMobileMenuClose();
     }
 
-    const user: any = await ipcRenderer.sendSync('fetch-username','sync button');
+    const user: any = await ipcRenderer.sendSync('fetch-username', 'sync button');
 
     await ipcRenderer.send('request-data-sync', user.username);
     setDisabledSyncConfig(true);
@@ -67,11 +68,9 @@ function Header(props: HeaderProps) {
 
     // tslint:disable-next-line: variable-name
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-      console.log("Finished clicked sync");
+      console.log('Finished clicked sync');
       setDisabledSyncConfig(false);
-      props.fetchLastSyncTime();
-      if (!appConfigSyncComplete)
-        setAppConfigSyncComplete(true);
+      if (!appConfigSyncComplete) setAppConfigSyncComplete(true);
     });
 
     // tslint:disable-next-line: variable-name
@@ -79,7 +78,7 @@ function Header(props: HeaderProps) {
       setAppConfigSyncComplete(false);
       setDisabledSyncData(false);
       props.updateUnsyncCount();
-      props.fetchLastSyncTime();
+      props.setLastSyncTime();
     });
   };
 
