@@ -72,12 +72,13 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const [lastSync, setLastSync] = React.useState<string | null>(null);
   const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
 
-
   const fetchLastSyncTime = async () => {
+    console.log('++++++++++ || fetchLastSyncTime (client) || ++++++++++');
     const syncTime: number = await ipcRenderer.invoke('fetch-last-sync');
     const time = syncTime !== 0 ? new Date(Math.round(syncTime)).toLocaleString() : 'never';
     setLastSync(time);
-  }
+    console.log(`++++++++++ || fetchLastSyncTime SUCCESS: ${time} (client) || ++++++++++`);
+  };
 
   const updateUnsyncCount = async () => {
     console.log("update Unsync Count");
