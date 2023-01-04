@@ -148,7 +148,7 @@ function Header(props: HeaderProps) {
                   style={{ backgroundColor: getButtonColor() }}
                   onClick={handleAppSync}
                   className={classes.button}
-                  disabled={isDisabledSyncConfig || isDisabledSyncData}
+                  disabled={isWaitingForFormSync || isWaitingForDataSync}
                 >
                   Sync Now
                 </Button>
