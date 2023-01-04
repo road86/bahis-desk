@@ -94,14 +94,14 @@ function AppRegister(props: any) {
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You requested a change of user database.\nThis is now configured but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You requested a change of user database.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::firstTimeUser':
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You are logging in for the first time.\nWe have now configured your database but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You are logging in for the first time.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::offlineUser':

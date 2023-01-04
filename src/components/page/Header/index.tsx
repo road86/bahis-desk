@@ -105,7 +105,7 @@ function Header(props: HeaderProps) {
       key={'topcenter'}
     >
       <Alert severity="info">
-        Synchronising data. This requires a good internet connection and may take some time.
+        Synchronising data. 
       </Alert>
     </Snackbar>
   );
