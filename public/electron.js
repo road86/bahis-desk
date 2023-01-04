@@ -19,8 +19,9 @@ const fs = require('fs');
 const { fetchDataFromServer, sendDataToServer, parseAndSaveToFlatTables, deleteDataWithInstanceId, fetchCsvDataFromServer, queries } = require('./modules/syncFunctions');
 const firstRun = require('electron-first-run');
 const {
+  formConfigEndpoint,
+  _url,
   SERVER_URL,
-  DB_TABLES_ENDPOINT,
   CATCHMENT_DEFINITION_ENDPOINT,
   APP_DEFINITION_ENDPOINT,
   FORMS_ENDPOINT,
@@ -912,14 +913,6 @@ const fetchGeo = (event, level, divisionId, districtId) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns - success if sync successful
  */
-
-const formConfigEndpoint = (name, time) => {
-  return DB_TABLES_ENDPOINT.replace('?', time).replace('core_admin', name);
-};
-
-const _url = (url, username, time) => {
-  return `${url.replace('core_admin', username)}?last_modified=${time}`;
-}
 
 const startAppSync = (event, name, time) => {
   electronLog.info('--------- || App Sync Started || ------------------');
