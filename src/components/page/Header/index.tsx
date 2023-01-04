@@ -19,7 +19,7 @@ export interface HeaderProps {
   showContent: boolean;
   unsyncCount: number;
   updateUnsyncCount: any;
-  fetchLastSyncTime: any;
+  setLastSyncTime: any;
 }
 
 function Header(props: HeaderProps) {
@@ -48,6 +48,7 @@ function Header(props: HeaderProps) {
   // }, [appConfigSyncComplete]);
 
   const handleAppSync = async () => {
+    props.setLastSyncTime('Sync in progress');
     setWaitingForFormSync(true);
     setWaitingForDataSync(true);
 
@@ -61,7 +62,6 @@ function Header(props: HeaderProps) {
 
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
       console.log('Finished clicked sync');
-      props.fetchLastSyncTime();
       if (!appConfigSyncComplete) {
         setAppConfigSyncComplete(true);
       }
@@ -71,7 +71,7 @@ function Header(props: HeaderProps) {
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
       setAppConfigSyncComplete(false);
       props.updateUnsyncCount();
-      props.fetchLastSyncTime();
+      props.setLastSyncTime();
       setWaitingForDataSync(false);
     });
   };
@@ -123,7 +123,7 @@ function Header(props: HeaderProps) {
               <div className="syncBar">
                 {props.syncTime && (
                   <Typography className={classes.title} variant="body2" noWrap={true}>
-                    Time of last data submission: {props.syncTime}
+                    Time of last synchronisation: {props.syncTime}
                   </Typography>
                 )}
 

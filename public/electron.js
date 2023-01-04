@@ -856,14 +856,6 @@ const fetchUsername = (event, infowhere) => {
   }
 };
 
-ipcMain.handle('fetch-last-sync', async () => {
-  const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-  const result = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-
-  electronLog.info(`JUST GOT A LAST SYNC TIME ----------------`);
-  return result
-})
-
 const fetchImage = (event, moduleId) => {
   electronLog.info(`------- || fetchImage: ${moduleId} || ----------------`);
   try {

@@ -72,12 +72,15 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
   const [lastSync, setLastSync] = React.useState<string | null>(null);
   const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
 
-
-  const fetchLastSyncTime = async () => {
-    const syncTime: number = await ipcRenderer.invoke('fetch-last-sync');
-    const time = syncTime !== 0 ? new Date(Math.round(syncTime)).toLocaleString() : 'never';
+  const setLastSyncTime = async (override: string | undefined) => {
+    console.log('++++++++++ || setLastSyncTime (client) || ++++++++++');
+    let time = new Date().toLocaleString();
+    if (override) {
+      time = override;
+    }
     setLastSync(time);
-  }
+    console.log(`++++++++++ || setLastSyncTime SUCCESS: ${time} (client) || ++++++++++`);
+  };
 
   const updateUnsyncCount = async () => {
     console.log("update Unsync Count");
@@ -110,7 +113,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   return (
     <React.Fragment>
-        <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} fetchLastSyncTime={fetchLastSyncTime} />
+        <Header unsyncCount={unsyncCount} updateUnsyncCount={updateUnsyncCount} showContent={!headerExcludedURLs.includes(location.pathname)} handleLogout={logout} redirectToSubmitted={gotoSubmittedData} redirectToMenu={gotoMenu} syncTime={lastSync} pathName={location.pathname} setLastSyncTime={setLastSyncTime} />
         {/* )} */}
         <div className={classes.offset} />
         <Row id="main-page-container">
