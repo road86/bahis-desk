@@ -401,8 +401,8 @@ function SubmittedForm(props: ListProps) {
             count={tableData.length}
             rowsPerPage={rowsPerPage}
             page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </AccordionActions>
       </Accordion>

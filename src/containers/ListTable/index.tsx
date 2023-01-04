@@ -406,8 +406,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
               count={this.props.totalRecords}
               rowsPerPage={this.state.rowsPerPage}
               page={this.state.page}
-              onChangePage={this.handleChangePage}
-              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              onPageChange={this.handleChangePage}
+              onRowsPerPageChange={this.handleChangeRowsPerPage}
             />
           </AccordionActions>
         </Accordion>
