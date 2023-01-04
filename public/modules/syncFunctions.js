@@ -33,7 +33,7 @@ const fetchCsvDataFromServer = async (db, username) => {
   try {
     const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
     const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
-    const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
+    const url = _url(CSV_DATA_FETCH_ENDPOINT, username, updated);
     electronLog.log(url);
     await axios
       .get(url)
