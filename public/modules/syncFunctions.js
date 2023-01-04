@@ -4,13 +4,12 @@ const { app } = electron;
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
 const path = require('path');
-const { SERVER_URL } = require('../constants');
+const { _url, SERVER_URL } = require('../constants');
 const { update } = require('lodash');
 const electronLog = require('electron-log');
 const { convertCompilerOptionsFromJson } = require('typescript');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
-const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 const CSV_DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
 const DATA_SYNC_COUNT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-count/`;
 const DATA_SYNC_PAGINATED = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-paginated/`;
@@ -34,7 +33,7 @@ const fetchCsvDataFromServer = async (db, username) => {
   try {
     const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
     const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
-    const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
+    const url = _url(CSV_DATA_FETCH_ENDPOINT, username, updated);
     electronLog.log(url);
     await axios
       .get(url)
@@ -125,8 +124,8 @@ const fetchDataFromServer = async (db, username) => {
   try {
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    const url = DATA_SYNC_PAGINATED.replace('core_admin', username);
-    const dataCountUrl = DATA_SYNC_COUNT.replace('core_admin', username) + '?last_modified=' + updated;
+    const url = _url(DATA_SYNC_PAGINATED, username);
+    const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
 
     electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
     const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
@@ -139,7 +138,7 @@ const fetchDataFromServer = async (db, username) => {
     let serverCalls = [];
     for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
       promises.push(
-        axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
+        axios.get(`${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
           serverCalls.push(i);
 
           electronLog.info(`----------|| call ${i}: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH} ||------------------`);
@@ -389,7 +388,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
           //test_file: queries,
         };
 
-        const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
+        const url = _url(SUBMISSION_ENDPOINT, username);
         const jsondata = JSON.stringify(apiFormData)
         console.log("url",url);
         console.log(url);
