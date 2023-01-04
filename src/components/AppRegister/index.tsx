@@ -1,12 +1,9 @@
-import { Avatar, Grid, Snackbar, useTheme } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import { Avatar, Grid, Snackbar, useTheme, Button, Paper, Typography } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import Typist from 'react-typist';
 import Loader from 'react-loader-spinner';
 import React, { useState } from 'react';
 import { withRouter } from 'react-router';
-import { Alert } from 'reactstrap';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppSignInForm from './AppSignInForm';
 import { registerStyles } from './styles';
@@ -21,8 +18,6 @@ function Copyright() {
     </Typography>
   );
 }
-
-
 
 function AppRegister(props: any) {
   // const { history } = props;
@@ -61,8 +56,7 @@ function AppRegister(props: any) {
       setSignInButtonDisabled(false);
     }
     setOpenAlert(false);
-  }
-
+  };
 
   const handleSignIn = async () => {
     console.log(`----------------- || client-side handleSignIn || ----------------------------`);
@@ -100,14 +94,14 @@ function AppRegister(props: any) {
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You requested a change of user database.\nThis is now configured but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You requested a change of user database.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::firstTimeUser':
               setToastContent({
                 severity: 'warning',
                 msg:
-                  'You are logging in for the first time.\nWe have now configured your database but a full data sync is now happening.\nThis requires a good internet connection and may take some time; however, this will enable offline-ready access to this account in the future.',
+                  'You are logging in for the first time.\n Please wait as the app synchronises user data for offline use.',
               });
               break;
             case 'signIn::offlineUser':
@@ -138,19 +132,19 @@ function AppRegister(props: any) {
     // console.log(JSON.stringify(isAppDef));
 
     if (isAppDef.length !== 0) {
+      props.history.push({
+        pathname: '/menu/',
+        state: { username: user },
+      });
+    } else {
+      //   const user: any = await ipcRenderer.sendSync('fetch-username');
+      await ipcRenderer.send('start-app-sync', user.username);
+
+      ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
+        console.log('Finished first sync');
         props.history.push({
           pathname: '/menu/',
           state: { username: user },
-        });
-    } else {
-    //   const user: any = await ipcRenderer.sendSync('fetch-username');
-      await ipcRenderer.send('start-app-sync', user.username);
-      
-      ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-        console.log("Finished first sync");
-        props.history.push({
-          pathname: '/menu/',
-          state: { username: user }
         });
       });
     }
@@ -195,15 +189,17 @@ function AppRegister(props: any) {
               </Typography>
             </Grid>
             <React.Fragment>
-              <AppSignInForm
-                userInput={userInput}
-                setFieldValueHandler={setFieldValue}
-                handleSignin={handleSignIn}
-              />
+              <AppSignInForm userInput={userInput} setFieldValueHandler={setFieldValue} handleSignin={handleSignIn} />
 
               {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
               <div className={classes.buttons}>
-                <Button variant="contained" color="secondary" onClick={handleSignIn} className={classes.button} disabled={isSignInButtonDisabled} >
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleSignIn}
+                  className={classes.button}
+                  disabled={isSignInButtonDisabled}
+                >
                   Sign In
                 </Button>
               </div>
@@ -213,12 +209,7 @@ function AppRegister(props: any) {
         </div>
       ) : (
         <div className="loader-container">
-          <Loader
-            type="Puff"
-            color={theme.palette.primary.dark}
-            height={100}
-            width={100}
-          />
+          <Loader type="Puff" color={theme.palette.primary.dark} height={100} width={100} />
           <Typist cursor={{ hideWhenDone: true }}>
             <span className="loader-title"> BAHIS </span>
             <br />
@@ -242,5 +233,3 @@ function AppRegister(props: any) {
 }
 
 export default withRouter(AppRegister);
-
-
