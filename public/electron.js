@@ -1059,7 +1059,7 @@ const startAppSync = (event, name, time) => {
     })
     .then(() => {
         // sync the csv Data ?
-        csvDataSync(name);
+        csvDataSync(db, name);
     })
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
@@ -1083,7 +1083,7 @@ const requestDataSync = async (event, username) => {
  * @param {IpcMainEvent} event - the default ipc main event
  * @returns {string} - success when completes; otherwise, failed if error occurs
  */
-const csvDataSync = async (username) => {
+const csvDataSync = async (db, username) => {
   electronLog.info("XIM1 csvDataSync")
   try {
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type=? AND name=?';
