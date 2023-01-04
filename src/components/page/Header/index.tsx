@@ -133,7 +133,7 @@ function Header(props: HeaderProps) {
               <div className="syncBar">
                 {props.syncTime && (
                   <Typography className={classes.title} variant="body2" noWrap={true}>
-                    Time of last data submission: {props.syncTime}
+                    Time of last synchronisation: {props.syncTime}
                   </Typography>
                 )}
 
