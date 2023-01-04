@@ -20,7 +20,7 @@ const formConfigEndpoint = (name, time) => {
 };
 
 const _url = (url, name, time) => {
-  if (time) {
+  if (time !== null && time !== undefined) {
     return `${url.replace('core_admin', name)}?last_modified=${time}&bahis_desk_version=${APP_VERSION}`;
   } else {
     return `${url.replace('core_admin', name)}?bahis_desk_version=${APP_VERSION}`;
