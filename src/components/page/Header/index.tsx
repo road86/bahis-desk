@@ -47,6 +47,18 @@ function Header(props: HeaderProps) {
 
   // }, [appConfigSyncComplete]);
 
+  React.useEffect(() => {
+    setTimeout(() => {
+      setWaitingForFormSync(false);
+    }, 45000);
+  }, [isWaitingForFormSync]);
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setWaitingForDataSync(false);
+    }, 45000);
+  }, [isWaitingForDataSync]);
+
   const handleAppSync = async () => {
     props.setLastSyncTime('Sync in progress');
     setWaitingForFormSync(true);
@@ -104,9 +116,7 @@ function Header(props: HeaderProps) {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}
     >
-      <Alert severity="info">
-        Synchronising data. 
-      </Alert>
+      <Alert severity="info">Synchronising data.</Alert>
     </Snackbar>
   );
 
