@@ -4,13 +4,12 @@ const { app } = electron;
 const Database = require('better-sqlite3');
 const DB_NAME = 'foobar.db';
 const path = require('path');
-const { SERVER_URL } = require('../constants');
+const { _url, SERVER_URL } = require('../constants');
 const { update } = require('lodash');
 const electronLog = require('electron-log');
 const { convertCompilerOptionsFromJson } = require('typescript');
 
 const SUBMISSION_ENDPOINT = `${SERVER_URL}/bhmodule/core_admin/submission/`;
-const DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync/`;
 const CSV_DATA_FETCH_ENDPOINT = `${SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
 const DATA_SYNC_COUNT = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-count/`;
 const DATA_SYNC_PAGINATED = `${SERVER_URL}/bhmodule/form/core_admin/data-sync-paginated/`;
@@ -26,17 +25,16 @@ CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT 
 CREATE TABLE form_choices( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);
 CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
 
-
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchCsvDataFromServer = async (db, username) => {
-  console.log('fetchCsvData call', username);
+  electronLog.log('fetchCsvData call', username);
   try {
     const last_updated = db.prepare('SELECT time from csv_sync_log order by time desc limit 1').get();
     const updated = last_updated == undefined || last_updated.time == null ? 0 : last_updated.time;
-    const url = CSV_DATA_FETCH_ENDPOINT.replace('core_admin', username) + '?last_modified=' + updated;
-    console.log(url);
+    const url = _url(CSV_DATA_FETCH_ENDPOINT, username, updated);
+    electronLog.log(url);
     await axios
       .get(url)
       .then((response) => {
@@ -53,13 +51,13 @@ const fetchCsvDataFromServer = async (db, username) => {
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
-        console.log('axios error', error);
+        electronLog.log('axios error', error);
         return 'failed';
       });
     return 'success';
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log('fetch err', err);
+    electronLog.log('fetch err', err);
     return 'failed';
   }
 };
@@ -126,8 +124,8 @@ const fetchDataFromServer = async (db, username) => {
   try {
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
     const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
-    const url = DATA_SYNC_PAGINATED.replace('core_admin', username);
-    const dataCountUrl = DATA_SYNC_COUNT.replace('core_admin', username) + '?last_modified=' + updated;
+    const url = _url(DATA_SYNC_PAGINATED, username);
+    const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
 
     electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
     const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
@@ -140,7 +138,7 @@ const fetchDataFromServer = async (db, username) => {
     let serverCalls = [];
     for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
       promises.push(
-        axios.get(`${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
+        axios.get(`${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
           serverCalls.push(i);
 
           electronLog.info(`----------|| call ${i}: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH} ||------------------`);
@@ -242,7 +240,7 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
  */
 const parseAndSaveToFlatTables = (dbConnection, formId, userInput, instanceId) => {
   const formObj = dbConnection.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
-  if (formObj != 'undefined') {
+  if (formObj !== undefined) {
     const formDefinition = JSON.parse(formObj.definition);
     const formFieldNames = JSON.parse(formObj.field_names);
     const userInputObj = JSON.parse(userInput);
@@ -390,7 +388,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
           //test_file: queries,
         };
 
-        const url = SUBMISSION_ENDPOINT.replace('core_admin', username);
+        const url = _url(SUBMISSION_ENDPOINT, username);
         const jsondata = JSON.stringify(apiFormData)
         console.log("url",url);
         console.log(url);

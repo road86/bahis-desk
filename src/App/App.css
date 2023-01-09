@@ -79,6 +79,15 @@ fieldset[disabled] .gatekeeper-btn.active {
   background: white !important;
 }
 
+.syncBar {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
 .main-container{
   padding-top: 8%;
 }

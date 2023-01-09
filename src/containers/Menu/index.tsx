@@ -46,7 +46,7 @@ export interface MenuProps {
 }
 
 // export interface MenuState {
-//   shouldAlertOpen: boolean;
+//   isSynchronisingAlertOpen: boolean;
 //   isDataAvailable: boolean;
 //   username: string;
 //   imageSrc: string;
@@ -55,13 +55,68 @@ export interface MenuProps {
 // interface MenuURLParams {
 //   username: string;
 // }
+
+const updateAppDefinition = (appDefinition: any) => {
+  const update = function (module: any) {
+    if (module.xform_id !== '') {
+      const formModule = {
+        xform_id: module.xform_id,
+        name: module.name,
+        img_id: module.img_id,
+        children: [],
+        label: {
+          Bangla: 'New Submission',
+          English: 'New Submission',
+        },
+        catchment_area: module.catchment_area,
+        list_id: '',
+        type: 'form',
+        id: module.id,
+      };
+      const listId = random(100, 200);
+      const listModule = {
+        xform_id: module.xform_id,
+        name: 'module_' + listId,
+        img_id: '',
+        children: [],
+        label: {
+          Bangla: 'Submitted Data',
+          English: 'Submitted Data',
+        },
+        catchment_area: module.catchment_area,
+        list_id: '',
+        type: 'form_list',
+        id: listId,
+      };
+      module.xform_id = '';
+      module.name = 'module_' + listId;
+      module.img_id = '';
+      module.childre = {
+        formModule,
+        listModule,
+      };
+      //  module.children.push(formModule);
+      //  module.children.push(listModule);
+      module.type = 'container';
+      module.id = listId;
+    } else if (module.children)
+      module.children.forEach((mod: any) => {
+        update(mod);
+      });
+  };
+
+  appDefinition.children.forEach((definition: any) => {
+    update(definition);
+  });
+};
+
 const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
   // class Menu extends React.Component<RouteComponentProps<{}, {}, MenuURLParams> & MenuProps, MenuState> {
   // const [isDataAvailable, setDataAvailavle] = React.useState<boolean>(false);
-  const [shouldAlertOpen, setAlertOpen] = React.useState<boolean>(false);
+  // TODO this Alert should be part of the main app or the menu or something so it can happen across all screens
+  const [isSynchronisingAlertOpen, setSynchronisingAlertOpen] = React.useState<boolean>(false);
   // const [username, setUsername] = React.useState<string>('');
   // const [appData, setAppData] = React.useState<any>({});
-
 
   const typeEvalutor = (menuItem: MenuItem, appLanguage: string) => {
     if (menuItem.type === MODULE_TYPE) {
@@ -79,83 +134,52 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     return null;
   };
 
-  const compUpdate = async () => {
-    const { currentMenu, setMenuItemActionCreator } = props;
-    if (!currentMenu) {
-      const newMenuItem = await ipcRenderer.sendSync('fetch-app-definition');
-      // console.log(newMenuItem);
-      setMenuItemActionCreator(JSON.parse(newMenuItem));
-      updateAppDefinition(JSON.parse(newMenuItem));
-    }
-    setAlertOpen(false);
-    // console.log(response);
+  const handleClose = () => {
+    setSynchronisingAlertOpen(false);
   };
 
-  const updateAppDefinition = (appDefinition: any) => {
-    let update = function (module: any) {
-      if (module.xform_id !== '') {
-        const formModule = {
-          xform_id: module.xform_id,
-          name: module.name,
-          img_id: module.img_id,
-          children: [],
-          label: {
-            Bangla: 'New Submission',
-            English: 'New Submission',
-          },
-          catchment_area: module.catchment_area,
-          list_id: "",
-          type: "form",
-          id: module.id
-        };
-        const listId = random(100, 200)
-        const listModule = {
-          xform_id: module.xform_id,
-          name: 'module_' + listId,
-          img_id: "",
-          children: [],
-          label: {
-            Bangla: 'Submitted Data',
-            English: 'Submitted Data',
-          },
-          catchment_area: module.catchment_area,
-          list_id: "",
-          type: "form_list",
-          id: listId
-        }
-        module.xform_id = "";
-        module.name = 'module_' + listId;
-        module.img_id = "";
-        module.childre = {
-          formModule,
-          listModule
-        }
-        //  module.children.push(formModule);
-        //  module.children.push(listModule);
-        module.type = "container";
-        module.id = listId;
-      } else if (module.children)
-        module.children.forEach((mod: any) => {
-          update(mod)
+  const compUpdate = async (currentMenu: MenuItem | null, setMenuItemActionCreator: any) => {
+    if (!currentMenu) {
+      console.log('No menu definition found, fetching');
+      ipcRenderer
+        .invoke('fetch-app-definition')
+        .then((newMenuItem: any) => {
+          if (newMenuItem) {
+            console.log('setting menu item action creator to new menu item');
+            setMenuItemActionCreator(JSON.parse(newMenuItem));
+            console.log('updating app definition to new menu item');
+            updateAppDefinition(JSON.parse(newMenuItem));
+            console.log('fetching menu definition suceeded');
+            setSynchronisingAlertOpen(false);
+          }
+          console.log('fetching menu definition suceeded but menu was empty');
+        })
+        .catch((err: Error) => {
+          console.log('fetching menu definition failed');
+          console.log(err);
         });
-    };
-
-    appDefinition.children.forEach((definition: any) => {
-      update(definition)
-    });
-  }
+    } else {
+      setSynchronisingAlertOpen(false);
+    }
+  };
 
   React.useEffect(() => {
-    compUpdate();
-  }, []);
-
+    const { currentMenu, setMenuItemActionCreator } = props;
+    setSynchronisingAlertOpen(true);
+    compUpdate(currentMenu, setMenuItemActionCreator);
+  }, [props]);
 
   const { currentMenu, appLanguage } = props;
-  console.log(' ----> ', currentMenu);
+  console.log(' ----> currentMenu: ', currentMenu);
   return (
     <React.Fragment>
       <div className="menu-container">
-        {shouldAlertOpen && <Alert color="success">Everything is up-to-date!</Alert>}
+        {isSynchronisingAlertOpen && (
+          <Alert severity="info" onClose={handleClose}>
+            Attempting to sync modules. This may take some time. If nothing happens after five minutes try hitting the
+            Sync Now.
+          </Alert>
+        )}
 
         <Row id="menu-body">
           {currentMenu &&

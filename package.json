@@ -1,6 +1,6 @@
 {
-  "name": "bahis",
-  "version": "2.0.3",
+  "name": "devbahis",
+  "version": "2.1.2-dev",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
@@ -12,8 +12,9 @@
     "@fortawesome/free-regular-svg-icons": "^5.10.0",
     "@fortawesome/free-solid-svg-icons": "^5.10.0",
     "@fortawesome/react-fontawesome": "^0.1.4",
-    "@material-ui/core": "^4.9.3",
-    "@material-ui/icons": "^4.9.1",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/lab": "^4.0.0-alpha.61",
     "@material-ui/pickers": "^3.3.10",
     "@onaio/connected-private-route": "^0.0.8",
     "@onaio/connected-reducer-registry": "^0.0.1",
@@ -44,6 +45,10 @@
     "cross-blob": "^1.2.0",
     "cross-env": "^6.0.0",
     "date-fns": "^2.22.1",
+    "electron-first-run": "^3.0.0",
+    "electron-is-dev": "^1.1.0",
+    "electron-log": "^4.4.6",
+    "electron-updater": "^4.0.4",
     "eslint": "^7.23.0",
     "fetch-mock": "^7.3.9",
     "form-data": "^3.0.0",
@@ -80,20 +85,17 @@
     "to-array-buffer": "^3.2.0",
     "typeface-roboto": "^0.0.75",
     "typescript": "^3.5.3",
-    "xlsx": "^0.17.0",
-    "electron-first-run": "^3.0.0",
-    "electron-is-dev": "^1.1.0",
-    "electron-log": "^4.4.6",
-    "electron-updater": "^4.0.4"
+    "xlsx": "^0.17.0"
   },
   "build": {
+    "extends": null,
     "appId": "com.electron.bahis",
     "publish": [
       {
         "provider": "github",
         "owner": "road86",
         "repo": "bahis-desk",
-        "releaseType": "release"
+        "releaseType": "prerelease"
       }
     ],
     "win": {
@@ -157,8 +159,9 @@
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
     "concurrently": "^4.1.2",
-    "electron": "^12.0.2",
+    "electron": "^13.0.0",
     "electron-builder": "^23.0.2",
+    "electron-devtools-installer": "^3.2.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.3.5",

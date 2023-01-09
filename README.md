@@ -1,51 +1,76 @@
+# Getting started
 
-## Getting started
+## PC configuration
 
-### PC configuration Linux
+### Linux
+
 We need node and yarn. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
 
-```
+```bash
 nvm install 14.19.2
 nvm use 14.19.2
 ```
-On windows install node in version 14.
 
 Next, install yarn globally:
-```
-npm install -g yarn 
+
+```bash
+npm install -g yarn
 ```
 
-### PC configuration Windows 
-https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi
+### Windows
+
+On windows install node in version 14, which you can download [here](https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi).
 
 Please tick to install all additional tools with "chocolatey" that should cover all of the other requirements (visual studio, python etc.)
 
+## Running the web-app locally
 
-### Running the web-app
+### Linux and Windows
 
+Install packages using yarn:
 
-Install packages using yarn and then start the app:
-
-```sh
-yarn
-
-yarn start
-```
-In order to reset the database before the next build you need to remove the bahis files. On linux run:
-```
-rm -rf ~/.config/bahis  
+```bash
+yarn install
 ```
 
-### build setup file
+Build the electron app with:
 
-for windows
-```sh
-yarn win-build
+```bash
+yarn electron-build
 ```
 
-for linux
-```sh
+Run the react app with:
+
+```
+yarn react-start
+```
+
+In a second terminal, start electron with:
+
+```bash
+yarn electron .
+```
+
+In order to reset the database before the next build you need to remove the bahis files, e.g. on linux:
+
+```bash
+rm -rf ~/.config/bahis
+```
+
+Changes made should auto-render.
+
+## Building the app for distribution
+
+### For Linux
+
+```bash
 yarn linux-build
+```
+
+### For Windows
+
+```bash
+yarn win-build
 ```
 
 ## Re-run of the app in dev mode
@@ -54,11 +79,29 @@ yarn linux-build
 rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && yarn start
 ```
 
-There is some leak in UI code that might give an error saying that there are too many watchers. Try this 
+## Problems
+
+### crashes
+
+There is some leak in UI code that might give an error saying that there are too many watchers. Try this
+
 ```
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
+
 (https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
+
+###
+
+If `yarn electron .` fails saying "better_sqlite3.node' was compiled against a different Node.js", try
+
+```
+yarn add electron-rebuild --dev
+yarn electron-rebuild
+```
+
+(https://github.com/road86/bahis-desk/issues/27)
+
 ## Configuration
 
 The configurations are located in the `configs` directory and are split into two modules:
