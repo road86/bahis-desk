@@ -50,7 +50,7 @@ function Form(props: formProps) {
   const [formDefinition, setFormDefinition] = useState<any>(null);
   const [formChoices, setFormChoices] = useState<any>(null);
   const [toastVisible, setToastVisible] = useState<boolean>(false);
-  const [userLocationInfo, setUserLocationInfo] = useState<any>(null);
+//   const [userLocationInfo, setUserLocationInfo] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
   const [userInput, setUserInput] = useState<any>(null);
@@ -58,13 +58,13 @@ function Form(props: formProps) {
   useEffect(() => {
     const formId = props.match.params.id || '';
     const formDefinitionObj = ipcRenderer.sendSync('fetch-form-definition', formId);
-    const userLocationInfoObj = ipcRenderer.sendSync('user-db-info');
+    // const userLocationInfoObj = ipcRenderer.sendSync('user-db-info');
     const userInfoObj = ipcRenderer.sendSync('fetch-userlist');
     if (formDefinitionObj != null) {
       const { definition, formChoices } = formDefinitionObj;
       setFormDefinition(definition);
       setFormChoices(formChoices);
-      setUserLocationInfo(userLocationInfoObj);
+    //   setUserLocationInfo(userLocationInfoObj);
       setUserInfo(userInfoObj);
     }
   }, []);
@@ -77,7 +77,7 @@ function Form(props: formProps) {
       for (const prop of userInputProperties) {
         userInput = {
           ...userInput,
-          [prop[0].slice(1)]: userLocationInfo[prop[1].split('@')[1]],
+        //   [prop[0].slice(1)]: userLocationInfo[prop[1].split('@')[1]],
         };
       }
     }
