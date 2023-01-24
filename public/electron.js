@@ -392,7 +392,7 @@ const fetchQueryData = (event, queryString) => {
 
 const configureFreshDatabase = async (data, userData, mac) => {
   const insertStmt = db.prepare(
-    `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email, upazila) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   insertStmt.run(
     data.user_name,
@@ -404,6 +404,7 @@ const configureFreshDatabase = async (data, userData, mac) => {
     data.organization,
     data.branch,
     data.email,
+    data.upazila,
   );
 
   electronLog.log(`Created db with user details, now synchronising form config and catchments for ${data.user_name}`);
@@ -637,9 +638,14 @@ const signIn = async (event, userData) => {
 
 const getErrorMessage = (error) => {
   electronLog.info(error.message);
-  if (error.message.includes("409")) return "Users credentials are not authorized or missing catchment area."
-  else return "Unauthenticated User.";
-}
+  if (error.message.includes('403')) {
+    return 'Only upazilas can use BAHIS-desk, please contact support.';
+  }
+  if (error.message.includes('409')) {
+    return 'Users credentials are not authorized or missing catchment area.';
+  }
+  return 'Unauthenticated User.';
+};
 
 
 const populateCatchment = (catchments) => {
