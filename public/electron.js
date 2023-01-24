@@ -1097,22 +1097,16 @@ const csvDataSync = async (db, username) => {
 const getUserDBInfo = (event) => {
   // FIXME this function is actually about user location and is badly named
   try {
-    const query = `with division as (
-                      select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
-                  ), district as (
-                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from division limit 1)
-                  ), upazila as (
-                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from district limit 1)
-                  ) select
-                          division.value division,
-                          district.value district,
-                          upazila.value upazila
-                  from division join district on division.ca = district.ca
-                      join upazila on upazila.ca = division.ca`
+    const query_to_get_upazila = `select upazila from users`;
+    const upazila_id = db.prepare(query_to_get_upazila).get().upazila;
+    const query_to_get_district = `select parent from geo_cluster where value in (${upazila_id})`;
+    const district_id = db.prepare(query_to_get_district).get().parent;
+    const query_to_get_division = `select parent from geo_cluster where value in (${district_id})`;
+    const division_id = db.prepare(query_to_get_division).get().parent;
+    const info = { division: division_id, district: district_id, upazila: upazila_id.toString() };
 
-    const info = db.prepare(query).get();
     if (info !== undefined) {
-      electronLog.info(`------- || userDB SUCCESS ${info} || ----------------`);
+      electronLog.info(`------- || userDB SUCCESS ${JSON.stringify(info)} || ----------------`);
       event.returnValue = info;
     } else {
       electronLog.info(`------- || userDB FAILED - undefined || ----------------`);
