@@ -534,7 +534,6 @@ const synchroniseModules = async (name, time) => {
  * 2. when a user try to login, we check db for its login history. if we found any, we will forward that user to home page
  * 3. if a user try to login, we will check the db for its login history and if we found a different user then
  *    we will show a delete-data dialog to remove everything related to the previous user
- *    
  */
 const signIn = async (event, userData) => {
   electronLog.info(`----------------- || electron-side signIn || ----------------------------`);
@@ -543,29 +542,47 @@ const signIn = async (event, userData) => {
     mac = mac;
     // electronLog.info(mac);
   });
-  const query =
-    'SELECT * from users limit 1';
-  const userInfo = db.prepare(query).get();
+  const query = 'SELECT * from users limit 1';
+  let userInfo = db.prepare(query).get();
   // if a user has signed in before then no need to call signin-api
   // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
-  if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+  if (
+    userInfo &&
+    userInfo.username == userData.username &&
+    userInfo.password == userData.password &&
+    userInfo.upazila
+  ) {
     electronLog.log(`This is an offline-ready account.`);
     results = { username: userData.username, message: 'signIn::local' };
     mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
-      message: ''
+      message: '',
     };
   } else {
-  const data = {
-    username: userData.username,
-    password: userData.password,
-    mac_address: mac,
-    upazila: 202249,
-  };
-  electronLog.info('----------- || Attempt To Signin || -----------------');
-  electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
-  electronLog.info(`--------------------------`);
+    if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+      // from v2.2 user's need an upazila in the local DB
+      // if a user exists but doesn't have an upazila, add it now
+      // annoyingling sqlite doesn't let you alter column types
+      // so we drop and re-create and then treat as a first time sign in to fill
+      electronLog.info('----- || Update users table to include numerical upazilla before normal sign in || -----');
+      drop_table = 'DROP TABLE users;';
+      create_table =
+        'CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);';
+      db.exec(drop_table);
+      db.exec(create_table);
+      userInfo = undefined;
+    }
+
+    const data = {
+      username: userData.username,
+      password: userData.password,
+      mac_address: mac,
+      upazila: 202249,
+    };
+    electronLog.info('----------- || Attempt To Signin || -----------------');
+    electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
+    electronLog.info(`--------------------------`);
 
     await axios
       .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
