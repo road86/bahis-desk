@@ -48,6 +48,7 @@ const getSearchDBProperties = (question: any, path: any) => {
 
 function Form(props: formProps) {
   const [formDefinition, setFormDefinition] = useState<any>(null);
+  const [formDefinitionJson, setFormDefinitionJson] = useState<any>(null);
   const [formChoices, setFormChoices] = useState<any>(null);
   const [toastVisible, setToastVisible] = useState<boolean>(false);
   const [userLocationInfo, setUserLocationInfo] = useState<any>(null);
@@ -65,9 +66,14 @@ function Form(props: formProps) {
       setFormDefinition(definition);
       setFormChoices(formChoices);
       setUserLocationInfo(userLocationInfoObj);
+      console.log(JSON.stringify(userLocationInfo));
       setUserInfo(userInfoObj);
     }
   }, []);
+
+  useEffect(() => {
+    setFormDefinitionJson(formDefinition ? removeGeoLocationFields(JSON.parse(formDefinition)) : null);
+  }, [formDefinition]);
 
   const getUserInput = (dataJson: any) => {
     let userInput = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {};
@@ -120,8 +126,37 @@ function Form(props: formProps) {
 
   const handleSubmit = (userInput: any) => {
     console.log('handleSubmit');
-    setUserInput(userInput);
+    setUserInput(addPrefilledGeoLocationFields(userInput));
     setShowConfirmDialog(true);
+  };
+
+  const removeGeoLocationFields = (formDefinitionJson: any) => {
+    // TODO test on all current forms... using array positions is not ideal
+    console.log('+++++ removeGeoLocationFields ++++');
+    // console.log('+++++ formDefinitionJson ++++');
+    // console.log(JSON.stringify(formDefinitionJson));
+    const ownerInformationQuestions = formDefinitionJson['children'][3];
+    // console.log('+++++ ownerInformationQuestions ++++');
+    // console.log(JSON.stringify(ownerInformationQuestions));
+    // console.log('+++++ DISTRICT ++++');
+    // console.log(JSON.stringify(ownerInformationQuestions['children'][1]));
+    delete ownerInformationQuestions['children'][1];
+    delete ownerInformationQuestions['children'][2];
+    delete ownerInformationQuestions['children'][3];
+    formDefinitionJson['basic_info'] = ownerInformationQuestions;
+    return formDefinitionJson;
+  };
+
+  const addPrefilledGeoLocationFields = (userInput: any) => {
+    console.log('+++++ addPrefilledGeoLocationFields ++++');
+    console.log('+++++ userInput ++++');
+    console.log(userInput);
+    console.log('+++++ userLocationInfoObj ++++');
+    console.log(JSON.stringify(userLocationInfo));
+    userInput['division'] = userLocationInfo['division'];
+    userInput['district'] = userLocationInfo['district'];
+    userInput['upazila'] = userLocationInfo['upazila'];
+    return userInput;
   };
 
   const { dataJson } = queryString.parse(props.location.search);
@@ -129,7 +164,7 @@ function Form(props: formProps) {
   const odk_props = {
     csvList: formChoices ? JSON.parse(formChoices) : {},
     defaultLanguage: props.appLanguage,
-    formDefinitionJson: formDefinition ? JSON.parse(formDefinition) : {},
+    formDefinitionJson: formDefinitionJson || {},
     handleSubmit,
     languageOptions: [
       {
@@ -157,7 +192,7 @@ function Form(props: formProps) {
     <div className="form-container">
       <AlertDialog open={showConfirmDialog} yes={handleYes} cancel={handleCancel} />
       {toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
-      {formDefinition ? (
+      {formDefinitionJson ? (
         getOdkFormRenderer()
       ) : (
         <div style={{ marginTop: '10%' }}>

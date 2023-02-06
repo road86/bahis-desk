@@ -170,13 +170,13 @@ function AppRegister(props: any) {
   const [isSignInButtonDisabled, setSignInButtonDisabled] = useState(false);
 
   return (
-    <Grid container={true} spacing={3} direction="row" justify="center" alignItems="center">
+    <Grid container={true} spacing={3} direction="row" justifyContent="center" alignItems="center">
       {isLoadComplete ? (
         <div className={classes.layout}>
           {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
           <Paper className={classes.paper} elevation={3}>
             {toast(toastContent)}
-            <Grid container={true} direction="row" justify="center" alignItems="center">
+            <Grid container={true} direction="row" justifyContent="center" alignItems="center">
               <div className={classes.circle}>
                 <div className={classes.image}>
                   <Avatar variant="square" src="/icon.png" />

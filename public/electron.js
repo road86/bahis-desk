@@ -392,7 +392,7 @@ const fetchQueryData = (event, queryString) => {
 
 const configureFreshDatabase = async (data, userData, mac) => {
   const insertStmt = db.prepare(
-    `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (username, password, macaddress, lastlogin, name, role, organization, branch, email, upazila) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   insertStmt.run(
     data.user_name,
@@ -404,6 +404,7 @@ const configureFreshDatabase = async (data, userData, mac) => {
     data.organization,
     data.branch,
     data.email,
+    data.upazila,
   );
 
   electronLog.log(`Created db with user details, now synchronising form config and catchments for ${data.user_name}`);
@@ -533,7 +534,6 @@ const synchroniseModules = async (name, time) => {
  * 2. when a user try to login, we check db for its login history. if we found any, we will forward that user to home page
  * 3. if a user try to login, we will check the db for its login history and if we found a different user then
  *    we will show a delete-data dialog to remove everything related to the previous user
- *    
  */
 const signIn = async (event, userData) => {
   electronLog.info(`----------------- || electron-side signIn || ----------------------------`);
@@ -542,29 +542,47 @@ const signIn = async (event, userData) => {
     mac = mac;
     // electronLog.info(mac);
   });
-  const query =
-    'SELECT * from users limit 1';
-  const userInfo = db.prepare(query).get();
+  const query = 'SELECT * from users limit 1';
+  let userInfo = db.prepare(query).get();
   // if a user has signed in before then no need to call signin-api
   // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
-  if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+  if (
+    userInfo &&
+    userInfo.username == userData.username &&
+    userInfo.password == userData.password &&
+    userInfo.upazila
+  ) {
     electronLog.log(`This is an offline-ready account.`);
     results = { username: userData.username, message: 'signIn::local' };
     mainWindow.send('formSubmissionResults', results);
     event.returnValue = {
       userInfo: '',
-      message: ''
+      message: '',
     };
   } else {
-  const data = {
-    username: userData.username,
-    password: userData.password,
-    mac_address: mac,
-    upazila: 202249,
-  };
-  electronLog.info('----------- || Attempt To Signin || -----------------');
-  electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
-  electronLog.info(`--------------------------`);
+    if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
+      // from v2.2 user's need an upazila in the local DB
+      // if a user exists but doesn't have an upazila, add it now
+      // annoyingling sqlite doesn't let you alter column types
+      // so we drop and re-create and then treat as a first time sign in to fill
+      electronLog.info('----- || Update users table to include numerical upazilla before normal sign in || -----');
+      drop_table = 'DROP TABLE users;';
+      create_table =
+        'CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, macaddress TEXT, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);';
+      db.exec(drop_table);
+      db.exec(create_table);
+      userInfo = undefined;
+    }
+
+    const data = {
+      username: userData.username,
+      password: userData.password,
+      mac_address: mac,
+      upazila: 202249,
+    };
+    electronLog.info('----------- || Attempt To Signin || -----------------');
+    electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
+    electronLog.info(`--------------------------`);
 
     await axios
       .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
@@ -637,9 +655,14 @@ const signIn = async (event, userData) => {
 
 const getErrorMessage = (error) => {
   electronLog.info(error.message);
-  if (error.message.includes("409")) return "Users credentials are not authorized or missing catchment area."
-  else return "Unauthenticated User.";
-}
+  if (error.message.includes('403')) {
+    return 'Only upazilas can use BAHIS-desk, please contact support.';
+  }
+  if (error.message.includes('409')) {
+    return 'Users credentials are not authorized or missing catchment area.';
+  }
+  return 'Unauthenticated User.';
+};
 
 
 const populateCatchment = (catchments) => {
@@ -1091,22 +1114,16 @@ const csvDataSync = async (db, username) => {
 const getUserDBInfo = (event) => {
   // FIXME this function is actually about user location and is badly named
   try {
-    const query = `with division as (
-                      select name, value, 'catchment-area' as ca from geo_cluster where parent = -1
-                  ), district as (
-                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from division limit 1)
-                  ), upazila as (
-                      select name , value, 'catchment-area' as ca from geo_cluster where parent = (select value from district limit 1)
-                  ) select
-                          division.value division,
-                          district.value district,
-                          upazila.value upazila
-                  from division join district on division.ca = district.ca
-                      join upazila on upazila.ca = division.ca`
+    const query_to_get_upazila = `select upazila from users`;
+    const upazila_id = db.prepare(query_to_get_upazila).get().upazila;
+    const query_to_get_district = `select parent from geo_cluster where value in (${upazila_id})`;
+    const district_id = db.prepare(query_to_get_district).get().parent;
+    const query_to_get_division = `select parent from geo_cluster where value in (${district_id})`;
+    const division_id = db.prepare(query_to_get_division).get().parent;
+    const info = { division: division_id, district: district_id, upazila: upazila_id.toString() };
 
-    const info = db.prepare(query).get();
     if (info !== undefined) {
-      electronLog.info(`------- || userDB SUCCESS ${info} || ----------------`);
+      electronLog.info(`------- || userDB SUCCESS ${JSON.stringify(info)} || ----------------`);
       event.returnValue = info;
     } else {
       electronLog.info(`------- || userDB FAILED - undefined || ----------------`);
