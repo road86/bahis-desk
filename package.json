@@ -4,7 +4,7 @@
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
-  "author": "community",
+  "author": "community <email@willbe.here>",
   "dependencies": {
     "@date-io/date-fns": "1.x",
     "@fortawesome/fontawesome-svg-core": "^1.2.20",
@@ -112,6 +112,12 @@
       "menuCategory": "bahis",
       "license": "LICENSE",
       "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "snap"
+      ]
     }
   },
   "scripts": {
