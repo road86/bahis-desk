@@ -76,6 +76,7 @@ function Form(props: formProps) {
   }, [formDefinition]);
 
   const getUserInput = (dataJson: any) => {
+    console.log('+++++ || getUserInput || +++++');
     let userInput = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {};
 
     const userInputProperties = getSearchDBProperties(JSON.parse(formDefinition), '');
@@ -97,14 +98,22 @@ function Form(props: formProps) {
   };
 
   const handleYes = () => {
-    console.log('handleYes');
+    console.log('+++++ || handleYes || +++++');
     if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
-      const inputJson = userInput && typeof userInput === 'string' ? JSON.parse(atob(userInput)) : null;
+      let inputJson = null;
+      if (typeof userInput === 'object') {
+        inputJson = userInput;
+      } else if (typeof userInput === 'string') {
+        // decode if needed
+        inputJson = JSON.parse(atob(userInput));
+      }
       const metaId =
         inputJson !== null &&
-        (inputJson['meta/instanceID'] !== null ||
-          inputJson['meta/instanceID'] != 'undefined' ||
-          inputJson['meta/instanceID'] != '')
+        !(
+          inputJson['meta/instanceID'] === null ||
+          inputJson['meta/instanceID'] === undefined ||
+          inputJson['meta/instanceID'] === ''
+        )
           ? inputJson['meta/instanceID']
           : `${userInfo.users[0].username}-${generateUid()}`;
       const formId = props.match.params.id || '';
@@ -125,7 +134,7 @@ function Form(props: formProps) {
   };
 
   const handleSubmit = (userInput: any) => {
-    console.log('handleSubmit');
+    console.log('+++++ || handleSubmit || +++++');
     setUserInput(addPrefilledGeoLocationFields(userInput));
     setShowConfirmDialog(true);
   };

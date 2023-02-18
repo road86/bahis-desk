@@ -217,24 +217,21 @@ const fetchAppDefinition = async (event) => {
   }
 };
 
-/** saves the form response to db
- * @param {IpcMainEvent} event - the default ipc main event
- * @param {Object} response - an object containing formId and data (user's response)
- */
 const submitFormResponse = (event, response) => {
-  // eslint-disable-next-line no-console
-  electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
+  electronLog.info(`------- || submitFormResponse || ----------------`);
   //The following deletes a record when editing an existing entry and replacing it with a new one
-  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
+  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId);
   const fetchedUsername = getCurrentUser();
   event.returnValue = {
     username: fetchedUsername,
   };
   const date = new Date().toISOString();
-  const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
-  insert.run(response, fetchedUsername, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
+  const insert = db.prepare(
+    'INSERT INTO data (form_id, data, status,  submitted_by, submission_date, instanceid) VALUES (?, ?, 0, ?, ?, ?)',
+  );
+  insert.run(response.formId, response.data, fetchedUsername, date, JSON.parse(response.data)['meta/instanceID']);
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
-  
+  electronLog.info(`------- || submitFormResponse COMPLETE || ----------------`);
 };
 
 /** fetches the form definition
@@ -1135,7 +1132,7 @@ const getUserDBInfo = (event) => {
 
 const deleteData = (event, instanceId, formId) => {
   electronLog.info(instanceId, formId);
-  deleteDataWithInstanceId(db, instanceId.toString(), formId);
+  deleteDataWithInstanceId(db, instanceId, formId);
   event.returnValue = {
     status: 'successful',
   };
