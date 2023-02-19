@@ -1064,7 +1064,8 @@ const startAppSync = (event, name, time) => {
     })
     .then(() => {
         // sync the csv Data ?
-        csvDataSync(db, name);
+        // No, because requestDataSync does this too!
+        // csvDataSync(db, name);
     })
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
@@ -1168,7 +1169,7 @@ ipcMain.on('fetch-list-followup', fetchFollowupFormData);
 ipcMain.on('fetch-query-data', fetchQueryData);
 ipcMain.on('start-app-sync', startAppSync);
 ipcMain.on('request-data-sync', requestDataSync);
-ipcMain.on('csv-data-sync', csvDataSync);
+// ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
 ipcMain.on('sign-in', signIn);
 ipcMain.on('fetch-userlist', fetchUserList);
