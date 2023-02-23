@@ -395,7 +395,7 @@ const configureFreshDatabase = async (data, userData, mac) => {
     data.user_name,
     userData.password,
     mac,
-    Math.round(new Date().getTime()),
+    new Date().toISOString(),
     data.name,
     data.role,
     data.organization,
@@ -497,7 +497,7 @@ const synchroniseModules = async (name, time) => {
     .get(_url(APP_DEFINITION_ENDPOINT, name, time))
     .then((moduleListRes) => {
       const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-      newLayoutQuery.run(new Date().getTime());
+      newLayoutQuery.run(Date.now());
 
       if (moduleListRes.data) {
         electronLog.info('---------------------|| moduleListRes data ||---------------------');
@@ -958,7 +958,7 @@ const startAppSync = (event, name, time) => {
     .then(
       axios.spread((formListRes, listRes, formChoice) => {
         const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-        newLayoutQuery.run(new Date().getTime());
+        newLayoutQuery.run(Date.now());
         if (formListRes.data) {
           electronLog.info(
             `---------------------|| FormListRes data (time: ${last_sync_time}; total: ${formListRes.data.length}) ||---------------------`,
