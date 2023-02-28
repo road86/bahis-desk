@@ -76,6 +76,7 @@ function Form(props: formProps) {
   }, [formDefinition]);
 
   const getUserInput = (dataJson: any) => {
+    console.log('+++++ || getUserInput || +++++');
     let userInput = dataJson && typeof dataJson === 'string' ? JSON.parse(atob(dataJson)) : {};
 
     const userInputProperties = getSearchDBProperties(JSON.parse(formDefinition), '');
@@ -97,14 +98,22 @@ function Form(props: formProps) {
   };
 
   const handleYes = () => {
-    console.log('handleYes');
+    console.log('+++++ || handleYes || +++++');
     if (userInput && userInput !== 'Field Violated' && userInput !== 'submitted') {
-      const inputJson = userInput && typeof userInput === 'string' ? JSON.parse(atob(userInput)) : null;
+      let inputJson = null;
+      if (typeof userInput === 'object') {
+        inputJson = userInput;
+      } else if (typeof userInput === 'string') {
+        // decode if needed
+        inputJson = JSON.parse(atob(userInput));
+      }
       const metaId =
         inputJson !== null &&
-        (inputJson['meta/instanceID'] !== null ||
-          inputJson['meta/instanceID'] != 'undefined' ||
-          inputJson['meta/instanceID'] != '')
+        !(
+          inputJson['meta/instanceID'] === null ||
+          inputJson['meta/instanceID'] === undefined ||
+          inputJson['meta/instanceID'] === ''
+        )
           ? inputJson['meta/instanceID']
           : `${userInfo.users[0].username}-${generateUid()}`;
       const formId = props.match.params.id || '';
@@ -125,38 +134,38 @@ function Form(props: formProps) {
   };
 
   const handleSubmit = (userInput: any) => {
-    console.log('handleSubmit');
-    setUserInput(addPrefilledGeoLocationFields(userInput));
+    console.log('+++++ || handleSubmit || +++++');
+    setUserInput(userInput);
     setShowConfirmDialog(true);
   };
 
   const removeGeoLocationFields = (formDefinitionJson: any) => {
-    // TODO test on all current forms... using array positions is not ideal
     console.log('+++++ removeGeoLocationFields ++++');
-    // console.log('+++++ formDefinitionJson ++++');
-    // console.log(JSON.stringify(formDefinitionJson));
-    const ownerInformationQuestions = formDefinitionJson['children'][3];
-    // console.log('+++++ ownerInformationQuestions ++++');
-    // console.log(JSON.stringify(ownerInformationQuestions));
-    // console.log('+++++ DISTRICT ++++');
-    // console.log(JSON.stringify(ownerInformationQuestions['children'][1]));
-    delete ownerInformationQuestions['children'][1];
-    delete ownerInformationQuestions['children'][2];
-    delete ownerInformationQuestions['children'][3];
-    formDefinitionJson['basic_info'] = ownerInformationQuestions;
+    const formDefinitionChildren = formDefinitionJson['children'];
+    let questionsToDelete: number[] = [];
+    for (const section in formDefinitionChildren) {
+      if (formDefinitionChildren[section]['name'] === 'basic_info') {
+        const basicInfoQuestions = formDefinitionChildren[section]['children'];
+        for (let question = 0; question < basicInfoQuestions.length; question++) {
+          if (basicInfoQuestions[question]['name'] === 'division') {
+            questionsToDelete.push(question);
+          }
+          if (basicInfoQuestions[question]['name'] === 'district') {
+            questionsToDelete.push(question);
+          }
+          if (basicInfoQuestions[question]['name'] === 'upazila') {
+            questionsToDelete.push(question);
+          }
+        }
+        questionsToDelete = questionsToDelete.sort((a, b) => b - a);
+        console.log(questionsToDelete);
+        for (const question in questionsToDelete) {
+          delete basicInfoQuestions[questionsToDelete[question]];
+        }
+        formDefinitionJson['children'][section]['children'] = basicInfoQuestions;
+      }
+    }
     return formDefinitionJson;
-  };
-
-  const addPrefilledGeoLocationFields = (userInput: any) => {
-    console.log('+++++ addPrefilledGeoLocationFields ++++');
-    console.log('+++++ userInput ++++');
-    console.log(userInput);
-    console.log('+++++ userLocationInfoObj ++++');
-    console.log(JSON.stringify(userLocationInfo));
-    userInput['division'] = userLocationInfo['division'];
-    userInput['district'] = userLocationInfo['district'];
-    userInput['upazila'] = userLocationInfo['upazila'];
-    return userInput;
   };
 
   const { dataJson } = queryString.parse(props.location.search);
@@ -176,7 +185,7 @@ function Form(props: formProps) {
         value: 'Bangla',
       },
     ],
-    userInputJson: getUserInput(dataJson),
+    userInputJson: userInput || getUserInput(dataJson),
   };
 
   const getOdkFormRenderer = () => {

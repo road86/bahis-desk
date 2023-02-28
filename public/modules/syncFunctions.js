@@ -47,7 +47,7 @@ const fetchCsvDataFromServer = async (db, username) => {
           }
         });
         const newLayoutQuery = db.prepare('INSERT INTO csv_sync_log(time) VALUES(?)');
-        newLayoutQuery.run(Math.round(new Date().getTime()));
+        newLayoutQuery.run(Date.now());
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
@@ -123,7 +123,10 @@ const fetchDataFromServer = async (db, username) => {
   
   try {
     const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    const updated = last_updated == undefined || last_updated.last_updated == null ? 0 : last_updated.last_updated;
+    const updated =
+      last_updated == undefined || last_updated.last_updated == null
+        ? 0
+        : new Date(last_updated.last_updated).valueOf();
     const url = _url(DATA_SYNC_PAGINATED, username);
     const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
 
@@ -180,31 +183,33 @@ const fetchDataFromServer = async (db, username) => {
   }
 };
 
-/** deletes the entry from data table and related tables if exist
- * @param {string} instanceId
- * @param {string} formId
- */
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
+  electronLog.info(
+    `----- || deleteDataWithInstanceID; instanceId: ${instanceId.toString()}; formId: ${formId} ||  -----`,
+  );
   try {
-    const dataDeleteStmt = 'delete from data where instanceid =?';
-    // const dataDeleteStmt = db.prepare(query);
-    // console.log(deleteStmt);
-    const info = db.prepare(dataDeleteStmt).run(instanceId);
-    if (info.changes > 0) {
-      const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(formId);
+    let sql = 'DELETE FROM data WHERE instanceid = ?';
+    let stmt = db.prepare(sql);
+    let numDeleted = stmt.run(instanceId.toString()).changes;
+    console.log(`Row(s) deleted from table "data": ${numDeleted}`);
+    if (numDeleted > 0) {
+      const formDefinitionObj = db.prepare('SELECT * FROM forms WHERE form_id = ?').get(formId);
       const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
       tableMapping.forEach((tableName) => {
         try {
-          const deleteStmt = `delete from ${tableName} where instanceid = ?`;
-          db.prepare(deleteStmt).run(instanceId);
+          sql = `DELETE FROM ${tableName} WHERE instanceid = ?`;
+          stmt = db.prepare(sql);
+          numDeleted = stmt.run(instanceId.toString()).changes;
+          console.log(`Row(s) deleted from table "${tableName}": ${numDeleted}`);
+          electronLog.info(`----- || deleteDataWithInstanceID SUCCESS ||  -----`);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err);
+          electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
+          console.error(err);
         }
       });
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
+    electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
     console.log(err);
   }
 };
@@ -216,12 +221,22 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
  */
 const saveNewDataToTable = (db, instanceId, formId, userInput) => {
   try {
-    const date = userInput._submission_time ? new Date(userInput._submission_time).toISOString() : new Date().toISOString();
+    electronLog.info(`+++++ || saveNewDataToTable with submission time ${userInput._submission_time} || +++++`);
+    const date = userInput._submission_time
+      ? new Date(userInput._submission_time).toISOString()
+      : new Date().toISOString();
 
     const insertStmt = db.prepare(
       `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
     );
-    insertStmt.run(formId, JSON.stringify(userInput), instanceId, Math.round(new Date().getTime()), userInput._submitted_by, date);
+    insertStmt.run(
+      formId,
+      JSON.stringify(userInput),
+      instanceId,
+      new Date().toISOString(),
+      userInput._submitted_by,
+      date,
+    );
 
     // console.log('xform_id: '+userInput._xform_id_string);
 
