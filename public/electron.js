@@ -217,24 +217,21 @@ const fetchAppDefinition = async (event) => {
   }
 };
 
-/** saves the form response to db
- * @param {IpcMainEvent} event - the default ipc main event
- * @param {Object} response - an object containing formId and data (user's response)
- */
 const submitFormResponse = (event, response) => {
-  // eslint-disable-next-line no-console
-  electronLog.info(`------- || submitFormResponse ${event} ${response} || ----------------`);
+  electronLog.info(`------- || submitFormResponse || ----------------`);
   //The following deletes a record when editing an existing entry and replacing it with a new one
-  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId)
+  deleteDataWithInstanceId(db, JSON.parse(response.data)['meta/instanceID'], response.formId);
   const fetchedUsername = getCurrentUser();
   event.returnValue = {
     username: fetchedUsername,
   };
   const date = new Date().toISOString();
-  const insert = db.prepare('INSERT INTO data (form_id,data, status,  submitted_by, submission_date, instanceid) VALUES (@formId, @data, 0, ?, ?, ?)');
-  insert.run(response, fetchedUsername, date, response.data ? JSON.parse(response.data)['meta/instanceID'] : '');
+  const insert = db.prepare(
+    'INSERT INTO data (form_id, data, status,  submitted_by, submission_date, instanceid) VALUES (?, ?, 0, ?, ?, ?)',
+  );
+  insert.run(response.formId, response.data, fetchedUsername, date, JSON.parse(response.data)['meta/instanceID']);
   parseAndSaveToFlatTables(db, response.formId, response.data, null);
-  
+  electronLog.info(`------- || submitFormResponse COMPLETE || ----------------`);
 };
 
 /** fetches the form definition
@@ -398,7 +395,7 @@ const configureFreshDatabase = async (data, userData, mac) => {
     data.user_name,
     userData.password,
     mac,
-    Math.round(new Date().getTime()),
+    new Date().toISOString(),
     data.name,
     data.role,
     data.organization,
@@ -500,7 +497,7 @@ const synchroniseModules = async (name, time) => {
     .get(_url(APP_DEFINITION_ENDPOINT, name, time))
     .then((moduleListRes) => {
       const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-      newLayoutQuery.run(new Date().getTime());
+      newLayoutQuery.run(Date.now());
 
       if (moduleListRes.data) {
         electronLog.info('---------------------|| moduleListRes data ||---------------------');
@@ -961,7 +958,7 @@ const startAppSync = (event, name, time) => {
     .then(
       axios.spread((formListRes, listRes, formChoice) => {
         const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
-        newLayoutQuery.run(new Date().getTime());
+        newLayoutQuery.run(Date.now());
         if (formListRes.data) {
           electronLog.info(
             `---------------------|| FormListRes data (time: ${last_sync_time}; total: ${formListRes.data.length}) ||---------------------`,
@@ -1067,7 +1064,8 @@ const startAppSync = (event, name, time) => {
     })
     .then(() => {
         // sync the csv Data ?
-        csvDataSync(db, name);
+        // No, because requestDataSync does this too!
+        // csvDataSync(db, name);
     })
     .catch((err) => {
       electronLog.info(`----------------- || App Sync Failed At Login || ----------------------------\n`, err);
@@ -1135,7 +1133,7 @@ const getUserDBInfo = (event) => {
 
 const deleteData = (event, instanceId, formId) => {
   electronLog.info(instanceId, formId);
-  deleteDataWithInstanceId(db, instanceId.toString(), formId);
+  deleteDataWithInstanceId(db, instanceId, formId);
   event.returnValue = {
     status: 'successful',
   };
@@ -1171,7 +1169,7 @@ ipcMain.on('fetch-list-followup', fetchFollowupFormData);
 ipcMain.on('fetch-query-data', fetchQueryData);
 ipcMain.on('start-app-sync', startAppSync);
 ipcMain.on('request-data-sync', requestDataSync);
-ipcMain.on('csv-data-sync', csvDataSync);
+// ipcMain.on('csv-data-sync', csvDataSync);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
 ipcMain.on('sign-in', signIn);
 ipcMain.on('fetch-userlist', fetchUserList);
