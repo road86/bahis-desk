@@ -1,6 +1,6 @@
 {
   "name": "devbahis",
-  "version": "2.1.4-dev",
+  "version": "2.1.5-dev",
   "private": false,
   "main": "public/electron.js",
   "homepage": ".",
@@ -75,7 +75,6 @@
     "xlsx": "^0.17.0"
   },
   "build": {
-    "extends": null,
     "appId": "com.electron.bahis",
     "publish": [
       {
