@@ -10705,7 +10705,7 @@ obuf@^1.0.0, obuf@^1.1.2:
 
 "odkformrenderer@git+https://github.com/road86/odk-form-renderer-v2-lib#develop":
   version "0.1.0"
-  resolved "git+https://github.com/road86/odk-form-renderer-v2-lib#d02e105ead6ab64dd8d384342d9b593fd768145d"
+  resolved "git+https://github.com/road86/odk-form-renderer-v2-lib#5d95e5f112487f6bf8ba89a8a31571f0fe2188b3"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-brands-svg-icons" "^5.11.2"
