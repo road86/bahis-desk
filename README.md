@@ -73,6 +73,8 @@ yarn linux-build
 yarn win-build
 ```
 
+Because of a bug (https://github.com/road86/bahis-desk/issues/45) you have to remove line saying `"extends": null,` from `build` in `package.json`, or otherwise the app will start to blank screen if build on windows.
+
 ## Re-run of the app in dev mode
 
 ```
