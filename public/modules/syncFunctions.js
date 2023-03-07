@@ -227,11 +227,12 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
       : new Date().toISOString();
 
     const insertStmt = db.prepare(
-      `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
+      `INSERT INTO data (form_id, data, status, instanceid, last_updated, submitted_by, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
     );
     insertStmt.run(
       formId,
       JSON.stringify(userInput),
+      1,
       instanceId,
       new Date().toISOString(),
       userInput._submitted_by,
