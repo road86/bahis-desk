@@ -299,7 +299,7 @@ const objToTable = (
     if (possibleFieldNames.includes(key)) {
       current_entry = tableObj[key];
       current_entry_array = Array.isArray(current_entry);
-      current_entry_nonzero = current_entry.length > 0;
+      current_entry_nonzero = current_entry !== null && current_entry.length > 0;
       if (current_entry_array && current_entry_nonzero) {
         repeatKeys.push(key);
       } else {
