@@ -74,7 +74,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
   const setLastSyncTime = async (override: string | undefined) => {
     console.log('++++++++++ || setLastSyncTime (client) || ++++++++++');
-    let time = new Date().toISOString();
+    let time = new Date().toLocaleString();
     if (override) {
       time = override;
     }
