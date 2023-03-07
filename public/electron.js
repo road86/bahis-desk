@@ -1078,8 +1078,8 @@ const startAppSync = (event, name, time) => {
  */
 const requestDataSync = async (event, username) => {
   electronLog.info("requesting data sync...")
-  await fetchDataFromServer(db, username);
   const msg = await sendDataToServer(db, username, mainWindow);
+  await fetchDataFromServer(db, username);
   csvDataSync(db, username);
   electronLog.info('----------------------------------- complete data sync ----------------------------------------');
   event.returnValue = msg;

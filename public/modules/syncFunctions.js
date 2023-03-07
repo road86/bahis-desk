@@ -421,6 +421,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
             },
           })
           .then((response) => {
+            electronLog.info(`+++++ || UFF GOT A RESPONSE NOW|| +++++`);
             console.log(response.data);
             if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
@@ -430,7 +431,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
               });
             }
 
-            electronLog.info(`------- || UFF GOT A RESPONSE NOW|| ----------------`);
+
             //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
             noRowsSynced = noRowsSynced + 1;
             if (noRowsSynced == noRowsToSync){
@@ -442,6 +443,8 @@ const sendDataToServer = async (db, username, mainWindow) => {
             electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
           })
         }, index * derdelay);
+        electronLog.info(rowObj);
+        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
       });
     } catch (err) {
       electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
