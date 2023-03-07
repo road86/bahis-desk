@@ -1072,17 +1072,21 @@ const startAppSync = (event, name, time) => {
     });
 };
 
-/** starts data sync on request event
- * @param {IpcMainEvent} event - the default ipc main event
- * @returns {string} - success when completes; otherwise, failed if error occurs
- */
 const requestDataSync = async (event, username) => {
-  electronLog.info("requesting data sync...")
-  await fetchDataFromServer(db, username);
-  const msg = await sendDataToServer(db, username, mainWindow);
-  csvDataSync(db, username);
-  electronLog.info('----------------------------------- complete data sync ----------------------------------------');
-  event.returnValue = msg;
+  electronLog.info('+++++ || requestDataSync || +++++');
+  let msg = null;
+  sendDataToServer(db, username, mainWindow)
+    .then((r) => {
+      msg = r;
+      fetchDataFromServer(db, username);
+    })
+    .then(() => {
+      csvDataSync(db, username);
+    })
+    .then(() => {
+      electronLog.info('+++++ || requestDataSync SUCCESS || +++++');
+      event.returnValue = msg;
+    });
 };
 
 /** starts csv data sync on request event

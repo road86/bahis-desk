@@ -227,11 +227,12 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
       : new Date().toISOString();
 
     const insertStmt = db.prepare(
-      `INSERT INTO data (form_id, data, status, instanceid, last_updated,submitted_by, submission_date) VALUES (?, ?, 1, ?, ?, ?, ?)`,
+      `INSERT INTO data (form_id, data, status, instanceid, last_updated, submitted_by, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
     );
     insertStmt.run(
       formId,
       JSON.stringify(userInput),
+      1,
       instanceId,
       new Date().toISOString(),
       userInput._submitted_by,
@@ -299,7 +300,7 @@ const objToTable = (
     if (possibleFieldNames.includes(key)) {
       current_entry = tableObj[key];
       current_entry_array = Array.isArray(current_entry);
-      current_entry_nonzero = current_entry.length > 0;
+      current_entry_nonzero = current_entry !== null && current_entry.length > 0;
       if (current_entry_array && current_entry_nonzero) {
         repeatKeys.push(key);
       } else {
@@ -421,6 +422,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
             },
           })
           .then((response) => {
+            electronLog.info(`+++++ || UFF GOT A RESPONSE NOW|| +++++`);
             console.log(response.data);
             if (response.data.status === 201 || response.data.status === 201) {
               updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
@@ -430,7 +432,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
               });
             }
 
-            electronLog.info(`------- || UFF GOT A RESPONSE NOW|| ----------------`);
+
             //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
             noRowsSynced = noRowsSynced + 1;
             if (noRowsSynced == noRowsToSync){
@@ -442,6 +444,8 @@ const sendDataToServer = async (db, username, mainWindow) => {
             electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
           })
         }, index * derdelay);
+        electronLog.info(rowObj);
+        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
       });
     } catch (err) {
       electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
