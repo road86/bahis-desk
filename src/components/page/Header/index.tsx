@@ -73,7 +73,7 @@ function Header(props: HeaderProps) {
     await ipcRenderer.send('start-app-sync', user.username);
 
     ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-      console.log('Finished clicked sync');
+      console.log(`----- || Finished form sync with message: ${_args}|| -----`);
       if (!appConfigSyncComplete) {
         setAppConfigSyncComplete(true);
       }
@@ -81,6 +81,7 @@ function Header(props: HeaderProps) {
     });
 
     ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
+      console.log(`----- || Finished data sync with message: ${_args} || -----`);
       setAppConfigSyncComplete(false);
       props.updateUnsyncCount();
       props.setLastSyncTime();
