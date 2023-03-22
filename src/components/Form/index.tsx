@@ -156,6 +156,9 @@ function Form(props: formProps) {
           if (basicInfoQuestions[question]['name'] === 'upazila') {
             questionsToDelete.push(question);
           }
+          if (basicInfoQuestions[question]['name'] === 'mouza') {
+            questionsToDelete.push(question);
+          }
         }
         questionsToDelete = questionsToDelete.sort((a, b) => b - a);
         console.log(questionsToDelete);
