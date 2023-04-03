@@ -1,5 +1,5 @@
 {
-  "name": "devbahis",
+  "name": "bahis",
   "version": "2.2.1",
   "private": false,
   "main": "public/electron.js",
