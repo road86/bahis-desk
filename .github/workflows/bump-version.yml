@@ -2,7 +2,7 @@ name: semantic versioning
 on:
   push:
     branches:
-      - main
+      - development
 
 jobs:
   automatically_bump_version:
