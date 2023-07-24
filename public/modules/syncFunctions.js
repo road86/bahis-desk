@@ -118,69 +118,113 @@ const saveNewCSVDataToTable = (db, rowData) => {
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchDataFromServer = async (db, username) => {
-  console.log('XIM1 fetch call of the user', username);
-  console.log('See database here', app.getPath("userData"));
-  
-  try {
-    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    const updated =
-      last_updated == undefined || last_updated.last_updated == null
-        ? 0
-        : new Date(last_updated.last_updated).valueOf();
-    const url = _url(DATA_SYNC_PAGINATED, username);
-    const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
+    console.log('XIM1 fetch call of the user', username);
+    console.log('See database here', app.getPath("userData"));
 
-    electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
-    const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
+    try {
+        const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+        const updated = last_updated == undefined || last_updated.last_updated == null ? 0
+                : new Date(last_updated.last_updated).valueOf();
+        const url = _url(DATA_SYNC_PAGINATED, username);
+        const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
+
+        electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
+        const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
 
-    electronLog.info('---------- || Data Sync Started || -------------------');
-    const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
+        electronLog.info('---------- || Data Sync Started || -------------------');
+        const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
 
-    let promises = [];
-    let serverCalls = [];
-    for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
-      promises.push(
-        axios.get(`${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
-          serverCalls.push(i);
+        const maxRetries = 5;
+        let tries = 1;
+        let pageUrls = [];
+        let serverCalls = [];
 
-          electronLog.info(`----------|| call ${i}: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH} ||------------------`);
-          const newDataRows = response.data;
-          newDataRows.forEach((newDataRow) => {
-            // eslint-disable-next-line no-console
-            //console.log(newDataRow.id); //jesus f christ
-            
-            //someone went mad here:
-            // deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
-            saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
-          });
+        //get list of axios promise from urls
+        const getPromiseAll = (urls) => {
+            let promises = [];
+            urls.forEach((pageUrl, i) => {
+                promises.push(
+                    axios.get(pageUrl)
+                        .then((response) => {
+                            serverCalls.push(i + 1);
 
-          electronLog.info('-------- || data saved into database || ------------');
+                            electronLog.info(`----------|| call ${i + 1}: ${pageUrl} ||------------------`);
+                            const newDataRows = response.data;
+                            newDataRows.forEach((newDataRow) => {
+                                // eslint-disable-next-line no-console
+                                //console.log(newDataRow.id); //jesus f christ
 
-        }).catch((err) => {
+                                //someone went mad here:
+                                // deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
+                                saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
+                            });
 
-          console.log("error in data sync paginated ");
-          console.log(err);
-          electronLog.info("-------------- || Error in Data sync || -----------------");
-          electronLog.info(` Error Occured In the response of this url: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`);
-          electronLog.info(err);
-        })
-      );
+                            electronLog.info('-------- || data saved into database || ------------');
+
+                            return true;
+                        })
+                        .catch((err) => {
+                            console.log("error in data sync paginated ");
+                            console.log(err);
+                            electronLog.info("-------------- || Error in Data sync || -----------------");
+                            electronLog.info(` Error Occured In the response of this url: ${pageUrl}`);
+                            electronLog.info(err);
+                            return pageUrl;
+                        })
+                );
+            });
+
+            return promises;
+        }
+
+        // calling all the promise and check failed request and retrying for failed request
+        const callPromiseAll = async (promises) => {
+            await Promise.all(promises)
+                .then(data => {
+
+                    electronLog.info(data);
+                    const failedReq = data.filter(val => {
+                        return (val !== true && typeof val == 'string');
+                    });
+
+                    console.info("Failed request: ", failedReq);
+
+                    if (failedReq.length > 0 && tries <= maxRetries) {
+                        // giving 1 sec delay for each tries
+                        setTimeout(async () => {
+                            electronLog.info(`~~~~~~~~~~~~~~~~ tries ${tries} ~~~~~~~~~~`)
+                            console.info(`~~~~~~~~~~~~~~~~ tries ${tries} ~~~~~~~~~~`)
+                            await callPromiseAll(getPromiseAll(failedReq));
+                        }, 1000);
+                        tries++;
+                    }
+                })
+        }
+
+        // generate the page url from data length
+        for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
+            let pageUrl = `${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`
+            pageUrls.push(pageUrl);
+        }
+
+        let promises = getPromiseAll(pageUrls);
+
+        await callPromiseAll(promises)
+
+
+        console.log(serverCalls);
+        electronLog.info(`--------|| total server call: ${serverCalls.length} `);
+        electronLog.info('------- || Data Sync Complete || --------------');
+
+        return 'success';
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('fetch err', err);
+        electronLog.info('----------------|| Error In Fetching Data From Server || -------------------');
+        electronLog.info(err);
+        return 'failed';
     }
-
-    await Promise.all(promises);
-    console.log(serverCalls);
-    electronLog.info(`--------|| total server call: ${serverCalls.length} `);
-    electronLog.info('------- || Data Sync Complete || --------------');
-
-    return 'success';
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log('fetch err', err);
-    electronLog.info('----------------|| Error In Fetching Data From Server || -------------------');
-    electronLog.info(err);
-    return 'failed';
-  }
 };
 
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
@@ -221,7 +265,7 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
  */
 const saveNewDataToTable = (db, instanceId, formId, userInput) => {
   try {
-    electronLog.info(`+++++ || saveNewDataToTable with submission time ${userInput._submission_time} || +++++`);
+    // electronLog.info(`+++++ || saveNewDataToTable with submission time ${userInput._submission_time} || +++++`);
     const date = userInput._submission_time
       ? new Date(userInput._submission_time).toISOString()
       : new Date().toISOString();
@@ -239,7 +283,7 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
       date,
     );
 
-    // console.log('xform_id: '+userInput._xform_id_string);
+    console.log('xform_id: '+userInput._xform_id_string + ' instance: ' + instanceId);
 
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
