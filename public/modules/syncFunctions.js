@@ -283,7 +283,7 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
       date,
     );
 
-    console.log('xform_id: '+userInput._xform_id_string + ' instance: ' + instanceId);
+    // console.log('xform_id: '+userInput._xform_id_string + ' instance: ' + instanceId);
 
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
@@ -418,91 +418,108 @@ const isNotArrayOfString = (testArray) => {
  * @returns {string} - success if suceess; otherwise failed
  */
 const sendDataToServer = async (db, username, mainWindow) => {
-  console.log('send data', username);
-  
-  try {
-    const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
-    const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
+    console.log('send data', username);
+
     try {
-      const notSyncRows = notSyncRowsQuery.all() || [];
-      const noRowsToSync = notSyncRows.length;
-      electronLog.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
-      let noRowsSynced = 0;
+        const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
+        const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
+        try {
+            const notSyncRows = notSyncRowsQuery.all() || [];
+            const noRowsToSync = notSyncRows.length;
+            electronLog.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
+            let noRowsSynced = 0;
+            const url = _url(SUBMISSION_ENDPOINT, username);
+
+            // if (noRowsSynced == noRowsToSync) {
+            //     mainWindow.send('dataSyncComplete', "no rows to sync");
+            // }
+
+            //send data to the server row by row
+             function sendRow(rowObj) {
+                const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
+                // eslint-disable-next-line no-unused-vars
+                let formData = JSON.parse(rowObj.data) || {};
+                formData = {...formData, 'formhub/uuid': formDefinitionObj.form_uuid};
+                //We are converting json to XML which is an alternative submission for xforms
+                const apiFormData = {
+                    xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
+                    // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
+                    //test_file: queries,
+                };
+
+                const jsondata = JSON.stringify(apiFormData)
+                console.log("url", url);
+
+                return axios.post(url, jsondata, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': '*',
+                        'Content-Type': 'application/json',
+                    },
+                }).then((response) => {
+
+                    if (response.data.status === 201 || response.data.status === 201) {
+
+                        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
+                        updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
+                        JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
+                            const updateDataIdQuery = db.prepare(`UPDATE ${tableName}
+                                                                  SET instanceid = ?
+                                                                  WHERE instanceid = ?`);
+                            updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
+                        });
+                    }
+
+                    // //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
+                    // noRowsSynced = noRowsSynced + 1;
+                    // if (noRowsSynced == noRowsToSync) {
+                    //     mainWindow.send('dataSyncComplete', "synchronised");
+                    // }
 
 
-      if (noRowsSynced == noRowsToSync) {
-        mainWindow.send('dataSyncComplete', "no rows to sync");
-      }
+                    return true;
 
-      derdelay = 500 //POST request getting to server at the same time make it lock. Introducing this delay at least we will not be blocking few requests of our own and over time synchronise all of the data
-      notSyncRows.forEach(async (rowObj, index) => {
-
-        const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
-        // eslint-disable-next-line no-unused-vars
-        let formData = JSON.parse(rowObj.data) || {};
-        formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
-        //We are converting json to XML which is an alternative submission for xforms
-        const apiFormData = {
-          xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
-          // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-          //test_file: queries,
-        };
-
-        const url = _url(SUBMISSION_ENDPOINT, username);
-        const jsondata = JSON.stringify(apiFormData)
-        console.log("url",url);
-        console.log(url);
-        console.log("jsondata",jsondata);
-        console.log(jsondata);
-       
-        setTimeout(async function() {  
-        await axios
-          .post(url, jsondata, {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((response) => {
-            electronLog.info(`+++++ || UFF GOT A RESPONSE NOW|| +++++`);
-            console.log(response.data);
-            if (response.data.status === 201 || response.data.status === 201) {
-              updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
-              JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
-                const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
-                updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
-              });
+                }).catch((error) => {
+                    // eslint-disable-next-line no-console
+                    // electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
+                    electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`);
+                    return jsondata;
+                })
             }
 
-
-            //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
-            noRowsSynced = noRowsSynced + 1;
-            if (noRowsSynced == noRowsToSync){
-              mainWindow.send('dataSyncComplete', "synchronised");
+            // send new data asynchronous way
+            async function sendNewData() {
+                for (let i = 0; i < notSyncRows.length; i++) {
+                    console.log("Send no: " + i)
+                    await sendRow( notSyncRows[i]);
+                }
             }
-          })
-          .catch((error) => {
+
+            await sendNewData().then(res=>{
+                // console.log(res);
+                console.log("~~~~~~~~~~submit finished all~~~~~~~~~~~");
+                // mainWindow.send('dataSyncComplete', "synchronised");
+
+            }).catch(er=>{
+                // console.log(er);
+                console.log("~~~~~~~~~~Failed to submit all~~~~~~~~~~~");
+            })
+
+
+        } catch (err) {
+            // electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
+            electronLog.info(`----------------- || Data submission failed!|| ----------------------------`);
+
             // eslint-disable-next-line no-console
-            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
-          })
-        }, index * derdelay);
-        electronLog.info(rowObj);
-        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
-      });
+            // console.log(err);
+        }
+        return 'success';
     } catch (err) {
-      electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
-
-      // eslint-disable-next-line no-console
-      // console.log(err);
+        // eslint-disable-next-line no-console
+        // console.log(err);
+        return 'failed';
     }
-    return 'success';
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    // console.log(err);
-    return 'failed';
-  }
 };
 
 /** converts json object to xml text

@@ -1075,18 +1075,23 @@ const startAppSync = (event, name, time) => {
 const requestDataSync = async (event, username) => {
   electronLog.info('+++++ || requestDataSync || +++++');
   let msg = null;
-  sendDataToServer(db, username, mainWindow)
-    .then((r) => {
-      msg = r;
-      fetchDataFromServer(db, username);
-    })
-    .then(() => {
-      csvDataSync(db, username);
-    })
-    .then(() => {
-      electronLog.info('+++++ || requestDataSync SUCCESS || +++++');
-      event.returnValue = msg;
-    });
+  await sendDataToServer(db, username, mainWindow)
+      .then(async (r) => {
+        msg = r;
+        await fetchDataFromServer(db, username);
+      })
+      .then(() => {
+        csvDataSync(db, username);
+      })
+      .then(() => {
+        electronLog.info('+++++ || requestDataSync SUCCESS || +++++');
+        event.returnValue = msg;
+
+        // close the synchronizing popup message
+        console.log("Data Sync Complete");
+        mainWindow.send('dataSyncComplete', "synchronised");
+
+      });
 };
 
 /** starts csv data sync on request event
