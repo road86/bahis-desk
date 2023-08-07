@@ -59,6 +59,11 @@ function Header(props: HeaderProps) {
   //   }, 45000);
   // }, [isWaitingForDataSync]);
 
+  const handleClose = () => {
+    setWaitingForFormSync(false);
+    setWaitingForDataSync(false);
+  }
+
   const handleAppSync = async () => {
     props.setLastSyncTime('Sync in progress');
     setWaitingForFormSync(true);
@@ -86,6 +91,11 @@ function Header(props: HeaderProps) {
       props.updateUnsyncCount();
       props.setLastSyncTime();
       setWaitingForDataSync(false);
+      setTimeout(()=>{
+        setWaitingForDataSync(false);
+        setWaitingForFormSync(false);
+        
+      }, 1000)
     });
   };
 
@@ -107,6 +117,8 @@ function Header(props: HeaderProps) {
 
   const getButtonColor = (): any => {
     console.log('Getting button colour');
+    //check unsync count on load the application
+    props.updateUnsyncCount();
     console.log('---------- || unsyncCount || ------------', props.unsyncCount);
     return props.unsyncCount === 0 ? '#00B755' : 'red';
   };
@@ -117,7 +129,7 @@ function Header(props: HeaderProps) {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}
     >
-      <Alert severity="info" icon={false}><CircularProgress size={"1rem"}/> Synchronising data.</Alert>
+      <Alert severity="info" onClose={handleClose} icon={false}><CircularProgress size={"1rem"}/> Synchronising data.</Alert>
     </Snackbar>
   );
 

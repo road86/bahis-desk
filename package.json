@@ -75,7 +75,6 @@
     "xlsx": "^0.17.0"
   },
   "build": {
-    "extends": null,
     "appId": "com.electron.bahis",
     "publish": [
       {
