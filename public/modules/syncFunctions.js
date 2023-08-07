@@ -128,11 +128,11 @@ const fetchDataFromServer = async (db, username) => {
         const url = _url(DATA_SYNC_PAGINATED, username);
         const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
 
-        electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
+        console.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
         const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
 
-        electronLog.info('---------- || Data Sync Started || -------------------');
+        console.info('---------- || Data Sync Started || -------------------');
         const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
 
         const maxRetries = 5;
@@ -149,7 +149,7 @@ const fetchDataFromServer = async (db, username) => {
                         .then((response) => {
                             serverCalls.push(i + 1);
 
-                            electronLog.info(`----------|| call ${i + 1}: ${pageUrl} ||------------------`);
+                            console.info(`----------|| call ${i + 1}: ${pageUrl} ||------------------`);
                             const newDataRows = response.data;
                             newDataRows.forEach((newDataRow) => {
                                 // eslint-disable-next-line no-console
@@ -160,16 +160,15 @@ const fetchDataFromServer = async (db, username) => {
                                 saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
                             });
 
-                            electronLog.info('-------- || data saved into database || ------------');
+                            console.info('-------- || data saved into database || ------------');
 
                             return true;
                         })
                         .catch((err) => {
-                            console.log("error in data sync paginated ");
-                            console.log(err);
-                            electronLog.info("-------------- || Error in Data sync || -----------------");
-                            electronLog.info(` Error Occured In the response of this url: ${pageUrl}`);
-                            electronLog.info(err);
+                            // console.log("error in data sync paginated ");
+                            // console.log(err);
+                            console.info("-------------- || Error in Data sync || -----------------");
+                            console.info(` Error Occurred In the response of this url: ${pageUrl}`);
                             return pageUrl;
                         })
                 );
@@ -193,7 +192,6 @@ const fetchDataFromServer = async (db, username) => {
                     if (failedReq.length > 0 && tries <= maxRetries) {
                         // giving 1 sec delay for each tries
                         setTimeout(async () => {
-                            electronLog.info(`~~~~~~~~~~~~~~~~ tries ${tries} ~~~~~~~~~~`)
                             console.info(`~~~~~~~~~~~~~~~~ tries ${tries} ~~~~~~~~~~`)
                             await callPromiseAll(getPromiseAll(failedReq));
                         }, 1000);
@@ -214,21 +212,21 @@ const fetchDataFromServer = async (db, username) => {
 
 
         console.log(serverCalls);
-        electronLog.info(`--------|| total server call: ${serverCalls.length} `);
-        electronLog.info('------- || Data Sync Complete || --------------');
+        console.info(`--------|| total server call: ${serverCalls.length} `);
+        console.info('------- || Data Sync Complete || --------------');
 
         return 'success';
     } catch (err) {
         // eslint-disable-next-line no-console
         console.log('fetch err', err);
-        electronLog.info('----------------|| Error In Fetching Data From Server || -------------------');
-        electronLog.info(err);
+        console.info('----------------|| Error In Fetching Data From Server || -------------------');
+        console.info(err);
         return 'failed';
     }
 };
 
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
-  electronLog.info(
+  console.info(
     `----- || deleteDataWithInstanceID; instanceId: ${instanceId.toString()}; formId: ${formId} ||  -----`,
   );
   try {
@@ -245,15 +243,15 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
           stmt = db.prepare(sql);
           numDeleted = stmt.run(instanceId.toString()).changes;
           console.log(`Row(s) deleted from table "${tableName}": ${numDeleted}`);
-          electronLog.info(`----- || deleteDataWithInstanceID SUCCESS ||  -----`);
+          console.info(`----- || deleteDataWithInstanceID SUCCESS ||  -----`);
         } catch (err) {
-          electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
+          console.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
           console.error(err);
         }
       });
     }
   } catch (err) {
-    electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
+    console.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
     console.log(err);
   }
 };
@@ -288,7 +286,8 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    // console.log(err);
+      console.log("~~~~~~~~Save New Data To Table~~~~~~~~~")
   }
 };
 
@@ -382,6 +381,7 @@ const objToTable = (
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Insert failed !!!', err, query);
+      // console.log('Insert failed !!!');
     }
   }
   repeatKeys.forEach((key) => {
@@ -426,7 +426,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
         try {
             const notSyncRows = notSyncRowsQuery.all() || [];
             const noRowsToSync = notSyncRows.length;
-            electronLog.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
+            console.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
             let noRowsSynced = 0;
             const url = _url(SUBMISSION_ENDPOINT, username);
 
@@ -483,7 +483,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
                 }).catch((error) => {
                     // eslint-disable-next-line no-console
                     // electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
-                    electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`);
+                    console.info(`----------------- || Datapoint submission failed!|| ----------------------------`);
                     return jsondata;
                 })
             }
@@ -509,7 +509,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
 
         } catch (err) {
             // electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
-            electronLog.info(`----------------- || Data submission failed!|| ----------------------------`);
+            console.info(`----------------- || Data submission failed!|| ----------------------------`);
 
             // eslint-disable-next-line no-console
             // console.log(err);
