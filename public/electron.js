@@ -28,6 +28,7 @@ const {
   LISTS_ENDPOINT,
   SIGN_IN_ENDPOINT,
   FORM_CHOICE_ENDPOINT,
+  APP_VERSION,
 } = require('./constants');
 
 const { app, BrowserWindow, ipcMain } = electron;
@@ -576,6 +577,7 @@ const signIn = async (event, userData) => {
       password: userData.password,
       mac_address: mac,
       upazila: 202249,
+      bahis_desk_version: APP_VERSION
     };
     electronLog.info('----------- || Attempt To Signin || -----------------');
     electronLog.info(`signin url: ${SIGN_IN_ENDPOINT}`);
