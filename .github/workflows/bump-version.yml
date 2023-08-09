@@ -26,7 +26,7 @@ jobs:
         if: ${{ steps.bump.outputs.skipped == 'false' }}
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
-          body: ${{ steps.bump.outputs.clean_changelog }}
-          prerelease: true
+          generate_release_notes: "true"
+          prerelease: "true"
         env:
           GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
