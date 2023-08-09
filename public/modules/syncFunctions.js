@@ -118,73 +118,115 @@ const saveNewCSVDataToTable = (db, rowData) => {
  * @returns {string} - success if successful; otherwise, failed
  */
 const fetchDataFromServer = async (db, username) => {
-  console.log('XIM1 fetch call of the user', username);
-  console.log('See database here', app.getPath("userData"));
-  
-  try {
-    const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
-    const updated =
-      last_updated == undefined || last_updated.last_updated == null
-        ? 0
-        : new Date(last_updated.last_updated).valueOf();
-    const url = _url(DATA_SYNC_PAGINATED, username);
-    const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
+    console.log('XIM1 fetch call of the user', username);
+    console.log('See database here', app.getPath("userData"));
 
-    electronLog.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
-    const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
+    try {
+        const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get();
+        const updated = last_updated == undefined || last_updated.last_updated == null ? 0
+                : new Date(last_updated.last_updated).valueOf();
+        const url = _url(DATA_SYNC_PAGINATED, username);
+        const dataCountUrl = _url(DATA_SYNC_COUNT, username, updated);
+
+        console.info(`--------- || Data count URL ${dataCountUrl} || ------------------`);
+        const dataSyncCountResponse = await axios.get(`${dataCountUrl}`);
 
 
-    electronLog.info('---------- || Data Sync Started || -------------------');
-    const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
+        console.info('---------- || Data Sync Started || -------------------');
+        const dataLength = Array.isArray(dataSyncCountResponse.data) ? dataSyncCountResponse.data[0].count : dataSyncCountResponse.data.count;
 
-    let promises = [];
-    let serverCalls = [];
-    for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
-      promises.push(
-        axios.get(`${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`).then((response) => {
-          serverCalls.push(i);
+        const maxRetries = 5;
+        let tries = 1;
+        let pageUrls = [];
+        let serverCalls = [];
 
-          electronLog.info(`----------|| call ${i}: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH} ||------------------`);
-          const newDataRows = response.data;
-          newDataRows.forEach((newDataRow) => {
-            // eslint-disable-next-line no-console
-            //console.log(newDataRow.id); //jesus f christ
-            
-            //someone went mad here:
-            // deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
-            saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
-          });
+        //get list of axios promise from urls
+        const getPromiseAll = (urls) => {
+            let promises = [];
+            urls.forEach((pageUrl, i) => {
+                promises.push(
+                    axios.get(pageUrl)
+                        .then((response) => {
+                            serverCalls.push(i + 1);
 
-          electronLog.info('-------- || data saved into database || ------------');
+                            console.info(`----------|| call ${i + 1}: ${pageUrl} ||------------------`);
+                            const newDataRows = response.data;
+                            newDataRows.forEach((newDataRow) => {
+                                // eslint-disable-next-line no-console
+                                //console.log(newDataRow.id); //jesus f christ
 
-        }).catch((err) => {
+                                //someone went mad here:
+                                // deleteDataWithInstanceId(db, newDataRow.id.toString(), newDataRow.xform_id);
+                                saveNewDataToTable(db, newDataRow.id.toString(), newDataRow.xform_id, newDataRow.json);
+                            });
 
-          console.log("error in data sync paginated ");
-          console.log(err);
-          electronLog.info("-------------- || Error in Data sync || -----------------");
-          electronLog.info(` Error Occured In the response of this url: ${url}?last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`);
-          electronLog.info(err);
-        })
-      );
+                            console.info('-------- || data saved into database || ------------');
+
+                            return true;
+                        })
+                        .catch((err) => {
+                            // console.log("error in data sync paginated ");
+                            // console.log(err);
+                            console.info("-------------- || Error in Data sync || -----------------");
+                            console.info(` Error Occurred In the response of this url: ${pageUrl}`);
+                            return pageUrl;
+                        })
+                );
+            });
+
+            return promises;
+        }
+
+        // calling all the promise and check failed request and retrying for failed request
+        const callPromiseAll = async (promises) => {
+            await Promise.all(promises)
+                .then(data => {
+
+                    electronLog.info(data);
+                    const failedReq = data.filter(val => {
+                        return (val !== true && typeof val == 'string');
+                    });
+
+                    console.info("Failed request: ", failedReq);
+
+                    if (failedReq.length > 0 && tries <= maxRetries) {
+                        // giving 1 sec delay for each tries
+                        setTimeout(async () => {
+                            console.info(`~~~~~~~~~~~~~~~~ tries ${tries} ~~~~~~~~~~`)
+                            await callPromiseAll(getPromiseAll(failedReq));
+                        }, 1000);
+                        tries++;
+                    }
+                })
+        }
+
+        // generate the page url from data length
+        for (let i = 1; i <= (dataLength / PAGE_LENGTH) + 1; i++) {
+            let pageUrl = `${url}&last_modified=${updated}&page_no=${i}&page_length=${PAGE_LENGTH}`
+            pageUrls.push(pageUrl);
+        }
+
+        let promises = getPromiseAll(pageUrls);
+
+        await callPromiseAll(promises)
+
+
+        console.log(serverCalls);
+        console.info(`--------|| total server call: ${serverCalls.length} `);
+        console.info('------- || Data Sync Complete || --------------');
+
+        return 'success';
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('fetch err', err);
+        console.info('----------------|| Error In Fetching Data From Server || -------------------');
+        console.info(err);
+        return 'failed';
     }
-
-    await Promise.all(promises);
-    console.log(serverCalls);
-    electronLog.info(`--------|| total server call: ${serverCalls.length} `);
-    electronLog.info('------- || Data Sync Complete || --------------');
-
-    return 'success';
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log('fetch err', err);
-    electronLog.info('----------------|| Error In Fetching Data From Server || -------------------');
-    electronLog.info(err);
-    return 'failed';
-  }
 };
 
 const deleteDataWithInstanceId = (db, instanceId, formId) => {
-  electronLog.info(
+  console.info(
     `----- || deleteDataWithInstanceID; instanceId: ${instanceId.toString()}; formId: ${formId} ||  -----`,
   );
   try {
@@ -201,15 +243,15 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
           stmt = db.prepare(sql);
           numDeleted = stmt.run(instanceId.toString()).changes;
           console.log(`Row(s) deleted from table "${tableName}": ${numDeleted}`);
-          electronLog.info(`----- || deleteDataWithInstanceID SUCCESS ||  -----`);
+          console.info(`----- || deleteDataWithInstanceID SUCCESS ||  -----`);
         } catch (err) {
-          electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
+          console.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
           console.error(err);
         }
       });
     }
   } catch (err) {
-    electronLog.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
+    console.info(`----- || deleteDataWithInstanceID FAILED ||  -----`);
     console.log(err);
   }
 };
@@ -221,7 +263,7 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
  */
 const saveNewDataToTable = (db, instanceId, formId, userInput) => {
   try {
-    electronLog.info(`+++++ || saveNewDataToTable with submission time ${userInput._submission_time} || +++++`);
+    // electronLog.info(`+++++ || saveNewDataToTable with submission time ${userInput._submission_time} || +++++`);
     const date = userInput._submission_time
       ? new Date(userInput._submission_time).toISOString()
       : new Date().toISOString();
@@ -239,12 +281,13 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
       date,
     );
 
-    // console.log('xform_id: '+userInput._xform_id_string);
+    // console.log('xform_id: '+userInput._xform_id_string + ' instance: ' + instanceId);
 
     parseAndSaveToFlatTables(db, formId, JSON.stringify(userInput), instanceId);
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.log(err);
+    // console.log(err);
+      console.log("~~~~~~~~Save New Data To Table~~~~~~~~~")
   }
 };
 
@@ -338,6 +381,7 @@ const objToTable = (
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Insert failed !!!', err, query);
+      // console.log('Insert failed !!!');
     }
   }
   repeatKeys.forEach((key) => {
@@ -374,91 +418,108 @@ const isNotArrayOfString = (testArray) => {
  * @returns {string} - success if suceess; otherwise failed
  */
 const sendDataToServer = async (db, username, mainWindow) => {
-  console.log('send data', username);
-  
-  try {
-    const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
-    const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
+    console.log('send data', username);
+
     try {
-      const notSyncRows = notSyncRowsQuery.all() || [];
-      const noRowsToSync = notSyncRows.length;
-      electronLog.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
-      let noRowsSynced = 0;
+        const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
+        const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
+        try {
+            const notSyncRows = notSyncRowsQuery.all() || [];
+            const noRowsToSync = notSyncRows.length;
+            console.info(`------- || SYNCING DATA, number of rows to sync ${noRowsToSync} || ----------------`);
+            let noRowsSynced = 0;
+            const url = _url(SUBMISSION_ENDPOINT, username);
+
+            // if (noRowsSynced == noRowsToSync) {
+            //     mainWindow.send('dataSyncComplete', "no rows to sync");
+            // }
+
+            //send data to the server row by row
+             function sendRow(rowObj) {
+                const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
+                // eslint-disable-next-line no-unused-vars
+                let formData = JSON.parse(rowObj.data) || {};
+                formData = {...formData, 'formhub/uuid': formDefinitionObj.form_uuid};
+                //We are converting json to XML which is an alternative submission for xforms
+                const apiFormData = {
+                    xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
+                    // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
+                    //test_file: queries,
+                };
+
+                const jsondata = JSON.stringify(apiFormData)
+                console.log("url", url);
+
+                return axios.post(url, jsondata, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers': '*',
+                        'Content-Type': 'application/json',
+                    },
+                }).then((response) => {
+
+                    if (response.data.status === 201 || response.data.status === 201) {
+
+                        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
+                        updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
+                        JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
+                            const updateDataIdQuery = db.prepare(`UPDATE ${tableName}
+                                                                  SET instanceid = ?
+                                                                  WHERE instanceid = ?`);
+                            updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
+                        });
+                    }
+
+                    // //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
+                    // noRowsSynced = noRowsSynced + 1;
+                    // if (noRowsSynced == noRowsToSync) {
+                    //     mainWindow.send('dataSyncComplete', "synchronised");
+                    // }
 
 
-      if (noRowsSynced == noRowsToSync) {
-        mainWindow.send('dataSyncComplete', "no rows to sync");
-      }
+                    return true;
 
-      derdelay = 500 //POST request getting to server at the same time make it lock. Introducing this delay at least we will not be blocking few requests of our own and over time synchronise all of the data
-      notSyncRows.forEach(async (rowObj, index) => {
-
-        const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
-        // eslint-disable-next-line no-unused-vars
-        let formData = JSON.parse(rowObj.data) || {};
-        formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
-        //We are converting json to XML which is an alternative submission for xforms
-        const apiFormData = {
-          xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
-          // test_file: fs.readFileSync('set-up-queries.sql', 'utf8'),
-          //test_file: queries,
-        };
-
-        const url = _url(SUBMISSION_ENDPOINT, username);
-        const jsondata = JSON.stringify(apiFormData)
-        console.log("url",url);
-        console.log(url);
-        console.log("jsondata",jsondata);
-        console.log(jsondata);
-       
-        setTimeout(async function() {  
-        await axios
-          .post(url, jsondata, {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': '*',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((response) => {
-            electronLog.info(`+++++ || UFF GOT A RESPONSE NOW|| +++++`);
-            console.log(response.data);
-            if (response.data.status === 201 || response.data.status === 201) {
-              updateStatusQuery.run(response.data.id.toString(), rowObj.data_id);
-              JSON.parse(formDefinitionObj.table_mapping).forEach((tableName) => {
-                const updateDataIdQuery = db.prepare(`UPDATE ${tableName} SET instanceid = ? WHERE instanceid = ?`);
-                updateDataIdQuery.run(response.data.id.toString(), JSON.parse(rowObj.data)['meta/instanceID']);
-              });
+                }).catch((error) => {
+                    // eslint-disable-next-line no-console
+                    // electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
+                    console.info(`----------------- || Datapoint submission failed!|| ----------------------------`);
+                    return jsondata;
+                })
             }
 
-
-            //YEAH I GET THAT THIS IS NOT GREAT FOR PARALLELISM BUT WHAT CAN I DO?
-            noRowsSynced = noRowsSynced + 1;
-            if (noRowsSynced == noRowsToSync){
-              mainWindow.send('dataSyncComplete', "synchronised");
+            // send new data asynchronous way
+            async function sendNewData() {
+                for (let i = 0; i < notSyncRows.length; i++) {
+                    console.log("Send no: " + i)
+                    await sendRow( notSyncRows[i]);
+                }
             }
-          })
-          .catch((error) => {
+
+            await sendNewData().then(res=>{
+                // console.log(res);
+                console.log("~~~~~~~~~~submit finished all~~~~~~~~~~~");
+                // mainWindow.send('dataSyncComplete', "synchronised");
+
+            }).catch(er=>{
+                // console.log(er);
+                console.log("~~~~~~~~~~Failed to submit all~~~~~~~~~~~");
+            })
+
+
+        } catch (err) {
+            // electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
+            console.info(`----------------- || Data submission failed!|| ----------------------------`);
+
             // eslint-disable-next-line no-console
-            electronLog.info(`----------------- || Datapoint submission failed!|| ----------------------------`, error);
-          })
-        }, index * derdelay);
-        electronLog.info(rowObj);
-        deleteDataWithInstanceId(db, JSON.parse(rowObj.data)['meta/instanceID'], rowObj.form_id);
-      });
+            // console.log(err);
+        }
+        return 'success';
     } catch (err) {
-      electronLog.info(`----------------- || Data submission failed!|| ----------------------------`, err);
-
-      // eslint-disable-next-line no-console
-      // console.log(err);
+        // eslint-disable-next-line no-console
+        // console.log(err);
+        return 'failed';
     }
-    return 'success';
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    // console.log(err);
-    return 'failed';
-  }
 };
 
 /** converts json object to xml text

@@ -1075,18 +1075,24 @@ const startAppSync = (event, name, time) => {
 const requestDataSync = async (event, username) => {
   electronLog.info('+++++ || requestDataSync || +++++');
   let msg = null;
-  sendDataToServer(db, username, mainWindow)
-    .then((r) => {
-      msg = r;
-      fetchDataFromServer(db, username);
-    })
-    .then(() => {
-      csvDataSync(db, username);
-    })
-    .then(() => {
-      electronLog.info('+++++ || requestDataSync SUCCESS || +++++');
-      event.returnValue = msg;
-    });
+  await sendDataToServer(db, username, mainWindow)
+      .then(async (r) => {
+        msg = r;
+        await fetchDataFromServer(db, username);
+      })
+      .then(async () => {
+        await csvDataSync(db, username);
+        console.log("wait for csv data sync");
+      })
+      .then(() => {
+        electronLog.info('+++++ || requestDataSync SUCCESS || +++++');
+        event.returnValue = msg;
+
+        // close the synchronizing popup message
+        console.log("Data Sync Complete");
+        mainWindow.send('dataSyncComplete', "synchronised");
+
+      });
 };
 
 /** starts csv data sync on request event
@@ -1099,13 +1105,14 @@ const csvDataSync = async (db, username) => {
     const tableExistStmt = 'SELECT name FROM sqlite_master WHERE type=? AND name=?';
     const info = db.prepare(tableExistStmt).get('table','csv_sync_log');
     if (info && info.name == 'csv_sync_log') {
-      fetchCsvDataFromServer(db, username);
+      await fetchCsvDataFromServer(db, username);
     } else {
       electronLog.info('I think that csv_sync_log table does not exist so I will create it');
       db.prepare('CREATE TABLE csv_sync_log( time TEXT)').run();
-      fetchCsvDataFromServer(db, username);
+      await fetchCsvDataFromServer(db, username);
     }
     electronLog.info(`------- || csvDataSync  SUCCESS || ----------------`);
+    return "success"
   } catch (err) {
     electronLog.info(`------- || csvDataSync FAILED || ----------------`);
     electronLog.info(err);

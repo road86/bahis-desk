@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button, AppBar, Toolbar, Typography, Snackbar } from '@material-ui/core';
+import { Avatar, Button, AppBar, Toolbar, Typography, Snackbar, Badge, CircularProgress} from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
@@ -47,17 +47,22 @@ function Header(props: HeaderProps) {
 
   // }, [appConfigSyncComplete]);
 
-  React.useEffect(() => {
-    setTimeout(() => {
-      setWaitingForFormSync(false);
-    }, 45000);
-  }, [isWaitingForFormSync]);
+  // React.useEffect(() => {
+  //   setTimeout(() => {
+  //     setWaitingForFormSync(false);
+  //   }, 45000);
+  // }, [isWaitingForFormSync]);
+  //
+  // React.useEffect(() => {
+  //   setTimeout(() => {
+  //     setWaitingForDataSync(false);
+  //   }, 45000);
+  // }, [isWaitingForDataSync]);
 
-  React.useEffect(() => {
-    setTimeout(() => {
-      setWaitingForDataSync(false);
-    }, 45000);
-  }, [isWaitingForDataSync]);
+  const handleClose = () => {
+    setWaitingForFormSync(false);
+    setWaitingForDataSync(false);
+  }
 
   const handleAppSync = async () => {
     props.setLastSyncTime('Sync in progress');
@@ -86,6 +91,11 @@ function Header(props: HeaderProps) {
       props.updateUnsyncCount();
       props.setLastSyncTime();
       setWaitingForDataSync(false);
+      setTimeout(()=>{
+        setWaitingForDataSync(false);
+        setWaitingForFormSync(false);
+        
+      }, 1000)
     });
   };
 
@@ -107,8 +117,10 @@ function Header(props: HeaderProps) {
 
   const getButtonColor = (): any => {
     console.log('Getting button colour');
+    //check unsync count on load the application
+    props.updateUnsyncCount();
     console.log('---------- || unsyncCount || ------------', props.unsyncCount);
-    return props.unsyncCount === 0 ? 'orange' : 'red';
+    return props.unsyncCount === 0 ? '#00B755' : 'red';
   };
 
   const Toast = () => (
@@ -117,7 +129,7 @@ function Header(props: HeaderProps) {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       key={'topcenter'}
     >
-      <Alert severity="info">Synchronising data.</Alert>
+      <Alert severity="info" onClose={handleClose} icon={false}><CircularProgress size={"1rem"}/> Synchronising data.</Alert>
     </Snackbar>
   );
 
@@ -143,16 +155,17 @@ function Header(props: HeaderProps) {
                     Please synchronise the app after logging in.
                   </Typography>
                 )}
-
-                <Button
-                  variant="contained"
-                  style={{ backgroundColor: getButtonColor() }}
-                  onClick={handleAppSync}
-                  className={classes.button}
-                  disabled={isWaitingForFormSync || isWaitingForDataSync}
-                >
-                  Sync Now
-                </Button>
+                <Badge badgeContent={props.unsyncCount} color="secondary">
+                  <Button
+                    variant="contained"
+                    style={{ backgroundColor: getButtonColor() }}
+                    onClick={handleAppSync}
+                    className={classes.button}
+                    disabled={isWaitingForFormSync || isWaitingForDataSync}
+                  >
+                    Sync Now
+                  </Button>
+                </Badge>
               </div>
               <div className={classes.sectionDesktop}>
                 {props.isBackPossible && (
