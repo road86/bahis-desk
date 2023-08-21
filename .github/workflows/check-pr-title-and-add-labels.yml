@@ -3,7 +3,7 @@ on:
     pull_request:
         types: [opened, edited, synchronize, auto_merge_enabled, reopened]
         branches:
-            - main
+            - development
 
 jobs:
     check_PR_title:
