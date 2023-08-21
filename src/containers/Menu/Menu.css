@@ -34,8 +34,6 @@ a .card-body {
 .menu-container {
   min-height: 500px;
   padding: 30px;
-  /* border-radius: 5px;
-  box-shadow: 0 2px 4px 0 #D7D7E0; */
 }
 
 .menu-title {
@@ -90,5 +88,4 @@ a .card-body {
 .menu-item {
   padding: 5px;
   margin: 40px;
-  margin-top: 0px;
 }
