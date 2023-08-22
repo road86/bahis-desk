@@ -34,6 +34,16 @@ Just run `npm run format`
 
 Just run `npm run lint-electron` for the electron code and `npm run lint-react` for the react code.
 
+### core dumped and loads of go errors
+
+Scroll up - do you see "fatal error: all goroutines are asleep - deadlock!". If so, I think you are using the wrong version of node. Try running:
+
+```bash
+node --version
+```
+
+And then select the correct version with `nvm` or whatever you're using.
+
 ### better-sqlite error
 
 If you get an error like this (note: version numbers may vary):
