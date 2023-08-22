@@ -29,32 +29,32 @@ export const IN_BETWEEN_LABEL = 'in between';
 
 // text filter operators
 export const NUMBER_FILTER_OPERATORS = [
-  {
-    label: GREATER_THAN_LABEL,
-    value: GREATER_THAN_TYPE,
-  },
-  {
-    label: GREATER_THAN_EQUAL_LABEL,
-    value: GREATER_THAN_EQUAL_TYPE,
-  },
-  {
-    label: LESS_THAN_LABEL,
-    value: LESS_THAN_TYPE,
-  },
-  {
-    label: LESS_THAN_EQUAL_LABEL,
-    value: LESS_THAN_EQUAL_TYPE,
-  },
-  {
-    label: EQUAL_LABEL,
-    value: EQUAL_TYPE,
-  },
-  {
-    label: NOT_EQUAL_LABEL,
-    value: NOT_EQUAL_TYPE,
-  },
-  {
-    label: IN_BETWEEN_LABEL,
-    value: IN_BETWEEN_TYPE,
-  },
+    {
+        label: GREATER_THAN_LABEL,
+        value: GREATER_THAN_TYPE,
+    },
+    {
+        label: GREATER_THAN_EQUAL_LABEL,
+        value: GREATER_THAN_EQUAL_TYPE,
+    },
+    {
+        label: LESS_THAN_LABEL,
+        value: LESS_THAN_TYPE,
+    },
+    {
+        label: LESS_THAN_EQUAL_LABEL,
+        value: LESS_THAN_EQUAL_TYPE,
+    },
+    {
+        label: EQUAL_LABEL,
+        value: EQUAL_TYPE,
+    },
+    {
+        label: NOT_EQUAL_LABEL,
+        value: NOT_EQUAL_TYPE,
+    },
+    {
+        label: IN_BETWEEN_LABEL,
+        value: IN_BETWEEN_TYPE,
+    },
 ];

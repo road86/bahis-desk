@@ -1,55 +1,63 @@
-# Getting started
+# BAHIS-desk
 
-## PC configuration
+## Local Development - Setup
 
 ### Linux
 
-We need node and yarn. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
+We need node v18 - the latest LTS. On linux a convenient way is to use Node Version Manager (https://github.com/nvm-sh/nvm)
 
 ```bash
-nvm install 14.19.2
-nvm use 14.19.2
+nvm install lts/hydrogen
+nvm use lts/hydrogen
 ```
 
-Next, install yarn globally:
+Next, in your shell, change directory to the bahis-desk project and run:
 
 ```bash
-npm install -g yarn
+npm install
+npm run dev
 ```
 
 ### Windows
 
-On windows install node in version 14, which you can download [here](https://nodejs.org/download/release/v14.19.2/node-v14.19.2-x64.msi).
+On Windows install node direct from their website, or by clicking [here](https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi).
 
 Please tick to install all additional tools with "chocolatey" that should cover all of the other requirements (visual studio, python etc.)
 
-## Running the web-app locally
+## Helpful tricks
 
-### Linux and Windows
+### How to format code locally
 
-Install packages using yarn:
+Just run `npm run format`
 
-```bash
-yarn install
-```
+### How to lint your code to find potential issues
 
-Build the electron app with:
+Just run `npm run lint-electron` for the electron code and `npm run lint-react` for the react code.
 
-```bash
-yarn electron-build
-```
+### better-sqlite error
 
-Run the react app with:
-
-```
-yarn react-start
-```
-
-In a second terminal, start electron with:
+If you get an error like this (note: version numbers may vary):
 
 ```bash
-yarn electron .
+Uncaught Error: The module './node_modules/better-sqlite3/build/Release/better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 64. This version of Node.js requires
+NODE_MODULE_VERSION 69. Please try re-compiling or re-installing
 ```
+
+First, check you are using the correct version of node:
+
+```bash
+node --version
+```
+
+Then, if you are, run:
+
+```bash
+npm run fix-better-sqlite-build-error
+```
+
+### clearing the local datatabase
 
 In order to reset the database before the next build you need to remove the bahis files, e.g. on linux:
 
@@ -57,67 +65,82 @@ In order to reset the database before the next build you need to remove the bahi
 rm -rf ~/.config/bahis
 ```
 
-Changes made should auto-render.
+The exact location of your database will be in the electron-debug.log file and / or printed to your console.
 
-## Building the app for distribution
-
-### For Linux
-
-```bash
-yarn linux-build
-```
-
-### For Windows
-
-```bash
-yarn win-build
-```
-
-Because of a bug (https://github.com/road86/bahis-desk/issues/45) you have to remove line saying `"extends": null,` from `build` in `package.json`, or otherwise the app will start to blank screen if build on windows.
-
-## Re-run of the app in dev mode
-
-```
-rm -rf  ~/.config/bahis && export BAHIS_SERVER="http://www.bahis2-dev.net" && yarn start
-```
-
-## Problems
-
-### crashes
+### too many watchers
 
 There is some leak in UI code that might give an error saying that there are too many watchers. Try this
 
-```
+```bash
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
 (https://stackoverflow.com/questions/55763428/react-native-error-enospc-system-limit-for-number-of-file-watchers-reached)
 
-###
+## Building the app for distribution
 
-If `yarn electron .` fails saying "better_sqlite3.node' was compiled against a different Node.js", try
+### For Windows
 
+```bash
+npm run build
 ```
-yarn add electron-rebuild --dev
-yarn electron-rebuild
-```
-
-(https://github.com/road86/bahis-desk/issues/27)
 
 ## Configuration
 
-The configurations are located in the `configs` directory and are split into two modules:
+We have three `.env` files:
 
-- **env.ts**: this module reads configurations from environment variables
-- **settings.ts**: this module holds more complicated configurations
+- `.env` - for local development
+- `.env.staging` - for staging builds
+- `.env.production` - for production builds
 
-## Documentation
+Note that all variables in `.env` files should follow the naming format of: `VITE_[SCOPE]_[REALLY_USEFUL_NAME]`, where `SCOPE` is on of [`BAHIS`, `ELECTRON`, `REACT`] depending on whether it defines how the system interacts with the BAHIS server, the electron main process, or the react renderer process.
+Once variables are read into the code they can loose the `VITE_` prefix, e.g. `VITE_BAHIS_SERVER_URL` becomes `BAHIS_SERVER_URL`.
 
-1. [Components](docs/Architecture/components.md)
-2. [Containers](docs/Architecture/containers.md)
-3. [store](docs/Architecture/store.md)
-4. [Services & Utilities](docs/Architecture/services_utilities.md)
+### Locally overriding environment variables
 
-## Code Quality
+If you have a `.env.local` file, this will be used instead of `.env` for local development, e.g. your `.env.local` if you are testing local server changes might look like this:
 
-See [guidelines](docs/codeQuality.md) on recommended coding conventions for this project.
+```bash
+VITE_BAHIS_SERVER_URL=http://localhost
+```
+
+### Adding new environment variables
+
+Note that adding environment variables is a multistep process and depends on what you're trying to acheive.
+
+#### Scenario 1 - environment variables that depend only on the build mode
+
+If you're trying to set an environment variable that depends only on the build mode (`development` / `staging` / `production`), e.g. `BAHIS_SERVER_URL` might be `http://localhost` in `development` and `http://www.bahis2-dev.net` in `staging` and if you are accessing this variable in the electron main process (probably the most common scenario), you can hard code this into the switch statement near the top of [`/electron/main.ts`](./electron/main.ts). For example:
+
+```typescript
+// default environment variables, i.e. for local development
+let BAHIS_SERVER_URL = 'http://www.bahis2-dev.net';
+
+// set environment variables based on mode
+switch (import.meta.env.MODE) {
+    case 'development':
+        break;
+    case 'staging':
+        BAHIS_SERVER_URL = 'http://www.bahis2-dev.net';
+        break;
+    default:
+        break;
+}
+```
+
+If you also want to enable the ability to override this variable from a `.env` file or local shell environment, you can add the following code below the switch statement:
+
+```typescript
+// overwrite anything defined in a .env file
+if (import.meta.env.VITE_BAHIS_BAHIS_SERVER_URL) {
+    BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_BAHIS_SERVER_URL;
+    log.warn(`Overwriting BAHIS_SERVER_URL base on environment variables or .env[.local] file.`)
+}
+```
+
+#### Scenario 2 - environment variables that vary based on the server or user, e.g. secret keys or URLs that change between deployments
+
+Store these inside an appropriate `.env` file:
+
+- if it's not-so-secret, i.e. a URL, add it to `.env` (and if it changes then `.env.staging` and / or `.env.production`).
+- if it's a secret, i.e. a key or password, add it to `.env.local` and document it in the `README.md` file.

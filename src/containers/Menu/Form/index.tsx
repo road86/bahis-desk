@@ -1,68 +1,38 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as React from 'react';
 import { Link } from 'react-router-dom';
-// import { Card, CardBody, CardTitle } from 'reactstrap';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { FormMenu } from '../../../store/ducks/menu';
-import { ipcRenderer } from '../../../services/ipcRenderer';
 import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import { menuStyle } from '../style';
 
 export interface FormMenuItemProps {
-  menuItem: FormMenu;
-  appLanguage: string;
+    menuItem: FormMenu;
+    appLanguage: string;
 }
 
-// class FormMenuItem extends React.Component<FormMenuItemProps> {
 function FormMenuItem(props: FormMenuItemProps) {
-  // class ListMenuItem extends React.Component<ListMenuItemProps> {
-  const [imageSource, setImageSource] = React.useState<string>('');
+    const { menuItem, appLanguage } = props;
 
-  const compUpdate = async () => {
-    if (props.menuItem.img_id.toString().length > 5) {
-      const image: any = await ipcRenderer.sendSync('fetch-image', props.menuItem.name);
-      setImageSource(image.replaceAll('\\', '/'));
-    }
-  };
+    const theme = useTheme();
+    const useStyles = makeStyles(menuStyle(theme));
+    const classes = useStyles();
 
-  React.useEffect(() => {
-    compUpdate();
-  }, []);
-
-  const { menuItem, appLanguage } = props;
-
-  const theme = useTheme();
-  const useStyles = makeStyles(menuStyle(theme));
-  const classes = useStyles();
-  
-  return (
-    <Link to={`/form/${menuItem.xform_id}/`}>
-      <div className={classes.outerCircle}>
-        <div className={classes.innerDiv}>
-          <div className={classes.circle}>
-            <div className={classes.image}>
-              {navigator.onLine && imageSource.length ? (
-                <img
-                  src={
-                    imageSource
-                      ? require(`../../../../${imageSource}`)
-                      : require('../../../assets/images/debuglogo.png')
-                  }
-                  className={classes.iconClass}
-                  alt={props.menuItem.name}
-                />
-              ) : (
-                <FontAwesomeIcon icon={['far', 'file-alt']} size="4x" />
-              )}
+    return (
+        <Link to={`/form/${menuItem.xform_id}/`}>
+            <div className={classes.outerCircle}>
+                <div className={classes.innerDiv}>
+                    <div className={classes.circle}>
+                        <div className={classes.image}>
+                            <FontAwesomeIcon icon={['far', 'file-alt']} size="4x" />
+                        </div>
+                    </div>
+                    <Typography variant="h6" color={'primary'}>
+                        {getNativeLanguageText(props.menuItem.label, appLanguage).toUpperCase()}
+                    </Typography>
+                </div>
             </div>
-          </div>
-          <Typography variant="h6" color={'primary'}>
-            {getNativeLanguageText(props.menuItem.label, appLanguage).toUpperCase()}
-          </Typography>
-        </div>
-      </div>
-    </Link>
-  );
+        </Link>
+    );
 }
 
 export default FormMenuItem;

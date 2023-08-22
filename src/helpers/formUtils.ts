@@ -1,4 +1,6 @@
-const SELECT_ALL: string = 'select all that apply';
+import { logger } from './logger';
+
+const SELECT_ALL = 'select all that apply';
 const SELECT_ONE = 'select one';
 
 const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, choices: any) => {
@@ -7,10 +9,10 @@ const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, cho
     fieldNames.forEach((element: any) => {
         const exist = userInput.find((obj: any) => obj[0] === element);
         if (exist) {
-            let formField: any = {}
+            let formField: any = {};
             if (exist[0].includes('/')) {
                 const fields = exist[0].split('/');
-                let children = definition.children
+                let children = definition.children;
                 for (let i = 0; i <= fields.length - 2; i++) {
                     const groupObj = children.find((obj: any) => obj.name === fields[i]);
                     if (groupObj) {
@@ -22,82 +24,75 @@ const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, cho
                 formField = definition.children.find((obj: any) => obj.name === exist[0]);
             }
             if (formField) {
-                console.log('----------------|| form field || ------------------');
-                console.log(formField);
+                logger.info(' form field ');
+                logger.info(formField);
                 formData.push({
                     label: formField.label,
                     value: getReadableValue(exist[1], formField, choices),
-                })
-                console.log(formField.label, exist[1]);
+                });
+                logger.info(formField.label, exist[1]);
             }
         }
     });
     return formData;
-}
+};
 
 const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
-
     //  it means that value has been selected from csv-list.
     if (formField && formField.control && formField.control.appearance && formField.control.appearance.includes('search')) {
-        const processedStringArray = formField.control.appearance.match(
-            /\([^\)]+\)/i
-        ) || [''];
+        // eslint-disable-next-line no-useless-escape
+        const processedStringArray = formField.control.appearance.match(/\([^\)]+\)/i) || [''];
         let params = processedStringArray[0];
 
         if (params.length > 2) {
             params = params.substring(1, params.length - 1);
-            const csvName = params.split(',')[0].replaceAll('\'', '');
+            const csvName = params.split(',')[0].replaceAll("'", '');
 
-            console.log(formField, fieldValue);
+            logger.info(formField, fieldValue);
             const csvChoices = choices.formChoices[`${csvName}.csv`];
 
-            let result = csvChoices.find((option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim());
-            console.log('--------result :', result);
+            let result = csvChoices.find(
+                (option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim(),
+            );
+            logger.info('result :', result);
             if (result === undefined) return ' -- ';
             else {
                 result = result[formField.children[0].label['English']];
                 return result;
             }
         }
-    }
-    else if (formField.type === SELECT_ONE || formField.type === SELECT_ALL) {
-        // console.log('----------in select one -----------------');
-        // console.log(fieldValue, formField);
+    } else if (formField.type === SELECT_ONE || formField.type === SELECT_ALL) {
         for (let i = 0; i < choices.simpleFormChoice.length; i++) {
             const choice = choices.simpleFormChoice[i];
 
             if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
                 // choice.value_label = JSON.parse(choice.value_label);
-                console.log('--- got it: ', formField.name, fieldValue);
+                logger.info('got it: ', formField.name, fieldValue);
                 if (typeof choice.value_label === 'string') {
                     try {
-                        let result = JSON.parse(choice.value_label);
+                        const result = JSON.parse(choice.value_label);
                         return result.English;
                     } catch (err) {
                         return choice.value_label;
                     }
-                }
-                else if (typeof choice.value_label === 'object') {
-                    console.log('ans: ', choice.value_label.English);
+                } else if (typeof choice.value_label === 'object') {
+                    logger.info('ans: ', choice.value_label.English);
                     return choice.value_label.English;
                 }
             }
         }
-    }
-    else {
+    } else {
         return typeof fieldValue == 'string' ? fieldValue : JSON.stringify(fieldValue);
     }
-}
-
+};
 
 const makeLabelColumnPair = (definition: any, fieldNames: any) => {
     const formData: any[] = [];
     fieldNames.forEach((element: any) => {
-
-        let formField: any = {}
+        let formField: any = {};
         if (element.includes('/')) {
             const fields = element.split('/');
-            let children = definition.children
+            let children = definition.children;
             for (let i = 0; i <= fields.length - 2; i++) {
                 const groupObj = children.find((obj: any) => obj.name === fields[i]);
                 if (groupObj) {
@@ -109,16 +104,15 @@ const makeLabelColumnPair = (definition: any, fieldNames: any) => {
             formField = definition.children.find((obj: any) => obj.name === element);
         }
         if (formField) {
-            console.log('----------------|| form field || ------------------');
-            console.log(formField);
+            logger.info(' form field ');
+            logger.info(formField);
             formData.push({
                 label: formField.label,
                 value: element,
             });
         }
-
     });
     return formData;
-}
+};
 
 export { createFormKeyValuePair, getReadableValue, makeLabelColumnPair };
