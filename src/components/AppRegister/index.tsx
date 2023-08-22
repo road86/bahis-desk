@@ -164,44 +164,44 @@ function AppRegister(props: any) {
 
     return (
         <Grid container={true} spacing={3} direction="row" justifyContent="center" alignItems="center">
-                <div className={classes.layout}>
-                    {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
-                    <Paper className={classes.paper} elevation={3}>
-                        {toast(toastContent)}
-                        <Grid container={true} direction="row" justifyContent="center" alignItems="center">
-                            <div className={classes.circle}>
-                                <div className={classes.image}>
-                                    <Avatar variant="square" src="/icon.png" />
-                                </div>
+            <div className={classes.layout}>
+                {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
+                <Paper className={classes.paper} elevation={3}>
+                    {toast(toastContent)}
+                    <Grid container={true} direction="row" justifyContent="center" alignItems="center">
+                        <div className={classes.circle}>
+                            <div className={classes.image}>
+                                <Avatar variant="square" src="/icon.png" />
                             </div>
-                        </Grid>
-                        <Grid item={true} style={{ marginTop: 20 }}>
-                            <Typography component="h1" variant="h4" align="center">
-                                Please sign in
-                            </Typography>
-                        </Grid>
-                        <React.Fragment>
-                            <AppSignInForm
-                                userInput={userInput}
-                                setFieldValueHandler={setFieldValue}
-                                handleSignin={handleSignIn}
-                            />
+                        </div>
+                    </Grid>
+                    <Grid item={true} style={{ marginTop: 20 }}>
+                        <Typography component="h1" variant="h4" align="center">
+                            Please sign in
+                        </Typography>
+                    </Grid>
+                    <React.Fragment>
+                        <AppSignInForm
+                            userInput={userInput}
+                            setFieldValueHandler={setFieldValue}
+                            handleSignin={handleSignIn}
+                        />
 
-                            <div className={classes.buttons}>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={handleSignIn}
-                                    className={classes.button}
-                                    disabled={isSignInButtonDisabled}
-                                >
-                                    Sign In
-                                </Button>
-                            </div>
-                        </React.Fragment>
-                    </Paper>
-                    <Copyright />
-                </div>
+                        <div className={classes.buttons}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={handleSignIn}
+                                className={classes.button}
+                                disabled={isSignInButtonDisabled}
+                            >
+                                Sign In
+                            </Button>
+                        </div>
+                    </React.Fragment>
+                </Paper>
+                <Copyright />
+            </div>
             <AlertDialog open={openAlert} handleClick={(e: any) => performChangeUserOperation(e)} />
         </Grid>
     );
