@@ -1,16 +1,16 @@
-import { Avatar, Grid, Snackbar, useTheme, Button, Paper, Typography } from '@material-ui/core';
+import { Avatar, Button, Grid, Paper, Snackbar, Typography, useTheme } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 // import Typist from 'react-typist';
 // import Loader from 'react-loader-spinner';
+import { makeStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import { withRouter } from 'react-router';
+import packageJson from '../../../package.json';
+import { logger } from '../../helpers/logger';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppSignInForm from './AppSignInForm';
-import { registerStyles } from './styles';
-import { makeStyles } from '@material-ui/core/styles';
-import packageJson from '../../../package.json';
 import AlertDialog from './Dialog';
-import { logger } from '../../helpers/logger';
+import { registerStyles } from './styles';
 
 function Copyright() {
     return (
@@ -27,8 +27,6 @@ function AppRegister(props: any) {
     const [userInput, setUserInput] = React.useState({});
     const [toastVisible, setToastVisible] = React.useState<boolean>(false);
     const [toastContent, setToastContent] = React.useState<any>({});
-    const [isLoadComplete, setLoadComplete] = React.useState<boolean>(true);
-    setLoadComplete(true); // we have commented out the logic that really uses this so this line just prevents TS complaining
     const [openAlert, setOpenAlert] = React.useState<any>(false);
     const [loginArgs, setLoginArgs] = React.useState<any>({});
     const [userEntry, setUserEntry] = React.useState<{ [key: string]: any }>({
@@ -166,7 +164,6 @@ function AppRegister(props: any) {
 
     return (
         <Grid container={true} spacing={3} direction="row" justifyContent="center" alignItems="center">
-            {isLoadComplete ? (
                 <div className={classes.layout}>
                     {/* {toastVisible && <Alert color="success">{toastContent.msg}</Alert>} */}
                     <Paper className={classes.paper} elevation={3}>
@@ -190,7 +187,6 @@ function AppRegister(props: any) {
                                 handleSignin={handleSignIn}
                             />
 
-                            {/* {getStepContent(activeStep, userInput, setFieldValueHandler, )} */}
                             <div className={classes.buttons}>
                                 <Button
                                     variant="contained"
@@ -206,27 +202,6 @@ function AppRegister(props: any) {
                     </Paper>
                     <Copyright />
                 </div>
-            ) : (
-                <div className="loader-container">
-                    <p>Loading...</p>
-                    {/* <Loader type="Puff" color={theme.palette.primary.dark} height={100} width={100} />
-          <Typist cursor={{ hideWhenDone: true }}>
-            <span className="loader-title"> BAHIS </span>
-            <br />
-            <span className="loader-subtitle">
-              Welcome
-              <Typist.Backspace count={7} delay={500} />
-              Loading{' '}
-              <span className="blink-one">
-                .
-                <span className="blink-two">
-                  .<span className="blink-three">.</span>
-                </span>
-              </span>
-            </span>
-          </Typist> */}
-                </div>
-            )}
             <AlertDialog open={openAlert} handleClick={(e: any) => performChangeUserOperation(e)} />
         </Grid>
     );
