@@ -7,7 +7,6 @@ export const menuStyle = (theme: Theme) =>
             width: '100%',
             border: `20px solid ${theme.palette.primary.main}`,
             borderRadius: 10,
-            backgroundColor: theme.palette.info.main,
             display: 'grid',
             alignItems: 'center',
         },

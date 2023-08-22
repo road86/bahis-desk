@@ -8,6 +8,7 @@ import { ipcRenderer } from '../../../services/ipcRenderer';
 import { isPrevMenuEmpty, setPrevMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
 import { logger } from '../../../helpers/logger';
+import { theme } from '../../../theme';
 
 export interface HeaderProps {
     handleLogout: any;
@@ -95,7 +96,7 @@ function Header(props: HeaderProps) {
         //check unsync count on load the application
         props.updateUnsyncCount();
         logger.info(' unsyncCount ', props.unsyncCount);
-        return props.unsyncCount === 0 ? '#00B755' : 'red';
+        return props.unsyncCount === 0 ? theme.palette.primary.main : theme.palette.secondary.main;
     };
 
     const Toast = () => (

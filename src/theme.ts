@@ -3,9 +3,10 @@ import { createTheme as createMuiTheme } from '@material-ui/core/styles';
 // TODO this has no impact on forms which needs to be fixed
 
 // default (development) colours
-let primary_main = '#7DE2D1'; // AppBar, Borders, Icons
-let primary_dark = '#339989'; // Box backgrounds
-const secondary_main = '#FA7921'; // Button backgrounds
+let primary_main = '#009EDB'; // AppBar, Borders, Icons
+let primary_light = '#6ED6FF'; // Box backgrounds
+let primary_dark = '#004F6E'; // Box backgrounds
+const secondary_main = '#DB3E00'; // Button backgrounds
 const secondary_light = '#FFFAFB'; // Button text
 const secondary_dark = '#2B2C28';
 // override based on mode
@@ -14,12 +15,14 @@ if (import.meta.env.MODE === 'staging') {
     primary_dark = '#AA0000';
 } else if (import.meta.env.MODE === 'production') {
     primary_main = '#649a6a';
+    primary_light = '#ebfded';
     primary_dark = '#8ac390';
 }
 export const theme = createMuiTheme({
     palette: {
         primary: {
             main: primary_main,
+            light: primary_light,
             dark: primary_dark,
         },
         secondary: {
@@ -36,14 +39,14 @@ export const theme = createMuiTheme({
         //table stripe
         info: {
             dark: '#F5F4F4',
-            main: '#EBFDED',
+            main: primary_light,
             light: '#F9F9F9',
         },
         // success: {
         //   main: '#4caf50',
         // },
         text: {
-            primary: '#EBFDED',
+            primary: primary_light,
             secondary: '#000000',
             disabled: 'rgba(0, 0, 0, 0.38)',
             hint: 'rgba(0, 0, 0, 0.38)',
@@ -66,7 +69,7 @@ export const theme = createMuiTheme({
             fontWeight: 700,
             // lineHeight: 0.35,
             fontSize: 30,
-            color: '#EBFDED',
+            color: primary_light,
         },
         h2: {
             fontWeight: 500,
@@ -83,19 +86,19 @@ export const theme = createMuiTheme({
             fontWeight: 700,
             // lineHeight: 0.35,
             fontSize: 26,
-            color: '#EBFDED',
+            color: primary_light,
         },
         h6: {
             fontWeight: 500,
             // lineHeight: 0.35,
             fontSize: 20,
-            color: '#EBFDED',
+            color: primary_light,
         },
         body1: {
             fontFamily: 'Roboto',
             fontWeight: 400,
             // lineHeight: 1.18,
-            // color: '#EBFDED',
+            // color: primary_light,
             fontSize: 16,
         },
         caption: {
@@ -125,7 +128,7 @@ export const theme = createMuiTheme({
                 paddingBottom: 12,
                 color: '#666666 !important',
                 '&:hover': {
-                    // backgroundColor: '#EBFDED',
+                    // backgroundColor: primary_light,
                     textDecoration: 'none',
                 },
                 '&:selected': {
@@ -152,15 +155,15 @@ export const theme = createMuiTheme({
         MuiAccordionSummary: {
             root: {
                 borderTop: '5px solid',
-                borderTopColor: '#8ac390 !important',
-                color: '#8ac390',
+                borderTopColor: primary_dark,
+                color: primary_dark,
                 '&:hover': {
-                    backgroundColor: '#8ac390 !important',
-                    color: '#EBFDED !important',
+                    backgroundColor: primary_dark,
+                    color: primary_light,
                 },
                 '&$expanded': {
-                    backgroundColor: '#8ac390 !important',
-                    color: '#EBFDED !important',
+                    backgroundColor: primary_dark,
+                    color: primary_light,
                 },
             },
         },
@@ -169,20 +172,20 @@ export const theme = createMuiTheme({
                 color: '#222222',
             },
             stickyHeader: {
-                backgroundColor: '#649A6A',
+                backgroundColor: primary_main,
             },
         },
         MuiTableSortLabel: {
             icon: {
-                color: '#EBFDED !important',
+                color: primary_light,
             },
         },
         MuiStepIcon: {
             active: {
-                color: '#649A6A',
+                color: primary_main,
             },
             // completed: {
-            //   color: '#8ac390 !important',
+            //   color: primary_dark,
             // },
             // active: {
             //
@@ -190,12 +193,12 @@ export const theme = createMuiTheme({
         },
         MuiStepLabel: {
             label: {
-                color: '#649A6A',
+                color: primary_main,
             },
         },
         MuiStepConnector: {
             line: {
-                color: '#EBFDED',
+                color: primary_light,
             },
         },
         MuiTypography: {
@@ -205,13 +208,13 @@ export const theme = createMuiTheme({
         },
         MuiTextField: {
             root: {
-                backgroundColor: '#EBFDED',
+                backgroundColor: secondary_light,
                 borderRadius: 5,
             },
         },
         MuiFormControlLabel: {
             root: {
-                color: '#EBFDED',
+                color: primary_light,
             },
         },
         MuiTablePagination: {
@@ -227,7 +230,7 @@ export const theme = createMuiTheme({
         //         color: '#a9a3a3',
         //     },
         //     current: {
-        //         color: '#649A6A',
+        //         color: primary_main,
         //     },
         // },
         MuiButton: {
@@ -238,7 +241,7 @@ export const theme = createMuiTheme({
                 fontWeight: 400,
                 // fontSize: 16,
                 // lineHeight: 0.18,
-                // color: '#EBFDED',
+                // color: primary_light,
                 fontFamily: 'Roboto',
             },
             containedPrimary: {
@@ -247,7 +250,7 @@ export const theme = createMuiTheme({
         },
         MuiRadio: {
             root: {
-                color: '#EBFDED',
+                color: primary_light,
             },
         },
         MuiSelect: {
