@@ -1,20 +1,23 @@
+import { Accordion, AccordionDetails, AccordionSummary, makeStyles, useTheme } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import _, { random } from 'lodash';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { RouteComponentProps } from 'react-router-dom';
 import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
+import { logger } from '../../helpers/logger';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
     FORMLIST_TYPE,
     FORM_TYPE,
+    LIST_TYPE,
+    MODULE_TYPE,
+    MenuItem,
     getCurrentMenu,
     isPrevMenuEmpty,
-    LIST_TYPE,
-    MenuItem,
-    MODULE_TYPE,
     reducerName as menuReducerName,
     resetMenu,
     setMenuItem,
@@ -25,10 +28,7 @@ import ListMenuItem from './List';
 import './Menu.css';
 import ModuleMenuItem from './Module';
 import SubmittedFormMenuItem from './SubmittedForm';
-import { Accordion, AccordionDetails, AccordionSummary, makeStyles, Typography, useTheme } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { menuStyle } from './style';
-import { logger } from '../../helpers/logger';
 
 /** register the clients reducer */
 reducerRegistry.register(menuReducerName, menuReducer);
