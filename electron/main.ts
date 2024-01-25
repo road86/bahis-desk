@@ -24,45 +24,29 @@ autoUpdater.logger = log;
 const APP_VERSION = app.getVersion();
 
 // default environment variables, i.e. for local development
-let MODE = 'development';
-let BAHIS_SERVER_URL = 'http://www.bahis2-dev.net';
+export const MODE = import.meta.env.MODE || 'development';
 
 // set environment variables based on mode
-switch (import.meta.env.MODE) {
+switch (MODE) {
     case 'development':
         log.transports.file.level = 'silly';
         log.transports.console.level = 'silly';
         log.transports.ipc!.level = false; // we turn this off until we can upgrade to electron-log v5 as we can't format it - all the information it would show is found in the main console and the log file anyway
         break;
-    case 'staging':
-        log.info('Running in staging mode');
-        MODE = 'staging';
-        BAHIS_SERVER_URL = 'http://www.bahis2-dev.net';
-        log.transports.file.level = 'silly';
-        log.transports.console.level = 'warn';
-        log.transports.ipc!.level = false;
-        break;
     case 'production':
         log.info('Running in production mode');
-        MODE = 'production';
-        BAHIS_SERVER_URL = 'http://bahis.dls.gov.bd';
         log.transports.file.level = 'info';
         log.transports.console.level = 'warn';
         log.transports.ipc!.level = false;
         break;
     default:
+        log.error(`Unknown mode: ${MODE}`);
         break;
-}
-
-// overwrite anything defined in a .env file
-if (import.meta.env.VITE_BAHIS_BAHIS_SERVER_URL) {
-    BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_BAHIS_SERVER_URL;
-    log.warn(`Overwriting BAHIS_SERVER_URL base on environment variables or .env[.local] file.`);
 }
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
-log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL}`);
+log.info(`BAHIS2_SERVER_URL=${BAHIS2_SERVER_URL}`);
 log.info(
     `Using the following log settings: file=${log.transports.file.level}; console=${log.transports.console.level}; ipc=${
         log.transports.ipc!.level
