@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ROBOT_TOKEN }}
       - name: bump
         id: bump
         uses: TriPSs/conventional-changelog-action@v5
