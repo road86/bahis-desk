@@ -24,7 +24,7 @@
     "@onaio/gatekeeper": "^0.4.0",
     "@onaio/session-reducer": "^0.0.13",
     "axios": "^1.4.0",
-    "better-sqlite3": "github:destyk/better-sqlite3#master",
+    "better-sqlite3": "^8.6.0",
     "connected-react-router": "^6.9.3",
     "electron-first-run": "^3.0.0",
     "electron-log": "^4.4.8",
