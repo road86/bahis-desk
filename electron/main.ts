@@ -7,7 +7,7 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import axios from 'axios';
 import { random } from 'lodash';
-import { existsSync, unlinkSync, writeFile } from 'fs';
+import { existsSync, unlinkSync, writeFile, cp } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import { autoUpdater } from 'electron-updater';
 
@@ -21,7 +21,21 @@ log.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] {scope} {text}';
 log.warn(`Full debug logs can be found in ${path.join(process.env.DIST, 'debug.log')}`);
 autoUpdater.logger = log;
 
+// MIGRATION
+// The following code migrates user data from bahis-desk <=v2.3.0
+// to a new location used in later version (in preparation for v3.0)
+// This code can be removed once we are confident that all users have upgraded to v3.0
+log.info(path.join(app.getPath('userData'), '..', 'bahis/'));
+if (existsSync(path.join(app.getPath('userData'), '..', 'bahis/'))) {
+    log.warn('Migrating user data from old location');
+    cp(path.join(app.getPath('userData'), '..', 'bahis/'), app.getPath('userData'), { recursive: true }, (err) => {
+        log.error('Failed to migrate user data from old location');
+        log.error(err);
+    });
+}
+
 const APP_VERSION = app.getVersion();
+export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost';
 
 // default environment variables, i.e. for local development
 export const MODE = import.meta.env.MODE || 'development';
@@ -46,7 +60,7 @@ switch (MODE) {
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
-log.info(`BAHIS2_SERVER_URL=${BAHIS2_SERVER_URL}`);
+log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL}`);
 log.info(
     `Using the following log settings: file=${log.transports.file.level}; console=${log.transports.console.level}; ipc=${
         log.transports.ipc!.level
