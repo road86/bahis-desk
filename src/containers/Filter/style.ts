@@ -32,20 +32,4 @@ export const filterStyles = (theme: Theme) =>
             backgroundColor: theme.palette.secondary.dark,
             borderColor: theme.palette.secondary.dark,
         },
-        root: {
-            '&.MuiAccordionSummary-root': {
-                borderTop: `5px solid ${theme.palette.primary.dark}`,
-                color: theme.palette.primary.dark,
-                '&:hover': {
-                    backgroundColor: `${theme.palette.primary.dark} !important`,
-                    color: `${theme.palette.secondary.light} !important`,
-                    borderTop: 'none',
-                },
-                '&.Mui-expanded': {
-                    backgroundColor: `${theme.palette.primary.dark} !important`,
-                    color: `${theme.palette.secondary.light} !important`,
-                    borderTop: 'none',
-                },
-            },
-        },
     });

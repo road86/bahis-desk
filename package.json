@@ -8,7 +8,6 @@
     "lint": "yarn lint-electron && yarn lint-react",
     "lint-electron": "eslint electron --ext ts,tsx --report-unused-disable-directives",
     "lint-react": "eslint src --ext ts,tsx --report-unused-disable-directives",
-    "preview": "vite preview",
     "fix-better-sqlite-build-error": "electron-builder install-app-deps",
     "format": "prettier --write */**/*.{ts,tsx}"
   },

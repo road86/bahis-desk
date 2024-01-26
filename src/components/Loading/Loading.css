@@ -34,14 +34,12 @@
 }
 
 .loader-title {
-  font-family: 'PennaRegular' !important;
   font-size: 70px;
   color: #407000;
   letter-spacing: 2px;
 }
 
 .loader-subtitle {
-  font-family: Arial !important;
   color: #2c2d2e;
   letter-spacing: 1px;
 }

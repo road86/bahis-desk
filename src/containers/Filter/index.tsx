@@ -163,7 +163,7 @@ function Filter(props: FilterProps) {
                     <Row id="menu-body">
                         {isEnvSet &&
                             definition.map((filterItem, index) => (
-                                <Col key={'filter-' + index} className="menu-item" lg={12} md={12} sm={12} xs={12}>
+                                <Col key={'filter-' + index} lg={12} md={12} sm={12} xs={12}>
                                     {renderTypeEvaluator(filterItem, index, appLanguage, listId)}
                                 </Col>
                             ))}
