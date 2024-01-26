@@ -1,4 +1,3 @@
-// import 'odkformrenderer/example/index.css'; // FIXME this seems stupid?
 import OdkFormRenderer from 'odkformrenderer'; // FIXME this is the big one to remove
 import queryString from 'query-string';
 import { Typography } from '@material-ui/core';
