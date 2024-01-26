@@ -7,7 +7,7 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import axios from 'axios';
 import { random } from 'lodash';
-import { existsSync, unlinkSync, writeFile, cp } from 'fs';
+import { existsSync, unlinkSync, writeFile, cp, rm } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import { autoUpdater } from 'electron-updater';
 
@@ -20,19 +20,6 @@ log.transports.file.format = '{y}-{m}-{d} {h}:{i}:{s}.{ms} [{level}] {scope} {te
 log.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] {scope} {text}';
 log.warn(`Full debug logs can be found in ${path.join(process.env.DIST, 'debug.log')}`);
 autoUpdater.logger = log;
-
-// MIGRATION
-// The following code migrates user data from bahis-desk <=v2.3.0
-// to a new location used in later version (in preparation for v3.0)
-// This code can be removed once we are confident that all users have upgraded to v3.0
-log.info(path.join(app.getPath('userData'), '..', 'bahis/'));
-if (existsSync(path.join(app.getPath('userData'), '..', 'bahis/'))) {
-    log.warn('Migrating user data from old location');
-    cp(path.join(app.getPath('userData'), '..', 'bahis/'), app.getPath('userData'), { recursive: true }, (err) => {
-        log.error('Failed to migrate user data from old location');
-        log.error(err);
-    });
-}
 
 const APP_VERSION = app.getVersion();
 export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost';
@@ -57,6 +44,37 @@ switch (MODE) {
         log.error(`Unknown mode: ${MODE}`);
         break;
 }
+
+// MIGRATION
+// The following code migrates user data from bahis-desk <=v2.3.0
+// to a new location used in later version (in preparation for v3.0)
+// This code can be removed once we are confident that all users have upgraded to v3.0
+const migrate = (old_app_location) => {
+    if (existsSync(old_app_location)) {
+        log.warn(`Migrating user data from old location: ${old_app_location}`);
+        cp(old_app_location, app.getPath('userData'), { recursive: true }, (err) => {
+            log.error('Failed to migrate user data from old location');
+            log.error(err);
+        });
+        rm(old_app_location, { recursive: true }, (err) => {
+            log.error('Failed to delete user data from old location');
+            log.error(err);
+        });
+    }
+};
+switch (MODE) {
+    case 'development':
+        migrate(path.join(app.getPath('userData'), '..', 'devbahis/'));
+        break;
+    case 'production':
+        migrate(path.join(app.getPath('userData'), '..', 'bahis/'));
+        break;
+    default:
+        log.error(`Unknown mode: ${MODE}`);
+        break;
+}
+
+
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
