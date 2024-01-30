@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Suspense } from 'react';
-import { connect } from 'react-redux';
-import { Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router';
-import { Col, Container, Row } from 'reactstrap'; // FIXME why are we using reactstrap _AND_ material UI?
-import { Store } from 'redux';
+import {Suspense} from 'react';
+import {connect} from 'react-redux';
+import {Redirect, Route, RouteComponentProps, Switch, withRouter} from 'react-router';
+import {Col, Container, Row} from 'reactstrap'; // FIXME why are we using reactstrap _AND_ material UI?
+import {Store} from 'redux';
 
-import { library } from '@fortawesome/fontawesome-svg-core'; // FIXME do we need fortawesome _AND_ material UI packages?
-import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons'; // FIXME do we need fortawesome _AND_ material UI packages?
+import {library} from '@fortawesome/fontawesome-svg-core'; // FIXME do we need fortawesome _AND_ material UI packages?
+import {faFileAlt, faFolder, faListAlt, faUser} from '@fortawesome/free-regular-svg-icons'; // FIXME do we need fortawesome _AND_ material UI packages?
 import {
     faArrowLeft,
     faBars,
@@ -33,14 +33,16 @@ import Header from '../components/page/Header';
 
 import Menu from '../containers/Menu';
 
-import { ipcRenderer } from '../services/ipcRenderer';
+import {ipcRenderer} from '../services/ipcRenderer';
 
-import { logger } from '../helpers/logger';
+import {logger} from '../helpers/logger';
 
-import { FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu } from '../store/ducks/menu';
+import {FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu} from '../store/ducks/menu';
 
 import './App.css';
-import { appStyles } from './styles';
+import {appStyles} from './styles';
+import {Snackbar} from "@material-ui/core";
+import {Alert} from "@material-ui/lab";
 
 library.add(
     faUser,
@@ -66,7 +68,7 @@ export interface MenuProps {
 /** Main App component */
 const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
     const classes = appStyles();
-    const { location } = props;
+    const {location} = props;
     // const [loading, setLoading] = React.useState<boolean>(false);
     const headerExcludedURLs = ['/', '/signup/'];
     // const [percentage, setPercentage] = React.useState<number>(0);
@@ -74,6 +76,8 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     const [lastSync, setLastSync] = React.useState<string | null>(null);
     const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
 
+    const [toastVisible, setToastVisible] = React.useState<boolean>(false);
+    const [toastContent, setToastContent] = React.useState<any>({});
     const setLastSyncTime = async (override: string | undefined) => {
         logger.info(' setLastSyncTime (client) ');
         let time = new Date().toLocaleString();
@@ -113,6 +117,43 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         }
     };
 
+    const toast = (response: any) => (
+        <Snackbar
+            open={toastVisible}
+            anchorOrigin={{vertical: 'top', horizontal: 'left'}}
+            key={'topleft'}
+        >
+            <Alert severity={response.severity}>
+                {response.msg}
+            </Alert>
+        </Snackbar>
+    );
+
+    ipcRenderer.on('init-refresh-database',  () => {
+        if (unsyncCount > 0) {
+            setToastVisible(true);
+            setToastContent({
+                severity: 'error',
+                msg: `${unsyncCount} data unsynced! Please Sync first`,
+            });
+        } else {
+            setToastVisible(true);
+            setToastContent({
+                severity: 'success',
+                msg: `Database will refresh with in short time. Please login again and sync first. 
+                It might take some time to first sync. please be patient while sync`,
+            });
+
+            ipcRenderer.send('refresh-database');
+            logout()
+
+        }
+
+        setTimeout(() => {
+            setToastVisible(false)
+        }, 5000)
+    })
+
     return (
         <React.Fragment>
             <Header
@@ -126,48 +167,49 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 pathName={location.pathname}
                 setLastSyncTime={setLastSyncTime}
             />
+            {toast(toastContent)}
             {/* )} */}
-            <div className={classes.offset} />
+            <div className={classes.offset}/>
             <Row id="main-page-container">
                 <Col>
-                    <Redirect to="/" />
+                    <Redirect to="/"/>
                     <Switch>
                         <Route exact={true} path="/">
-                            <Redirect to="/signup/" />
+                            <Redirect to="/signup/"/>
                         </Route>
                         <Route exact={true} path="/signup/">
-                            <AppRegister />
+                            <AppRegister/>
                         </Route>
                         <Route exact={true} path="/menu/">
-                            <Menu />
+                            <Menu/>
                         </Route>
                         <Route exact={true} path="/form/:id">
                             <Container>
                                 <Suspense fallback={<div>Loading...</div>}>
                                     <ErrorBoundary>
-                                        <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
+                                        <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount}/>
                                     </ErrorBoundary>
                                 </Suspense>
                             </Container>
                         </Route>
                         <Route exact={true} path="/formlist/:id">
                             <Container>
-                                <SubmittedForm appLanguage={'English'} />
+                                <SubmittedForm appLanguage={'English'}/>
                             </Container>
                         </Route>
                         <Route exact={true} path="/submittedDetails/:id">
                             <Container>
-                                <FormDetails />
+                                <FormDetails/>
                             </Container>
                         </Route>
                         <Route exact={true} path="/list/:id">
                             <Container>
-                                <List appLanguage={'English'} />
+                                <List appLanguage={'English'}/>
                             </Container>
                         </Route>
                         <Route exact={true} path="/listProfile/:id">
                             <Container>
-                                <ListProfile />
+                                <ListProfile/>
                             </Container>
                         </Route>
                     </Switch>
