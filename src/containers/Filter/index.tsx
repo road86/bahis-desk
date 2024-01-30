@@ -150,12 +150,7 @@ function Filter(props: FilterProps) {
     const { definition, appLanguage, listId } = props;
     return (
         <Accordion defaultExpanded>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-                className={classes.root}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                 Filter
             </AccordionSummary>
             <AccordionDetails>
@@ -163,7 +158,7 @@ function Filter(props: FilterProps) {
                     <Row id="menu-body">
                         {isEnvSet &&
                             definition.map((filterItem, index) => (
-                                <Col key={'filter-' + index} className="menu-item" lg={12} md={12} sm={12} xs={12}>
+                                <Col key={'filter-' + index} lg={12} md={12} sm={12} xs={12}>
                                     {renderTypeEvaluator(filterItem, index, appLanguage, listId)}
                                 </Col>
                             ))}

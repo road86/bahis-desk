@@ -13,9 +13,6 @@ import { register } from './serviceWorker.ts'; // TODO can this be replaced with
 import store from './store';
 import { theme } from './theme.ts';
 
-// import "bootstrap/dist/css/bootstrap.min.css"; // FIXME why are we using reactstrap _AND_ material UI?
-import './index.css'; // TODO importing CSS like this is not clever
-
 ReactDOM.render(
     //   <React.StrictMode> // we should move to StrictMode when we upgrade to react v18
     <Provider store={store}>
