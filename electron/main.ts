@@ -1,7 +1,7 @@
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 
-import {app, BrowserWindow, ipcMain, dialog} from 'electron';
+import {app, BrowserWindow, ipcMain, dialog, Menu} from 'electron';
 import log from 'electron-log';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -9,7 +9,7 @@ import axios from 'axios';
 import {random} from 'lodash';
 import {existsSync, unlinkSync, writeFile, cp, rm} from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
-import { autoUpdater } from 'electron-updater';
+import {autoUpdater} from 'electron-updater';
 
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
@@ -180,8 +180,6 @@ app.on('window-all-closed', () => {
 });
 
 
-const {Menu} = require('electron')
-
 const isMac = process.platform === 'darwin'
 
 const template = [
@@ -190,7 +188,7 @@ const template = [
         submenu: [
             {
                 label: 'Reset Database',
-                click: async () => {
+                click: () => {
                     mainWindow?.webContents.send('init-refresh-database')
                 }
             },
@@ -1801,7 +1799,7 @@ const handleXmlInvalidEntries = (affectedString) => {
     return tmpString;
 };
 
-const refreshDatabase = ()=>{
+const refreshDatabase = () => {
     try {
         db.close();
         unlinkSync(DB_PATH);
@@ -1809,7 +1807,7 @@ const refreshDatabase = ()=>{
         db = new Database(DB_PATH, {nativeBinding: addon});
         prepareDb(db);
         return 'success'
-    }catch (e) {
+    } catch (e) {
         console.log(e);
         return 'failed'
     }

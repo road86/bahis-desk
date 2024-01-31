@@ -41,8 +41,9 @@ import {FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu} from '../store/ducks/m
 
 import './App.css';
 import {appStyles} from './styles';
-import {Snackbar} from "@material-ui/core";
+import {IconButton, Snackbar} from "@material-ui/core";
 import {Alert} from "@material-ui/lab";
+import CloseIcon from '@material-ui/icons/Close';
 
 library.add(
     faUser,
@@ -78,6 +79,8 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
     const [toastVisible, setToastVisible] = React.useState<boolean>(false);
     const [toastContent, setToastContent] = React.useState<any>({});
+
+    let isResetDone = false
     const setLastSyncTime = async (override: string | undefined) => {
         logger.info(' setLastSyncTime (client) ');
         let time = new Date().toLocaleString();
@@ -92,6 +95,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         logger.info('update Unsync Count');
         const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
         setUnsyncCount(response[0].cnt);
+        isResetDone = false;
     };
 
     const logout = () => {
@@ -123,35 +127,57 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
             anchorOrigin={{vertical: 'top', horizontal: 'left'}}
             key={'topleft'}
         >
-            <Alert severity={response.severity}>
-                {response.msg}
-            </Alert>
+            <>
+                <Alert severity={response.severity}>
+                    {response.msg}
+                    <IconButton
+                        aria-label="close"
+                        color="secondary"
+                        onClick={handleClose}
+                    >
+                        <CloseIcon/>
+                    </IconButton>
+                </Alert>
+            </>
         </Snackbar>
     );
 
-    ipcRenderer.on('init-refresh-database',  () => {
-        if (unsyncCount > 0) {
+    const handleClose = () => {
+        setToastVisible(false);
+    }
+
+    ipcRenderer.on('init-refresh-database', async () => {
+        const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
+        const unSyncData = response[0].cnt;
+
+        if (unSyncData > 0) {
             setToastVisible(true);
             setToastContent({
                 severity: 'error',
-                msg: `${unsyncCount} data unsynced! Please Sync first`,
+                msg: `${unSyncData} data unsynced! Please Sync first`,
             });
+
+            setTimeout(() => {
+                setToastVisible(false);
+            }, 5000)
         } else {
             setToastVisible(true);
             setToastContent({
                 severity: 'success',
-                msg: `Database will refresh with in short time. Please login again and sync first. 
-                It might take some time to first sync. please be patient while sync`,
+                msg: `Database will refresh shortly. Please login again and sync first. 
+                It might take a while for the first sync. please be patient while syncing`,
             });
-
-            ipcRenderer.send('refresh-database');
-            logout()
+            if (!isResetDone) {
+                ipcRenderer.send('refresh-database');
+                logout()
+                isResetDone = true
+            }
 
         }
+        ipcRenderer.send('clear');
+        ipcRenderer.removeAllListeners('init-refresh-database');
 
-        setTimeout(() => {
-            setToastVisible(false)
-        }, 5000)
+        return
     })
 
     return (
