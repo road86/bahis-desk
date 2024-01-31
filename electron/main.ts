@@ -189,7 +189,24 @@ const template = [
             {
                 label: 'Reset Database',
                 click: () => {
-                    mainWindow?.webContents.send('init-refresh-database')
+
+                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    if (browserWindow) {
+                        let status = dialog.showMessageBoxSync(browserWindow,
+                            {
+                                title: 'Confirm',
+                                message: `Are you sure?`,
+                                type: "warning",
+                                buttons: ['Yes', 'Cancel'],
+                                cancelId: 1,
+                                noLink: true
+                            }
+                        )
+                        if (status === 0) {
+                            mainWindow?.webContents.send('init-refresh-database')
+                        }
+                    }
+
                 }
             },
             isMac ? {role: 'close'} : {role: 'quit'},

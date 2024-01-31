@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Suspense} from 'react';
+import {Suspense, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {Redirect, Route, RouteComponentProps, Switch, withRouter} from 'react-router';
 import {Col, Container, Row} from 'reactstrap'; // FIXME why are we using reactstrap _AND_ material UI?
@@ -80,7 +80,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     const [toastVisible, setToastVisible] = React.useState<boolean>(false);
     const [toastContent, setToastContent] = React.useState<any>({});
 
-    let isResetDone = false
     const setLastSyncTime = async (override: string | undefined) => {
         logger.info(' setLastSyncTime (client) ');
         let time = new Date().toLocaleString();
@@ -95,7 +94,6 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         logger.info('update Unsync Count');
         const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
         setUnsyncCount(response[0].cnt);
-        isResetDone = false;
     };
 
     const logout = () => {
@@ -146,39 +144,36 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
         setToastVisible(false);
     }
 
-    ipcRenderer.on('init-refresh-database', async () => {
-        const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
-        const unSyncData = response[0].cnt;
+    useEffect(() => {
+        ipcRenderer.on('init-refresh-database', async () => {
+            const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
+            const unSyncData = response[0].cnt;
 
-        if (unSyncData > 0) {
-            setToastVisible(true);
-            setToastContent({
-                severity: 'error',
-                msg: `${unSyncData} data unsynced! Please Sync first`,
-            });
+            if (unSyncData > 0) {
+                setToastVisible(true);
+                setToastContent({
+                    severity: 'error',
+                    msg: `${unSyncData} data unsynced! Please Sync first`,
+                });
 
-            setTimeout(() => {
-                setToastVisible(false);
-            }, 5000)
-        } else {
-            setToastVisible(true);
-            setToastContent({
-                severity: 'success',
-                msg: `Database will refresh shortly. Please login again and sync first. 
+                setTimeout(() => {
+                    setToastVisible(false);
+                }, 5000)
+            } else {
+                setToastVisible(true);
+                setToastContent({
+                    severity: 'success',
+                    msg: `Database will refresh shortly. Please login again and sync first. 
                 It might take a while for the first sync. please be patient while syncing`,
-            });
-            if (!isResetDone) {
-                ipcRenderer.send('refresh-database');
-                logout()
-                isResetDone = true
+                });
+
+                    ipcRenderer.send('refresh-database');
+                    logout()
             }
 
-        }
-        ipcRenderer.send('clear');
-        ipcRenderer.removeAllListeners('init-refresh-database');
-
-        return
-    })
+            return
+        })
+    }, [])
 
     return (
         <React.Fragment>
