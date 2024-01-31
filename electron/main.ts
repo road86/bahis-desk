@@ -195,6 +195,29 @@ const template = [
             isMac ? {role: 'close'} : {role: 'quit'},
         ]
     },
+    {
+        label: 'Help',
+        submenu: [
+            {
+                label: 'About',
+                click: () => {
+                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    if (browserWindow) {
+                        return dialog.showMessageBox(browserWindow,
+                            {
+                                title: 'About BAHIS',
+                                message: `
+                                BAHIS
+                                Version ${APP_VERSION}
+                                `,
+                                type: "info",
+                            }
+                        )
+                    }
+                }
+            },
+        ]
+    },
 ]
 
 // @ts-ignore
