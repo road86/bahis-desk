@@ -1,7 +1,7 @@
-import { createRequire } from 'node:module';
-import { pathToFileURL } from 'node:url';
+import {createRequire} from 'node:module';
+import {pathToFileURL} from 'node:url';
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import {app, BrowserWindow, ipcMain, dialog, Menu} from 'electron';
 import log from 'electron-log';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -9,7 +9,7 @@ import axios from 'axios';
 import { random } from 'lodash';
 import { existsSync, unlinkSync, writeFile, cp, rm } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
-import { autoUpdater } from 'electron-updater';
+import {autoUpdater} from 'electron-updater';
 
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
@@ -52,11 +52,11 @@ switch (MODE) {
 const migrate = (old_app_location) => {
     if (existsSync(old_app_location)) {
         log.warn(`Migrating user data from old location: ${old_app_location}`);
-        cp(old_app_location, app.getPath('userData'), { recursive: true }, (err) => {
+        cp(old_app_location, app.getPath('userData'), {recursive: true}, (err) => {
             log.error('Failed to migrate user data from old location');
             log.error(err);
         });
-        rm(old_app_location, { recursive: true }, (err) => {
+        rm(old_app_location, {recursive: true}, (err) => {
             log.error('Failed to delete user data from old location');
             log.error(err);
         });
@@ -73,6 +73,7 @@ switch (MODE) {
         log.error(`Unknown mode: ${MODE}`);
         break;
 }
+
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
@@ -101,7 +102,7 @@ const requireMe = createRequire(pathToFileURL(__filename).href);
 const addon = requireMe(
     path.resolve('./node_modules/better-sqlite3/build/Release/better_sqlite3.node').replace(/(\.node)?$/, '.node'),
 );
-let db = new Database(DB_PATH, { nativeBinding: addon });
+let db = new Database(DB_PATH, {nativeBinding: addon});
 
 const formConfigEndpoint = (name, time) => {
     return DB_TABLES_ENDPOINT.replace('?', time).replace('core_admin', name) + `?bahis_desk_version=${APP_VERSION}`;
@@ -178,6 +179,68 @@ app.on('window-all-closed', () => {
     app.quit();
 });
 
+
+const isMac = process.platform === 'darwin'
+
+const template = [
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Reset Database',
+                click: () => {
+
+                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    if (browserWindow) {
+                        let status = dialog.showMessageBoxSync(browserWindow,
+                            {
+                                title: 'Confirm',
+                                message: `Are you sure?`,
+                                type: "warning",
+                                buttons: ['Yes', 'Cancel'],
+                                cancelId: 1,
+                                noLink: true
+                            }
+                        )
+                        if (status === 0) {
+                            mainWindow?.webContents.send('init-refresh-database')
+                        }
+                    }
+
+                }
+            },
+            isMac ? {role: 'close'} : {role: 'quit'},
+        ]
+    },
+    {
+        label: 'Help',
+        submenu: [
+            {
+                label: 'About',
+                click: () => {
+                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    if (browserWindow) {
+                        return dialog.showMessageBox(browserWindow,
+                            {
+                                title: 'About BAHIS',
+                                message: `
+                                BAHIS
+                                Version ${APP_VERSION}
+                                `,
+                                type: "info",
+                            }
+                        )
+                    }
+                }
+            },
+        ]
+    },
+]
+
+// @ts-ignore
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
+
 /** set up new db */
 function prepareDb(db) {
     log.info('Creating New Database');
@@ -236,7 +299,8 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     try {
         const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId) as any;
         const datasource = JSON.parse(listDefinition.datasource);
-        const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
+        const datasourceQuery = datasource.type === '0' ? `select *
+                                                           from ${datasource.query}` : datasource.query;
         const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
         const a = filterColumns.toString();
 
@@ -319,7 +383,7 @@ const fetchFormDefinition = (event, formId) => {
             const choices = {};
             Object.keys(choiceDefinition).forEach((key) => {
                 try {
-                    const { query } = choiceDefinition[key];
+                    const {query} = choiceDefinition[key];
                     choices[`${key}.csv`] = db.prepare(query).all();
                 } catch (err) {
                     log.info(`Choice Definition Error  ${err}`);
@@ -327,7 +391,7 @@ const fetchFormDefinition = (event, formId) => {
             });
 
             log.info(`Choices for form ${formId}:  ${choices}`);
-            event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
+            event.returnValue = {...formDefinitionObj, formChoices: JSON.stringify(choices)};
         } else {
             event.returnValue = null;
             log.info(`fetchFormDefinition problem, no such form with ${formId}`);
@@ -341,7 +405,9 @@ const fetchFormDefinition = (event, formId) => {
 const fetchFormChoices = (event, formId) => {
     try {
         log.info(`fetchFormChoices  ${formId}`);
-        const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
+        const formchoices = db.prepare(`SELECT *
+                                        from form_choices
+                                        where xform_id = ? `).all(formId);
         event.returnValue = formchoices;
     } catch (err) {
         log.info('error fetch form choices ', err);
@@ -351,10 +417,12 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
     log.info(`fetchFormDetails  ${event} ${listId}`);
     try {
-        const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
+        const formData = db.prepare(`SELECT *
+                                     from data
+                                     where ${column} = ? limit 1`).get(listId);
         log.info(formData);
         if (formData != undefined) {
-            event.returnValue = { formDetails: formData };
+            event.returnValue = {formDetails: formData};
         } else {
             event.returnValue = null;
         }
@@ -403,7 +471,7 @@ const fetchFormListDefinition = (event, formId) => {
         const query = 'SELECT * from data where form_id = ? and submitted_by = ?';
         const fetchedRows = db.prepare(query).all(formId, userName);
 
-        event.returnValue = { fetchedRows };
+        event.returnValue = {fetchedRows};
     } catch (err) {
         log.info(`fetchFormListDefinition, listId: ${formId}`);
     }
@@ -422,7 +490,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
         }
         const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
 
-        event.returnValue = { fetchedRows };
+        event.returnValue = {fetchedRows};
     } catch (err) {
         log.info(`fetchFollowupFormData, formId: ${formId}`);
     }
@@ -449,7 +517,8 @@ const fetchQueryData = (event, queryString) => {
 
 const configureFreshDatabase = async (data, userData) => {
     const insertStmt = db.prepare(
-        `INSERT INTO users (username, password, lastlogin, name, role, organization, branch, email, upazila) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO users (username, password, lastlogin, name, role, organization, branch, email, upazila)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
     insertStmt.run(
         data.user_name,
@@ -475,9 +544,9 @@ const changeUser = async (event, obj) => {
     log.info('new db setup call after delete previous user data');
     db = new Database(DB_PATH);
     prepareDb(db);
-    const { response, userData } = obj;
+    const {response, userData} = obj;
     configureFreshDatabase(response, userData);
-    const results = { username: response.user_name, message: 'changeUser' };
+    const results = {username: response.user_name, message: 'changeUser'};
     mainWindow?.webContents.send('formSubmissionResults', results);
     event.returnValue = {
         userInfo: response,
@@ -587,7 +656,7 @@ const signIn = async (event, userData) => {
     // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
     if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password && userInfo.upazila) {
         log.info('This is an offline-ready account.');
-        const results = { username: userData.username, message: 'signIn::local' };
+        const results = {username: userData.username, message: 'signIn::local'};
         mainWindow?.webContents.send('formSubmissionResults', results);
         event.returnValue = {
             userInfo: '',
@@ -638,7 +707,7 @@ const signIn = async (event, userData) => {
                         log.info('New user - setting up local db');
                         configureFreshDatabase(response.data, userData);
                         log.info('Local db configured');
-                        results = { username: response.data.user_name, message: 'signIn::firstTimeUser' };
+                        results = {username: response.data.user_name, message: 'signIn::firstTimeUser'};
                         mainWindow?.webContents.send('formSubmissionResults', results);
                         event.returnValue = {
                             userInfo: response.data,
@@ -658,7 +727,7 @@ const signIn = async (event, userData) => {
                     else {
                         log.info('Existing user');
                         // given the offline-ready stuff we do above... do we use this branch?
-                        results = { username: response.data.user_name, message: 'signIn::offlineUser' };
+                        results = {username: response.data.user_name, message: 'signIn::offlineUser'};
                         mainWindow?.webContents.send('formSubmissionResults', results);
                         event.returnValue = {
                             userInfo: response.data,
@@ -702,7 +771,8 @@ const populateCatchment = (catchments) => {
     const geoData = catchments ? catchments : [];
     if (geoData.length) {
         const insertStmt = db.prepare(
-            `INSERT INTO geo_cluster (value, name, loc_type , parent) VALUES (@value, @name, @loc_type, @parent)`,
+            `INSERT INTO geo_cluster (value, name, loc_type, parent)
+             VALUES (@value, @name, @loc_type, @parent)`,
         );
 
         const insertMany = db.transaction((geos) => {
@@ -1064,13 +1134,18 @@ const csvDataSync = async (db, username) => {
 const getUserDBInfo = (event) => {
     // FIXME this function is actually about user location and is badly named
     try {
-        const query_to_get_upazila = `select upazila from users`;
+        const query_to_get_upazila = `select upazila
+                                      from users`;
         const upazila_id = (db.prepare(query_to_get_upazila).get() as any).upazila;
-        const query_to_get_district = `select parent from geo_cluster where value in (${upazila_id})`;
+        const query_to_get_district = `select parent
+                                       from geo_cluster
+                                       where value in (${upazila_id})`;
         const district_id = (db.prepare(query_to_get_district).get() as any).parent;
-        const query_to_get_division = `select parent from geo_cluster where value in (${district_id})`;
+        const query_to_get_division = `select parent
+                                       from geo_cluster
+                                       where value in (${district_id})`;
         const division_id = (db.prepare(query_to_get_division).get() as any).parent;
-        const geoInfo = { division: division_id, district: district_id, upazila: upazila_id.toString() };
+        const geoInfo = {division: division_id, district: district_id, upazila: upazila_id.toString()};
 
         if (geoInfo !== undefined) {
             log.info(`userDB SUCCESS ${JSON.stringify(geoInfo)}`);
@@ -1106,15 +1181,85 @@ const DATA_SYNC_COUNT = `${BAHIS_SERVER_URL}/bhmodule/form/core_admin/data-sync-
 const DATA_SYNC_PAGINATED = `${BAHIS_SERVER_URL}/bhmodule/form/core_admin/data-sync-paginated/`;
 const PAGE_LENGTH = 100;
 
-const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
-CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
-CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
-CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
-CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
-CREATE TABLE app_log( time TEXT);
-CREATE TABLE module_image( id INTEGER PRIMARY KEY AUTOINCREMENT, module_id TEXT NOT NULL, image_name TEXT NOT NULL, directory_name TEXT );
-CREATE TABLE form_choices( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);
-CREATE TABLE geo( geo_id INTEGER PRIMARY KEY AUTOINCREMENT, div_id TEXT NOT NULL, division TEXT NOT NULL, dis_id TEXT NOT NULL, district TEXT NOT NULL, upz_id TEXT NOT NULL, upazila TEXT NOT NULL);`;
+const queries = `CREATE TABLE users
+                 (
+                     user_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                     username     TEXT NOT NULL,
+                     password     TEXT NOT NULL,
+                     lastlogin    TEXT NOT NULL,
+                     upazila      INTEGER,
+                     role         Text NOT NULL,
+                     branch       TEXT NOT NULL,
+                     organization TEXT NOT NULL,
+                     name         TEXT NOT NULL,
+                     email        TEXT NOT NULL
+                 );
+CREATE TABLE app
+(
+    app_id     INTEGER PRIMARY KEY,
+    app_name   TEXT NOT NULL,
+    definition TEXT NOT NULL
+);
+CREATE TABLE forms
+(
+    form_id           INTEGER PRIMARY KEY,
+    form_name         TEXT NOT NULL,
+    definition        TEXT NOT NULL,
+    choice_definition TEXT,
+    form_uuid         TEXT,
+    table_mapping     TEXT,
+    field_names       TEXT
+);
+CREATE TABLE lists
+(
+    list_id           INTEGER PRIMARY KEY,
+    list_name         TEXT NOT NULL,
+    list_header       TEXT,
+    datasource        TEXT,
+    filter_definition TEXT,
+    column_definition TEXT
+);
+CREATE TABLE data
+(
+    data_id         INTEGER PRIMARY KEY,
+    submitted_by    TEXT    NOT NULL,
+    submission_date TEXT    NOT NULL,
+    form_id         INTEGER NOT NULL,
+    data            TEXT    NOT NULL,
+    status          INTEGER,
+    instanceid      TEXT,
+    last_updated    TEXT
+);
+CREATE TABLE app_log
+(
+    time TEXT
+);
+CREATE TABLE module_image
+(
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    module_id      TEXT NOT NULL,
+    image_name     TEXT NOT NULL,
+    directory_name TEXT
+);
+CREATE TABLE form_choices
+(
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    value_text  TEXT,
+    xform_id    TEXT,
+    value_label TEXT,
+    field_name  TEXT,
+    field_type  TEXT
+);
+CREATE TABLE geo
+(
+    geo_id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    div_id   TEXT NOT NULL,
+    division TEXT NOT NULL,
+    dis_id   TEXT NOT NULL,
+    district TEXT NOT NULL,
+    upz_id   TEXT NOT NULL,
+    upazila  TEXT NOT NULL
+);`;
 
 /** fetches data from server to app
  * @returns {string} - success if successful; otherwise, failed
@@ -1158,7 +1303,9 @@ const deleteCSVDataWithPk = (db, pkList, rowData, tableName) => {
     log.debug(tableName); // TODO: remove
     try {
         rowData.data.forEach((rowObj) => {
-            let sqlWhereClause = `delete from ${rowData.table_name} where `;
+            let sqlWhereClause = `delete
+                                  from ${rowData.table_name}
+                                  where `;
             pkList.forEach((filterName) => {
                 if (rowObj[filterName] !== '') {
                     sqlWhereClause = `${sqlWhereClause} ${filterName} = ${rowObj[filterName]} and `;
@@ -1186,7 +1333,8 @@ const saveNewCSVDataToTable = (db, rowData) => {
                 values = `${values}@${filterName}, `;
             }
         });
-        const sqlWhereClause = `INSERT INTO ${rowData.table_name} (${keys.slice(0, -2)}) VALUES (${values.slice(0, -2)})`;
+        const sqlWhereClause = `INSERT INTO ${rowData.table_name} (${keys.slice(0, -2)})
+                                VALUES (${values.slice(0, -2)})`;
         const insertMany = db.transaction((rows) => {
             for (const row of rows) db.prepare(sqlWhereClause).run(row);
         });
@@ -1311,7 +1459,9 @@ const deleteDataWithInstanceId = (db, instanceId, formId) => {
             const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
             tableMapping.forEach((tableName) => {
                 try {
-                    sql = `DELETE FROM ${tableName} WHERE instanceid = ?`;
+                    sql = `DELETE
+                           FROM ${tableName}
+                           WHERE instanceid = ?`;
                     stmt = db.prepare(sql);
                     numDeleted = stmt.run(instanceId.toString()).changes;
                     log.info(`Row(s) deleted from table "${tableName}": ${numDeleted}`);
@@ -1340,7 +1490,8 @@ const saveNewDataToTable = (db, instanceId, formId, userInput) => {
             : new Date().toISOString();
 
         const insertStmt = db.prepare(
-            `INSERT INTO data (form_id, data, status, instanceid, last_updated, submitted_by, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO data (form_id, data, status, instanceid, last_updated, submitted_by, submission_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
         );
         insertStmt.run(
             formId,
@@ -1509,7 +1660,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
             const sendRow = async (rowObj) => {
                 const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
                 let formData = JSON.parse(rowObj.data) || {};
-                formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
+                formData = {...formData, 'formhub/uuid': formDefinitionObj.form_uuid};
                 //We are converting json to XML which is an alternative submission for xforms
                 const apiFormData = {
                     xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
@@ -1688,6 +1839,20 @@ const handleXmlInvalidEntries = (affectedString) => {
     return tmpString;
 };
 
+const refreshDatabase = () => {
+    try {
+        db.close();
+        unlinkSync(DB_PATH);
+        log.info('Databased delete');
+        db = new Database(DB_PATH, {nativeBinding: addon});
+        prepareDb(db);
+        return 'success'
+    } catch (e) {
+        console.log(e);
+        return 'failed'
+    }
+}
+
 // subscribes the listeners to channels
 ipcMain.handle('fetch-app-definition', fetchAppDefinition);
 ipcMain.on('submit-form-response', submitFormResponse);
@@ -1710,3 +1875,4 @@ ipcMain.on('delete-instance', deleteData);
 ipcMain.on('form-details', fetchFormDetails);
 ipcMain.on('user-db-info', getUserDBInfo);
 ipcMain.on('change-user', changeUser);
+ipcMain.on('refresh-database', refreshDatabase);
