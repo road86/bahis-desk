@@ -150,12 +150,7 @@ function Filter(props: FilterProps) {
     const { definition, appLanguage, listId } = props;
     return (
         <Accordion defaultExpanded>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-                className={classes.root}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                 Filter
             </AccordionSummary>
             <AccordionDetails>

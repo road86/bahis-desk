@@ -6,8 +6,8 @@ import log from 'electron-log';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import axios from 'axios';
-import {random} from 'lodash';
-import {existsSync, unlinkSync, writeFile, cp, rm} from 'fs';
+import { random } from 'lodash';
+import { existsSync, unlinkSync, writeFile, cp, rm } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import {autoUpdater} from 'electron-updater';
 
