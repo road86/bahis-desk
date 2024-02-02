@@ -1,9 +1,10 @@
+import { Grid, Input, Typography } from '@material-ui/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { Col, FormGroup, Input, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
+import { logger } from '../../../helpers/logger';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import {
     FilterCondition,
@@ -49,6 +50,8 @@ class FilterNumber extends React.Component<NumberProps> {
     }
 
     public render() {
+        logger.info('rendering FilterNumber');
+        // TODO is this ever used?
         const { filterItem, condition, value, appLanguage } = this.props;
         if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {
             this.props.setFilterValueActionCreator(
@@ -58,42 +61,40 @@ class FilterNumber extends React.Component<NumberProps> {
             );
         }
         return (
-            <FormGroup style={{ marginBottom: 0 }}>
-                <Row>
-                    <Col md={3}>
-                        <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
-                    </Col>
-                    <Col md={3}>
-                        <Select
-                            options={NUMBER_FILTER_OPERATORS}
-                            values={NUMBER_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
-                            onChange={this.handleConditionChange}
-                        />
-                    </Col>
-                    <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
+            <Grid container xs={12} spacing={2}>
+                <Grid item md={3}>
+                    <Typography>{getNativeLanguageText(filterItem.label, appLanguage)}</Typography>
+                </Grid>
+                <Grid item md={3}>
+                    <Select
+                        options={NUMBER_FILTER_OPERATORS}
+                        values={NUMBER_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+                        onChange={this.handleConditionChange}
+                    />
+                </Grid>
+                <Grid item md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
+                    <Input
+                        type="number"
+                        value={value && value[0] ? value[0] : ''}
+                        name={filterItem.name}
+                        onChange={this.handleValueChange}
+                    />
+                </Grid>
+                {condition === IN_BETWEEN_TYPE && (
+                    <Grid item md={3}>
                         <Input
                             type="number"
-                            value={value && value[0] ? value[0] : ''}
-                            name={filterItem.name}
+                            name={filterItem.name + '_v2'}
+                            value={value && value[1] ? value[1] : ''}
                             onChange={this.handleValueChange}
                         />
-                    </Col>
-                    {condition === IN_BETWEEN_TYPE && (
-                        <Col md={3}>
-                            <Input
-                                type="number"
-                                name={filterItem.name + '_v2'}
-                                value={value && value[1] ? value[1] : ''}
-                                onChange={this.handleValueChange}
-                            />
-                        </Col>
-                    )}
-                </Row>
-            </FormGroup>
+                    </Grid>
+                )}
+            </Grid>
         );
     }
 
-    private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
+    private handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { filterItem, condition, value } = this.props;
         let tmpVal;
         if (event.currentTarget.name === filterItem.name + '_v2') {

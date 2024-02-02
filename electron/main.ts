@@ -333,7 +333,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
  * @returns - the app definition json
  */
 const fetchAppDefinition = async (event) => {
-    log.info(`fetchAppDefinition ${event}`);
+    log.info(`fetchAppDefinition ${JSON.stringify(event)}`);
     try {
         const appResult = db.prepare('SELECT definition from app where app_id=1').get() as any;
         const appResultDefinition = appResult.definition;
@@ -668,7 +668,7 @@ const signIn = async (event, userData) => {
             // if a user exists but doesn't have an upazila, add it now
             // annoyingling sqlite doesn't let you alter column types
             // so we drop and re-create and then treat as a first time sign in to fill
-            log.info('Update users table to include numerical upazilla before normal sign in');
+            log.info('Update users table to include numerical upazila before normal sign in');
             const drop_table = 'DROP TABLE users;';
             const create_table =
                 'CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);';
@@ -680,7 +680,7 @@ const signIn = async (event, userData) => {
         const data = {
             username: userData.username,
             password: userData.password,
-            upazila: 202249,
+            upazila: userInfo.upazila,
             bahis_desk_version: APP_VERSION,
         };
         log.info('Attempt To Signin');

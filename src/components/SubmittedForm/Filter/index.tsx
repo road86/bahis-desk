@@ -1,8 +1,7 @@
 import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { Button as ReactButton } from 'reactstrap';
-import { Accordion, AccordionDetails, AccordionSummary, TextField, MenuItem, Grid } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Button, TextField, MenuItem, Grid } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { listPageStyles } from '../style';
 import {
@@ -232,12 +231,12 @@ function Filter(props: FilterProps) {
                         )}
                     </Grid>
                     <Grid item={true} xs={10}>
-                        <ReactButton className={classes.submitButton} size="sm" onClick={submitHandler}>
+                        <Button className={classes.submitButton} size="sm" onClick={submitHandler}>
                             Submit
-                        </ReactButton>
-                        <ReactButton className={classes.resetButton} size="sm" onClick={resetFilter}>
+                        </Button>
+                        <Button className={classes.resetButton} size="sm" onClick={resetFilter}>
                             Reset
-                        </ReactButton>
+                        </Button>
                     </Grid>
                 </Grid>
             </AccordionDetails>

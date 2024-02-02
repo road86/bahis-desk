@@ -11,12 +11,12 @@ import {
     TableRow,
     TableCell,
     TableBody,
+    Grid,
 } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import ListTableReducer, {
@@ -345,14 +345,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
         };
 
         return (
-            <div style={{ marginBottom: 20 }}>
-                <Row>
-                    <Col>
-                        <span className="float-right csv-export">
-                            <Export generateExcel={generateExcel} />
-                        </span>
-                    </Col>
-                </Row>
+            <>
                 <Accordion defaultExpanded>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                         ListTable
@@ -515,7 +508,10 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                         />
                     </AccordionActions>
                 </Accordion>
-            </div>
+                <Grid container xs={12}>
+                    <Export generateExcel={generateExcel} />
+                </Grid>
+            </>
         );
     }
 

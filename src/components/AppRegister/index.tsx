@@ -20,6 +20,8 @@ function Copyright() {
     );
 }
 
+// Props: include "onLogin: ('string')=>void"
+
 function AppRegister(props: any) {
     const theme = useTheme();
     const useStyles = makeStyles(registerStyles(theme));
@@ -59,7 +61,7 @@ function AppRegister(props: any) {
         setSignInButtonDisabled(true);
         await ipcRenderer.send('sign-in', userInput);
         ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
-            logger.info('in delete table dialogue: ', event, args);
+            logger.debug('in delete table dialogue: ', event, args);
             setOpenAlert(true);
             setLoginArgs(args);
         });

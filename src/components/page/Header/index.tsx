@@ -5,14 +5,16 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Store } from 'redux';
 import { ipcRenderer } from '../../../services/ipcRenderer';
-import { isPrevMenuEmpty, setPrevMenu } from '../../../store/ducks/menu';
+import { isPrevMenuEmpty, setPrevMenu, resetMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
 import { logger } from '../../../helpers/logger';
 import { theme } from '../../../theme';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
 
 export interface HeaderProps {
     handleLogout: any;
     syncTime: string | null;
+    resetMenuActionCreator: any;
     setPrevMenuActionCreator: any;
     isBackPossible: boolean;
     pathName: string;
@@ -91,6 +93,16 @@ function Header(props: HeaderProps) {
         setWaitingForDataSync(false);
     };
 
+    const onHomeHandler = (_event: React.MouseEvent<HTMLElement>) => {
+        if (isMobileMenuOpen) {
+            handleMobileMenuClose();
+        }
+        props.resetMenuActionCreator();
+        props.redirectToMenu();
+        // allow re-sync after clicking back button for now. It will however wait for the sync to complete, not sure how that works
+        setWaitingForDataSync(false);
+    };
+
     const getButtonColor = (): any => {
         logger.info('Getting button colour');
         //check unsync count on load the application
@@ -118,7 +130,17 @@ function Header(props: HeaderProps) {
                 <Toolbar className={classes.toolbar}>
                     {props.showContent ? (
                         <React.Fragment>
-                            <div className={classes.menuButton}></div>
+                            <div className={classes.sectionDesktop}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={onHomeHandler}
+                                    className={classes.homeButton}
+                                >
+                                    <FontAwesomeIcon icon={faHouse} style={{ marginRight: 5 }} />
+                                    Home
+                                </Button>
+                            </div>
                             <div className="syncBar">
                                 {props.syncTime && (
                                     <Typography className={classes.title} variant="body2" noWrap={true}>
@@ -180,6 +202,7 @@ const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
 /** map props to actions */
 const mapDispatchToProps = {
     setPrevMenuActionCreator: setPrevMenu,
+    resetMenuActionCreator: resetMenu,
 };
 
 /** connect clientsList to the redux store */

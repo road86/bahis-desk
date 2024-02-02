@@ -1,7 +1,7 @@
+import { Grid, Input, Typography } from '@material-ui/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { Col, FormGroup, Input, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import { getNativeLanguageText } from '../../../helpers/utils';
@@ -50,27 +50,25 @@ class FilterText extends React.Component<TextProps> {
     public render() {
         const { filterItem, value, condition, appLanguage } = this.props;
         return (
-            <FormGroup style={{ marginBottom: 0 }}>
-                <Row>
-                    <Col md={3}>
-                        <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
-                    </Col>
-                    <Col md={3}>
-                        <Select
-                            options={TEXT_FILTER_OPERATORS}
-                            values={TEXT_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
-                            onChange={this.handleConditionChange}
-                        />
-                    </Col>
-                    <Col md={6}>
-                        <Input type="text" name={filterItem.name} value={value || ''} onChange={this.handleValueChange} />
-                    </Col>
-                </Row>
-            </FormGroup>
+            <Grid container xs={12} spacing={2}>
+                <Grid item md={3}>
+                    <Typography>{getNativeLanguageText(filterItem.label, appLanguage)} Test</Typography>
+                </Grid>
+                <Grid item md={3}>
+                    <Select
+                        options={TEXT_FILTER_OPERATORS}
+                        values={TEXT_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+                        onChange={this.handleConditionChange}
+                    />
+                </Grid>
+                <Grid item md={6}>
+                    <Input type="text" name={filterItem.name} value={value || ''} onChange={this.handleValueChange} />
+                </Grid>
+            </Grid>
         );
     }
 
-    private handleValueChange = (event: React.FormEvent<HTMLInputElement>) => {
+    private handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { filterItem, condition } = this.props;
         this.props.setFilterValueActionCreator(
             filterItem.name,

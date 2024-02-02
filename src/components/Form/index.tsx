@@ -1,13 +1,13 @@
 import OdkFormRenderer from 'odkformrenderer'; // FIXME this is the big one to remove
 import queryString from 'query-string';
-import {Typography} from '@material-ui/core';
-import {useEffect, useState} from 'react';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
-import {Alert} from 'reactstrap';
-import {ipcRenderer} from '../../services/ipcRenderer';
+import { Snackbar, Typography } from '@material-ui/core';
+import MuiAlert from '@material-ui/lab/Alert';
+import { useEffect, useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { ipcRenderer } from '../../services/ipcRenderer';
 import AlertDialog from './dialog';
 import './Form.css'; // FIXME this seems stupid?
-import {logger} from '../../helpers/logger';
+import { logger } from '../../helpers/logger';
 
 interface FormURLParams {
     id: string;
@@ -16,6 +16,7 @@ interface FormURLParams {
 interface formProps extends RouteComponentProps<FormURLParams> {
     appLanguage: string;
     setUnsyncCount: any;
+    setSuccess: () => void;
 }
 
 const getSearchDBProperties = (question: any, path: any) => {
@@ -62,7 +63,7 @@ function Form(props: formProps) {
         const userLocationInfoObj = ipcRenderer.sendSync('user-db-info');
         const userInfoObj = ipcRenderer.sendSync('fetch-userlist');
         if (formDefinitionObj != null) {
-            const {definition, formChoices} = formDefinitionObj;
+            const { definition, formChoices } = formDefinitionObj;
             setFormDefinition(definition);
             setFormChoices(formChoices);
             setUserLocationInfo(userLocationInfoObj);
@@ -118,7 +119,8 @@ function Form(props: formProps) {
                     : `${userInfo.users[0].username}-${generateUid()}`;
             const formId = (props as any).match.params.id || '';
             ipcRenderer.send('submit-form-response', {
-                data: JSON.stringify({...userInput, 'meta/instanceID': metaId}),
+                data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
+                data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
                 formId,
             });
             setToastVisible(true);
@@ -127,7 +129,6 @@ function Form(props: formProps) {
             props.setUnsyncCount();
         }
     };
-
     const handleCancel = () => {
         logger.info('handleCancel');
         setShowConfirmDialog(false);
@@ -137,7 +138,8 @@ function Form(props: formProps) {
         logger.info(' handleSubmit ');
         console.log(userInput);
         setUserInput(userInput);
-        if(userInput && userInput !== 'Field Violated') {
+        setShowConfirmDialog(true);
+        if (userInput && userInput !== 'Field Violated') {
             setShowConfirmDialog(true);
         }
     };
@@ -174,7 +176,7 @@ function Form(props: formProps) {
         return formDefinitionJson;
     };
 
-    const {dataJson} = queryString.parse((props as any).location.search);
+    const { dataJson } = queryString.parse((props as any).location.search);
 
     const odk_props = {
         csvList: formChoices ? JSON.parse(formChoices) : {},
@@ -203,14 +205,22 @@ function Form(props: formProps) {
         }
     };
 
+    const Alert = (props) => <MuiAlert elevation={6} variant="filled" {...props} />;
+
+    const SuccessSnackbar = () => (
+        <Snackbar open={toastVisible}>
+            <Alert severity="success">Form Submitted Successfully! You will be redirected in 5 seconds...</Alert>
+        </Snackbar>
+    );
+
     return (
         <div className="form-container">
-            <AlertDialog open={showConfirmDialog} yes={handleYes} cancel={handleCancel}/>
-            {toastVisible && <Alert color="success">Form Submitted Successfylly!</Alert>}
+            <SuccessSnackbar />
+            <AlertDialog open={showConfirmDialog} yes={handleYes} cancel={handleCancel} />
             {formDefinitionJson ? (
                 getOdkFormRenderer()
             ) : (
-                <div style={{marginTop: '10%'}}>
+                <div style={{ marginTop: '10%' }}>
                     <Typography color="secondary" component="h1" variant="h4" align="center">
                         Form is loading. If form does not render please Sync Now and then press Back and try again.
                     </Typography>
