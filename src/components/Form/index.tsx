@@ -120,7 +120,6 @@ function Form(props: formProps) {
             const formId = (props as any).match.params.id || '';
             ipcRenderer.send('submit-form-response', {
                 data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
-                data: JSON.stringify({ ...userInput, 'meta/instanceID': metaId }),
                 formId,
             });
             setToastVisible(true);

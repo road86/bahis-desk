@@ -856,6 +856,8 @@ const updateAppDefinition = (appDefinition) => {
             module.children.push(listModule);
             module.type = 'container';
             module.id = listId;
+        } else if (module.type == 'iframe') {
+            // do nothing special
         } else if (module.children)
             module.children.forEach((mod) => {
                 update(mod);

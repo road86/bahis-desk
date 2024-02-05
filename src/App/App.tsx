@@ -31,6 +31,7 @@ import SubmittedForm from '../components/SubmittedForm';
 import ErrorBoundary from '../components/page/ErrorBoundary';
 import Header from '../components/page/Header';
 
+import IFrame from '../containers/IFrame';
 import Menu from '../containers/Menu';
 
 import { ipcRenderer } from '../services/ipcRenderer';
@@ -185,37 +186,38 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 <Grid item xs={12}>
                     <Redirect to="/" />
                     <Switch>
-                        <Route exact={true} path="/">
-                            <Redirect to="/signup/" />
-                        </Route>
-                        <Route exact={true} path="/signup/">
+                        <Route exact path="/">
                             <AppRegister onLogin={setUpazila} />
                         </Route>
-                        <Route exact={true} path="/dashboard/">
-                            <IFrame upazila={upazila} />
+                        <Route path="/signup">
+                            <Redirect to="/" />
                         </Route>
-                        <Route exact={true} path="/menu/">
+                        <Route path="/iframe">
+                            <IFrame upazila={upazila} appLanguage={'English'} />
+                        </Route>
+                        <Route exact path="/menu/">
                             <Menu />
                         </Route>
-                        <Route exact={true} path="/form/:id">
+                        <Route exact path="/form/:id">
                                 <Suspense fallback={<div>Loading...</div>}>
                                     <ErrorBoundary>
                                     <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
                                     </ErrorBoundary>
                                 </Suspense>
                         </Route>
-                        <Route exact={true} path="/formlist/:id">
+                        <Route exact path="/formlist/:id">
                             <SubmittedForm appLanguage={'English'} />
                         </Route>
-                        <Route exact={true} path="/submittedDetails/:id">
+                        <Route exact path="/submittedDetails/:id">
                             <FormDetails />
                         </Route>
-                        <Route exact={true} path="/list/:id">
+                        <Route exact path="/list/:id">
                             <List appLanguage={'English'} />
                         </Route>
-                        <Route exact={true} path="/listProfile/:id">
+                        <Route exact path="/listProfile/:id">
                             <ListProfile />
                         </Route>
+                        <Route render={() => <div>404 Route Not Found</div>} />
                     </Switch>
                 </Grid>
             </Container>

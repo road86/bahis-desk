@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { RouteComponentProps } from 'react-router-dom';
-import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { logger } from '../../helpers/logger';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -15,6 +14,7 @@ import menuReducer, {
     FORM_TYPE,
     LIST_TYPE,
     MODULE_TYPE,
+    IFRAME_TYPE,
     MenuItem,
     getCurrentMenu,
     isPrevMenuEmpty,
@@ -30,6 +30,7 @@ import './Menu.css';
 import ModuleMenuItem from './Module';
 import SubmittedFormMenuItem from './SubmittedForm';
 import { menuStyle } from './style';
+import IFrameMenuItem from './IFrame';
 
 /** register the clients reducer */
 reducerRegistry.register(menuReducerName, menuReducer);
@@ -115,6 +116,9 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
         }
         if (menuItem.type === FORMLIST_TYPE) {
             return <SubmittedFormMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+        }
+        if (menuItem.type === IFRAME_TYPE) {
+            return <IFrameMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
         }
         return null;
     };
