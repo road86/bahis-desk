@@ -672,7 +672,7 @@ const signIn = async (event, userData) => {
     const query = 'SELECT * from users limit 1';
     let userInfo = db.prepare(query).get() as any;
     // if a user has signed in before then no need to call signin-api
-    // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
+    // essentially allowing sign in offline
     if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password && userInfo.upazila) {
         log.info('This is an offline-ready account.');
         const results = { username: userData.username, message: 'signIn::local' };
@@ -699,7 +699,6 @@ const signIn = async (event, userData) => {
         const data = {
             username: userData.username,
             password: userData.password,
-            upazila: userInfo.upazila,
             bahis_desk_version: APP_VERSION,
         };
         log.info('Attempt To Signin');
@@ -1153,9 +1152,9 @@ const csvDataSync = async (db, username) => {
 
 const getUserDBInfo = (event) => {
     // FIXME this function is actually about user location and is badly named
+    log.info(`getting userDBInfo after ${event}`);
     try {
         const query_to_get_upazila = `select upazila from users`;
-        log.info(db.prepare(query_to_get_upazila).get());
         const upazila_id = (db.prepare(query_to_get_upazila).get() as any).upazila;
         const query_to_get_district = `select parent
                                        from geo_cluster

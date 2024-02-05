@@ -115,7 +115,12 @@ function AppRegister(props: any) {
                     syncAppModule();
                 }
             }
+            logger.debug('END formSubmissionResults: ', event, args);
         });
+
+        const { upazila } = ipcRenderer.sendSync('user-db-info');
+        logger.info(`client-side handleSignIn upazila: ${upazila}`);
+        props.onLogin(upazila);
     };
 
     //Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
@@ -141,6 +146,10 @@ function AppRegister(props: any) {
                 });
             });
         }
+
+        const { upazila } = ipcRenderer.sendSync('user-db-info');
+        logger.info(`syncAppModule upazila: ${upazila} `);
+        props.onLogin(upazila);
     };
 
     const snackbarClose = () => {
