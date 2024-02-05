@@ -183,59 +183,81 @@ app.on('window-all-closed', () => {
 const isMac = process.platform === 'darwin'
 
 const template = [
+    // { role: 'fileMenu' }
     {
         label: 'File',
         submenu: [
             {
                 label: 'Reset Database',
                 click: () => {
-
-                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    const browserWindow = BrowserWindow.getFocusedWindow();
                     if (browserWindow) {
-                        let status = dialog.showMessageBoxSync(browserWindow,
-                            {
+                        const status = dialog.showMessageBoxSync(browserWindow, {
                                 title: 'Confirm',
                                 message: `Are you sure?`,
-                                type: "warning",
+                            type: 'warning',
                                 buttons: ['Yes', 'Cancel'],
                                 cancelId: 1,
-                                noLink: true
-                            }
-                        )
+                            noLink: true,
+                        });
                         if (status === 0) {
-                            mainWindow?.webContents.send('init-refresh-database')
+                            mainWindow?.webContents.send('init-refresh-database');
                         }
                     }
-
-                }
+                },
             },
-            isMac ? {role: 'close'} : {role: 'quit'},
-        ]
+            isMac ? { role: 'close' } : { role: 'quit' },
+        ],
     },
+    // { role: 'viewMenu' }
+    {
+        label: 'View',
+        submenu: [
+            { role: 'reload' },
+            { role: 'forceReload' },
+            { role: 'toggleDevTools' },
+            { type: 'separator' },
+            { role: 'resetZoom' },
+            { role: 'zoomIn' },
+            { role: 'zoomOut' },
+            { type: 'separator' },
+            { role: 'togglefullscreen' },
+        ],
+    },
+    // { role: 'windowMenu' }
+    {
+        label: 'Window',
+        submenu: [
+            { role: 'minimize' },
+            { role: 'zoom' },
+            ...(isMac
+                ? [{ type: 'separator' }, { role: 'front' }, { type: 'separator' }, { role: 'window' }]
+                : [{ role: 'close' }]),
+        ],
+    },
+    // { role: 'helpMenu' }
     {
         label: 'Help',
         submenu: [
             {
                 label: 'About',
                 click: () => {
-                    const browserWindow = BrowserWindow.getFocusedWindow()
+                    const browserWindow = BrowserWindow.getFocusedWindow();
                     if (browserWindow) {
-                        return dialog.showMessageBox(browserWindow,
-                            {
+                        return dialog.showMessageBox(browserWindow, {
                                 title: 'About BAHIS',
                                 message: `
                                 BAHIS
                                 Version ${APP_VERSION}
                                 `,
-                                type: "info",
-                            }
-                        )
-                    }
+                            type: 'info',
+                        });
                 }
+                },
             },
-        ]
+        ],
     },
-]
+];
 
 // @ts-ignore
 const menu = Menu.buildFromTemplate(template)
