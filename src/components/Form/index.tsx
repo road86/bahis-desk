@@ -58,6 +58,7 @@ function Form(props: formProps) {
     const [userInput, setUserInput] = useState<any>(null);
 
     useEffect(() => {
+        logger.info(JSON.stringify(props));
         const formId = (props as any).match.params.id || '';
         const formDefinitionObj = ipcRenderer.sendSync('fetch-form-definition', formId);
         const userLocationInfoObj = ipcRenderer.sendSync('user-db-info');

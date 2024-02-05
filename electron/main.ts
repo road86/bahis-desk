@@ -1,7 +1,7 @@
-import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 
-import {app, BrowserWindow, ipcMain, dialog, Menu} from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import log from 'electron-log';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -9,7 +9,7 @@ import axios from 'axios';
 import { random } from 'lodash';
 import { existsSync, unlinkSync, writeFile, cp, rm } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
-import {autoUpdater} from 'electron-updater';
+import { autoUpdater } from 'electron-updater';
 
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
@@ -52,11 +52,11 @@ switch (MODE) {
 const migrate = (old_app_location) => {
     if (existsSync(old_app_location)) {
         log.warn(`Migrating user data from old location: ${old_app_location}`);
-        cp(old_app_location, app.getPath('userData'), {recursive: true}, (err) => {
+        cp(old_app_location, app.getPath('userData'), { recursive: true }, (err) => {
             log.error('Failed to migrate user data from old location');
             log.error(err);
         });
-        rm(old_app_location, {recursive: true}, (err) => {
+        rm(old_app_location, { recursive: true }, (err) => {
             log.error('Failed to delete user data from old location');
             log.error(err);
         });
@@ -73,7 +73,6 @@ switch (MODE) {
         log.error(`Unknown mode: ${MODE}`);
         break;
 }
-
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
@@ -102,7 +101,7 @@ const requireMe = createRequire(pathToFileURL(__filename).href);
 const addon = requireMe(
     path.resolve('./node_modules/better-sqlite3/build/Release/better_sqlite3.node').replace(/(\.node)?$/, '.node'),
 );
-let db = new Database(DB_PATH, {nativeBinding: addon});
+let db = new Database(DB_PATH, { nativeBinding: addon });
 
 const formConfigEndpoint = (name, time) => {
     return DB_TABLES_ENDPOINT.replace('?', time).replace('core_admin', name) + `?bahis_desk_version=${APP_VERSION}`;
@@ -179,10 +178,9 @@ app.on('window-all-closed', () => {
     app.quit();
 });
 
+const isMac = process.platform === 'darwin';
 
-const isMac = process.platform === 'darwin'
-
-const template = [
+const template: Electron.MenuItemConstructorOptions[] = [
     // { role: 'fileMenu' }
     {
         label: 'File',
@@ -193,11 +191,11 @@ const template = [
                     const browserWindow = BrowserWindow.getFocusedWindow();
                     if (browserWindow) {
                         const status = dialog.showMessageBoxSync(browserWindow, {
-                                title: 'Confirm',
-                                message: `Are you sure?`,
+                            title: 'Confirm',
+                            message: `Are you sure?`,
                             type: 'warning',
-                                buttons: ['Yes', 'Cancel'],
-                                cancelId: 1,
+                            buttons: ['Yes', 'Cancel'],
+                            cancelId: 1,
                             noLink: true,
                         });
                         if (status === 0) {
@@ -224,17 +222,6 @@ const template = [
             { role: 'togglefullscreen' },
         ],
     },
-    // { role: 'windowMenu' }
-    {
-        label: 'Window',
-        submenu: [
-            { role: 'minimize' },
-            { role: 'zoom' },
-            ...(isMac
-                ? [{ type: 'separator' }, { role: 'front' }, { type: 'separator' }, { role: 'window' }]
-                : [{ role: 'close' }]),
-        ],
-    },
     // { role: 'helpMenu' }
     {
         label: 'Help',
@@ -245,23 +232,22 @@ const template = [
                     const browserWindow = BrowserWindow.getFocusedWindow();
                     if (browserWindow) {
                         return dialog.showMessageBox(browserWindow, {
-                                title: 'About BAHIS',
-                                message: `
+                            title: 'About BAHIS',
+                            message: `
                                 BAHIS
                                 Version ${APP_VERSION}
                                 `,
                             type: 'info',
                         });
-                }
+                    }
                 },
             },
         ],
     },
 ];
 
-// @ts-ignore
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
 /** set up new db */
 function prepareDb(db) {
@@ -321,8 +307,11 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     try {
         const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId) as any;
         const datasource = JSON.parse(listDefinition.datasource);
-        const datasourceQuery = datasource.type === '0' ? `select *
-                                                           from ${datasource.query}` : datasource.query;
+        const datasourceQuery =
+            datasource.type === '0'
+                ? `select *
+                                                           from ${datasource.query}`
+                : datasource.query;
         const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
         const a = filterColumns.toString();
 
@@ -405,7 +394,7 @@ const fetchFormDefinition = (event, formId) => {
             const choices = {};
             Object.keys(choiceDefinition).forEach((key) => {
                 try {
-                    const {query} = choiceDefinition[key];
+                    const { query } = choiceDefinition[key];
                     choices[`${key}.csv`] = db.prepare(query).all();
                 } catch (err) {
                     log.info(`Choice Definition Error  ${err}`);
@@ -413,7 +402,7 @@ const fetchFormDefinition = (event, formId) => {
             });
 
             log.info(`Choices for form ${formId}:  ${choices}`);
-            event.returnValue = {...formDefinitionObj, formChoices: JSON.stringify(choices)};
+            event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
         } else {
             event.returnValue = null;
             log.info(`fetchFormDefinition problem, no such form with ${formId}`);
@@ -427,9 +416,13 @@ const fetchFormDefinition = (event, formId) => {
 const fetchFormChoices = (event, formId) => {
     try {
         log.info(`fetchFormChoices  ${formId}`);
-        const formchoices = db.prepare(`SELECT *
+        const formchoices = db
+            .prepare(
+                `SELECT *
                                         from form_choices
-                                        where xform_id = ? `).all(formId);
+                                        where xform_id = ? `,
+            )
+            .all(formId);
         event.returnValue = formchoices;
     } catch (err) {
         log.info('error fetch form choices ', err);
@@ -439,12 +432,16 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
     log.info(`fetchFormDetails  ${event} ${listId}`);
     try {
-        const formData = db.prepare(`SELECT *
+        const formData = db
+            .prepare(
+                `SELECT *
                                      from data
-                                     where ${column} = ? limit 1`).get(listId);
+                                     where ${column} = ? limit 1`,
+            )
+            .get(listId);
         log.info(formData);
         if (formData != undefined) {
-            event.returnValue = {formDetails: formData};
+            event.returnValue = { formDetails: formData };
         } else {
             event.returnValue = null;
         }
@@ -493,7 +490,7 @@ const fetchFormListDefinition = (event, formId) => {
         const query = 'SELECT * from data where form_id = ? and submitted_by = ?';
         const fetchedRows = db.prepare(query).all(formId, userName);
 
-        event.returnValue = {fetchedRows};
+        event.returnValue = { fetchedRows };
     } catch (err) {
         log.info(`fetchFormListDefinition, listId: ${formId}`);
     }
@@ -512,7 +509,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
         }
         const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
 
-        event.returnValue = {fetchedRows};
+        event.returnValue = { fetchedRows };
     } catch (err) {
         log.info(`fetchFollowupFormData, formId: ${formId}`);
     }
@@ -566,9 +563,9 @@ const changeUser = async (event, obj) => {
     log.info('new db setup call after delete previous user data');
     db = new Database(DB_PATH);
     prepareDb(db);
-    const {response, userData} = obj;
+    const { response, userData } = obj;
     configureFreshDatabase(response, userData);
-    const results = {username: response.user_name, message: 'changeUser'};
+    const results = { username: response.user_name, message: 'changeUser' };
     mainWindow?.webContents.send('formSubmissionResults', results);
     event.returnValue = {
         userInfo: response,
@@ -678,7 +675,7 @@ const signIn = async (event, userData) => {
     // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
     if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password && userInfo.upazila) {
         log.info('This is an offline-ready account.');
-        const results = {username: userData.username, message: 'signIn::local'};
+        const results = { username: userData.username, message: 'signIn::local' };
         mainWindow?.webContents.send('formSubmissionResults', results);
         event.returnValue = {
             userInfo: '',
@@ -729,7 +726,7 @@ const signIn = async (event, userData) => {
                         log.info('New user - setting up local db');
                         configureFreshDatabase(response.data, userData);
                         log.info('Local db configured');
-                        results = {username: response.data.user_name, message: 'signIn::firstTimeUser'};
+                        results = { username: response.data.user_name, message: 'signIn::firstTimeUser' };
                         mainWindow?.webContents.send('formSubmissionResults', results);
                         event.returnValue = {
                             userInfo: response.data,
@@ -749,7 +746,7 @@ const signIn = async (event, userData) => {
                     else {
                         log.info('Existing user');
                         // given the offline-ready stuff we do above... do we use this branch?
-                        results = {username: response.data.user_name, message: 'signIn::offlineUser'};
+                        results = { username: response.data.user_name, message: 'signIn::offlineUser' };
                         mainWindow?.webContents.send('formSubmissionResults', results);
                         event.returnValue = {
                             userInfo: response.data,
@@ -813,7 +810,6 @@ const populateCatchment = (catchments) => {
 
 const updateAppDefinition = (appDefinition) => {
     log.info('updateAppDefinition');
-    log.info(JSON.stringify(appDefinition.name));
     const update = function (module) {
         if (module.xform_id != '') {
             const formModule = {
@@ -1158,8 +1154,8 @@ const csvDataSync = async (db, username) => {
 const getUserDBInfo = (event) => {
     // FIXME this function is actually about user location and is badly named
     try {
-        const query_to_get_upazila = `select upazila
-                                      from users`;
+        const query_to_get_upazila = `select upazila from users`;
+        log.info(db.prepare(query_to_get_upazila).get());
         const upazila_id = (db.prepare(query_to_get_upazila).get() as any).upazila;
         const query_to_get_district = `select parent
                                        from geo_cluster
@@ -1169,7 +1165,7 @@ const getUserDBInfo = (event) => {
                                        from geo_cluster
                                        where value in (${district_id})`;
         const division_id = (db.prepare(query_to_get_division).get() as any).parent;
-        const geoInfo = {division: division_id, district: district_id, upazila: upazila_id.toString()};
+        const geoInfo = { division: division_id, district: district_id, upazila: upazila_id.toString() };
 
         if (geoInfo !== undefined) {
             log.info(`userDB SUCCESS ${JSON.stringify(geoInfo)}`);
@@ -1684,7 +1680,7 @@ const sendDataToServer = async (db, username, mainWindow) => {
             const sendRow = async (rowObj) => {
                 const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
                 let formData = JSON.parse(rowObj.data) || {};
-                formData = {...formData, 'formhub/uuid': formDefinitionObj.form_uuid};
+                formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
                 //We are converting json to XML which is an alternative submission for xforms
                 const apiFormData = {
                     xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
@@ -1868,14 +1864,14 @@ const refreshDatabase = () => {
         db.close();
         unlinkSync(DB_PATH);
         log.info('Databased delete');
-        db = new Database(DB_PATH, {nativeBinding: addon});
+        db = new Database(DB_PATH, { nativeBinding: addon });
         prepareDb(db);
-        return 'success'
+        return 'success';
     } catch (e) {
         console.log(e);
-        return 'failed'
+        return 'failed';
     }
-}
+};
 
 // subscribes the listeners to channels
 ipcMain.handle('fetch-app-definition', fetchAppDefinition);

@@ -1,7 +1,5 @@
 import { Avatar, Button, Grid, Paper, Snackbar, Typography, useTheme } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
-// import Typist from 'react-typist';
-// import Loader from 'react-loader-spinner';
 import { makeStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import { withRouter } from 'react-router';

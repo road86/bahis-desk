@@ -38,7 +38,7 @@ import { ipcRenderer } from '../services/ipcRenderer';
 
 import { logger } from '../helpers/logger';
 
-import {FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu} from '../store/ducks/menu';
+import { FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu } from '../store/ducks/menu';
 
 import './App.css';
 import { appStyles } from './styles';
@@ -159,7 +159,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 It might take a while for the first sync. please be patient while syncing`,
                 });
 
-                    ipcRenderer.send('refresh-database');
+                ipcRenderer.send('refresh-database');
                 logout();
             }
 
@@ -199,11 +199,11 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                             <Menu />
                         </Route>
                         <Route exact path="/form/:id">
-                                <Suspense fallback={<div>Loading...</div>}>
-                                    <ErrorBoundary>
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <ErrorBoundary>
                                     <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
-                                    </ErrorBoundary>
-                                </Suspense>
+                                </ErrorBoundary>
+                            </Suspense>
                         </Route>
                         <Route exact path="/formlist/:id">
                             <SubmittedForm appLanguage={'English'} />
