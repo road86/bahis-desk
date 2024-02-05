@@ -242,7 +242,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
                     {currentMenu &&
                         currentMenu.type === MODULE_TYPE &&
                         _.sortBy(currentMenu.children, ['order']).map((menuItem, index) => (
-                            <Grid key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
+                            <Grid item key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
                                 {typeEvalutor(menuItem, appLanguage)}
                             </Grid>
                         ))}
