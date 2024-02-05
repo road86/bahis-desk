@@ -157,7 +157,7 @@ function Filter(props: FilterProps) {
                     <div id="menu-body">
                         {isEnvSet &&
                             definition.map((filterItem, index) => (
-                                <div key={'filter-' + index} className="menu-item" lg={12} md={12} sm={12} xs={12}>
+                                <div key={'filter-' + index} className="menu-item">
                                     {renderTypeEvaluator(filterItem, index, appLanguage, listId)}
                                 </div>
                             ))}

@@ -231,10 +231,10 @@ function Filter(props: FilterProps) {
                         )}
                     </Grid>
                     <Grid item={true} xs={10}>
-                        <Button className={classes.submitButton} size="sm" onClick={submitHandler}>
+                        <Button className={classes.submitButton} size="small" onClick={submitHandler}>
                             Submit
                         </Button>
-                        <Button className={classes.resetButton} size="sm" onClick={resetFilter}>
+                        <Button className={classes.resetButton} size="small" onClick={resetFilter}>
                             Reset
                         </Button>
                     </Grid>
