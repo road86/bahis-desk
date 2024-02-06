@@ -1,7 +1,6 @@
 import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { Col, Row } from 'reactstrap';
 import { FILTER_CHOICES } from '../../constants.tsx';
 import Filter from '../../containers/Filter';
 import ListTable from '../../containers/ListTable';
@@ -19,16 +18,6 @@ interface ListURLParams {
 interface ListProps extends RouteComponentProps<ListURLParams> {
     appLanguage: string;
 }
-
-// /** interface for List state */
-// interface ListState {
-//   filterDefinition: any;
-//   columnDefinition: any;
-//   datasource: any;
-//   filtersValue: any;
-//   listHeader: { [key: string]: string };
-//   listId: string;
-// }
 
 function List(props: ListProps) {
     const [columnDefinition, setColumnDefinition] = React.useState<any>(null);
@@ -51,11 +40,6 @@ function List(props: ListProps) {
             setDataSource(datasource ? JSON.parse(datasource) : null);
             setFilterDefinition(filterDefinition ? JSON.parse(filterDefinition) : null);
             setListHeader(listHeader ? JSON.parse(listHeader) : {});
-            // if (listId == '24') {
-            //   setColumnDefinition(ColumnnDefinition as any)
-            // } else {
-            //   setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
-            // }
             setColumnDefinition(columnDefinition ? JSON.parse(columnDefinition) : null);
             setListId(listId);
         }
@@ -76,7 +60,7 @@ function List(props: ListProps) {
     const classes = useStyles();
 
     return (
-        <React.Fragment>
+        <>
             {columnDefinition && filterDefinition ? (
                 <div>
                     <hr className={classes.hrTag} />
@@ -85,31 +69,23 @@ function List(props: ListProps) {
                     </div>
                     <hr className={classes.hrTag} />
                     {filterDefinition && listId !== '' && (
-                        <Row>
-                            <Col>
-                                <Filter
-                                    definition={filterDefinition}
-                                    choices={FILTER_CHOICES}
-                                    onSubmitHandler={setFiltersValue}
-                                    appLanguage={appLanguage}
-                                    listId={listId}
-                                    columnDefinition={columnDefinition}
-                                    datasource={datasource}
-                                />
-                            </Col>
-                        </Row>
+                        <Filter
+                            definition={filterDefinition}
+                            choices={FILTER_CHOICES}
+                            onSubmitHandler={setFiltersValue}
+                            appLanguage={appLanguage}
+                            listId={listId}
+                            columnDefinition={columnDefinition}
+                            datasource={datasource}
+                        />
                     )}
                     {columnDefinition && datasource && (
-                        <Row>
-                            <Col>
-                                <ListTable
-                                    listId={listId}
-                                    columnDefinition={columnDefinition}
-                                    datasource={datasource}
-                                    filters={filtersValue}
-                                />
-                            </Col>
-                        </Row>
+                        <ListTable
+                            listId={listId}
+                            columnDefinition={columnDefinition}
+                            datasource={datasource}
+                            filters={filtersValue}
+                        />
                     )}
                 </div>
             ) : (
@@ -117,7 +93,7 @@ function List(props: ListProps) {
                     Couldn't Find List Definition
                 </Typography>
             )}
-        </React.Fragment>
+        </>
     );
 }
 

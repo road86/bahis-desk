@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, makeStyles, useTheme } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Grid, makeStyles, useTheme } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import _, { random } from 'lodash';
@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { RouteComponentProps } from 'react-router-dom';
-import { Alert, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { logger } from '../../helpers/logger';
 import { ipcRenderer } from '../../services/ipcRenderer';
@@ -15,6 +14,7 @@ import menuReducer, {
     FORM_TYPE,
     LIST_TYPE,
     MODULE_TYPE,
+    IFRAME_TYPE,
     MenuItem,
     getCurrentMenu,
     isPrevMenuEmpty,
@@ -23,12 +23,14 @@ import menuReducer, {
     setMenuItem,
     setPrevMenu,
 } from '../../store/ducks/menu';
+import Alert from '@material-ui/lab/Alert';
 import FormMenuItem from './Form';
 import ListMenuItem from './List';
 import './Menu.css';
 import ModuleMenuItem from './Module';
 import SubmittedFormMenuItem from './SubmittedForm';
 import { menuStyle } from './style';
+import IFrameMenuItem from './IFrame';
 
 /** register the clients reducer */
 reducerRegistry.register(menuReducerName, menuReducer);
@@ -114,6 +116,9 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
         }
         if (menuItem.type === FORMLIST_TYPE) {
             return <SubmittedFormMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
+        }
+        if (menuItem.type === IFRAME_TYPE) {
+            return <IFrameMenuItem menuItem={menuItem} appLanguage={appLanguage} />;
         }
         return null;
     };
@@ -202,7 +207,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
                                 (2023-03-28) When users sign in from bahis-desk they used to have the entire branch catchment
                                 returned to them but no upazila (which was later inferred from the whole catchment every time
                                 it was needed); we now don&apos;t send the catchment (as users already have this) and do send
-                                the upazilla (so it no longer needs to be determined over and over again) - importantly this
+                                the upazila (so it no longer needs to be determined over and over again) - importantly this
                                 limits login to accounts that have been correctly assigned as an upazila.
                             </li>
                             <li>
@@ -233,15 +238,15 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
                     </AccordionDetails>
                 </Accordion>
 
-                <Row id="menu-body">
+                <Grid container id="menu-body">
                     {currentMenu &&
                         currentMenu.type === MODULE_TYPE &&
                         _.sortBy(currentMenu.children, ['order']).map((menuItem, index) => (
-                            <Col key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
+                            <Grid item key={'menu-' + index} className="menu-item" lg={3} md={4} sm={6} xs={12}>
                                 {typeEvalutor(menuItem, appLanguage)}
-                            </Col>
+                            </Grid>
                         ))}
-                </Row>
+                </Grid>
             </div>
         </>
     );

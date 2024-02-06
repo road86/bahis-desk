@@ -13,6 +13,8 @@ export const MODULE_TYPE = 'container';
 export type MODULE_TYPE = typeof MODULE_TYPE;
 export const FORMLIST_TYPE = 'form_list';
 export type FORMLIST_TYPE = typeof FORMLIST_TYPE;
+export const IFRAME_TYPE = 'iframe';
+export type IFRAME_TYPE = typeof IFRAME_TYPE;
 
 /** interface for multi language label object */
 export interface Label {
@@ -43,11 +45,20 @@ export interface ModuleMenu {
     name: string;
     label: Label;
     img_id: number;
-    children: Array<ModuleMenu | ListMenu | FormMenu>;
+    children: Array<ModuleMenu | ListMenu | FormMenu | IFrameMenu>;
+}
+
+/** interface for iFrame menu */
+export interface IFrameMenu {
+    type: IFRAME_TYPE;
+    name: string;
+    label: Label;
+    img_id: number;
+    external_url: string;
 }
 
 /** interface for MenuItem */
-export type MenuItem = ModuleMenu | FormMenu | ListMenu;
+export type MenuItem = ModuleMenu | FormMenu | ListMenu | IFrameMenu;
 
 // actions
 

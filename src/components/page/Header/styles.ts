@@ -16,6 +16,11 @@ export const headerStyles = makeStyles((theme: Theme) =>
             // backgroundColor: `${theme.palette.secondary.main} !important`,
             borderRadius: `5px !important`,
         },
+        homeButton: {
+            backgroundColor: `${theme.palette.secondary.light} !important`,
+            color: `${theme.palette.primary.dark} !important`,
+            borderRadius: `5px !important`,
+        },
         backButton: {
             backgroundColor: `${theme.palette.secondary.light} !important`,
             color: `${theme.palette.primary.dark} !important`,

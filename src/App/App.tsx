@@ -1,12 +1,11 @@
 import * as React from 'react';
-import {Suspense, useEffect} from 'react';
-import {connect} from 'react-redux';
-import {Redirect, Route, RouteComponentProps, Switch, withRouter} from 'react-router';
-import {Col, Container, Row} from 'reactstrap'; // FIXME why are we using reactstrap _AND_ material UI?
-import {Store} from 'redux';
+import { useEffect, Suspense } from 'react';
+import { connect } from 'react-redux';
+import { Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router';
+import { Store } from 'redux';
 
-import {library} from '@fortawesome/fontawesome-svg-core'; // FIXME do we need fortawesome _AND_ material UI packages?
-import {faFileAlt, faFolder, faListAlt, faUser} from '@fortawesome/free-regular-svg-icons'; // FIXME do we need fortawesome _AND_ material UI packages?
+import { library } from '@fortawesome/fontawesome-svg-core'; // FIXME do we need fortawesome _AND_ material UI packages?
+import { faFileAlt, faFolder, faListAlt, faUser } from '@fortawesome/free-regular-svg-icons'; // FIXME do we need fortawesome _AND_ material UI packages?
 import {
     faArrowLeft,
     faBars,
@@ -19,31 +18,31 @@ import {
     faSync,
     faTools,
 } from '@fortawesome/free-solid-svg-icons'; // FIXME do we need fortawesome _AND_ material UI packages?
-// import { Box, CircularProgress, Typography } from '@material-ui/core';
+import { IconButton, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import CloseIcon from '@material-ui/icons/Close';
 
 import AppRegister from '../components/AppRegister';
 import Form from '../components/Form';
 import FormDetails from '../components/FormDetails';
 import List from '../components/List';
 import ListProfile from '../components/ListProfile';
-// import Loading from "../components/Loading";
 import SubmittedForm from '../components/SubmittedForm';
 import ErrorBoundary from '../components/page/ErrorBoundary';
 import Header from '../components/page/Header';
 
+import IFrame from '../containers/IFrame';
 import Menu from '../containers/Menu';
 
-import {ipcRenderer} from '../services/ipcRenderer';
+import { ipcRenderer } from '../services/ipcRenderer';
 
-import {logger} from '../helpers/logger';
+import { logger } from '../helpers/logger';
 
-import {FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu} from '../store/ducks/menu';
+import { FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu } from '../store/ducks/menu';
 
 import './App.css';
-import {appStyles} from './styles';
-import {IconButton, Snackbar} from "@material-ui/core";
-import {Alert} from "@material-ui/lab";
-import CloseIcon from '@material-ui/icons/Close';
+import { appStyles } from './styles';
+import { Container, Grid } from '@material-ui/core';
 
 library.add(
     faUser,
@@ -69,13 +68,11 @@ export interface MenuProps {
 /** Main App component */
 const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
     const classes = appStyles();
-    const {location} = props;
-    // const [loading, setLoading] = React.useState<boolean>(false);
+    const { location } = props;
     const headerExcludedURLs = ['/', '/signup/'];
-    // const [percentage, setPercentage] = React.useState<number>(0);
-    // const [csv, setCsv] = React.useState<any>({});
     const [lastSync, setLastSync] = React.useState<string | null>(null);
     const [unsyncCount, setUnsyncCount] = React.useState<number>(0);
+    const [upazila, setUpazila] = React.useState<string>('');
 
     const [toastVisible, setToastVisible] = React.useState<boolean>(false);
     const [toastContent, setToastContent] = React.useState<any>({});
@@ -120,20 +117,12 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     };
 
     const toast = (response: any) => (
-        <Snackbar
-            open={toastVisible}
-            anchorOrigin={{vertical: 'top', horizontal: 'left'}}
-            key={'topleft'}
-        >
+        <Snackbar open={toastVisible} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} key={'topleft'}>
             <>
                 <Alert severity={response.severity}>
                     {response.msg}
-                    <IconButton
-                        aria-label="close"
-                        color="secondary"
-                        onClick={handleClose}
-                    >
-                        <CloseIcon/>
+                    <IconButton aria-label="close" color="secondary" onClick={handleClose}>
+                        <CloseIcon />
                     </IconButton>
                 </Alert>
             </>
@@ -142,11 +131,14 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
     const handleClose = () => {
         setToastVisible(false);
-    }
+    };
 
     useEffect(() => {
         ipcRenderer.on('init-refresh-database', async () => {
-            const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
+            const response = await ipcRenderer.sendSync(
+                'fetch-query-data',
+                'select count(*) as cnt from data where status != 1',
+            );
             const unSyncData = response[0].cnt;
 
             if (unSyncData > 0) {
@@ -158,7 +150,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
 
                 setTimeout(() => {
                     setToastVisible(false);
-                }, 5000)
+                }, 5000);
             } else {
                 setToastVisible(true);
                 setToastContent({
@@ -167,16 +159,16 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 It might take a while for the first sync. please be patient while syncing`,
                 });
 
-                    ipcRenderer.send('refresh-database');
-                    logout()
+                ipcRenderer.send('refresh-database');
+                logout();
             }
 
-            return
-        })
-    }, [])
+            return;
+        });
+    }, []);
 
     return (
-        <React.Fragment>
+        <>
             <Header
                 unsyncCount={unsyncCount}
                 updateUnsyncCount={updateUnsyncCount}
@@ -189,76 +181,47 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                 setLastSyncTime={setLastSyncTime}
             />
             {toast(toastContent)}
-            {/* )} */}
-            <div className={classes.offset}/>
-            <Row id="main-page-container">
-                <Col>
-                    <Redirect to="/"/>
+            <div className={classes.offset} />
+            <Container id="main-page-container">
+                <Grid item xs={12}>
+                    <Redirect to="/" />
                     <Switch>
-                        <Route exact={true} path="/">
-                            <Redirect to="/signup/"/>
+                        <Route exact path="/">
+                            <AppRegister onLogin={setUpazila} />
                         </Route>
-                        <Route exact={true} path="/signup/">
-                            <AppRegister/>
+                        <Route path="/signup">
+                            <Redirect to="/" />
                         </Route>
-                        <Route exact={true} path="/menu/">
-                            <Menu/>
+                        <Route path="/iframe">
+                            <IFrame upazila={upazila} appLanguage={'English'} />
                         </Route>
-                        <Route exact={true} path="/form/:id">
-                            <Container>
-                                <Suspense fallback={<div>Loading...</div>}>
-                                    <ErrorBoundary>
-                                        <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount}/>
-                                    </ErrorBoundary>
-                                </Suspense>
-                            </Container>
+                        <Route exact path="/menu/">
+                            <Menu />
                         </Route>
-                        <Route exact={true} path="/formlist/:id">
-                            <Container>
-                                <SubmittedForm appLanguage={'English'}/>
-                            </Container>
+                        <Route exact path="/form/:id">
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <ErrorBoundary>
+                                    <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
+                                </ErrorBoundary>
+                            </Suspense>
                         </Route>
-                        <Route exact={true} path="/submittedDetails/:id">
-                            <Container>
-                                <FormDetails/>
-                            </Container>
+                        <Route exact path="/formlist/:id">
+                            <SubmittedForm appLanguage={'English'} />
                         </Route>
-                        <Route exact={true} path="/list/:id">
-                            <Container>
-                                <List appLanguage={'English'}/>
-                            </Container>
+                        <Route exact path="/submittedDetails/:id">
+                            <FormDetails />
                         </Route>
-                        <Route exact={true} path="/listProfile/:id">
-                            <Container>
-                                <ListProfile/>
-                            </Container>
+                        <Route exact path="/list/:id">
+                            <List appLanguage={'English'} />
                         </Route>
+                        <Route exact path="/listProfile/:id">
+                            <ListProfile />
+                        </Route>
+                        <Route render={() => <div>404 Route Not Found</div>} />
                     </Switch>
-                </Col>
-            </Row>
-            {/* {loading ? (
-                <Box position="fixed" bottom={0} left={0} right={0} display="inline-flex" justifyContent="space-between">
-                    <Typography variant="caption" component="div" style={{ marginLeft: 10, marginTop: 15 }} color="primary">
-                        Downloading
-                    </Typography>
-                    <Box position="relative" display="inline-flex" marginRight={2} marginBottom={2}>
-                        <CircularProgress variant="determinate" value={percentage} />
-                        <Box
-                            top={0}
-                            left={0}
-                            bottom={0}
-                            right={0}
-                            position="absolute"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <Typography variant="caption" component="div" color="primary">{`${percentage}%`}</Typography>
-                        </Box>
-                    </Box>
-                </Box>
-            ) : null} */}
-        </React.Fragment>
+                </Grid>
+            </Container>
+        </>
     );
 };
 

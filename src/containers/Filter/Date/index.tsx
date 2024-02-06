@@ -1,11 +1,12 @@
+import { Grid, Typography } from '@material-ui/core';
 import * as React from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
+import { logger } from '../../../helpers/logger';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import {
     FilterCondition,
@@ -16,6 +17,7 @@ import {
     setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_DATE_TYPE } from '../constants';
+import './Date.css';
 import {
     DATE_FILTER_OPERATORS,
     EQUAL_TYPE,
@@ -26,8 +28,6 @@ import {
     LESS_THAN_TYPE,
     NOT_EQUAL_TYPE,
 } from './constants';
-import './Date.css';
-import { logger } from '../../../helpers/logger';
 
 export interface FilterDateItem extends FilterItem {
     type: FILTER_DATE_TYPE;
@@ -72,33 +72,31 @@ class FilterDate extends React.Component<DateProps> {
             );
         }
         return (
-            <FormGroup style={{ marginBottom: 0 }}>
-                <Row>
-                    <Col md={3}>
-                        <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
-                    </Col>
-                    <Col md={3}>
-                        <Select
-                            options={DATE_FILTER_OPERATORS}
-                            values={DATE_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
-                            onChange={this.handleConditionChange}
+            <Grid container xs={12} spacing={2}>
+                <Grid item md={3}>
+                    <Typography>{getNativeLanguageText(filterItem.label, appLanguage)}</Typography>
+                </Grid>
+                <Grid item md={3}>
+                    <Select
+                        options={DATE_FILTER_OPERATORS}
+                        values={DATE_FILTER_OPERATORS.filter((filterObj) => filterObj.value === condition)}
+                        onChange={this.handleConditionChange}
+                    />
+                </Grid>
+                <Grid item md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
+                    <DatePicker className="form-control" selected={startDate} onChange={this.handleStartDate} /> <br />
+                </Grid>
+                {condition === IN_BETWEEN_TYPE && (
+                    <Grid item md={3}>
+                        <DatePicker
+                            className="form-control"
+                            selected={endDate}
+                            onChange={this.handleEndDate}
+                            minDate={startDate}
                         />
-                    </Col>
-                    <Col md={condition === IN_BETWEEN_TYPE ? 3 : 6}>
-                        <DatePicker className="form-control" selected={startDate} onChange={this.handleStartDate} /> <br />
-                    </Col>
-                    {condition === IN_BETWEEN_TYPE && (
-                        <Col md={3}>
-                            <DatePicker
-                                className="form-control"
-                                selected={endDate}
-                                onChange={this.handleEndDate}
-                                minDate={startDate}
-                            />
-                        </Col>
-                    )}
-                </Row>
-            </FormGroup>
+                    </Grid>
+                )}
+            </Grid>
         );
     }
 

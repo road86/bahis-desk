@@ -1,33 +1,31 @@
-import { AccordionActions, makeStyles, TablePagination, TableSortLabel, useTheme } from '@material-ui/core';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     Accordion,
+    AccordionActions,
     AccordionDetails,
     AccordionSummary,
-    TableContainer,
     Button,
+    makeStyles,
     Table,
-    TableHead,
-    TableRow,
-    TableCell,
     TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TableSortLabel,
+    useTheme,
 } from '@material-ui/core';
-// import { Button as ReactButton } from 'reactstrap';
-// import ListTable from '../../containers/ListTable';
-import { ipcRenderer } from '../../services/ipcRenderer';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { listPageStyles } from './style';
-import { Link } from 'react-router-dom';
+import * as React from 'react';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../../containers/ListTable';
-// import OrderBy from '../../containers/ListTable/OrderBy';
-// import Typist from 'react-typist';
-// import Loader from 'react-loader-spinner';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils';
-import Filter from './Filter';
 import { makeLabelColumnPair } from '../../helpers/formUtils';
 import { logger } from '../../helpers/logger';
+import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils';
+import { ipcRenderer } from '../../services/ipcRenderer';
+import Filter from './Filter';
+import { listPageStyles } from './style';
 
 /** interface for Form URL params */
 interface ListURLParams {

@@ -1,10 +1,11 @@
+import { Grid, Typography } from '@material-ui/core';
 import lodash from 'lodash';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
+import { logger } from '../../../helpers/logger';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import {
@@ -18,7 +19,6 @@ import {
     setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_SINGLE_SELECT_TYPE } from '../constants';
-import { logger } from '../../../helpers/logger';
 
 const OPTION_ID = 'opt_id';
 export interface FilterSingleSelectItem extends FilterItem {
@@ -129,27 +129,25 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     }
 
     public render() {
+        logger.info('rendering FilterSingleSelect');
+        // TODO is this even used
         const { filterItem, appLanguage, value } = this.props;
         const { filterOptions } = this.state;
         logger.info('filter options: ', this.state.filterOptions);
         return (
-            <FormGroup style={{ marginBottom: 0 }}>
-                <Row>
-                    <Col md={3}>
-                        <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
-                    </Col>
-                    <Col md={3} />
-                    <Col md={6}>
-                        <Select
-                            options={filterOptions}
-                            values={filterOptions.filter(
-                                (filterObj: any) => value && (value as any[]).includes(filterObj.value),
-                            )}
-                            onChange={this.handleValueChange}
-                        />
-                    </Col>
-                </Row>
-            </FormGroup>
+            <Grid container xs={12} spacing={2}>
+                <Grid item md={3}>
+                    <Typography>{getNativeLanguageText(filterItem.label, appLanguage)}</Typography>
+                </Grid>
+                <Grid item md={3} />
+                <Grid item md={6}>
+                    <Select
+                        options={filterOptions}
+                        values={filterOptions.filter((filterObj: any) => value && (value as any[]).includes(filterObj.value))}
+                        onChange={this.handleValueChange}
+                    />
+                </Grid>
+            </Grid>
         );
     }
 

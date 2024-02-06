@@ -1,8 +1,7 @@
-import { Accordion, AccordionDetails, AccordionSummary, makeStyles, useTheme } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Button, makeStyles, useTheme } from '@material-ui/core';
 import reducerRegistry from '@onaio/redux-reducer-registry';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Button, Col, Row } from 'reactstrap';
 import { Store } from 'redux';
 import filterReducer, {
     getAllFilterValueObjs,
@@ -155,18 +154,18 @@ function Filter(props: FilterProps) {
             </AccordionSummary>
             <AccordionDetails>
                 <div style={{ paddingLeft: '5%', paddingRight: '5%' }}>
-                    <Row id="menu-body">
+                    <div id="menu-body">
                         {isEnvSet &&
                             definition.map((filterItem, index) => (
-                                <Col key={'filter-' + index} lg={12} md={12} sm={12} xs={12}>
+                                <div key={'filter-' + index} className="menu-item">
                                     {renderTypeEvaluator(filterItem, index, appLanguage, listId)}
-                                </Col>
+                                </div>
                             ))}
-                    </Row>
-                    <Button className={classes.submitButton} size="sm" onClick={(e: any) => filterHandler(e)}>
+                    </div>
+                    <Button className={classes.submitButton} size="small" onClick={(e: any) => filterHandler(e)}>
                         Submit
                     </Button>
-                    <Button className={classes.resetButton} size="sm" onClick={(e: any) => resetFilterHandler(e)}>
+                    <Button className={classes.resetButton} size="small" onClick={(e: any) => resetFilterHandler(e)}>
                         Reset
                     </Button>
                 </div>

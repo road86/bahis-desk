@@ -2,7 +2,6 @@ import lodash from 'lodash';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { Col, FormGroup, Label, Row } from 'reactstrap';
 import { Store } from 'redux';
 import { FilterItem } from '..';
 import { getNativeLanguageText } from '../../../helpers/utils';
@@ -18,6 +17,8 @@ import {
     setFilterValue,
 } from '../../../store/ducks/filter';
 import { FILTER_MULTIPLE_SELECT_TYPE } from '../constants';
+import { Grid, Typography } from '@material-ui/core';
+import { logger } from '../../../helpers/logger';
 
 export interface FilterMultipleSelectItem extends FilterItem {
     type: FILTER_MULTIPLE_SELECT_TYPE;
@@ -83,25 +84,22 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
     public render() {
         const { filterItem, appLanguage, value } = this.props;
         const { filterOptions } = this.state;
+        logger.info(`rendering FilterMultipleSelect for ${filterItem.name}`);
+        // TODO is this ever used?
         return (
-            <FormGroup style={{ marginBottom: 0 }}>
-                <Row>
-                    <Col md={3}>
-                        <Label>{getNativeLanguageText(filterItem.label, appLanguage)}</Label>
-                    </Col>
-                    <Col md={3} />
-                    <Col md={6}>
-                        <Select
-                            isMulti={true}
-                            options={filterOptions}
-                            value={filterOptions.filter(
-                                (filterObj: any) => value && (value as any[]).includes(filterObj.value),
-                            )}
-                            onChange={this.handleValueChange}
-                        />
-                    </Col>
-                </Row>
-            </FormGroup>
+            <Grid container xs={12} spacing={2}>
+                <Grid item md={3}>
+                    <Typography>{getNativeLanguageText(filterItem.label, appLanguage)} Test</Typography>
+                </Grid>
+                <Grid item md={6}>
+                    <Select
+                        isMulti={true}
+                        options={filterOptions}
+                        value={filterOptions.filter((filterObj: any) => value && (value as any[]).includes(filterObj.value))}
+                        onChange={this.handleValueChange}
+                    />
+                </Grid>
+            </Grid>
         );
     }
 

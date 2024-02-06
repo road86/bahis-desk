@@ -1,7 +1,5 @@
 import { Avatar, Button, Grid, Paper, Snackbar, Typography, useTheme } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
-// import Typist from 'react-typist';
-// import Loader from 'react-loader-spinner';
 import { makeStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import { withRouter } from 'react-router';
@@ -19,6 +17,8 @@ function Copyright() {
         </Typography>
     );
 }
+
+// Props: include "onLogin: ('string')=>void"
 
 function AppRegister(props: any) {
     const theme = useTheme();
@@ -59,7 +59,7 @@ function AppRegister(props: any) {
         setSignInButtonDisabled(true);
         await ipcRenderer.send('sign-in', userInput);
         ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
-            logger.info('in delete table dialogue: ', event, args);
+            logger.debug('in delete table dialogue: ', event, args);
             setOpenAlert(true);
             setLoginArgs(args);
         });
@@ -115,7 +115,12 @@ function AppRegister(props: any) {
                     syncAppModule();
                 }
             }
+            logger.debug('END formSubmissionResults: ', event, args);
         });
+
+        const { upazila } = ipcRenderer.sendSync('user-db-info');
+        logger.info(`client-side handleSignIn upazila: ${upazila}`);
+        props.onLogin(upazila);
     };
 
     //Disabling automatic sync to allow offline login and properly display last syn and number of unsynced records after login
@@ -141,6 +146,10 @@ function AppRegister(props: any) {
                 });
             });
         }
+
+        const { upazila } = ipcRenderer.sendSync('user-db-info');
+        logger.info(`syncAppModule upazila: ${upazila} `);
+        props.onLogin(upazila);
     };
 
     const snackbarClose = () => {
