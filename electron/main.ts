@@ -92,8 +92,6 @@ switch (MODE) {
         break;
 }
 
-
-
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
 log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL}`);
