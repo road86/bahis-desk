@@ -76,7 +76,7 @@ switch (MODE) {
 
 // report the status of environment variables and logging
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
-log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL}`);
+log.info(`BAHIS2_SERVER_URL=${BAHIS2_SERVER_URL}`);
 log.info(
     `Using the following log settings: file=${log.transports.file.level}; console=${log.transports.console.level}; ipc=${
         log.transports.ipc!.level
