@@ -193,7 +193,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                             <Redirect to="/" />
                         </Route>
                         <Route path="/iframe">
-                            <IFrame upazila={upazila} appLanguage={'English'} />
+                            <IFrame upazila={upazila} />
                         </Route>
                         <Route exact path="/menu/">
                             <Menu />
@@ -201,18 +201,18 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                         <Route exact path="/form/:id">
                             <Suspense fallback={<div>Loading...</div>}>
                                 <ErrorBoundary>
-                                    <Form appLanguage={'English'} setUnsyncCount={updateUnsyncCount} />
+                                    <Form setUnsyncCount={updateUnsyncCount} />
                                 </ErrorBoundary>
                             </Suspense>
                         </Route>
                         <Route exact path="/formlist/:id">
-                            <SubmittedForm appLanguage={'English'} />
+                            <SubmittedForm />
                         </Route>
                         <Route exact path="/submittedDetails/:id">
                             <FormDetails />
                         </Route>
                         <Route exact path="/list/:id">
-                            <List appLanguage={'English'} />
+                            <List />
                         </Route>
                         <Route exact path="/listProfile/:id">
                             <ListProfile />

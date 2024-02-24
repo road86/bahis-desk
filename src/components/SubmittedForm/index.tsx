@@ -26,20 +26,13 @@ import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils
 import { ipcRenderer } from '../../services/ipcRenderer';
 import Filter from './Filter';
 import { listPageStyles } from './style';
-
-/** interface for Form URL params */
 interface ListURLParams {
     id: string;
 }
 
-/** interface for List props */
-interface ListProps extends RouteComponentProps<ListURLParams> {
-    appLanguage: string;
-}
-
 type Order = 'asc' | 'desc';
 
-function SubmittedForm(props: ListProps) {
+function SubmittedForm(props: RouteComponentProps<ListURLParams>) {
     const [formId, setFormId] = React.useState<string>('');
     const [tableData, setTableData] = React.useState<any>([]);
     const [filteredData, setFilteredData] = React.useState<any>([]);
@@ -269,8 +262,6 @@ function SubmittedForm(props: ListProps) {
     const useStyles = makeStyles(listPageStyles(theme));
     const classes = useStyles();
 
-    const { appLanguage } = props;
-
     const handleRequestSort = () => {
         const isAsc = order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -343,7 +334,7 @@ function SubmittedForm(props: ListProps) {
                                                                     className="sortable-column"
                                                                     onClick={handleRequestSort}
                                                                 >
-                                                                    {singleCol.label[appLanguage]}
+                                                                    {singleCol.label}
                                                                     {/* {orderBy === headCell.id ? (
                                   <span className={classes.visuallyHidden}>
                                     {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
@@ -360,7 +351,7 @@ function SubmittedForm(props: ListProps) {
                                                                 style={{ textAlign: 'center' }}
                                                                 className="initialism text-uppercase text-nowrap"
                                                             >
-                                                                {singleCol.label[appLanguage]}
+                                                                {singleCol.label}
                                                             </TableCell>
                                                         );
                                                     }
@@ -427,11 +418,7 @@ function SubmittedForm(props: ListProps) {
                                                                                                     }}
                                                                                                 >
                                                                                                     {' '}
-                                                                                                    {
-                                                                                                        actionObj.label[
-                                                                                                            appLanguage
-                                                                                                        ]
-                                                                                                    }{' '}
+                                                                                                    {actionObj.label}{' '}
                                                                                                 </Button>
                                                                                             </Link>
                                                                                         );
@@ -457,7 +444,7 @@ function SubmittedForm(props: ListProps) {
                                                                                                     whiteSpace: 'nowrap',
                                                                                                 }}
                                                                                             >
-                                                                                                {actionObj.label[appLanguage]}
+                                                                                                {actionObj.label}
                                                                                             </Button>
                                                                                         );
                                                                                     }
@@ -482,11 +469,7 @@ function SubmittedForm(props: ListProps) {
                                                                                                 }}
                                                                                             >
                                                                                                 {' '}
-                                                                                                {
-                                                                                                    actionObj.label[
-                                                                                                        appLanguage
-                                                                                                    ]
-                                                                                                }{' '}
+                                                                                                {actionObj.label}{' '}
                                                                                             </Button>
                                                                                         </Link>
                                                                                     );
