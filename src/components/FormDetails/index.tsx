@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 import * as React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { listPageStyles } from '../List/style';
+import { listPageStyles } from './style';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import { createFormKeyValuePair } from '../../helpers/formUtils';
