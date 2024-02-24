@@ -16,49 +16,33 @@ export type FORMLIST_TYPE = typeof FORMLIST_TYPE;
 export const IFRAME_TYPE = 'iframe';
 export type IFRAME_TYPE = typeof IFRAME_TYPE;
 
+/** menu item types as enum */
+export enum MenuItemTypes {
+    form = 1,
+    list,
+    module,
+    iframe,
+    submitted,
+}
+
 /** interface for multi language label object */
 export interface Label {
     [key: string]: string;
 }
 
-/** interface for form menu */
-export interface FormMenu {
-    type: FORM_TYPE | FORMLIST_TYPE;
-    name: string;
-    label: Label;
-    img_id: number;
-    xform_id: number;
+/** interface for MenuItems */
+export interface MenuItem {
+    id: number;
+    title: string;
+    icon: string;
+    description: string | null;
+    sort_order: number;
+    parent_module_id: number;
+    module_type_id: MenuItemTypes;
+    form_id: number | null;
+    external_url: string | null;
+    list_definition_id: number | null;
 }
-
-/** interface for List menu */
-export interface ListMenu {
-    type: LIST_TYPE;
-    name: string;
-    label: Label;
-    img_id: number;
-    list_id: number;
-}
-
-/** interface for Module menu */
-export interface ModuleMenu {
-    type: MODULE_TYPE;
-    name: string;
-    label: Label;
-    img_id: number;
-    children: Array<ModuleMenu | ListMenu | FormMenu | IFrameMenu>;
-}
-
-/** interface for iFrame menu */
-export interface IFrameMenu {
-    type: IFRAME_TYPE;
-    name: string;
-    label: Label;
-    img_id: number;
-    external_url: string;
-}
-
-/** interface for MenuItem */
-export type MenuItem = ModuleMenu | FormMenu | ListMenu | IFrameMenu;
 
 // actions
 

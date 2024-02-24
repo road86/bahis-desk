@@ -1,15 +1,12 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon, Typography, makeStyles, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { getNativeLanguageText } from '../../../helpers/utils.tsx';
 import { ModuleMenu, setMenuItem } from '../../../store/ducks/menu';
-import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import { menuStyle } from '../style';
 
 export interface ModuleMenuItemProps {
     menuItem: ModuleMenu;
     setMenuItemActionCreator: any;
-    appLanguage: string;
 }
 function ModuleMenuItem(props: ModuleMenuItemProps) {
     const theme = useTheme();
@@ -17,22 +14,18 @@ function ModuleMenuItem(props: ModuleMenuItemProps) {
     const classes = useStyles();
 
     const onClickHandler = (_event: React.MouseEvent<HTMLDivElement>) => {
-        const { menuItem } = props;
-        props.setMenuItemActionCreator(menuItem);
+        props.setMenuItemActionCreator(props.menuItem.id);
     };
 
     return (
-        <div className={classes.outerCircle} onClick={onClickHandler}>
-            <div className={classes.innerDiv}>
-                <div className={classes.circle}>
-                    <div className={classes.image}>
-                        <FontAwesomeIcon icon={['far', 'folder']} size="4x" />
-                    </div>
-                </div>
-                <Typography variant="h6" color={'primary'}>
-                    {getNativeLanguageText(props.menuItem.label, props.appLanguage).toUpperCase()}
-                </Typography>
-            </div>
+        <div className={classes.menuButton} onClick={onClickHandler}>
+            <Typography variant="h4" color={'primary'}>
+                {props.menuItem.title}
+            </Typography>
+            <Icon fontSize="large" color={'primary'}>
+                {props.menuItem.icon}
+            </Icon>
+            <Typography>{props.menuItem.description ?? ''}</Typography>
         </div>
     );
 }
