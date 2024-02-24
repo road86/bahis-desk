@@ -10,6 +10,8 @@ import { pathToFileURL } from 'node:url';
 import Database from 'better-sqlite3';
 import { unlinkSync, existsSync } from 'fs';
 
+import { queries as queries3 } from './localDB';
+
 // variables
 const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
@@ -34,9 +36,10 @@ export const createLocalDatabase2 = (MODE) => {
     log.info('Running initial queries');
     try {
         db.exec(queries);
-    } catch (err) {
+        db.exec(queries3);
+    } catch (error) {
         log.info('Failed setting up DB');
-        log.info(err);
+        log.info(error?.message);
     }
     log.info('Database setup finished !!!!');
 
