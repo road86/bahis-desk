@@ -50,15 +50,15 @@ export const deleteDataWithInstanceId2 = (db, instanceId, formId) => {
                     numDeleted = stmt.run(instanceId.toString()).changes;
                     log.info(`Row(s) deleted from table "${tableName}": ${numDeleted}`);
                     log.info('deleteDataWithInstanceID SUCCESS');
-                } catch (err) {
+                } catch (error) {
                     log.info('deleteDataWithInstanceID FAILED');
-                    console.error(err);
+                    console.error(error?.message);
                 }
             });
         }
-    } catch (err) {
+    } catch (error) {
         log.info('deleteDataWithInstanceID FAILED');
-        log.info(err);
+        log.info(error?.message);
     }
 };
 
@@ -123,8 +123,8 @@ export const parseAndSaveToFlatTables2 = (db, formId, userInput, instanceId) => 
                 const successfulInsertprep = db.prepare(query);
                 const successfulInsert = successfulInsertprep.run(actualValues);
                 newParentId = successfulInsert.lastInsertRowid;
-            } catch (err) {
-                log.info('Insert failed !!!', err, query);
+            } catch (error) {
+                log.info('Insert failed !!!', error?.message, query);
             }
         }
         repeatKeys.forEach((key) => {
@@ -226,9 +226,8 @@ export const getModuleDefinitions2 = async (username, time, db) => {
         try {
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
-        } catch (err) {
-            log.info(err);
-            //
+        } catch (error) {
+            log.info(error?.message);
         }
         log.info('updateModuleDefinitions FINISHED');
     };
@@ -245,7 +244,7 @@ export const getModuleDefinitions2 = async (username, time, db) => {
                     layoutDeleteQuery.run();
                 } catch (error) {
                     log.info('Previous Layout does not exist');
-                    log.info(error);
+                    log.info(error?.message);
                 }
                 updateModuleDefinitions(moduleListRes.data, db);
             }
@@ -295,7 +294,7 @@ export const getCatchments2 = async (username, time, db) => {
             log.info('Synchronising Catchments SUCCESS');
         })
         .catch((error) => {
-            log.info('Synchronising Catchments FAIL \n', error.message);
+            log.info('Synchronising Catchments FAIL \n', error?.message);
         });
 };
 
@@ -318,9 +317,9 @@ export const getFormConfig2 = async (username, time, db) => {
                 if (sqlObj.sql_script) {
                     try {
                         db.exec(sqlObj.sql_script);
-                    } catch (err: any) {
+                    } catch (error: any) {
                         log.info('formConfigRes FAILED');
-                        log.info('Error: ', err.message);
+                        log.info('Error: ', error?.message);
                     }
                 }
             });
@@ -375,7 +374,7 @@ export const getForms2 = async (username, time, db) => {
             formListRes.data.forEach(async (formObj) => {
                 try {
                     previousFormDeletionQuery.run(formObj.id);
-                } catch (err) {
+                } catch (error) {
                     log.info('Deletion Failed ! Previous form not exists!!');
                 }
                 try {
@@ -389,8 +388,8 @@ export const getForms2 = async (username, time, db) => {
                         JSON.stringify(formObj.table_mapping),
                         JSON.stringify(fieldNames),
                     );
-                } catch (err) {
-                    log.info('db form insertion failed !!!', err);
+                } catch (error) {
+                    log.info('db form insertion failed !!!', error?.message);
                 }
             });
         }
@@ -412,7 +411,7 @@ export const getLists2 = async (username, time, db) => {
             listRes.data.forEach((listObj) => {
                 try {
                     previousListDeletionQuery.run(listObj.id);
-                } catch (err) {
+                } catch (error) {
                     log.info('Deletion Failed ! Previous list not exists!!');
                 }
                 try {
@@ -424,8 +423,8 @@ export const getLists2 = async (username, time, db) => {
                         JSON.stringify(listObj.filter_definition),
                         JSON.stringify(listObj.column_definition),
                     );
-                } catch (err) {
-                    log.info('db list insertion failed', err);
+                } catch (error) {
+                    log.info('db list insertion failed', error?.message);
                 }
             });
         }
@@ -454,7 +453,7 @@ export const getFormChoices2 = async (username, time, db) => {
             formChoice.data.forEach(async (formObj) => {
                 try {
                     previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
-                } catch (err) {
+                } catch (error) {
                     log.info('db form_choice deletion failed');
                 }
 
@@ -466,7 +465,7 @@ export const getFormChoices2 = async (username, time, db) => {
                         formObj.field_name,
                         formObj.field_type,
                     );
-                } catch (err) {
+                } catch (error) {
                     log.info('db form_choice insertion failed');
                 }
             });
@@ -652,11 +651,11 @@ export const postFormSubmissions2 = async (username, time, db) => {
                 .catch(() => {
                     log.info('Failed to submit all');
                 });
-        } catch (err) {
+        } catch (error) {
             log.info('Data submission failed!');
         }
         return 'success';
-    } catch (err) {
+    } catch (error) {
         return 'failed';
     }
 };
@@ -686,7 +685,7 @@ export const getFormSubmissions2 = async (username, time, db) => {
             );
 
             parseAndSaveToFlatTables2(db, formId, JSON.stringify(userInput), instanceId);
-        } catch (err) {
+        } catch (error) {
             log.info('Save New Data To Table');
         }
     };
@@ -778,10 +777,9 @@ export const getFormSubmissions2 = async (username, time, db) => {
         log.info('Data Sync Complete');
 
         return 'success';
-    } catch (err) {
-        log.info('fetch err', err);
+    } catch (error) {
+        log.info('fetch error', error?.message);
         log.info('Error In Fetching Data From Server');
-        log.info(err);
         return 'failed';
     }
 };
@@ -805,8 +803,8 @@ export const getCSVData2 = async (username, time, db) => {
                     log.info(dataDeleteStmt);
                     db.prepare(dataDeleteStmt).run();
                 });
-            } catch (err) {
-                log.info(err);
+            } catch (error) {
+                log.info(error?.message);
             }
         };
 
@@ -826,8 +824,8 @@ export const getCSVData2 = async (username, time, db) => {
                 });
 
                 insertMany(rowData.data);
-            } catch (err) {
-                log.info(err);
+            } catch (error) {
+                log.info(error?.message);
             }
         };
 
@@ -844,7 +842,7 @@ export const getCSVData2 = async (username, time, db) => {
                 }
             })
             .catch((error) => {
-                log.info('axios error', error);
+                log.info('axios error', error?.message);
                 return 'failed';
             });
         return 'success';
@@ -862,9 +860,9 @@ export const getCSVData2 = async (username, time, db) => {
         }
         log.info('csvDataSync  SUCCESS');
         return 'success';
-    } catch (err) {
+    } catch (error) {
         log.info('csvDataSync FAILED');
-        log.info(err);
+        log.info(error?.message);
         return 'failed';
     }
 };

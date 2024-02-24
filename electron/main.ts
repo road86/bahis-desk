@@ -21,14 +21,9 @@ import {
     postFormSubmissions2,
 } from './sync2';
 import { createLocalDatabase2, createOrReadLocalDatabase2, updateFreshLocalDatabase2, deleteLocalDatabase2 } from './localDB2';
+import './sync';
 
-// variables
-
-export const APP_VERSION = app.getVersion();
-const SIGN_IN_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/app-user-verify/`;
-
-// setup
-
+// SETUP
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
 
@@ -70,13 +65,13 @@ switch (MODE) {
 const migrate = (old_app_location) => {
     if (existsSync(old_app_location)) {
         log.warn(`Migrating user data from old location: ${old_app_location}`);
-        cp(old_app_location, app.getPath('userData'), { recursive: true }, (err) => {
+        cp(old_app_location, app.getPath('userData'), { recursive: true }, (error) => {
             log.error('Failed to migrate user data from old location');
-            log.error(err);
+            log.error(error?.message);
         });
-        rm(old_app_location, { recursive: true }, (err) => {
+        rm(old_app_location, { recursive: true }, (error) => {
             log.error('Failed to delete user data from old location');
-            log.error(err);
+            log.error(error?.message);
         });
     }
 };
@@ -235,12 +230,23 @@ const template: Electron.MenuItemConstructorOptions[] = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
+// BAHIS3 VARIABLES
+const BAHIS_MODULE_DEFINITION_ENDPOINT = `${BAHIS_SERVER_URL}/api/desk/modules`;
+
+// BAHIS3 HELPERS
+const _url = (url, time?) => {
+    if (time !== null && time !== undefined) {
+        return `${url}?last_modified=${time}&bahis_desk_version=${APP_VERSION}`;
+    } else {
+        return `${url}?bahis_desk_version=${APP_VERSION}`;
+    }
+};
 
 // listeners
 
 const fetchFilterDataset = (event, listId, filterColumns) => {
     // fetches the filter dataset needed to render single select and multiple select options
-    log.info(`fetchFilterDataset ${event} ${listId} ${filterColumns}`);
+    log.info(`fetchFilterDataset ${event.type} ${listId} ${filterColumns}`);
     try {
         const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId) as any;
         const datasource = JSON.parse(listDefinition.datasource);
@@ -265,8 +271,8 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
         const returnedRows = filterDatasetQuery.all(a, a);
 
         event.returnValue = returnedRows;
-    } catch (err) {
-        log.info(`fetchFilterDataset Error ${err}`);
+    } catch (error) {
+        log.info(`fetchFilterDataset Error ${error?.message}`);
 
         event.returnValue = [];
     }
@@ -274,7 +280,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
 
 const fetchAppDefinition = async (event) => {
     // fetches the app menu definition
-    log.info(`fetchAppDefinition ${event}`);
+    log.info(`fetchAppDefinition ${event.type}`);
     try {
         const appResult = db.prepare('SELECT definition from app where app_id=1').get() as any;
         const appResultDefinition = appResult.definition;
@@ -285,8 +291,8 @@ const fetchAppDefinition = async (event) => {
             log.info('fetchAppDefinition FAILED - undefined');
             return null;
         }
-    } catch (err) {
-        log.info(`fetchAppDefinition FAILED ${err}`);
+    } catch (error) {
+        log.info(`fetchAppDefinition FAILED ${error?.message}`);
         return null;
     }
 };
@@ -310,7 +316,7 @@ const submitFormResponse = (event, response) => {
 
 const fetchFormDefinition = (event, formId) => {
     // fetches the form definition
-    log.info(`fetchFormDefinition ${event} ${formId}`);
+    log.info(`fetchFormDefinition ${event.type} ${formId}`);
     try {
         const formDefinitionObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId) as any;
         if (formDefinitionObj != undefined) {
@@ -322,8 +328,8 @@ const fetchFormDefinition = (event, formId) => {
                 try {
                     const { query } = choiceDefinition[key];
                     choices[`${key}.csv`] = db.prepare(query).all();
-                } catch (err) {
-                    log.info(`Choice Definition Error  ${err}`);
+                } catch (error) {
+                    log.info(`Choice Definition Error  ${error?.message}`);
                 }
             });
 
@@ -334,8 +340,8 @@ const fetchFormDefinition = (event, formId) => {
             log.info(`fetchFormDefinition problem, no such form with ${formId}`);
             log.info('see `SELECT * from forms where form_id = ? limit 1`');
         }
-    } catch (err) {
-        log.info(`fetchFormDefinition Error  ${err}`);
+    } catch (error) {
+        log.info(`fetchFormDefinition Error  ${error?.message}`);
     }
 };
 
@@ -344,13 +350,13 @@ const fetchFormChoices = (event, formId) => {
         log.info(`fetchFormChoices  ${formId}`);
         const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
         event.returnValue = formchoices;
-    } catch (err) {
-        log.info('error fetch form choices ', err);
+    } catch (error) {
+        log.info('error fetch form choices ', error?.message);
     }
 };
 
 const fetchFormDetails = (event, listId, column = 'data_id') => {
-    log.info(`fetchFormDetails  ${event} ${listId}`);
+    log.info(`fetchFormDetails  ${event.type} ${listId}`);
     try {
         const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
         log.info(formData);
@@ -359,9 +365,9 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
         } else {
             event.returnValue = null;
         }
-    } catch (err) {
-        log.info(err);
-        log.info(`Fetch FormDetails  ${err}`);
+    } catch (error) {
+        log.info(`Fetch FormDetails`);
+        log.info(error?.message);
     }
 };
 
@@ -382,7 +388,7 @@ const fetchListDefinition = (event, listId) => {
         } else {
             event.returnValue = null;
         }
-    } catch (err) {
+    } catch (error) {
         log.info(`fethcListDefinition Error, listId: ${listId}`);
     }
 };
@@ -401,7 +407,7 @@ const fetchFormListDefinition = (event, formId) => {
         const fetchedRows = db.prepare(query).all(formId, userName);
 
         event.returnValue = { fetchedRows };
-    } catch (err) {
+    } catch (error) {
         log.info(`fetchFormListDefinition, listId: ${formId}`);
     }
 };
@@ -420,7 +426,7 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
         const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
 
         event.returnValue = { fetchedRows };
-    } catch (err) {
+    } catch (error) {
         log.info(`fetchFollowupFormData, formId: ${formId}`);
     }
 };
@@ -433,15 +439,15 @@ const fetchQueryData = (event, queryString) => {
 
         event.returnValue = fetchedRows;
         log.info('fetchQueryData SUCCESS');
-    } catch (err) {
+    } catch (error) {
         log.info('fetchQueryData FAILED');
-        log.info(err);
+        log.info(error?.message);
         event.returnValue = []; //lack of return here was hanging the frontend which incorectly used sendSync
     }
 };
 
 const changeUser = async (event, obj) => {
-    deleteLocalDatabase2(db, MODE);
+    deleteLocalDatabase2(MODE, db);
     db = createLocalDatabase2(MODE);
 
     const { response, userData } = obj;
@@ -465,12 +471,14 @@ const changeUser = async (event, obj) => {
 const signIn = async (event, userData) => {
     log.info('electron-side signIn');
 
+    const SIGN_IN_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/app-user-verify/`;
+
     const getErrorMessage = (error) => {
-        log.info(error.message);
-        if (error.message.includes('403')) {
+        log.info(error?.message);
+        if (error?.message.includes('403')) {
             return 'Only upazilas can use BAHIS-desk, please contact support.';
         }
-        if (error.message.includes('409')) {
+        if (error?.message.includes('409')) {
             return 'Users credentials are not authorized or missing catchment area.';
         }
         return 'Unauthenticated User.';
@@ -478,6 +486,8 @@ const signIn = async (event, userData) => {
 
     const query = 'SELECT * from users limit 1';
     let userInfo = db.prepare(query).get() as any;
+    log.info('userInfo');
+    log.info(userInfo);
     // if a user has signed in before then no need to call signin-api
     // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
     if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password && userInfo.upazila) {
@@ -581,7 +591,7 @@ const signIn = async (event, userData) => {
 };
 
 const exportExcel = (event, excelData) => {
-    log.debug(`exporting Excel due to ${event}`);
+    log.debug(`exporting Excel due to ${event.type}`);
     let filename: string | undefined;
     dialog
         .showSaveDialog({
@@ -603,12 +613,12 @@ const exportExcel = (event, excelData) => {
                 return;
             }
 
-            writeFile(filename, new Buffer(excelData), (err) => {
-                if (err) {
-                    log.info(`an error occured with file creation,  ${err}`);
+            writeFile(filename, new Buffer(excelData), (error) => {
+                if (error) {
+                    log.info(`an error occured with file creation,  ${error?.message}`);
                     dialog.showMessageBox({
                         title: 'Download Updates',
-                        message: `an error ocurred with file creation ${err.message}`,
+                        message: `an error ocurred with file creation ${error?.message}`,
                     });
                     return;
                 }
@@ -618,12 +628,12 @@ const exportExcel = (event, excelData) => {
                 });
             });
         })
-        .catch((err) => {
+        .catch((error) => {
             dialog.showMessageBox({
                 title: 'Download Updates',
-                message: `${err}`,
+                message: `${error?.message}`,
             });
-            log.info(`export excel error: ${err}`);
+            log.info(`export excel error: ${error?.message}`);
         });
 };
 
@@ -637,8 +647,8 @@ const fetchUsername = (event, infowhere) => {
             username: fetchedUsername.username,
         };
         log.info('fetchUsername SUCCESS');
-    } catch (err) {
-        log.info(`fetchUsername FAILED ${err}`);
+    } catch (error) {
+        log.info(`fetchUsername FAILED ${error?.message}`);
     }
 };
 
@@ -650,8 +660,8 @@ const fetchUserList = (event) => {
         event.returnValue = {
             users: fetchedRows,
         };
-    } catch (err) {
-        log.info(err);
+    } catch (error) {
+        log.info(error?.message);
     }
 };
 
@@ -672,8 +682,8 @@ const getUserDBInfo = (event) => {
         } else {
             log.info('userDB FAILED - undefined');
         }
-    } catch (err) {
-        log.info(`userDBInfo FAILED ${err}`);
+    } catch (error) {
+        log.info(`userDBInfo FAILED ${error?.message}`);
     }
 };
 
@@ -688,7 +698,7 @@ const deleteData = (event, instanceId, formId) => {
 // main sync functions
 const getAppData = async (event, username) => {
     log.info('Getting app data from server');
-    log.debug(`due to ${event}`);
+    log.debug(`due to ${event.type}`);
 
     const readAppLastSyncTime = () => {
         const logged_time = db.prepare('SELECT * from app_log order by time desc limit 1').get() as any;
@@ -710,20 +720,21 @@ const getAppData = async (event, username) => {
         getModuleDefinitions2(username, last_sync_time, db),
         getFormConfig2(username, 0, db),
         getCatchments2(username, 0, db),
+        getModuleDefinitions(),
     ])
         .then(() => {
             updateAppLastSyncTime();
             mainWindow?.webContents.send('formSyncComplete', 'done'); // done is a keyword checked later
             log.info('Pulling app data successfully completed');
         })
-        .catch((err) => {
-            log.warn('Pulling app data failed with:\n', err);
+        .catch((error) => {
+            log.warn('Pulling app data failed with:\n', error?.message);
         });
 };
 
 const postLocalData = async (event, username) => {
-    log.info('Posting local data to server');
-    log.debug(`due to ${event}`);
+    log.info('POST local data to server');
+    log.debug(`due to ${event.type}`);
 
     const readDataLastSyncTime = () => {
         const logged_time = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get() as any;
@@ -751,16 +762,56 @@ const postLocalData = async (event, username) => {
             updateDataLastSyncTime();
             event.returnValue = msg;
             mainWindow?.webContents.send('dataSyncComplete', 'synchronised');
-            log.info('Pushing local data successfully completed');
+            log.info('POST local data SUCCESS');
         })
-        .catch((err) => {
-            log.warn('Pushing local data failed with:\n', err);
+        .catch((error) => {
+            log.warn('POST local data FAILED with\n', error?.message);
+        });
+};
+
+const getModuleDefinitions = async () => {
+    log.info(`GET Module Definitions`);
+
+    const api_url = _url(BAHIS_MODULE_DEFINITION_ENDPOINT);
+    log.info(`API URL: ${api_url}`);
+    // FIXME this API endpoint needs to take care of is_active and also the user's role
+
+    axios
+        .get(api_url)
+        .then((response) => {
+            if (response.data) {
+                log.info('Modules received from server');
+
+                const upsertQuery = db.prepare(
+                    'INSERT INTO module (id, title, icon, description, form_id, external_url, sort_order, list_definition_id, parent_module_id, module_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                );
+
+                for (const module of response.data) {
+                    log.info(module);
+                    upsertQuery.run([
+                        module.id,
+                        module.title,
+                        module.icon,
+                        module.description,
+                        module.form_id,
+                        module.external_url,
+                        module.sort_order,
+                        module.list_definition,
+                        module.parent_module,
+                        module.module_type,
+                    ]);
+                }
+            }
+            log.info('GET Module Definitions SUCCESS');
+        })
+        .catch((error) => {
+            log.warn('GET Module Definitions FAILED with\n', error?.message);
         });
 };
 
 const refreshDatabase = () => {
     try {
-        deleteLocalDatabase2(db, MODE);
+        deleteLocalDatabase2(MODE, db);
         db = createLocalDatabase2(MODE);
         return 'success';
     } catch (e) {
@@ -793,3 +844,6 @@ ipcMain.on('refresh-database', refreshDatabase);
 // refactored
 ipcMain.on('start-app-sync', getAppData);
 ipcMain.on('request-data-sync', postLocalData);
+
+// new
+ipcMain.handle('request-module-sync', getModuleDefinitions);
