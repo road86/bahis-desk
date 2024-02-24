@@ -1,13 +1,26 @@
 import { makeStyles, Typography, useTheme } from '@material-ui/core';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { FILTER_CHOICES } from '../../constants.tsx';
 import Filter from '../../containers/Filter';
 import ListTable from '../../containers/ListTable';
 import { getNativeLanguageText } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import { listPageStyles } from './style';
 import { logger } from '../../helpers/logger';
+
+export const FILTER_CHOICES = {
+    sample_select_one: [{ name: 'Dhaka' }, { name: 'Chatrogram' }],
+    sample_select_one_v1: [
+        { name: 'Dhaka', sample_select_one: 'Dhaka' },
+        { name: 'Chatrogram', sample_select_one: 'Chatrogram' },
+    ],
+    sample_select_multiple: [{ name: 'Dhaka' }, { name: 'Chatrogram' }],
+    sample_select_multiple_v1: [
+        { name: 'Dhaka', sample_select_multiple: 'Dhaka' },
+        { name: 'Chatrogram', sample_select_multiple: 'Chatrogram' },
+    ],
+};
+export type FILTER_CHOICES = typeof FILTER_CHOICES;
 
 /** interface for Form URL params */
 interface ListURLParams {

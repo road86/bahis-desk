@@ -1,4 +1,4 @@
-import { createTheme as createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 
 // TODO this has no impact on forms which needs to be fixed
 
@@ -15,7 +15,7 @@ if (import.meta.env.MODE === 'production') {
     primary_light = '#ebfded';
     primary_dark = '#8ac390';
 }
-export const theme = createMuiTheme({
+export const theme = createTheme({
     palette: {
         primary: {
             main: primary_main,

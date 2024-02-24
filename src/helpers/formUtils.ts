@@ -72,7 +72,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
                     try {
                         const result = JSON.parse(choice.value_label);
                         return result.English;
-                    } catch (err) {
+                    } catch (error) {
                         return choice.value_label;
                     }
                 } else if (typeof choice.value_label === 'object') {

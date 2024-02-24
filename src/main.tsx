@@ -1,7 +1,7 @@
 // import React from 'react';
+import { ConnectedRouter } from 'connected-react-router'; // FIXME doesn't work wiht React 18
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router'; // FIXME doesn't work wiht React 18
 
 import DateFnsUtils from '@date-io/date-fns';
 import { ThemeProvider } from '@material-ui/core/styles'; // FIXME doesn't work wiht React 18
@@ -9,7 +9,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers'; // FIXME doesn't
 import { history } from '@onaio/connected-reducer-registry'; // TODO can this be replaced?
 
 import App from './App/App.tsx';
-import { register } from './serviceWorker.ts'; // TODO can this be replaced with a module?
+import { register } from './serviceWorker.ts';
 import store from './store';
 import { theme } from './theme.ts';
 

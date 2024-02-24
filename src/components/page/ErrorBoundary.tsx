@@ -8,7 +8,7 @@ export default class ErrorBoundary extends React.Component<any, any> {
     }
 
     static getDerivedStateFromError(error: any) {
-        logger.info(error);
+        logger.info(error?.message);
         // Update state so the next render will show the fallback UI.
         return { hasError: true };
     }

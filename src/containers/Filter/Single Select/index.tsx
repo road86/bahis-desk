@@ -77,7 +77,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
 
             const options = Object.keys(unqOb).map((k: any) => ({ label: k, value: unqOb[k] }));
             return { filterOptions: options };
-        } catch (err) {
+        } catch (error) {
             return { filterOptions: [] };
         }
     };

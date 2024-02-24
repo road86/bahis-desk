@@ -144,7 +144,7 @@ export function getFormLabel(label: any) {
         try {
             result = JSON.parse(label);
             result = result.English;
-        } catch (err) {
+        } catch (error) {
             result = label;
         }
         return result;
