@@ -37,11 +37,10 @@ export interface MenuItem {
     icon: string;
     description: string | null;
     sort_order: number;
-    parent_module_id: number;
-    module_type_id: MenuItemTypes;
-    form_id: number | null;
+    parent_module: number;
+    module_type: MenuItemTypes;
+    form: number | null;
     external_url: string | null;
-    list_definition_id: number | null;
 }
 
 // actions
