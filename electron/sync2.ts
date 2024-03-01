@@ -10,7 +10,7 @@ import { random } from 'lodash';
 
 // variables
 export const APP_VERSION = app.getVersion();
-export const BAHIS2_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost';
+export const BAHIS2_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost:80';
 
 const BAHIS2_APP_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const BAHIS2_CATCHMENT_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/catchment-list/`;
@@ -41,7 +41,7 @@ export const deleteDataWithInstanceId2 = (db, instanceId, formId) => {
         let numDeleted = stmt.run(instanceId.toString()).changes;
         log.info(`Row(s) deleted from table "data": ${numDeleted}`);
         if (numDeleted > 0) {
-            const formDefinitionObj = db.prepare('SELECT * FROM forms WHERE form_id = ?').get(formId);
+            const formDefinitionObj = db.prepare('SELECT * FROM forms2 WHERE id = ?').get(formId);
             const tableMapping = JSON.parse(formDefinitionObj.table_mapping);
             tableMapping.forEach((tableName) => {
                 try {
@@ -143,9 +143,9 @@ export const parseAndSaveToFlatTables2 = (db, formId, userInput, instanceId) => 
         });
     };
 
-    const formObj = db.prepare('SELECT * from forms where form_id = ? limit 1').get(formId);
+    const formObj = db.prepare('SELECT * from forms2 where id = ? limit 1').get(formId);
     if (formObj !== undefined) {
-        const formDefinition = JSON.parse(formObj.definition);
+        const formDefinition = JSON.parse(formObj.json);
         const formFieldNames = JSON.parse(formObj.field_names);
         const userInputObj = JSON.parse(userInput);
         objToTable(
@@ -333,7 +333,7 @@ export const getForms2 = async (username, time, db) => {
     log.info(`Synchronising Forms (time: ${time})`);
     log.info(`api url: ${_url(BAHIS2_FORMS_ENDPOINT, username, time)}`);
 
-    const extractPossibleFieldNames = (xformJsn) => {
+    const extractPossibleFieldNames = (xformJSON) => {
         const parseFieldNames = (parentName, possibleNames, currentFormJsn) => {
             currentFormJsn.forEach((currentElem) => {
                 switch (currentElem.type) {
@@ -360,16 +360,16 @@ export const getForms2 = async (username, time, db) => {
         };
 
         const possibleNames = [];
-        parseFieldNames('', possibleNames, xformJsn.children);
+        parseFieldNames('', possibleNames, xformJSON.children);
         return possibleNames;
     };
 
     await axios.get(_url(BAHIS2_FORMS_ENDPOINT, username, time)).then((formListRes) => {
         if (formListRes.data) {
             log.info(` FormListRes data (time: ${time}; total: ${formListRes.data.length}) `);
-            const previousFormDeletionQuery = db.prepare('DELETE FROM forms WHERE form_id = ?');
+            const previousFormDeletionQuery = db.prepare('DELETE FROM forms2 WHERE id = ?');
             const newFormInsertionQuery = db.prepare(
-                'INSERT INTO forms(form_id, form_name, definition, choice_definition, form_uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?)',
+                'INSERT INTO forms2(id, id_string, xml, json, choice_definition, uuid, table_mapping, field_names) VALUES(?,?,?,?,?,?,?,?)',
             );
             formListRes.data.forEach(async (formObj) => {
                 try {
@@ -377,19 +377,20 @@ export const getForms2 = async (username, time, db) => {
                 } catch (error) {
                     log.info('Deletion Failed ! Previous form not exists!!');
                 }
+                const fieldNames = extractPossibleFieldNames(formObj.json);
                 try {
-                    const fieldNames = extractPossibleFieldNames(formObj.form_definition);
                     newFormInsertionQuery.run(
                         formObj.id,
-                        formObj.name,
-                        JSON.stringify(formObj.form_definition),
+                        formObj.id_string,
+                        formObj.xml,
+                        JSON.stringify(formObj.json),
                         JSON.stringify(formObj.choice_list),
-                        formObj.form_uuid,
+                        formObj.uuid,
                         JSON.stringify(formObj.table_mapping),
                         JSON.stringify(fieldNames),
                     );
                 } catch (error) {
-                    log.info('db form insertion failed !!!', error?.message);
+                    log.info('db form insertion failed', error?.message);
                 }
             });
         }
@@ -599,12 +600,12 @@ export const postFormSubmissions2 = async (username, time, db) => {
 
             //send data to the server row by row
             const sendRow = async (rowObj) => {
-                const formDefinitionObj = db.prepare('Select * from forms where form_id = ?').get(rowObj.form_id);
+                const formDefinitionObj = db.prepare('Select * from forms2 where id = ?').get(rowObj.form_id);
                 let formData = JSON.parse(rowObj.data) || {};
-                formData = { ...formData, 'formhub/uuid': formDefinitionObj.form_uuid };
+                formData = { ...formData, 'formhub/uuid': formDefinitionObj.uuid };
                 //We are converting json to XML which is an alternative submission for xforms
                 const apiFormData = {
-                    xml_submission_file: convertJsonToXml(formData, formDefinitionObj.form_name),
+                    xml_submission_file: convertJsonToXml(formData, formDefinitionObj.name),
                 };
 
                 const jsondata = JSON.stringify(apiFormData);

@@ -10,12 +10,12 @@ import { pathToFileURL } from 'node:url';
 import Database from 'better-sqlite3';
 import { unlinkSync, existsSync } from 'fs';
 
-import { queries as queries3 } from './localDB';
+import { initialiseDBTables } from './localDB';
 
 // variables
 const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
-CREATE TABLE forms( form_id INTEGER PRIMARY KEY, form_name TEXT NOT NULL, definition TEXT NOT NULL, choice_definition TEXT, form_uuid TEXT, table_mapping TEXT, field_names TEXT );
+CREATE TABLE forms2 ( id INTEGER PRIMARY KEY, id_string TEXT NOT NULL, xml TEXT NOT NULL, json TEXT NOT NULL,choice_definition TEXT, uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
 CREATE TABLE data( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
 CREATE TABLE app_log( time TEXT);
@@ -36,7 +36,9 @@ export const createLocalDatabase2 = (MODE) => {
     log.info('Running initial queries');
     try {
         db.exec(queries);
-        db.exec(queries3);
+        log.info('Initial queries ran successfully');
+        initialiseDBTables(db);
+        log.info('Initial tables created successfully');
     } catch (error) {
         log.info('Failed setting up DB');
         log.info(error?.message);
