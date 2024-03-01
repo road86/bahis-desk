@@ -52,12 +52,12 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     const useStyles = makeStyles(menuStyle(theme));
     const classes = useStyles();
 
-    const readModulesWithParent = (parent_module_id: any = null) => {
+    const readModulesWithParent = (parent_module: any = null) => {
         setSynchronisingAlertOpen(true);
-        logger.info(`reading modules with parent_module_id: ${parent_module_id}`);
-        let query = 'SELECT DISTINCT * FROM module WHERE parent_module_id';
-        if (parent_module_id) {
-            query += ` = ${parent_module_id}`;
+        logger.info(`reading modules with parent_module: ${parent_module}`);
+        let query = 'SELECT DISTINCT * FROM module WHERE parent_module';
+        if (parent_module) {
+            query += ` = ${parent_module}`;
         } else {
             query += ' IS NULL';
         }
@@ -68,7 +68,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
     };
 
     const typeEvalutor = (menuItem: MenuItem) => {
-        if (menuItem.module_type_id === MenuItemTypes.module) {
+        if (menuItem.module_type === MenuItemTypes.module) {
             return <ModuleMenuButton menuItem={menuItem} />;
         } else {
             return <MenuButton menuItem={menuItem} />;

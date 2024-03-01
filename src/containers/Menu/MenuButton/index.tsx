@@ -13,14 +13,14 @@ export default function ListMenuItem(props: ListMenuItemProps) {
     const classes = useStyles();
 
     let url = '';
-    if (props.menuItem.module_type_id === MenuItemTypes.list) {
-        url = `/list/${props.menuItem.list_definition_id}/`;
-    } else if (props.menuItem.module_type_id === MenuItemTypes.form) {
-        url = `/form/${props.menuItem.form_id}/`;
-    } else if (props.menuItem.module_type_id === MenuItemTypes.iframe) {
+    if (props.menuItem.module_type === MenuItemTypes.list) {
+        url = `/list/${props.menuItem.form}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.form) {
+        url = `/form/${props.menuItem.form}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.iframe) {
         url = `/iframe?url=${props.menuItem.external_url}`;
-    } else if (props.menuItem.module_type_id === MenuItemTypes.submitted) {
-        url = `/formlist/${props.menuItem.form_id}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.submitted) {
+        url = `/formlist/${props.menuItem.form}/`;
     }
 
     return (
