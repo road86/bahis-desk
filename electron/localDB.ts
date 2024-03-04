@@ -74,7 +74,7 @@ export const initialiseDBAdministrativeRegionsTable = (db) => {
         'CREATE TABLE administrativeregion (\
         id INTEGER NOT NULL PRIMARY KEY,\
         title TEXT NOT NULL,\
-        parent_administrative_region INTEGER NOT NULL,\
+        parent_administrative_region INTEGER,\
         administrative_region_level INTEGER NOT NULL\
     );',
     ).run();
