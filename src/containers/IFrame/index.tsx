@@ -1,5 +1,5 @@
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 
 interface IFrameURLParams {
     external_url: string;
@@ -21,13 +21,13 @@ const encodeUpazila = (upazillaID) => {
 };
 
 export const IFrame = (props: IFrameProps) => {
-    logger.info('loading IFrame');
-    logger.info(JSON.stringify(props));
+    log.info('loading IFrame');
+    log.info(JSON.stringify(props));
     const upazila = props.upazila;
     const encodedUpazila = encodeUpazila(upazila);
     const external_url = new URLSearchParams((props as any).location.search).get('url') || '';
     const url = `${external_url}${encodedUpazila}`;
-    logger.info(`loading IFrame for url: ${JSON.stringify(url)}`);
+    log.info(`loading IFrame for url: ${JSON.stringify(url)}`);
 
     return (
         <>

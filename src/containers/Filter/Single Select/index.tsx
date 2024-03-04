@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import { Store } from 'redux';
 import { FilterItem } from '..';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import {
@@ -103,7 +103,7 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
 
     public async componentDidMount() {
         const result: any = await this.getFilterOptions();
-        logger.info('new Options: ', result.filterOptions);
+        log.info('new Options: ', result.filterOptions);
         this.setState({ ...this.state, ...result });
     }
 
@@ -129,11 +129,11 @@ class FilterSingleSelect extends React.Component<SingleSelectProps, SingleSelect
     }
 
     public render() {
-        logger.info('rendering FilterSingleSelect');
+        log.info('rendering FilterSingleSelect');
         // TODO is this even used
         const { filterItem, appLanguage, value } = this.props;
         const { filterOptions } = this.state;
-        logger.info('filter options: ', this.state.filterOptions);
+        log.info('filter options: ', this.state.filterOptions);
         return (
             <Grid container xs={12} spacing={2}>
                 <Grid item md={3}>

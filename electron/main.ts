@@ -2,8 +2,9 @@ import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
 import log from 'electron-log';
 import path from 'node:path';
 import axios from 'axios';
-import { random } from 'lodash';
-import { existsSync, unlinkSync, writeFile, writeFileSync, cp, rm, mkdirSync } from 'fs';
+import csv from 'csv-parser';
+import xmlbuilder from 'xmlbuilder';
+import { existsSync, writeFile, createReadStream, cp, rm } from 'fs';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import { autoUpdater } from 'electron-updater';
 import {
@@ -35,7 +36,6 @@ log.warn(`Full debug logs can be found in ${path.join(process.env.DIST, 'debug.l
 autoUpdater.logger = log;
 
 const APP_VERSION = app.getVersion();
-export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_SERVER_URL || 'http://localhost:3001';
 
 // default environment variables, i.e. for local development
 export const MODE = import.meta.env.MODE || 'development';
@@ -264,25 +264,6 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
         log.info(`fetchFilterDataset Error ${error?.message}`);
 
         event.returnValue = [];
-    }
-};
-
-const fetchAppDefinition = async (event) => {
-    // fetches the app menu definition
-    log.info(`fetchAppDefinition ${event.type}`);
-    try {
-        const appResult = db.prepare('SELECT definition from app where app_id=1').get() as any;
-        const appResultDefinition = appResult.definition;
-        if (appResultDefinition) {
-            log.info('fetchAppDefinition SUCCESS');
-            return appResultDefinition;
-        } else {
-            log.info('fetchAppDefinition FAILED - undefined');
-            return null;
-        }
-    } catch (error) {
-        log.info(`fetchAppDefinition FAILED ${error?.message}`);
-        return null;
     }
 };
 

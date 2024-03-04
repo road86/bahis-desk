@@ -18,7 +18,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../../../containers/ListTable';
 import OrderBy from '../../../containers/ListTable/OrderBy';
 import { ipcRenderer } from '../../../services/ipcRenderer';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 
 /** interface for List props */
 interface ListProps {
@@ -144,7 +144,7 @@ function FollowUpTable(props: ListProps) {
 
     const handleChangePage = (event: unknown, newPage: number) => {
         // setPage(newPage);
-        logger.info(event);
+        log.info(event);
         setPage(newPage);
     };
 

@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import { Store } from 'redux';
 import { FilterItem } from '..';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import {
     FilterCondition,
@@ -45,7 +45,7 @@ export interface DateProps {
 class FilterDate extends React.Component<DateProps> {
     public componentDidMount() {
         const { filterItem, value } = this.props;
-        logger.info(filterItem);
+        log.info(filterItem);
         this.props.setConditionValueActionCreator(
             filterItem.name,
             IN_BETWEEN_TYPE,

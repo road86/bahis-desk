@@ -1,5 +1,5 @@
 import React from 'react';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 
 export default class ErrorBoundary extends React.Component<any, any> {
     constructor(props: any) {
@@ -8,7 +8,7 @@ export default class ErrorBoundary extends React.Component<any, any> {
     }
 
     static getDerivedStateFromError(error: any) {
-        logger.info(error?.message);
+        log.info(error?.message);
         // Update state so the next render will show the fallback UI.
         return { hasError: true };
     }

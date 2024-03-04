@@ -18,7 +18,7 @@ import Select from 'react-select';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import moment from 'moment';
 import { getFormLabel } from '../../../helpers/utils.tsx';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 
 /** interface for Form URL params */
 interface FilterProps {
@@ -123,7 +123,7 @@ function Filter(props: FilterProps) {
 
     props.fieldNames
         .filter((ob: any) => getFormLabel(ob.label) !== undefined)
-        .map((option: any) => logger.silly(`fieldnames: ${getFormLabel(option.label)}`));
+        .map((option: any) => log.silly(`fieldnames: ${getFormLabel(option.label)}`));
 
     return (
         <Accordion defaultExpanded>

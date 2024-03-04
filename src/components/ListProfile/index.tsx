@@ -21,7 +21,7 @@ import { ipcRenderer } from '../../services/ipcRenderer';
 import { ActionDefinition } from '../../containers/ListTable';
 import FollowUpTable from './DataTable';
 import { createFormKeyValuePair } from '../../helpers/formUtils.ts';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 
 /** interface for Form URL params */
 interface DetailsURLParams {
@@ -50,12 +50,12 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
 
         const viewFormData = await ipcRenderer.sendSync('form-details', formData.instanceid, 'instanceid');
 
-        logger.info('viewFormData: ', viewFormData);
+        log.info('viewFormData: ', viewFormData);
         const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', viewFormData.formDetails.form_id);
         const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', viewFormData.formDetails.form_id);
 
         if (viewFormData != null) {
-            const { definition, field_names, formChoices } = formDefinitionObj;
+            const { json: definition, field_names, formChoices } = formDefinitionObj;
             let { data } = viewFormData.formDetails;
             data = JSON.parse(data);
             setFormData(
@@ -77,11 +77,11 @@ function ListProfile(props: RouteComponentProps<DetailsURLParams>) {
 
     //TODO ?!?!?!?!?!??!?
     React.useEffect(() => {
-        logger.info(' i am in the correct component. ');
+        log.info(' i am in the correct component. ');
         comUpdate();
     }, []);
 
-    logger.info('form data: ', formData);
+    log.info('form data: ', formData);
     return (
         <div style={{ marginBottom: 20 }}>
             <hr className={classes.hrTag} />

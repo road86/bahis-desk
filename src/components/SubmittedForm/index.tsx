@@ -21,7 +21,7 @@ import * as React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { ActionColumnObj, ActionDefinition, ColumnObj, isColumnObj } from '../../containers/ListTable';
 import { makeLabelColumnPair } from '../../helpers/formUtils';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 import { exportToExcelForSubmittedData, getFormLabel } from '../../helpers/utils';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import Filter from './Filter';
@@ -74,20 +74,20 @@ function SubmittedForm(props: RouteComponentProps<ListURLParams>) {
     const comUpdate = async () => {
         // For some reason TS is not seeing "match" in props type despite it extending the RouteComponentProps
         const { match } = props as any;
-        logger.info('match: ', match);
+        log.info('match: ', match);
         const formId = match.params.id || '';
-        logger.info('form id: ', formId);
+        log.info('form id: ', formId);
         const formDefinitionObj = await ipcRenderer.sendSync('fetch-form-definition', formId);
         const simpleFormChoice = await ipcRenderer.sendSync('fetch-form-choices', formId);
 
         if (formDefinitionObj != null) {
-            const { field_names, formChoices, definition } = formDefinitionObj;
+            const { field_names, formChoices, json: definition } = formDefinitionObj;
             const form = { name: '', children: JSON.parse(formDefinitionObj.definition).children };
             const result = constructFieldWithLabel(form, '');
             setFieldWithLabels(result);
 
             const labelColumnPair = makeLabelColumnPair(JSON.parse(definition), JSON.parse(field_names));
-            logger.info('Label Column Pair: ', labelColumnPair);
+            log.info('Label Column Pair: ', labelColumnPair);
 
             setFieldNames(labelColumnPair);
             setFormAllChoices({ simpleFormChoice, formChoices: JSON.parse(formChoices) });
@@ -226,7 +226,7 @@ function SubmittedForm(props: RouteComponentProps<ListURLParams>) {
     }, []);
 
     const handleChangePage = (event: unknown, newPage: number) => {
-        logger.info(event);
+        log.info(event);
         setPage(newPage);
     };
 
@@ -299,19 +299,6 @@ function SubmittedForm(props: RouteComponentProps<ListURLParams>) {
                     {updating ? (
                         <div style={{ marginTop: '2%', textAlign: 'center' }}>
                             <p> Updating data table...</p>
-                            {/* <Loader
-                type="Puff"
-                color={theme.palette.primary.dark}
-                height={40}
-                width={100}
-              />
-              <Typist cursor={{ hideWhenDone: true }}>
-                <span className="loader-title"> BAHIS </span>
-                <br />
-                <span className="loader-subtitle">
-                  Updating Data Table
-                </span>
-              </Typist> */}
                         </div>
                     ) : (
                         <div style={{ padding: 15 }}>

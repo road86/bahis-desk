@@ -1,5 +1,5 @@
 import { ColumnObj } from '..';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 
 /** interface for LookUpProps */
 export interface LookUpProps {
@@ -44,10 +44,10 @@ const labelLookup = (props: any) => {
     const { columnDef, rowValue, lookupTableForLabel } = props;
     if (Object.keys(lookupTableForLabel).length === 0) return null;
 
-    logger.info(' label lookup ');
-    logger.info('the column: ', columnDef.field_name);
-    logger.info('the value: ', rowValue[columnDef.field_name]);
-    logger.info('props: ', props);
+    log.info(' label lookup ');
+    log.info('the column: ', columnDef.field_name);
+    log.info('the value: ', rowValue[columnDef.field_name]);
+    log.info('props: ', props);
 
     const { simpleFormChoice, formChoices } = lookupTableForLabel[columnDef.lookup_definition.form_id];
     let { definition } = lookupTableForLabel[columnDef.lookup_definition.form_id];
@@ -55,7 +55,7 @@ const labelLookup = (props: any) => {
         (obj: any) => obj.replace('/', '_').toLowerCase() === columnDef.field_name,
     );
 
-    logger.info('exist: ', exist);
+    log.info('exist: ', exist);
     if (exist) {
         let formField: any = {};
         definition = JSON.parse(definition.definition);
@@ -91,15 +91,15 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
             params = params.substring(1, params.length - 1);
             const csvName = params.split(',')[0].replaceAll("'", '');
 
-            logger.info(formField, fieldValue);
+            log.info(formField, fieldValue);
             const csvChoices = choices.formChoices[`${csvName}.csv`];
-            logger.info('choices');
-            logger.info(csvChoices);
-            logger.info('csvname :', csvName);
+            log.info('choices');
+            log.info(csvChoices);
+            log.info('csvname :', csvName);
             let result = csvChoices.find(
                 (option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim(),
             );
-            logger.info('result :', result);
+            log.info('result :', result);
             if (result === undefined) return ' -- ';
             else {
                 result = result[formField.children[0].label['English']];

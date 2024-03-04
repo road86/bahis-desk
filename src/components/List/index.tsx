@@ -2,7 +2,7 @@ import { Container, Typography } from '@material-ui/core';
 import { DataGrid, GridColDef } from '@material-ui/data-grid';
 import { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 import { ipcRenderer } from '../../services/ipcRenderer';
 
 interface ListURLParams {
@@ -16,13 +16,13 @@ function List(props: RouteComponentProps<ListURLParams>) {
     const [rows, setRows] = useState<[]>([]);
 
     const parseFormDefinitionAsColumns = (form: any = null, prefix = '') => {
-        logger.info('parsing form definition as datagrid columns');
+        log.info('parsing form definition as datagrid columns');
         const mappedColumns = form?.children
             .filter((field: any) => {
-                if (field.name === 'basic_info') {
+                if (field.name === 'basic_info' || field.name === 'group_basic_information') {
                     return true;
                 } else if (
-                    prefix === 'basic_info_' &&
+                    (prefix === 'basic_info_' || prefix === 'group_basic_information_') &&
                     (field.name === 'division' ||
                         field.name === 'district' ||
                         field.name === 'upazila' ||
@@ -30,7 +30,7 @@ function List(props: RouteComponentProps<ListURLParams>) {
                         field.name === 'mouza')
                 ) {
                     return false;
-                } else if (prefix === 'basic_info_') {
+                } else if (prefix === 'basic_info_' || prefix === 'group_basic_information_') {
                     return true;
                 } else {
                     return false;
@@ -44,51 +44,65 @@ function List(props: RouteComponentProps<ListURLParams>) {
                         field: `${prefix}${field.name}`,
                         headerName: field.label?.English || field.label?.Bangla || field.label || field.name,
                         width: 200,
-                        editable: false,
                     };
                 }
             });
         // flatten mapped columns
         if (mappedColumns) {
             const flattenedColumns = mappedColumns.flat();
-            logger.info(JSON.stringify(flattenedColumns));
             return flattenedColumns;
         }
     };
 
     const readForm = (form_id: any = null) => {
-        logger.info(`reading definition from forms for form_id: ${form_id}`);
-        const query = `SELECT definition FROM forms WHERE form_id IS ${form_id}`;
+        log.info(`reading JSON definition from forms for form: ${form_id}`);
+        const query = `SELECT json FROM forms2 WHERE id IS ${form_id}`;
         const response = ipcRenderer.sendSync('fetch-query-data', query);
-        const parsed_response = JSON.parse(response[0]?.definition || '');
+        const parsed_response = JSON.parse(response[0]?.json || []);
         setForm(parsed_response);
         setTableName(`bahis_${parsed_response.name}_table`);
     };
 
     const readData = (tableName: any = null) => {
-        logger.info(`reading data from table: ${tableName}`);
+        log.info(`reading data from table: ${tableName}`);
         const query = `SELECT * FROM ${tableName}`;
         return ipcRenderer.sendSync('fetch-query-data', query);
     };
 
     useEffect(() => {
-        readForm(props.id);
-    }, []);
-
-    useEffect(() => {
-        const data = readData(tableName);
-        setRows(data);
-    }, [tableName, form]);
+        readForm((props as any).match.params.id);
+    }, [props]);
 
     useEffect(() => {
         const parsedColumns = parseFormDefinitionAsColumns(form);
         setColumns(parsedColumns);
     }, [form]);
 
+    useEffect(() => {
+        const data = readData(tableName);
+        setRows(data);
+    }, [tableName, form]);
+
+    const onRowClick = (event) => {
+        log.info(`row clicked: ${event.row.id}`);
+        log.info(JSON.stringify(event.row));
+        props.history.push(`/submittedDetails/${(props as any).match.params.id}/${event.row.id}`); // TODO implement and include workflow buttons
+    };
+
     return (
         <Container maxWidth={false} style={{ marginTop: '20px' }}>
             <Typography variant="h3">{form?.title}</Typography>
-            {columns && rows && <DataGrid columns={columns} rows={rows} logger={logger} pageSize={15} autoHeight />}
+            {columns && rows && (
+                <DataGrid
+                    columns={columns}
+                    rows={rows}
+                    logger={log}
+                    rowsPerPageOptions={[15, 25, 50]}
+                    pageSize={15}
+                    onRowClick={onRowClick}
+                    autoHeight
+                />
+            )}
         </Container>
     );
 }

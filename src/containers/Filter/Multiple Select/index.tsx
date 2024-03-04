@@ -18,7 +18,7 @@ import {
 } from '../../../store/ducks/filter';
 import { FILTER_MULTIPLE_SELECT_TYPE } from '../constants';
 import { Grid, Typography } from '@material-ui/core';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 
 export interface FilterMultipleSelectItem extends FilterItem {
     type: FILTER_MULTIPLE_SELECT_TYPE;
@@ -84,7 +84,7 @@ class FilterMultipleSelect extends React.Component<MultipleSelectProps, Multiple
     public render() {
         const { filterItem, appLanguage, value } = this.props;
         const { filterOptions } = this.state;
-        logger.info(`rendering FilterMultipleSelect for ${filterItem.name}`);
+        log.info(`rendering FilterMultipleSelect for ${filterItem.name}`);
         // TODO is this ever used?
         return (
             <Grid container xs={12} spacing={2}>

@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { RouteComponentProps } from 'react-router-dom';
 import { Store } from 'redux';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import menuReducer, {
     MenuItem,
@@ -54,7 +54,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
 
     const readModulesWithParent = (parent_module: any = null) => {
         setSynchronisingAlertOpen(true);
-        logger.info(`reading modules with parent_module: ${parent_module}`);
+        log.info(`reading modules with parent_module: ${parent_module}`);
         let query = 'SELECT DISTINCT * FROM module WHERE parent_module';
         if (parent_module) {
             query += ` = ${parent_module}`;
@@ -62,7 +62,7 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
             query += ' IS NULL';
         }
         const modules = ipcRenderer.sendSync('fetch-query-data', query);
-        logger.debug(`modules: ${JSON.stringify(modules)}`);
+        log.debug(`modules: ${JSON.stringify(modules)}`);
         setSynchronisingAlertOpen(false);
         setmenuModules(modules);
     };

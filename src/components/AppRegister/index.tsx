@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import { withRouter } from 'react-router';
 import packageJson from '../../../package.json';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 import { ipcRenderer } from '../../services/ipcRenderer';
 import AppSignInForm from './AppSignInForm';
 import AlertDialog from './Dialog';
@@ -55,17 +55,17 @@ function AppRegister(props: any) {
     };
 
     const handleSignIn = async () => {
-        logger.info(` client-side handleSignIn `);
+        log.info(` client-side handleSignIn `);
         setSignInButtonDisabled(true);
         await ipcRenderer.send('sign-in', userInput);
         ipcRenderer.on('deleteTableDialogue', function (event: any, args: any) {
-            logger.debug('in delete table dialogue: ', event, args);
+            log.debug('in delete table dialogue: ', event, args);
             setOpenAlert(true);
             setLoginArgs(args);
         });
 
         ipcRenderer.on('formSubmissionResults', function (event: any, args: any) {
-            logger.debug('in formSubmissionResults: ', event, args);
+            log.debug('in formSubmissionResults: ', event, args);
             if (args !== undefined) {
                 setToastVisible(true);
                 if (args.username === '') {
@@ -115,11 +115,11 @@ function AppRegister(props: any) {
                     syncAppModule();
                 }
             }
-            logger.debug('END formSubmissionResults: ', event, args);
+            log.debug('END formSubmissionResults: ', event, args);
         });
 
         const { upazila } = ipcRenderer.sendSync('user-db-info');
-        logger.info(`client-side handleSignIn upazila: ${upazila}`);
+        log.info(`client-side handleSignIn upazila: ${upazila}`);
         props.onLogin(upazila);
     };
 
@@ -138,8 +138,8 @@ function AppRegister(props: any) {
             await ipcRenderer.send('start-app-sync', user.username);
 
             ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-                logger.info('Finished first sync');
-                logger.debug('with: ', event, args);
+                log.info('Finished first sync');
+                log.debug('with: ', event, args);
                 props.history.push({
                     pathname: '/menu/',
                     state: { username: user },
@@ -148,7 +148,7 @@ function AppRegister(props: any) {
         }
 
         const { upazila } = ipcRenderer.sendSync('user-db-info');
-        logger.info(`syncAppModule upazila: ${upazila} `);
+        log.info(`syncAppModule upazila: ${upazila} `);
         props.onLogin(upazila);
     };
 

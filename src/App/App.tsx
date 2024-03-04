@@ -23,7 +23,7 @@ import { Alert } from '@material-ui/lab';
 import CloseIcon from '@material-ui/icons/Close';
 
 import AppRegister from '../components/AppRegister';
-import Form from '../components/Form';
+import { Form } from '../components/Form';
 import FormDetails from '../components/FormDetails';
 import List from '../components/List';
 import ListProfile from '../components/ListProfile';
@@ -36,7 +36,7 @@ import Menu from '../containers/Menu';
 
 import { ipcRenderer } from '../services/ipcRenderer';
 
-import { logger } from '../helpers/logger';
+import { log } from '../helpers/log';
 
 import { FORM_TYPE, MODULE_TYPE, MenuItem, getCurrentMenu } from '../store/ducks/menu';
 
@@ -78,17 +78,17 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
     const [toastContent, setToastContent] = React.useState<any>({});
 
     const setLastSyncTime = async (override: string | undefined) => {
-        logger.info(' setLastSyncTime (client) ');
+        log.info(' setLastSyncTime (client) ');
         let time = new Date().toLocaleString();
         if (override) {
             time = override;
         }
         setLastSync(time);
-        logger.info(` setLastSyncTime SUCCESS: ${time} (client) `);
+        log.info(` setLastSyncTime SUCCESS: ${time} (client) `);
     };
 
     const updateUnsyncCount = async () => {
-        logger.info('update Unsync Count');
+        log.info('update Unsync Count');
         const response = await ipcRenderer.sendSync('fetch-query-data', 'select count(*) as cnt from data where status != 1');
         setUnsyncCount(response[0].cnt);
     };
@@ -198,7 +198,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                         <Route exact path="/menu/">
                             <Menu />
                         </Route>
-                        <Route exact path="/form/:id">
+                        <Route exact path="/form/:form_id">
                             <Suspense fallback={<div>Loading...</div>}>
                                 <ErrorBoundary>
                                     <Form setUnsyncCount={updateUnsyncCount} />
@@ -208,7 +208,7 @@ const App: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPro
                         <Route exact path="/formlist/:id">
                             <SubmittedForm />
                         </Route>
-                        <Route exact path="/submittedDetails/:id">
+                        <Route exact path="/submittedDetails/:form_id/:id">
                             <FormDetails />
                         </Route>
                         <Route exact path="/list/:id">

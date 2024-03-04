@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { log } from './log';
 
 const SELECT_ALL = 'select all that apply';
 const SELECT_ONE = 'select one';
@@ -24,13 +24,13 @@ const createFormKeyValuePair = (definition: any, fieldNames: any, data: any, cho
                 formField = definition.children.find((obj: any) => obj.name === exist[0]);
             }
             if (formField) {
-                logger.info(' form field ');
-                logger.info(formField);
+                log.info(' form field ');
+                log.info(formField);
                 formData.push({
                     label: formField.label,
                     value: getReadableValue(exist[1], formField, choices),
                 });
-                logger.info(formField.label, exist[1]);
+                log.info(formField.label, exist[1]);
             }
         }
     });
@@ -48,13 +48,13 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
             params = params.substring(1, params.length - 1);
             const csvName = params.split(',')[0].replaceAll("'", '');
 
-            logger.info(formField, fieldValue);
+            log.info(formField, fieldValue);
             const csvChoices = choices.formChoices[`${csvName}.csv`];
 
             let result = csvChoices.find(
                 (option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim(),
             );
-            logger.info('result :', result);
+            log.info('result :', result);
             if (result === undefined) return ' -- ';
             else {
                 result = result[formField.children[0].label['English']];
@@ -67,7 +67,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
 
             if (choice.field_name.includes(formField.name) && String(choice.value_text).trim() === String(fieldValue).trim()) {
                 // choice.value_label = JSON.parse(choice.value_label);
-                logger.info('got it: ', formField.name, fieldValue);
+                log.info('got it: ', formField.name, fieldValue);
                 if (typeof choice.value_label === 'string') {
                     try {
                         const result = JSON.parse(choice.value_label);
@@ -76,7 +76,7 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
                         return choice.value_label;
                     }
                 } else if (typeof choice.value_label === 'object') {
-                    logger.info('ans: ', choice.value_label.English);
+                    log.info('ans: ', choice.value_label.English);
                     return choice.value_label.English;
                 }
             }
@@ -104,8 +104,8 @@ const makeLabelColumnPair = (definition: any, fieldNames: any) => {
             formField = definition.children.find((obj: any) => obj.name === element);
         }
         if (formField) {
-            logger.info(' form field ');
-            logger.info(formField);
+            log.info(' form field ');
+            log.info(formField);
             formData.push({
                 label: formField.label,
                 value: element,

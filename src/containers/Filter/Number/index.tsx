@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import { Store } from 'redux';
 import { FilterItem } from '..';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 import { getNativeLanguageText } from '../../../helpers/utils';
 import {
     FilterCondition,
@@ -50,7 +50,7 @@ class FilterNumber extends React.Component<NumberProps> {
     }
 
     public render() {
-        logger.info('rendering FilterNumber');
+        log.info('rendering FilterNumber');
         // TODO is this ever used?
         const { filterItem, condition, value, appLanguage } = this.props;
         if (condition !== IN_BETWEEN_TYPE && value && value.length > 1) {

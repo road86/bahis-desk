@@ -7,7 +7,7 @@ import { Store } from 'redux';
 import { ipcRenderer } from '../../../services/ipcRenderer';
 import { isPrevMenuEmpty, setPrevMenu, resetMenu } from '../../../store/ducks/menu';
 import { headerStyles } from './styles';
-import { logger } from '../../../helpers/logger';
+import { log } from '../../../helpers/log';
 import { theme } from '../../../theme';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
 
@@ -58,7 +58,7 @@ function Header(props: HeaderProps) {
         await ipcRenderer.send('start-app-sync', user.username);
 
         ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-            logger.info(` Finished form sync with message: ${_args}`);
+            log.info(` Finished form sync with message: ${_args}`);
             if (!appConfigSyncComplete) {
                 setAppConfigSyncComplete(true);
             }
@@ -66,7 +66,7 @@ function Header(props: HeaderProps) {
         });
 
         ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
-            logger.info(` Finished data sync with message: ${_args} `);
+            log.info(` Finished data sync with message: ${_args} `);
             setAppConfigSyncComplete(false);
             props.updateUnsyncCount();
             props.setLastSyncTime();
@@ -104,10 +104,10 @@ function Header(props: HeaderProps) {
     };
 
     const getButtonColor = (): any => {
-        logger.info('Getting button colour');
+        log.info('Getting button colour');
         //check unsync count on load the application
         props.updateUnsyncCount();
-        logger.info(' unsyncCount ', props.unsyncCount);
+        log.info(' unsyncCount ', props.unsyncCount);
         return props.unsyncCount === 0 ? theme.palette.primary.main : theme.palette.secondary.main;
     };
 

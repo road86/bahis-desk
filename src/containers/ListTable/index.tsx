@@ -37,7 +37,7 @@ import OrderBy from './OrderBy';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import _ from 'lodash';
 import { getFormLabel } from '../../helpers/utils';
-import { logger } from '../../helpers/logger';
+import { log } from '../../helpers/log';
 
 export interface LookupDefinition {
     table_name: string;
@@ -185,9 +185,9 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
                 : `with ${randomTableName} as (${datasource.query}) select count(*) as count from ${randomTableName}`,
         );
         setTotalRecordsActionCreator(totalRecordsResponse[0].count);
-        logger.info(' datasource ');
+        log.info(' datasource ');
 
-        logger.info(
+        log.info(
             `with ${randomTableName} as (${datasource.query}) select * from ${randomTableName} limit ${this.state.rowsPerPage} offset 0`,
         );
         const response = await ipcRenderer.sendSync(
@@ -213,8 +213,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             lookup_table.${column.lookup_definition.return_column}
           from list_table left join lookup_table on list_table.${column.field_name} = lookup_table.${column.lookup_definition.match_column}`;
 
-                logger.info('lookup query');
-                logger.info(query);
+                log.info('lookup query');
+                log.info(query);
                 const resp = await ipcRenderer.sendSync('fetch-query-data', query);
                 lookupTableForDatasource[column.lookup_definition.return_column] = resp;
             }
@@ -239,8 +239,8 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             }
         });
 
-        logger.info('--> tableData: ', response);
-        logger.info('lookupTableForDatasource: ', lookupTableForDatasource);
+        log.info('--> tableData: ', response);
+        log.info('lookupTableForDatasource: ', lookupTableForDatasource);
         this.setState({ ...this.state, tableData: response || [], filters, lookupTableForDatasource, lookupTableForLabel });
     }
 
@@ -254,7 +254,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
             setTotalRecordsActionCreator,
             setPageNumberActionCreator,
         } = this.props;
-        logger.info({ prevProps });
+        log.info({ prevProps });
         const stateFilters = this.state.filters;
         const stateOrderSql = this.state.orderSql;
         const statePageNumber = this.state.pageNumber;
@@ -517,7 +517,7 @@ class ListTable extends React.Component<ListTableProps, ListTableState> {
 
     private handleChangePage = (event: unknown, newPage: number) => {
         // setPage(newPage);
-        logger.info(event);
+        log.info(event);
         this.props.setPageNumberActionCreator(newPage + 1);
         this.setState({
             page: newPage,

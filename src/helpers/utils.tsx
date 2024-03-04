@@ -1,6 +1,6 @@
 import { ipcRenderer } from '../services/ipcRenderer';
 import * as XLSX from 'xlsx';
-import { logger } from './logger';
+import { log } from './log';
 
 /** Interface for an object that is allowed to have any property */
 export interface FlexObject {
@@ -21,11 +21,11 @@ export function getNativeLanguageText(multiLanguageObject: FlexObject, languageI
 
 //the following function is never called
 export const appSync = async () => {
-    logger.info('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    log.info('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
     const user: any = await ipcRenderer.sendSync('fetch-username', 'aaa');
     await ipcRenderer.send('start-app-sync', user.username);
     ipcRenderer.on('formSyncComplete', async function (event: any, args: any) {
-        logger.info('check', event, args);
+        log.info('check', event, args);
         return args;
         // if (args == 'done') {
         //   return true;
@@ -36,11 +36,11 @@ export const appSync = async () => {
 };
 
 export const dataSync = async () => {
-    logger.info('BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    log.info('BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
     const user: any = await ipcRenderer.sendSync('fetch-username', 'bbbb');
     await ipcRenderer.send('request-data-sync', user.username);
     ipcRenderer.on('dataSyncComplete', async function (event: any, args: any) {
-        logger.info('check', event, args);
+        log.info('check', event, args);
         return args;
     });
 };
@@ -57,10 +57,10 @@ export const exportToExcel = (excelData: any) => {
 export const exportToExcelForSubmittedData = (tableData: any, filteredColumns: any, choiceList: any) => {
     const excelData: any[] = [];
     let excelTabs: any = {};
-    logger.info(filteredColumns, tableData, choiceList);
+    log.info(filteredColumns, tableData, choiceList);
     for (const row of tableData) {
         const data = JSON.parse(row.data);
-        logger.info('data: ', data);
+        log.info('data: ', data);
 
         //TODO   Line 63:20:    Unnecessarily computed property ['instance id'] found  no-useless-computed-key
         let newRow = { ['instance id']: row.instanceid };
@@ -109,15 +109,15 @@ const getReadableValue = (fieldValue: any, formField: any, choices: any) => {
             params = params.substring(1, params.length - 1);
             const csvName = params.split(',')[0].replaceAll("'", '');
 
-            logger.info(formField, fieldValue);
+            log.info(formField, fieldValue);
             const csvChoices = choices.formChoices[`${csvName}.csv`];
-            logger.info('choices');
-            logger.info(csvChoices);
-            logger.info('csvname :', csvName);
+            log.info('choices');
+            log.info(csvChoices);
+            log.info('csvname :', csvName);
             let result = csvChoices.find(
                 (option: any) => String(option[formField.children[0].name]).trim() === String(fieldValue).trim(),
             );
-            logger.info('result :', result);
+            log.info('result :', result);
             if (result === undefined) return ' -- ';
             else {
                 result = result[getFormLabel(formField.children[0].label)];
