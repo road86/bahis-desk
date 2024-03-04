@@ -16,7 +16,7 @@ export const initialiseDBModulesTable = (db) => {
         title TEXT NOT NULL,\
         icon TEXT NULL,\
         description TEXT NULL,\
-        form INTEGER NULL,\
+        form TEXT NULL,\
         external_url TEXT NULL,\
         sort_order INTEGER NOT NULL,\
         parent_module INTEGER NULL,\
@@ -31,8 +31,8 @@ export const initialiseDBWorkflowsTable = (db) => {
         'CREATE TABLE workflow (\
         id INTEGER NOT NULL PRIMARY KEY,\
         title TEXT NOT NULL,\
-        source_form INTEGER NULL,\
-        destination_form INTEGER NULL,\
+        source_form TEXT NULL,\
+        destination_form TEXT NULL,\
         definition TEXT NOT NULL\
     );',
     ).run();
