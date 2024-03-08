@@ -543,19 +543,6 @@ const fetchUsername = (event, infowhere) => {
     }
 };
 
-const fetchUserList = (event) => {
-    try {
-        const fetchedRows = db.prepare('SELECT DISTINCT	username, name FROM users').all();
-
-        log.info(fetchedRows);
-        event.returnValue = {
-            users: fetchedRows,
-        };
-    } catch (error) {
-        log.info(error?.message);
-    }
-};
-
 const getUserDBInfo = (event) => {
     // FIXME this function is actually about user location and is badly named
     try {
