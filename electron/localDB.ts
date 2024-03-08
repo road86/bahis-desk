@@ -1,4 +1,4 @@
-import log from 'electron-log';
+import { log } from './log';
 
 export const initialiseDBTables = (db) => {
     initialiseDBModulesTable(db);

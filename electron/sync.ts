@@ -1,7 +1,9 @@
-import { app } from 'electron';
-import log from 'electron-log';
 import axios from 'axios';
-import { existsSync, writeFileSync, mkdirSync } from 'fs';
+import { app } from 'electron';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { DOMParser } from 'xmldom';
+import xpath from 'xpath';
+import { log } from './log';
 
 export const APP_VERSION = app.getVersion();
 export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_SERVER_URL || 'http://localhost:3001';
@@ -62,7 +64,8 @@ export const getModules = async (db) => {
             log.info('GET Module Definitions SUCCESS');
         })
         .catch((error) => {
-            log.warn('GET Module Definitions FAILED with\n', error?.message);
+            log.error('GET Module Definitions FAILED with:');
+            log.error(error);
         });
 };
 
@@ -95,7 +98,7 @@ export const getWorkflows = async (db) => {
                             JSON.stringify(workflow.definition),
                         ]);
                     } else {
-                        log.info(`Deleting workflow ${workflow.id} from local database as no longer active`);
+                        log.warn(`Deleting workflow ${workflow.id} from local database as no longer active`);
                         deleteQuery.run([workflow.id]);
                     }
                 }
@@ -103,7 +106,8 @@ export const getWorkflows = async (db) => {
             log.info('GET Workflow Definitions SUCCESS');
         })
         .catch((error) => {
-            log.warn('GET Workflow Definitions FAILED with\n', error?.message);
+            log.error('GET Workflow Definitions FAILED with:');
+            log.error(error);
         });
 };
 
@@ -137,7 +141,8 @@ export const getForms = async (db) => {
             return formList;
         })
         .catch((error) => {
-            log.warn('GET KoboToolbox Form Definitions FAILED with\n', error?.message);
+            log.error('GET KoboToolbox Form Definitions FAILED with:');
+            log.error(error);
         });
 
     const upsertQuery = db.prepare(
@@ -154,7 +159,8 @@ export const getForms = async (db) => {
                 log.info(`GET form ${form.uid} SUCCESS`);
             })
             .catch((error) => {
-                log.warn(`GET KoboToolbox Form Definitions FAILED with\n${error?.message}`);
+                log.error('GET KoboToolbox Form Definitions FAILED with:');
+                log.error(error);
             });
     }
     log.info(`GET KoboToolbox Form Definitions SUCCESS`);
@@ -176,7 +182,8 @@ export const getTaxonomies = async (db) => {
             return response.data;
         })
         .catch((error) => {
-            log.warn('GET Taxonomy List FAILED with\n', error?.message);
+            log.error('GET Taxonomy List FAILED with:');
+            log.error(error);
         });
 
     const upsertQuery = db.prepare('INSERT INTO taxonomy (slug, csv_file) VALUES (?, ?);');
@@ -195,13 +202,15 @@ export const getTaxonomies = async (db) => {
                     }
                     writeFileSync(`${app.getAppPath()}/${taxonomy.csv_file_stub}`, response.data, 'utf-8');
                 } catch (error) {
-                    log.warn('GET Taxonomy CSV FAILED while saving with\n', error?.message);
+                    log.error('GET Taxonomy CSV FAILED while saving with:');
+                    log.error(error);
                 }
                 upsertQuery.run([taxonomy.slug, taxonomy.csv_file_stub]);
                 log.info(`GET Taxonomy CSV ${taxonomy.slug} SUCCESS`);
             })
             .catch((error) => {
-                log.warn(`GET Taxonomy CSV FAILED with\n${error?.message}`);
+                log.error('GET Taxonomy CSV FAILED with:');
+                log.error(error);
             });
     }
 };
@@ -231,7 +240,8 @@ export const getAdministrativeRegions = async (db) => {
             log.info('GET getAdministrativeRegionLevels Definitions SUCCESS');
         })
         .catch((error) => {
-            log.warn('GET getAdministrativeRegionLevels Definitions FAILED with\n', error?.message);
+            log.error('GET getAdministrativeRegionLevels Definitions FAILED with:');
+            log.error(error);
         });
 
     log.info(`GET getAdministrativeRegions Definitions`);
@@ -265,6 +275,7 @@ export const getAdministrativeRegions = async (db) => {
             log.info('GET getAdministrativeRegions Definitions SUCCESS');
         })
         .catch((error) => {
-            log.warn('GET getAdministrativeRegions Definitions FAILED with\n', error?.message);
+            log.error('GET getAdministrativeRegions Definitions FAILED with:');
+            log.error(error);
         });
 };

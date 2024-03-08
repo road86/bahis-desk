@@ -1,16 +1,26 @@
-import { app, BrowserWindow, ipcMain, dialog, Menu } from 'electron';
-import log from 'electron-log';
-import path from 'node:path';
 import axios from 'axios';
 import csv from 'csv-parser';
-import xmlbuilder from 'xmlbuilder';
-import { existsSync, writeFile, createReadStream, cp, rm } from 'fs';
+import { BrowserWindow, Menu, app, dialog, ipcMain } from 'electron';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import { autoUpdater } from 'electron-updater';
+import { cp, createReadStream, existsSync, writeFile } from 'fs';
+import path from 'node:path';
+import { create } from 'xmlbuilder2';
+import { createLocalDatabase2, createOrReadLocalDatabase2, deleteLocalDatabase2, updateFreshLocalDatabase2 } from './localDB2';
+import { log } from './log';
+import {
+    BAHIS_SERVER_URL,
+    getAdministrativeRegions,
+    getFormCloudSubmissions,
+    getForms,
+    getModules,
+    getTaxonomies,
+    getWorkflows,
+    postFormCloudSubmissions,
+} from './sync';
 import {
     BAHIS2_SERVER_URL,
     deleteDataWithInstanceId2,
-    parseAndSaveToFlatTables2,
     getCSVData2,
     getCatchments2,
     getFormChoices2,
@@ -19,21 +29,13 @@ import {
     getForms2,
     getLists2,
     getModuleDefinitions2,
+    parseAndSaveToFlatTables2,
     postFormSubmissions2,
 } from './sync2';
-import { createLocalDatabase2, createOrReadLocalDatabase2, updateFreshLocalDatabase2, deleteLocalDatabase2 } from './localDB2';
-import { BAHIS_SERVER_URL, getAdministrativeRegions, getForms, getModules, getTaxonomies, getWorkflows } from './sync';
 
 // SETUP
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
-
-// logging setup - keep at top of file
-log.transports.file.resolvePath = () => 'electron-debug.log';
-log.transports.file.format = '{y}-{m}-{d} {h}:{i}:{s}.{ms} [{level}] {scope} {text}';
-log.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] {scope} {text}';
-log.warn(`Full debug logs can be found in ${path.join(process.env.DIST, 'debug.log')}`);
-autoUpdater.logger = log;
 
 const APP_VERSION = app.getVersion();
 
@@ -43,20 +45,25 @@ export const MODE = import.meta.env.MODE || 'development';
 // set environment variables based on mode
 switch (MODE) {
     case 'development':
-        log.transports.file.level = 'silly';
-        log.transports.console.level = 'silly';
-        log.transports.ipc!.level = false; // we turn this off until we can upgrade to electron-log v5 as we can't format it - all the information it would show is found in the main console and the log file anyway
+        log.info('Running in dev mode');
+        log.transports[0].level = 'silly'; // console
+        log.transports[1].level = 'silly'; // file
+
         break;
     case 'production':
         log.info('Running in production mode');
-        log.transports.file.level = 'info';
-        log.transports.console.level = 'warn';
-        log.transports.ipc!.level = false;
+        log.transports[0].level = 'warn'; // console
+        log.transports[1].level = 'info'; // file
         break;
     default:
         log.error(`Unknown mode: ${MODE}`);
         break;
 }
+
+// logging setup
+autoUpdater.logger = log;
+log.info(`Using the following log settings: console=${log.transports[0].level}; file=${log.transports[1].level}}`);
+log.info(`Full debug logs can be found in ${path.join(process.env.DIST, 'electron-debug.log')}`);
 
 // MIGRATION
 // The following code migrates user data from bahis-desk <=v2.3.0
@@ -65,13 +72,11 @@ switch (MODE) {
 const migrate = (old_app_location) => {
     if (existsSync(old_app_location)) {
         log.warn(`Migrating user data from old location: ${old_app_location}`);
+        log.debug(`Old location: ${old_app_location}`);
+        log.debug(`New location: ${app.getPath('userData')}`);
         cp(old_app_location, app.getPath('userData'), { recursive: true }, (error) => {
             log.error('Failed to migrate user data from old location');
-            log.error(error?.message);
-        });
-        rm(old_app_location, { recursive: true }, (error) => {
-            log.error('Failed to delete user data from old location');
-            log.error(error?.message);
+            log.error(error);
         });
     }
 };
@@ -91,11 +96,6 @@ switch (MODE) {
 log.info(`Running version ${APP_VERSION} in ${MODE} mode with the following environment variables:`);
 log.info(`BAHIS2_SERVER_URL=${BAHIS2_SERVER_URL}`);
 log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL} (BAHIS 3)`);
-log.info(
-    `Using the following log settings: file=${log.transports.file.level}; console=${log.transports.console.level}; ipc=${
-        log.transports.ipc!.level
-    }`,
-);
 
 // Initialise local DB
 let db = createOrReadLocalDatabase2(MODE);
@@ -261,7 +261,8 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
 
         event.returnValue = returnedRows;
     } catch (error) {
-        log.info(`fetchFilterDataset Error ${error?.message}`);
+        log.error('fetchFilterDataset Error');
+        log.error(error);
 
         event.returnValue = [];
     }
@@ -299,7 +300,8 @@ const fetchFormDefinition = (event, formId) => {
                     const { query } = choiceDefinition[key];
                     choices[`${key}.csv`] = db.prepare(query).all();
                 } catch (error) {
-                    log.info(`Choice Definition Error  ${error?.message}`);
+                    log.error('Choice Definition Error:');
+                    log.error(error);
                 }
             });
 
@@ -307,10 +309,11 @@ const fetchFormDefinition = (event, formId) => {
             event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
         } else {
             event.returnValue = null;
-            log.info(`fetchFormDefinition problem, no such form with ${formId}`);
+            log.warn(`fetchFormDefinition problem, no such form with ${formId}`);
         }
     } catch (error) {
-        log.info(`fetchFormDefinition Error  ${error?.message}`);
+        log.error('fetchFormDefinition Error:');
+        log.error(error);
     }
 };
 
@@ -320,7 +323,8 @@ const fetchFormChoices = (event, formId) => {
         const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
         event.returnValue = formchoices;
     } catch (error) {
-        log.info('error fetch form choices ', error?.message);
+        log.error('fetchFormChoices FAILED with:');
+        log.error(error);
     }
 };
 
@@ -335,8 +339,8 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
             event.returnValue = null;
         }
     } catch (error) {
-        log.info(`Fetch FormDetails`);
-        log.info(error?.message);
+        log.error('fetchFormDetails FAILED with:');
+        log.error(error);
     }
 };
 
@@ -358,7 +362,7 @@ const fetchListDefinition = (event, listId) => {
             event.returnValue = null;
         }
     } catch (error) {
-        log.info(`fethcListDefinition Error, listId: ${listId}`);
+        log.error(`fethcListDefinition Error, listId: ${listId}`);
     }
 };
 
@@ -377,7 +381,7 @@ const fetchFormListDefinition = (event, formId) => {
 
         event.returnValue = { fetchedRows };
     } catch (error) {
-        log.info(`fetchFormListDefinition, listId: ${formId}`);
+        log.error(`fetchFormListDefinition, listId: ${formId}`);
     }
 };
 
@@ -584,7 +588,8 @@ const exportExcel = (event, excelData) => {
 
             writeFile(filename, new Buffer(excelData), (error) => {
                 if (error) {
-                    log.info(`an error occured with file creation,  ${error?.message}`);
+                    log.error('an error occured with file creation:');
+                    log.error(error);
                     dialog.showMessageBox({
                         title: 'Download Updates',
                         message: `an error ocurred with file creation ${error?.message}`,
@@ -602,7 +607,8 @@ const exportExcel = (event, excelData) => {
                 title: 'Download Updates',
                 message: `${error?.message}`,
             });
-            log.info(`export excel error: ${error?.message}`);
+            log.error('export excel error:');
+            log.error(error);
         });
 };
 
@@ -617,7 +623,8 @@ const fetchUsername = (event, infowhere) => {
         };
         log.info('fetchUsername SUCCESS');
     } catch (error) {
-        log.info(`fetchUsername FAILED ${error?.message}`);
+        log.error('fetchUsername FAILED with:');
+        log.error(error);
     }
 };
 
@@ -649,10 +656,11 @@ const getUserDBInfo = (event) => {
             log.info(`userDB SUCCESS ${JSON.stringify(geoInfo)}`);
             event.returnValue = geoInfo;
         } else {
-            log.info('userDB FAILED - undefined');
+            log.warn('userDB FAILED - undefined');
         }
     } catch (error) {
-        log.info(`userDBInfo FAILED ${error?.message}`);
+        log.error('userDBInfo FAILED with:');
+        log.error(error);
     }
 };
 

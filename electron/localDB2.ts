@@ -1,16 +1,14 @@
 // All functions used for setting up and handling the local database for BAHIS2 syncs
 // This file is used by electron/main.ts
 
-// imports
-import log from 'electron-log';
+import Database from 'better-sqlite3';
 import { app } from 'electron';
+import { existsSync, unlinkSync } from 'fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import Database from 'better-sqlite3';
-import { unlinkSync, existsSync } from 'fs';
-
 import { initialiseDBTables } from './localDB';
+import { log } from './log';
 
 // variables
 const queries = `CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
@@ -40,8 +38,8 @@ export const createLocalDatabase2 = (MODE) => {
         initialiseDBTables(db);
         log.info('Initial tables created successfully');
     } catch (error) {
-        log.info('Failed setting up DB');
-        log.info(error?.message);
+        log.error('Failed setting up DB');
+        log.error(error);
     }
     log.info('Database setup finished !!!!');
 

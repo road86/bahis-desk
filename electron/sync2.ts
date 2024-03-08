@@ -2,11 +2,10 @@
 // This file is used by electron/main.ts
 // Each function is called by the final function `sync2()`
 
-// imports
-import { app } from 'electron';
 import axios from 'axios';
-import log from 'electron-log';
+import { app } from 'electron';
 import { random } from 'lodash';
+import { log } from './log';
 
 // variables
 export const APP_VERSION = app.getVersion();
@@ -52,13 +51,13 @@ export const deleteDataWithInstanceId2 = (db, instanceId, formId) => {
                     log.info('deleteDataWithInstanceID SUCCESS');
                 } catch (error) {
                     log.info('deleteDataWithInstanceID FAILED');
-                    console.error(error?.message);
+                    log.error(error);
                 }
             });
         }
     } catch (error) {
         log.info('deleteDataWithInstanceID FAILED');
-        log.info(error?.message);
+        log.error(error);
     }
 };
 
@@ -124,7 +123,9 @@ export const parseAndSaveToFlatTables2 = (db, formId, userInput, instanceId) => 
                 const successfulInsert = successfulInsertprep.run(actualValues);
                 newParentId = successfulInsert.lastInsertRowid;
             } catch (error) {
-                log.info('Insert failed !!!', error?.message, query);
+                log.error('Insert failed !!!');
+                log.error(error);
+                log.debug(query);
             }
         }
         repeatKeys.forEach((key) => {
@@ -227,7 +228,7 @@ export const getModuleDefinitions2 = async (username, time, db) => {
             const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
         } catch (error) {
-            log.info(error?.message);
+            log.error(error);
         }
         log.info('updateModuleDefinitions FINISHED');
     };
@@ -244,7 +245,7 @@ export const getModuleDefinitions2 = async (username, time, db) => {
                     layoutDeleteQuery.run();
                 } catch (error) {
                     log.info('Previous Layout does not exist');
-                    log.info(error?.message);
+                    log.error(error);
                 }
                 updateModuleDefinitions(moduleListRes.data, db);
             }
@@ -294,7 +295,8 @@ export const getCatchments2 = async (username, time, db) => {
             log.info('Synchronising Catchments SUCCESS');
         })
         .catch((error) => {
-            log.info('Synchronising Catchments FAIL \n', error?.message);
+            log.error('Synchronising Catchments FAILED with:');
+            log.error(error);
         });
 };
 
@@ -318,8 +320,8 @@ export const getFormConfig2 = async (username, time, db) => {
                     try {
                         db.exec(sqlObj.sql_script);
                     } catch (error: any) {
-                        log.info('formConfigRes FAILED');
-                        log.info('Error: ', error?.message);
+                        log.error('formConfigRes FAILED with:');
+                        log.error(error);
                     }
                 }
             });
@@ -390,7 +392,8 @@ export const getForms2 = async (username, time, db) => {
                         JSON.stringify(fieldNames),
                     );
                 } catch (error) {
-                    log.info('db form insertion failed', error?.message);
+                    log.error('db form insertion FAILED with:');
+                    log.error(error);
                 }
             });
         }
@@ -425,7 +428,8 @@ export const getLists2 = async (username, time, db) => {
                         JSON.stringify(listObj.column_definition),
                     );
                 } catch (error) {
-                    log.info('db list insertion failed', error?.message);
+                    log.error('db list insertion FAILED with:');
+                    log.error(error);
                 }
             });
         }
@@ -455,7 +459,8 @@ export const getFormChoices2 = async (username, time, db) => {
                 try {
                     previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
                 } catch (error) {
-                    log.info('db form_choice deletion failed');
+                    log.error('db form_choice deletion FAILED with:');
+                    log.error(error);
                 }
 
                 try {
@@ -467,7 +472,8 @@ export const getFormChoices2 = async (username, time, db) => {
                         formObj.field_type,
                     );
                 } catch (error) {
-                    log.info('db form_choice insertion failed');
+                    log.error('db form_choice insertion FAILED with:');
+                    log.error(error);
                 }
             });
         }
@@ -632,7 +638,8 @@ export const postFormSubmissions2 = async (username, time, db) => {
                     }
                     return true;
                 } catch {
-                    log.info('Datapoint submission failed!');
+                    log.error('Datapoint submission FAILED with:');
+                    log.error('error');
                     return jsondata;
                 }
             };
@@ -650,7 +657,7 @@ export const postFormSubmissions2 = async (username, time, db) => {
                     log.info('submit finished all');
                 })
                 .catch(() => {
-                    log.info('Failed to submit all');
+                    log.error('Failed to submit all');
                 });
         } catch (error) {
             log.info('Data submission failed!');
@@ -750,7 +757,7 @@ export const getFormSubmissions2 = async (username, time, db) => {
                     return val !== true && typeof val == 'string';
                 });
 
-                log.info('Failed request: ', failedReq);
+                log.error('Failed request: ', failedReq);
 
                 if (failedReq.length > 0 && tries <= maxRetries) {
                     // giving 1 sec delay for each tries
@@ -779,8 +786,8 @@ export const getFormSubmissions2 = async (username, time, db) => {
 
         return 'success';
     } catch (error) {
-        log.info('fetch error', error?.message);
-        log.info('Error In Fetching Data From Server');
+        log.error('Error In Fetching Data From Server');
+        log.error(error);
         return 'failed';
     }
 };
@@ -805,7 +812,7 @@ export const getCSVData2 = async (username, time, db) => {
                     db.prepare(dataDeleteStmt).run();
                 });
             } catch (error) {
-                log.info(error?.message);
+                log.error(error);
             }
         };
 
@@ -826,7 +833,7 @@ export const getCSVData2 = async (username, time, db) => {
 
                 insertMany(rowData.data);
             } catch (error) {
-                log.info(error?.message);
+                log.error(error);
             }
         };
 
@@ -843,7 +850,8 @@ export const getCSVData2 = async (username, time, db) => {
                 }
             })
             .catch((error) => {
-                log.info('axios error', error?.message);
+                log.error('axios error:');
+                log.error(error);
                 return 'failed';
             });
         return 'success';
@@ -863,7 +871,7 @@ export const getCSVData2 = async (username, time, db) => {
         return 'success';
     } catch (error) {
         log.info('csvDataSync FAILED');
-        log.info(error?.message);
+        log.error(error);
         return 'failed';
     }
 };
