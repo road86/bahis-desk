@@ -16,7 +16,7 @@ CREATE TABLE app ( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definitio
 CREATE TABLE forms2 ( id INTEGER PRIMARY KEY, id_string TEXT NOT NULL, xml TEXT NOT NULL, json TEXT NOT NULL,choice_definition TEXT, uuid TEXT, table_mapping TEXT, field_names TEXT );
 CREATE TABLE lists2 ( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
 CREATE TABLE data ( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
-CREATE TABLE app_log ( time TEXT);
+CREATE TABLE app_log2 ( time TEXT);
 CREATE TABLE form_choices2 ( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);`;
 
 // 2023-08-21 the following options are a fix for using rollup (within vite) with better-sqlite3

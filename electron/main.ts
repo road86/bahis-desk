@@ -620,12 +620,12 @@ const getAppData = async (event) => {
     log.debug(`due to ${event.type}`);
 
     const readAppLastSyncTime = () => {
-        const logged_time = db.prepare('SELECT * from app_log order by time desc limit 1').get() as any;
+        const logged_time = db.prepare('SELECT * from app_log2 order by time desc limit 1').get() as any;
         return logged_time === undefined ? 0 : Math.round(logged_time.time);
     };
 
     const updateAppLastSyncTime = () => {
-        const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
+        const newLayoutQuery = db.prepare('INSERT INTO app_log2(time) VALUES(?)');
         newLayoutQuery.run(Date.now());
     };
 
