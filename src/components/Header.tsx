@@ -24,7 +24,7 @@ const getLastSyncTime = async (override?: string | undefined) => {
 
 const getUnsyncCount = async () => {
     log.info('update Unsync Count');
-    return ipcRenderer.invoke('get-local-db', 'select count(*) as cnt from data where status != 1').then((response) => {
+    return ipcRenderer.invoke('get-local-db', 'select count(*) as cnt from data2 where status != 1').then((response) => {
         return response[0].cnt;
     });
 };

@@ -35,7 +35,7 @@ const _url = (url, username, time) => {
 export const deleteDataWithInstanceId2 = (db, instanceId, formId) => {
     log.info(`deleteDataWithInstanceID; instanceId: ${instanceId.toString()}; formId: ${formId}`);
     try {
-        let sql = 'DELETE FROM data WHERE instanceid = ?';
+        let sql = 'DELETE FROM data2 WHERE instanceid = ?';
         let stmt = db.prepare(sql);
         let numDeleted = stmt.run(instanceId.toString()).changes;
         log.info(`Row(s) deleted from table "data": ${numDeleted}`);
@@ -596,8 +596,8 @@ export const postFormSubmissions2 = async (username, time, db) => {
     };
 
     try {
-        const notSyncRowsQuery = db.prepare('Select * from data where status = 0');
-        const updateStatusQuery = db.prepare('UPDATE data SET status = 1, instanceid = ? WHERE data_id = ?');
+        const notSyncRowsQuery = db.prepare('Select * from data2 where status = 0');
+        const updateStatusQuery = db.prepare('UPDATE data2 SET status = 1, instanceid = ? WHERE data_id = ?');
         try {
             const notSyncRows = notSyncRowsQuery.all() || [];
             const noRowsToSync = notSyncRows.length;
@@ -680,7 +680,7 @@ export const getFormSubmissions2 = async (username, time, db) => {
                 : new Date().toISOString();
 
             const insertStmt = db.prepare(
-                `INSERT INTO data (form_id, data, status, instanceid, last_updated, submitted_by, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO data2 (form_id, data, status, instanceid, last_updated, submitted_by, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
             );
             insertStmt.run(
                 formId,
@@ -699,7 +699,7 @@ export const getFormSubmissions2 = async (username, time, db) => {
     };
 
     try {
-        const last_updated = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get() as any;
+        const last_updated = db.prepare('SELECT last_updated from data2 order by last_updated desc limit 1').get() as any;
         const updated =
             last_updated == undefined || last_updated.last_updated == null ? 0 : new Date(last_updated.last_updated).valueOf();
         const url = _url(BAHIS2_DATA_SYNC_PAGINATED, username, updated);

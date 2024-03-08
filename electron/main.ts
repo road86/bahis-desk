@@ -285,7 +285,7 @@ const submitFormResponse = (event, response) => {
     };
     const date = new Date().toISOString();
     const insert = db.prepare(
-        'INSERT INTO data (form_id, data, status,  submitted_by, submission_date, instanceid) VALUES (?, ?, 0, ?, ?, ?)',
+        'INSERT INTO data2 (form_id, data, status,  submitted_by, submission_date, instanceid) VALUES (?, ?, 0, ?, ?, ?)',
     );
     insert.run(response.formId, response.data, fetchedUsername, date, JSON.parse(response.data)['meta/instanceID']);
     parseAndSaveToFlatTables2(db, response.formId, response.data, null);
@@ -338,7 +338,7 @@ const fetchFormChoices = (event, formId) => {
 const fetchFormDetails = (event, listId, column = 'data_id') => {
     log.info(`fetchFormDetails  ${event.type} ${listId}`);
     try {
-        const formData = db.prepare(`SELECT * from data where ${column} = ? limit 1`).get(listId);
+        const formData = db.prepare(`SELECT * from data2 where ${column} = ? limit 1`).get(listId);
         log.info(formData);
         if (formData != undefined) {
             event.returnValue = { formDetails: formData };
@@ -383,7 +383,7 @@ const fetchFormListDefinition = (event, formId) => {
     log.info(`fetchFormListDefinition, listId: ${formId}`);
     try {
         const userName = getCurrentUser();
-        const query = 'SELECT * from data where form_id = ? and submitted_by = ?';
+        const query = 'SELECT * from data2 where form_id = ? and submitted_by = ?';
         const fetchedRows = db.prepare(query).all(formId, userName);
 
         event.returnValue = { fetchedRows };
@@ -398,10 +398,10 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
         let query;
         if (constraint == 'equal') {
             query =
-                "SELECT data_id, submitted_by, submission_date, data from data where form_id = ? and json_extract(data, '$.?') = ?";
+                "SELECT data_id, submitted_by, submission_date, data from data2 where form_id = ? and json_extract(data, '$.?') = ?";
         } else {
             query =
-                "SELECT data_id, submitted_by, submission_date, data from data where form_id = ? and json_extract(data, '$.?') LIKE '%?%'";
+                "SELECT data_id, submitted_by, submission_date, data from data2 where form_id = ? and json_extract(data, '$.?') LIKE '%?%'";
         }
         const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
 
@@ -663,7 +663,7 @@ const postGetUserData = async (event) => {
     log.debug(`due to ${event.type}`);
 
     const readDataLastSyncTime = () => {
-        const logged_time = db.prepare('SELECT last_updated from data order by last_updated desc limit 1').get() as any;
+        const logged_time = db.prepare('SELECT last_updated from data2 order by last_updated desc limit 1').get() as any;
         return logged_time == undefined || logged_time.last_updated == null ? 0 : new Date(logged_time.last_updated).valueOf();
     };
 
