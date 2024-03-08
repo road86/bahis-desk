@@ -225,7 +225,7 @@ export const getModuleDefinitions2 = async (username, time, db) => {
         });
 
         try {
-            const newLayoutQuery = db.prepare('INSERT INTO app(app_id, app_name, definition) VALUES(1, ?,?)');
+            const newLayoutQuery = db.prepare('INSERT INTO app2 (app_id, app_name, definition) VALUES(1, ?,?)');
             newLayoutQuery.run('Bahis_Updated', JSON.stringify(appDefinition));
         } catch (error) {
             log.error(error);
@@ -238,7 +238,7 @@ export const getModuleDefinitions2 = async (username, time, db) => {
         .then((moduleListRes) => {
             if (moduleListRes.data) {
                 log.info('moduleListRes data');
-                const layoutDeleteQuery = db.prepare('DELETE FROM app');
+                const layoutDeleteQuery = db.prepare('DELETE FROM app2');
 
                 try {
                     log.info('clearing app layout');
