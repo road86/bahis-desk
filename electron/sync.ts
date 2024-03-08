@@ -7,6 +7,8 @@ import { log } from './log';
 
 export const APP_VERSION = app.getVersion();
 export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_SERVER_URL || 'http://localhost:3001';
+const BAHIS_KOBOTOOLBOX_KF_API_URL = import.meta.env.VITE_BAHIS_KOBOTOOLBOX_KF_API_URL || 'http://kf.localhost:80/api/v2/';
+const BAHIS_KOBOTOOLBOX_KC_API_URL = import.meta.env.VITE_BAHIS_KOBOTOOLBOX_K_API_URL || 'http://kc.localhost:80/api/v1/';
 log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL} (BAHIS 3)`);
 
 const _url = (url, time?) => {
@@ -114,18 +116,17 @@ export const getWorkflows = async (db) => {
 export const getForms = async (db) => {
     log.info(`GET KoboToolbox Form Definitions`);
 
-    const BAHIS_KOBOTOOLBOX_API_ENDPOINT = 'https://kf.kobotoolbox.org/api/v2/';
-    log.info(`KOBOTOOLBOX API URL: ${BAHIS_KOBOTOOLBOX_API_ENDPOINT}`);
+    log.info(`KOBOTOOLBOX KF API URL: ${BAHIS_KOBOTOOLBOX_KF_API_URL}`);
     const axios_config = {
         headers: {
-            Authorization: `Token ${import.meta.env.VITE_KOBO_API_TOKEN}`,
+            Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
         },
     };
     // FIXME this API endpoint needs to take care of auth in a dynamic fashion
 
     log.info('GET Form UIDs from KoboToolbox');
     const formList = await axios
-        .get(BAHIS_KOBOTOOLBOX_API_ENDPOINT + 'assets', axios_config)
+        .get(BAHIS_KOBOTOOLBOX_KF_API_URL + 'assets', axios_config)
         .then((response) => {
             const formList = response.data.results
                 .filter((asset) => asset.has_deployment)
@@ -166,6 +167,110 @@ export const getForms = async (db) => {
     log.info(`GET KoboToolbox Form Definitions SUCCESS`);
 };
 
+export const getFormCloudSubmissions = async (db) => {
+    log.info(`GET KoboToolbox Form Submissions`);
+
+    log.info(`KOBOTOOLBOX KF API URL: ${BAHIS_KOBOTOOLBOX_KF_API_URL}`);
+    const axios_config = {
+        headers: {
+            Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
+        },
+    };
+    // FIXME this API endpoint needs to take care of auth in a dynamic fashion
+
+    log.info('Using Form UIDs from local database');
+    const formList = db.prepare('SELECT uid FROM form').all();
+
+    const upsertQuery = db.prepare(
+        'INSERT INTO formcloudsubmission (uuid, form_uid, xml) VALUES (?, ?, ?) ON CONFLICT(uuid) DO UPDATE SET xml = excluded.xml;',
+    );
+    // NOTE UUID on KoboToolbox actually might not be unique historically; but should be as of 2023
+
+    for (const form of formList) {
+        log.info(`GET form ${form.uid} submissions from KoboToolbox`);
+        await axios
+            .get(BAHIS_KOBOTOOLBOX_KF_API_URL + 'assets/' + form.uid + '/data/?format=xml', axios_config)
+            // TODO add something like ?query={"_submission_time": {"$gt": "2019-09-01T01:02:03"}}' based on last sync time
+            .then((response) => {
+                const doc = new DOMParser().parseFromString(response.data, 'text/xml');
+
+                const results = xpath.select('/root/results', doc, true) as Node;
+
+                if (results) {
+                    log.debug('Got results from server');
+                    const children = results.childNodes;
+                    for (let i = 0; i < children.length; i++) {
+                        const child = children[i];
+                        if (child.nodeType === 1) {
+                            log.debug('Handling child with nodeName: ' + child.nodeName);
+                            const meta = xpath.select('meta', child, true) as Node;
+                            if (meta) {
+                                const meta_children = meta.childNodes;
+                                for (let j = 0; j < meta_children.length; j++) {
+                                    const meta_child = meta_children[j];
+                                    if (meta_child.nodeType === 1 && meta_child.nodeName === 'instanceID') {
+                                        const uuid = meta_child.textContent;
+                                        const form_id = child.nodeName;
+                                        const xml = child.toString();
+                                        log.debug('Upserting form submission with UUID: ' + uuid);
+                                        upsertQuery.run([uuid, form_id, xml]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    log.info(`GET form ${form.uid} submissions SUCCESS`);
+                } else {
+                    log.warn('No results received from server');
+                }
+            })
+            .catch((error) => {
+                log.error('GET KoboToolbox Form Submissions FAILED with:');
+                log.error(error);
+            });
+    }
+    log.info(`GET KoboToolbox Form Submissions SUCCESS`);
+};
+
+export const postFormCloudSubmissions = async (db) => {
+    log.info(`POST KoboToolbox Form Submissions`);
+
+    log.info(`KOBOTOOLBOX KF API URL: ${BAHIS_KOBOTOOLBOX_KC_API_URL}`);
+    const axios_config = {
+        headers: {
+            Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
+            'Content-Type': 'text/xml',
+        },
+    };
+    // FIXME this API endpoint needs to take care of auth in a dynamic fashion
+
+    log.info('Using Form Submitted to local database');
+    const formcloudsubmissionList = db.prepare('SELECT * FROM formlocaldraft').all();
+
+    const deleteQuery = db.prepare('DELETE FROM formlocaldraft WHERE uuid = ?');
+
+    for (const form of formcloudsubmissionList) {
+        log.info(`POST form ${form.uuid} submissions from KoboToolbox`);
+        const file = new Blob([form.xml], { type: 'text/xml' });
+        await axios
+            .post(BAHIS_KOBOTOOLBOX_KC_API_URL + 'submissions', file, axios_config)
+            .then((response) => {
+                if (response.status === 200) {
+                    deleteQuery.run([form.uuid]);
+                    log.info(`POST form ${form.uid} submissions SUCCESS`);
+                } else {
+                    log.error(`POST form ${form.uid} submissions FAILED with status ${response.status}`);
+                    log.error(response);
+                }
+            })
+            .catch((error) => {
+                log.error('POST KoboToolbox Form Submissions FAILED with:');
+                log.error(error);
+            });
+    }
+    log.info(`POST KoboToolbox Form Submissions SUCCESS`);
+};
+
 export const getTaxonomies = async (db) => {
     log.info(`GET Taxonomy Definitions`);
 
@@ -186,7 +291,9 @@ export const getTaxonomies = async (db) => {
             log.error(error);
         });
 
-    const upsertQuery = db.prepare('INSERT INTO taxonomy (slug, csv_file) VALUES (?, ?);');
+    const upsertQuery = db.prepare(
+        'INSERT INTO taxonomy (slug, csv_file) VALUES (?, ?) ON CONFLICT(slug) DO UPDATE SET csv_file = excluded.csv_file;',
+    );
     const BAHIS_TAXONOMY_CSV_ENDPOINT = (filename) => `${BAHIS_SERVER_URL}/media/${filename}`;
 
     for (const taxonomy of taxonomyList) {
@@ -199,6 +306,10 @@ export const getTaxonomies = async (db) => {
                     if (!existsSync(`${app.getAppPath()}/taxonomies/`)) {
                         log.info('Creating taxonomies directory');
                         mkdirSync(`${app.getAppPath()}/taxonomies/`);
+                    }
+                    if (existsSync(`${app.getAppPath()}/${taxonomy.csv_file_stub}`)) {
+                        log.info('Deleting old taxonomy');
+                        rmSync(`${app.getAppPath()}/${taxonomy.csv_file_stub}`);
                     }
                     writeFileSync(`${app.getAppPath()}/${taxonomy.csv_file_stub}`, response.data, 'utf-8');
                 } catch (error) {

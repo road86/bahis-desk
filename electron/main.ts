@@ -574,9 +574,42 @@ const deleteData = (event, instanceId, formId) => {
     };
 };
 
-// main sync functions
-const getAppData = async (event, username) => {
-    log.info('Getting app data from server');
+const getLocalDB = async (event, query) => {
+    log.info(`GET from local DB with query: ${query}`);
+    log.debug(`due to ${event.type}`);
+
+    return new Promise<string>((resolve, reject) => {
+        try {
+            const fetchedRows = db.prepare(query).all();
+            log.info('GET from local DB SUCCESS');
+            resolve(fetchedRows);
+        } catch (error) {
+            log.error('GET from local DB FAILED with:');
+            log.error(error);
+            reject(error);
+        }
+    });
+};
+
+const postLocalDB = (event, query) => {
+    log.info(`POST to local DB with query: ${query}`);
+    log.debug(`due to ${event.type}`);
+
+    return new Promise<boolean>((resolve, reject) => {
+        try {
+            db.prepare(query).run();
+            log.info('POST to local DB SUCCESS');
+            resolve(true);
+        } catch (error) {
+            log.error('POST to local DB FAILED with');
+            log.error(error);
+            reject(error);
+        }
+    });
+};
+
+const getAppData = async (event) => {
+    log.info('GET app data from server');
     log.debug(`due to ${event.type}`);
 
     const readAppLastSyncTime = () => {
@@ -588,6 +621,8 @@ const getAppData = async (event, username) => {
         const newLayoutQuery = db.prepare('INSERT INTO app_log(time) VALUES(?)');
         newLayoutQuery.run(Date.now());
     };
+
+    const username = db.prepare('SELECT username from users limit 1').get().username;
 
     const last_sync_time = readAppLastSyncTime();
     log.info(`Last Sync Time: ${last_sync_time}`);
@@ -601,21 +636,22 @@ const getAppData = async (event, username) => {
         getCatchments2(username, 0, db),
         getModules(db),
         getWorkflows(db),
-        getForms(db),
+        getForms(db).then(() => getFormCloudSubmissions(db)),
         getTaxonomies(db),
         getAdministrativeRegions(db),
     ])
         .then(() => {
             updateAppLastSyncTime();
-            mainWindow?.webContents.send('formSyncComplete', 'done'); // done is a keyword checked later
-            log.info('Pulling app data successfully completed');
+            mainWindow?.webContents.send('formSyncComplete', 'done'); // done is a keyword checked later // TODO check actually used or needed?
+            log.info('GET app data SUCCESS');
         })
         .catch((error) => {
-            log.warn('Pulling app data failed with:\n', error?.message);
+            log.error('GET app data FAILED with:');
+            log.error(error);
         });
 };
 
-const postLocalData = async (event, username) => {
+const postGetUserData = async (event) => {
     log.info('POST local data to server');
     log.debug(`due to ${event.type}`);
 
@@ -629,9 +665,12 @@ const postLocalData = async (event, username) => {
         newLayoutQuery.run(Date.now());
     };
 
+    const username = db.prepare('SELECT username from users limit 1').get().username;
+
     const last_sync_time = readDataLastSyncTime();
     log.info(`Last Sync Time: ${last_sync_time}`);
 
+    // BAHIS 2 data
     let msg: any;
     await postFormSubmissions2(username, last_sync_time, db)
         .then(async (r) => {
@@ -644,12 +683,17 @@ const postLocalData = async (event, username) => {
         .then(() => {
             updateDataLastSyncTime();
             event.returnValue = msg;
-            mainWindow?.webContents.send('dataSyncComplete', 'synchronised');
+            mainWindow?.webContents.send('dataSyncComplete', 'synchronised'); // FIXME combine with app data sync message?
             log.info('POST local data SUCCESS');
         })
         .catch((error) => {
-            log.warn('POST local data FAILED with\n', error?.message);
+            log.error('POST local data FAILED with:');
+            log.error(error);
         });
+
+    // BAHIS 3 data
+    await postFormCloudSubmissions(db).then(() => getFormCloudSubmissions(db));
+};
 };
 
 const readTaxonomyCSV = (filePath: string) => {
@@ -703,23 +747,21 @@ ipcMain.on('fetch-form-choices', fetchFormChoices);
 ipcMain.on('fetch-list-definition', fetchListDefinition);
 ipcMain.on('submitted-form-definition', fetchFormListDefinition);
 ipcMain.on('fetch-list-followup', fetchFollowupFormData);
-ipcMain.on('fetch-query-data', fetchQueryData);
 ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
-ipcMain.on('sign-in', signIn);
-ipcMain.on('fetch-userlist', fetchUserList);
 ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData);
 ipcMain.on('form-details', fetchFormDetails);
 ipcMain.on('user-db-info', getUserDBInfo);
-ipcMain.on('change-user', changeUser);
-ipcMain.on('refresh-database', refreshDatabase);
 
-// refactored
-ipcMain.on('start-app-sync', getAppData);
-ipcMain.on('request-data-sync', postLocalData);
+// refactored & new
+ipcMain.handle('sign-in', signIn); // still uses BAHIS 2 for Auth
+ipcMain.handle('request-app-data-sync', getAppData); // still both BAHIS 2 and BAHIS 3
+ipcMain.on('request-user-data-sync', postGetUserData); // still both BAHIS 2 and BAHIS 3
+ipcMain.handle('refresh-database', refreshDatabase); // still both BAHIS 2 and BAHIS 3 tables
 
-// new
+ipcMain.handle('get-local-db', getLocalDB);
+ipcMain.handle('post-local-db', postLocalDB);
 ipcMain.handle('request-module-sync', getModules);
 ipcMain.handle('request-workflow-sync', getWorkflows);
 ipcMain.handle('request-form-sync', getForms);
