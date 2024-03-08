@@ -1,13 +1,7 @@
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { log } from '../../helpers/log';
+import { log } from '../helpers/log';
 
-interface IFrameURLParams {
+interface IFrameProps {
     external_url: string;
-}
-
-export interface IFrameProps extends RouteComponentProps<IFrameURLParams> {
-    appLanguage: string;
-    upazila: string;
 }
 
 const encodeUpazila = (upazillaID) => {
@@ -23,7 +17,7 @@ const encodeUpazila = (upazillaID) => {
 export const IFrame = (props: IFrameProps) => {
     log.info('loading IFrame');
     log.info(JSON.stringify(props));
-    const upazila = props.upazila;
+    const upazila = ''; //props.upazila; // FIXME
     const encodedUpazila = encodeUpazila(upazila);
     const external_url = new URLSearchParams((props as any).location.search).get('url') || '';
     const url = `${external_url}${encodedUpazila}`;
@@ -37,5 +31,3 @@ export const IFrame = (props: IFrameProps) => {
         </>
     );
 };
-
-export default withRouter(IFrame);

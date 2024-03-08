@@ -2712,7 +2712,6 @@ button {
   font-family: "OpenSans";
   font-weight: normal;
   line-height: normal;
-  margin: 0 0 16px;
   position: relative;
   text-decoration: none;
   text-align: center;
@@ -3621,8 +3620,7 @@ input[type='range'],
 textarea,
 select,
 .widget {
-  display: block;
-  margin: 8px 0 8px 0; }
+  display: block;}
 
 input:not([type='radio']):not([type='checkbox']),
 textarea,

@@ -3,7 +3,7 @@ import { createLogger, format, transports } from 'winston';
 export const log = createLogger({
     transports: [
         new transports.Console({
-            level: 'debug',
+            level: 'info',
             format: format.combine(
                 format.colorize(),
                 format.timestamp({

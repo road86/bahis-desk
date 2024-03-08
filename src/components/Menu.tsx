@@ -2,101 +2,121 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Container,
+    Alert,
+    Button,
+    Card,
+    CardContent,
     Grid,
-    Snackbar,
-    makeStyles,
-    useTheme,
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Alert from '@material-ui/lab/Alert';
-import reducerRegistry from '@onaio/redux-reducer-registry';
-import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
-import { RouteComponentProps } from 'react-router-dom';
-import { Store } from 'redux';
-import { log } from '../../helpers/log';
-import { ipcRenderer } from '../../services/ipcRenderer';
-import menuReducer, {
-    MenuItem,
-    MenuItemTypes,
-    getCurrentMenu,
-    isPrevMenuEmpty,
-    reducerName as menuReducerName,
-    resetMenu,
-    setMenuItem,
-    setPrevMenu,
-} from '../../store/ducks/menu';
-import ModuleMenuButton from './ModuleMenuButton';
-import MenuButton from './MenuButton';
-import { menuStyle } from './style';
+    Icon,
+    Typography,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useEffect, useState } from 'react';
+import { log } from '../helpers/log';
+import { ipcRenderer } from '../services/ipcRenderer';
+import { Link, useParams } from 'react-router-dom';
 
-/** register the clients reducer */
-reducerRegistry.register(menuReducerName, menuReducer);
-
-export interface MenuProps {
-    setMenuItemActionCreator: any;
-    setPrevMenuActionCreator: any;
-    resetMenuActionCreator: any;
-    currentMenu: MenuItem | null;
-    isBackPossible: boolean;
+export enum MenuItemTypes {
+    form = 1,
+    list,
+    module,
+    iframe,
+    submitted,
 }
 
-const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentProps & MenuProps) => {
-    // TODO this Syncronising Alert should be part of the main app or the menu or something so it can happen across all screens
-    const [isSynchronisingAlertOpen, setSynchronisingAlertOpen] = useState<boolean>(false);
-    const [menuModules, setmenuModules] = useState<[]>([]);
+export interface MenuItem {
+    id: number;
+    title: string;
+    icon: string;
+    description: string | null;
+    sort_order: number;
+    parent_module: number;
+    module_type: MenuItemTypes;
+    form: number | null;
+    external_url: string | null;
+}
 
-    const theme = useTheme();
-    const useStyles = makeStyles(menuStyle(theme));
-    const classes = useStyles();
+interface MenuButtonProps {
+    menuItem: MenuItem;
+}
 
-    const readModulesWithParent = (parent_module: any = null) => {
-        setSynchronisingAlertOpen(true);
+export default function MenuButton(props: MenuButtonProps) {
+    let url = '';
+    if (props.menuItem.module_type === MenuItemTypes.module) {
+        url = `/menu/${props.menuItem.id}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.list) {
+        url = `/list/${props.menuItem.form}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.form) {
+        url = `/form/${props.menuItem.form}/`;
+    } else if (props.menuItem.module_type === MenuItemTypes.iframe) {
+        url = `/iframe?url=${props.menuItem.external_url}`;
+    } else if (props.menuItem.module_type === MenuItemTypes.submitted) {
+        url = `/formlist/${props.menuItem.form}/`;
+    }
+
+    return (
+        <Link to={url} style={{ textDecoration: 'none' }}>
+            <Card
+                sx={{
+                    minWidth: 150,
+                    height: 150,
+                    margin: 2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                }}
+            >
+                <CardContent>
+                    <Typography variant="h4" color={'primary'}>
+                        {props.menuItem.title}
+                    </Typography>
+                    <Icon fontSize="large" color={'primary'} sx={{ margin: 1 }}>
+                        {props.menuItem.icon}
+                    </Icon>
+                    <Typography>{props.menuItem.description ?? ''}</Typography>
+                </CardContent>
+            </Card>
+        </Link>
+    );
+}
+
+export const Menu = () => {
+    const [menuModules, setmenuModules] = useState<MenuItem[]>([]);
+
+    const { menu_id } = useParams();
+    log.info(`menu_id: ${menu_id}`);
+
+    const readModulesWithParent = (parent_module) => {
         log.info(`reading modules with parent_module: ${parent_module}`);
         let query = 'SELECT DISTINCT * FROM module WHERE parent_module';
-        if (parent_module) {
+        if (parent_module > 0) {
             query += ` = ${parent_module}`;
         } else {
             query += ' IS NULL';
         }
-        const modules = ipcRenderer.sendSync('fetch-query-data', query);
-        log.debug(`modules: ${JSON.stringify(modules)}`);
-        setSynchronisingAlertOpen(false);
-        setmenuModules(modules);
-    };
-
-    const typeEvalutor = (menuItem: MenuItem) => {
-        if (menuItem.module_type === MenuItemTypes.module) {
-            return <ModuleMenuButton menuItem={menuItem} />;
-        } else {
-            return <MenuButton menuItem={menuItem} />;
-        }
-    };
-
-    const handleClose = () => {
-        setSynchronisingAlertOpen(false);
+        ipcRenderer
+            .invoke('get-local-db', query)
+            .then((response) => {
+                log.debug(`modules: ${JSON.stringify(response)}`);
+                setmenuModules(response);
+            })
+            .catch((error) => {
+                log.error(`Error reading modules: ${error}`);
+            });
     };
 
     useEffect(() => {
-        readModulesWithParent(props.currentMenu);
-    }, [props.currentMenu]);
+        readModulesWithParent(menu_id);
+    }, [menu_id]);
 
     return (
-        <Container style={{ marginTop: '20px' }}>
-            <Snackbar open={isSynchronisingAlertOpen} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} key={'topleft'}>
-                <Alert severity="info" onClose={handleClose}>
-                    Attempting to sync modules. This may take some time. If nothing happens after five minutes try hitting the
-                    Sync Now.
-                </Alert>
-            </Snackbar>
-
+        <>
             <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                     Latest Improvements
                 </AccordionSummary>
-                <AccordionDetails className={classes.latestImprovements}>
+                <AccordionDetails>
                     <ul>
                         <li>
                             (2023-08-17) Previously some data was not pulled to the app if a synchronisation request failed,
@@ -155,12 +175,11 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
                 </AccordionDetails>
             </Accordion>
 
-            <Grid container>
-                {menuModules &&
+            <Grid container sx={{ marginTop: 2 }}>
+                {menuModules.length > 0 ? (
                     menuModules.map((menuItem) => (
                         <Grid
                             item
-                            className={classes.menuGrid}
                             key={'menu-' + menuItem.id}
                             style={{ order: menuItem.sort_order }}
                             lg={3}
@@ -168,39 +187,22 @@ const Menu: React.FC<RouteComponentProps & MenuProps> = (props: RouteComponentPr
                             sm={6}
                             xs={12}
                         >
-                            {typeEvalutor(menuItem)}
+                            <MenuButton menuItem={menuItem} />
                         </Grid>
-                    ))}
+                    ))
+                ) : (
+                    <Alert
+                        severity="error"
+                        action={
+                            <Button color="inherit" size="small" onClick={() => window.location.reload()}>
+                                REFRESH
+                            </Button>
+                        }
+                    >
+                        No modules found - try refreshing the app.
+                    </Alert>
+                )}
             </Grid>
-        </Container>
+        </>
     );
 };
-
-/** connect the component to the store */
-
-/** Interface to describe props from mapStateToProps */
-interface DispatchedStateProps {
-    currentMenu: MenuItem | null;
-    isBackPossible: boolean;
-}
-
-/** Map props to state  */
-const mapStateToProps = (state: Partial<Store>): DispatchedStateProps => {
-    const result = {
-        currentMenu: getCurrentMenu(state),
-        isBackPossible: !isPrevMenuEmpty(state),
-    };
-    return result;
-};
-
-/** map props to actions */
-const mapDispatchToProps = {
-    setMenuItemActionCreator: setMenuItem,
-    setPrevMenuActionCreator: setPrevMenu,
-    resetMenuActionCreator: resetMenu,
-};
-
-/** connect clientsList to the redux store */
-const ConnectedMenu = connect(mapStateToProps, mapDispatchToProps)(Menu);
-
-export default withRouter(ConnectedMenu);
