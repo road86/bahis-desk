@@ -14,7 +14,7 @@ import { log } from './log';
 const queries = `CREATE TABLE users2 ( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app ( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
 CREATE TABLE forms2 ( id INTEGER PRIMARY KEY, id_string TEXT NOT NULL, xml TEXT NOT NULL, json TEXT NOT NULL,choice_definition TEXT, uuid TEXT, table_mapping TEXT, field_names TEXT );
-CREATE TABLE lists ( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
+CREATE TABLE lists2 ( list_id INTEGER PRIMARY KEY, list_name TEXT NOT NULL, list_header TEXT, datasource TEXT, filter_definition TEXT, column_definition TEXT);
 CREATE TABLE data ( data_id INTEGER PRIMARY KEY, submitted_by TEXT NOT NULL, submission_date TEXT NOT NULL, form_id INTEGER NOT NULL, data TEXT NOT NULL, status INTEGER, instanceid TEXT, last_updated TEXT);
 CREATE TABLE app_log ( time TEXT);
 CREATE TABLE form_choices ( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);`;

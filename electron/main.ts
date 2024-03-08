@@ -244,7 +244,7 @@ const fetchFilterDataset = (event, listId, filterColumns) => {
     // fetches the filter dataset needed to render single select and multiple select options
     log.info(`fetchFilterDataset ${event.type} ${listId} ${filterColumns}`);
     try {
-        const listDefinition = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId) as any;
+        const listDefinition = db.prepare('SELECT * from lists2 where list_id = ? limit 1').get(listId) as any;
         const datasource = JSON.parse(listDefinition.datasource);
         const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
         const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
@@ -355,7 +355,7 @@ const fetchListDefinition = (event, listId) => {
     // fetches the list definition
     log.info(`fetchListDefinition, listId: ${listId}`);
     try {
-        const fetchedRows = db.prepare('SELECT * from lists where list_id = ? limit 1').get(listId) as any;
+        const fetchedRows = db.prepare('SELECT * from lists2 where list_id = ? limit 1').get(listId) as any;
 
         if (fetchedRows) {
             event.returnValue = {

@@ -408,9 +408,9 @@ export const getLists2 = async (username, time, db) => {
     await axios.get(_url(BAHIS2_LISTS_ENDPOINT, username, time)).then((listRes) => {
         if (listRes.data) {
             log.info(` ListRes data (time: ${time}; total: ${listRes.data.length}) `);
-            const previousListDeletionQuery = db.prepare('DELETE FROM lists WHERE list_id = ?');
+            const previousListDeletionQuery = db.prepare('DELETE FROM lists2 WHERE list_id = ?');
             const newListInsertQuery = db.prepare(
-                'INSERT INTO lists(list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
+                'INSERT INTO lists2 (list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
             );
             listRes.data.forEach((listObj) => {
                 try {
