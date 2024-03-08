@@ -404,161 +404,76 @@ const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) =>
     }
 };
 
-const fetchQueryData = (event, queryString) => {
-    // fetches the data based on query
-    log.info(`fetchQueryData, formId: ${queryString}`);
-    try {
-        const fetchedRows = db.prepare(queryString).all();
-
-        event.returnValue = fetchedRows;
-        log.info('fetchQueryData SUCCESS');
-    } catch (error) {
-        log.info('fetchQueryData FAILED');
-        log.info(error?.message);
-        event.returnValue = []; //lack of return here was hanging the frontend which incorectly used sendSync
-    }
-};
-
-const changeUser = async (event, obj) => {
-    deleteLocalDatabase2(MODE, db);
-    db = createLocalDatabase2(MODE);
-
-    const { response, userData } = obj;
-    updateFreshLocalDatabase2(response, userData, db);
-
-    const results = { username: response.user_name, message: 'changeUser' };
-    mainWindow?.webContents.send('formSubmissionResults', results);
-    event.returnValue = {
-        userInfo: response,
-    };
-};
-
-//  NOTE
-/**
- * there are four scenario in sign in process
- * 1. when a user login for the first time we save its details in db. and sync for its  modules, forms, lists
- * 2. when a user try to login, we check db for its login history. if we found any, we will forward that user to home page
- * 3. if a user try to login, we will check the db for its login history and if we found a different user then
- *    we will show a delete-data dialog to remove everything related to the previous user
+/** DEVNOTE
+ * There are five scenarios in sign in process
+ * 1. First, we check if the user exists in the local database with the correct password
+ * if so, we let them sign in (offline-user-success)
+ * 2. If the user exists in the local database but the password is incorrect,
+ * we show an error message to the user (offline-user-fail)
+ * 3. However, if the user conflicts with that in the local database,
+ * we show the ChangeUserDialog and confirm resetting the database before... (change-user)
+ * 4. Else, we send a request to the server to verify the user and, if the request suceeds,
+ * we update the local database with the user's information
+ * and let them sign in (fresh-user-success)
+ * 5. Finally, if this request fails we show an error message to the user (fresh-user-fail)
  */
 const signIn = async (event, userData) => {
-    log.info('electron-side signIn');
+    log.info(`Attempting electron-side signIn for ${userData.username}`);
+    log.debug(event);
 
     const SIGN_IN_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/app-user-verify/`;
+    const current_user = db.prepare('SELECT * from users2 limit 1').get();
 
-    const getErrorMessage = (error) => {
-        log.info(error?.message);
-        if (error?.message.includes('403')) {
-            return 'Only upazilas can use BAHIS-desk, please contact support.';
-        }
-        if (error?.message.includes('409')) {
-            return 'Users credentials are not authorized or missing catchment area.';
-        }
-        return 'Unauthenticated User.';
-    };
+    if (current_user) {
+        log.info(`User exists in the current database - ${current_user.username}`);
+    }
 
-    const query = 'SELECT * from users limit 1';
-    let userInfo = db.prepare(query).get() as any;
-    log.info('userInfo');
-    log.info(userInfo);
-    // if a user has signed in before then no need to call signin-api
-    // allowing log in offline. This feautre is currently mostly useless since you cannot use the app until initial synchronisation finishes
-    if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password && userInfo.upazila) {
+    if (current_user && userData && current_user.username == userData.username && current_user.password == userData.password) {
         log.info('This is an offline-ready account.');
-        const results = { username: userData.username, message: 'signIn::local' };
-        mainWindow?.webContents.send('formSubmissionResults', results);
-        event.returnValue = {
-            userInfo: '',
-            message: '',
-        };
+        return 'offline-user-success';
+    } else if (
+        current_user &&
+        userData &&
+        current_user.username === userData.username &&
+        current_user.password !== userData.password
+    ) {
+        log.info('This is an offline-ready account but the credentials are incorrect.');
+        return 'offline-user-fail';
+    } else if (current_user && userData && current_user.username !== userData.username) {
+        log.info('Change of user requested - handing back for confirmation.');
+        return 'change-user';
     } else {
-        if (userInfo && userInfo.username == userData.username && userInfo.password == userData.password) {
-            // from v2.2 user's need an upazila in the local DB
-            // if a user exists but doesn't have an upazila, add it now
-            // annoyingling sqlite doesn't let you alter column types
-            // so we drop and re-create and then treat as a first time sign in to fill
-            log.info('Update users table to include numerical upazilla before normal sign in');
-            const drop_table = 'DROP TABLE users;';
-            const create_table =
-                'CREATE TABLE users( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);';
-            db.exec(drop_table);
-            db.exec(create_table);
-            userInfo = undefined;
-        }
-
+        log.info('Attempt to sign in to the BAHIS server');
         const data = {
             username: userData.username,
             password: userData.password,
-            upazila: 202249,
             bahis_desk_version: APP_VERSION,
         };
-        log.info('Attempt To Signin');
         log.info(`signin url: ${SIGN_IN_ENDPOINT}`);
 
-        let results = {};
-
-        await axios
-            .post(SIGN_IN_ENDPOINT, JSON.stringify(data), {
+        return await axios
+            .post(SIGN_IN_ENDPOINT, data, {
                 headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-                    'Access-Control-Allow-Headers': '*',
                     'Content-Type': 'application/json',
                 },
             })
             .then((response) => {
-                if (!(Object.keys(response.data).length === 0 && response.data.constructor === Object)) {
-                    // if (response.status == 200 || response.status == 201) {
-                    log.info('Signed In received a response! :)');
+                if (response.status === 200 && response.data.user_name === userData.username) {
+                    log.info('BAHIS server sign in received a 200 response');
 
-                    // if a user has signed in for the first time
-                    if (userInfo === undefined) {
-                        log.info('New user - setting up local db');
-                        updateFreshLocalDatabase2(response.data, userData, db);
-                        log.info('Local db configured');
-                        results = { username: response.data.user_name, message: 'signIn::firstTimeUser' };
-                        mainWindow?.webContents.send('formSubmissionResults', results);
-                        event.returnValue = {
-                            userInfo: response.data,
-                            // message: ""
-                        };
-                    }
-                    //the user has changed
-                    else if (userInfo && userInfo.username !== response.data.user_name) {
-                        log.info('Change of user - handing back to human');
-                        results = {
-                            response: response.data,
-                            userData,
-                        };
-                        mainWindow?.webContents.send('deleteTableDialogue', results);
-                    }
-                    //if it is the same user
-                    else {
-                        log.info('Existing user');
-                        // given the offline-ready stuff we do above... do we use this branch?
-                        results = { username: response.data.user_name, message: 'signIn::offlineUser' };
-                        mainWindow?.webContents.send('formSubmissionResults', results);
-                        event.returnValue = {
-                            userInfo: response.data,
-                            // message: ""
-                        };
-                    }
+                    updateFreshLocalDatabase2(response.data, userData, db);
+                    log.info('Local db configured');
+
+                    return 'fresh-user-success';
                 } else {
-                    results = {
-                        message: 'Cannot log in, did you provide correct username and password?',
-                        username: '',
-                    };
-                    mainWindow?.webContents.send('formSubmissionResults', results);
+                    log.info('BAHIS server sign in received a non-200 response');
+                    return 'fresh-user-fail';
                 }
             })
             .catch((error) => {
-                results = {
-                    message: getErrorMessage(error),
-                    username: '',
-                };
-                mainWindow?.webContents.send('formSubmissionResults', results);
-                log.info('Sign In Error');
-                log.info(error);
+                log.error('Sign In Error');
+                log.error(error);
+                return 'error';
             });
     }
 };
