@@ -49,6 +49,7 @@ switch (MODE) {
         log.transports[0].level = 'silly'; // console
         log.transports[1].level = 'silly'; // file
 
+        app.disableHardwareAcceleration(); // hardware acceleration can break hot reloading on AMD GPUs
         break;
     case 'production':
         log.info('Running in production mode');
@@ -150,6 +151,12 @@ app.whenReady().then(() => {
         //we don't check for auto update on the first run, apparently that can cause problems
         autoUpdateBahis();
     }
+
+    // if (MODE === 'development') {
+    //     installExtension(REACT_DEVELOPER_TOOLS)
+    //         .then((name) => log.info(`Added Extension: ${name}`))
+    //         .catch((error) => log.error('An error occurred: ', error));
+    // }
 
     createWindow();
 });
@@ -367,7 +374,7 @@ const fetchListDefinition = (event, listId) => {
 };
 
 const getCurrentUser = () => {
-    const query = 'SELECT username from users LIMIT 1';
+    const query = 'SELECT username from users2 LIMIT 1';
     const fetchedRow = db.prepare(query).get() as any;
     return fetchedRow.username;
 };
@@ -530,7 +537,7 @@ const exportExcel = (event, excelData) => {
 const fetchUsername = (event, infowhere) => {
     log.info(`fetchUsername: ${infowhere}`);
     try {
-        const fetchedUsername = db.prepare('SELECT username from users order by lastlogin desc limit 1').get() as any;
+        const fetchedUsername = db.prepare('SELECT username from users2 order by lastlogin desc limit 1').get() as any;
 
         log.info('XIM2, we fetched', JSON.stringify(fetchedUsername));
         event.returnValue = {
@@ -546,7 +553,7 @@ const fetchUsername = (event, infowhere) => {
 const getUserDBInfo = (event) => {
     // FIXME this function is actually about user location and is badly named
     try {
-        const query_to_get_upazila = `select upazila from users`;
+        const query_to_get_upazila = `select upazila from users2`;
         const upazila_id = (db.prepare(query_to_get_upazila).get() as any).upazila;
         const query_to_get_district = `select parent from geo_cluster where value in (${upazila_id})`;
         const district_id = (db.prepare(query_to_get_district).get() as any).parent;
@@ -622,7 +629,7 @@ const getAppData = async (event) => {
         newLayoutQuery.run(Date.now());
     };
 
-    const username = db.prepare('SELECT username from users limit 1').get().username;
+    const username = db.prepare('SELECT username from users2 limit 1').get().username;
 
     const last_sync_time = readAppLastSyncTime();
     log.info(`Last Sync Time: ${last_sync_time}`);
@@ -665,7 +672,7 @@ const postGetUserData = async (event) => {
         newLayoutQuery.run(Date.now());
     };
 
-    const username = db.prepare('SELECT username from users limit 1').get().username;
+    const username = db.prepare('SELECT username from users2 limit 1').get().username;
 
     const last_sync_time = readDataLastSyncTime();
     log.info(`Last Sync Time: ${last_sync_time}`);
@@ -694,41 +701,74 @@ const postGetUserData = async (event) => {
     // BAHIS 3 data
     await postFormCloudSubmissions(db).then(() => getFormCloudSubmissions(db));
 };
+
+const readAdministrativeRegions = async (event) => {
+    log.info(`READ administrative regions from local DB`);
+    log.debug(`due to ${event.type}`);
+
+    const query =
+        'SELECT id AS name, title AS label, administrative_region_level AS administrative_region_level FROM administrativeregion';
+    const response = db.prepare(query).all();
+
+    return new Promise<string>((resolve, reject) => {
+        try {
+            const doc = create({ version: '1.0' }).ele('root');
+            response.forEach((row) => {
+                const item = doc.ele('item');
+                Object.keys(row).forEach((key) => {
+                    item.ele(key).txt(row[key]);
+                });
+            });
+
+            const xmlString = doc.root().toString({ prettyPrint: false });
+            log.info('READ administrative regions SUCCESS');
+            resolve(xmlString);
+        } catch (error) {
+            log.error('READ administrative regions FAILED with:');
+            log.error(error);
+            reject(error);
+        }
+    });
 };
 
-const readTaxonomyCSV = (filePath: string) => {
-    const data: any[] = [];
+const readTaxonomy = async (event, taxonomySlug: string) => {
+    log.info(`READ ${taxonomySlug} taxonomy CSV`);
+    log.debug(`due to ${event.type}`);
 
-    return new Promise((resolve, reject) => {
+    const query = `SELECT csv_file FROM taxonomy where slug = '${taxonomySlug}'`;
+    const response = db.prepare(query).get();
+    const filePath = response.csv_file;
+
+    log.info(`Reading taxonomy CSV at ${filePath}`);
+    const data: any[] = [];
+    return new Promise<string>((resolve, reject) => {
         createReadStream(filePath)
             .pipe(csv())
             .on('data', (row) => data.push(row))
             .on('end', () => {
-                const xml = xmlbuilder.create('root');
+                const doc = create({ version: '1.0' }).ele('root');
+
                 data.forEach((row) => {
-                    const item = xml.ele('item');
+                    const item = doc.ele('item');
                     Object.keys(row).forEach((key) => {
-                        item.ele(key, row[key]);
+                        item.ele(key).txt(row[key]);
                     });
                 });
-                resolve(xml.end({ pretty: true }));
+
+                const xmlString = doc.root().toString({ prettyPrint: false });
+                log.info(`READ taxonomy CSV at ${filePath} SUCCESS`);
+                resolve(xmlString);
             })
-            .on('error', reject);
+            .on('error', (error) => {
+                log.error('READ taxonomy CSV at ${filePath} FAILED with:');
+                log.error(error);
+                reject(error);
+            });
     });
 };
 
-const readTaxonomy = async (event, filePath: string) => {
-    log.info(`READ taxonomy CSV at ${filePath}`);
-    try {
-        const xml = await readTaxonomyCSV(filePath);
-        log.info(`READ taxonomy CSV at ${filePath} SUCCESS`);
-        return xml;
-    } catch (error) {
-        log.warn(`READ taxonomy CSV at ${filePath} FAILED with\n`, error?.message);
-    }
-};
-
-const refreshDatabase = () => {
+const refreshDatabase = async () => {
+    log.info('Refreshing database');
     try {
         deleteLocalDatabase2(MODE, db);
         db = createLocalDatabase2(MODE);
@@ -768,3 +808,4 @@ ipcMain.handle('request-form-sync', getForms);
 ipcMain.handle('request-taxonomy-sync', getTaxonomies);
 ipcMain.handle('request-administrative-region-sync', getAdministrativeRegions);
 ipcMain.handle('read-taxonomy-data', readTaxonomy);
+ipcMain.handle('read-administrative-region-data', readAdministrativeRegions);
