@@ -12,16 +12,6 @@ export interface HeaderProps {
     pathName?: string;
 }
 
-const getLastSyncTime = async (override?: string | undefined) => {
-    log.info(' setLastSyncTime (client) ');
-    let time = new Date().toLocaleString();
-    if (override) {
-        time = override;
-    }
-    log.info(` setLastSyncTime SUCCESS: ${time} (client) `);
-    return time;
-};
-
 const getUnsyncCount = async () => {
     log.info('update Unsync Count');
     return ipcRenderer.invoke('get-local-db', 'select count(*) as cnt from data2 where status != 1').then((response) => {
@@ -32,7 +22,6 @@ const getUnsyncCount = async () => {
 export const Header = (props: HeaderProps) => {
     const [appConfigSyncComplete, setAppConfigSyncComplete] = useState<boolean>(false);
     const [unsyncCount, setUnsyncCount] = useState<number>(0);
-    const [lastSyncTime, setLastSyncTime] = useState<string>('');
 
     const [isWaitingForFormSync, setWaitingForFormSync] = useState(false);
     const [isWaitingForDataSync, setWaitingForDataSync] = useState(false);
@@ -43,10 +32,6 @@ export const Header = (props: HeaderProps) => {
 
     useEffect(() => {
         getUnsyncCount().then((unsyncCount) => setUnsyncCount(unsyncCount));
-    }, []);
-
-    useEffect(() => {
-        getLastSyncTime().then((time) => setLastSyncTime(time));
     }, []);
 
     const handleClose = () => {
@@ -114,14 +99,11 @@ export const Header = (props: HeaderProps) => {
     return (
         <AppBar position="static">
             {(isWaitingForFormSync || isWaitingForDataSync) && <Toast />}
-            <Toolbar style={{ justifyContent: 'space-between' }}>
+            <Toolbar sx={{ justifyContent: 'space-between' }}>
                 <Button color="inherit" onClick={onHomeHandler} startIcon={<HomeIcon />}>
                     Home
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography noWrap={true} sx={{ marginRight: 5 }}>
-                        Time of last synchronisation: {lastSyncTime}
-                    </Typography>
                     <Badge badgeContent={unsyncCount} color="secondary" overlap="rectangular">
                         <Button
                             variant="contained"

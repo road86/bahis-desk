@@ -2,12 +2,16 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App.tsx';
+import { theme } from './theme.ts';
 import { register } from './services/serviceWorker.ts';
+import { ThemeProvider } from '@mui/material';
 
 const rootElement = document.getElementById('root') as HTMLElement;
 createRoot(rootElement).render(
     <React.StrictMode>
-        <App />
+        <ThemeProvider theme={theme}>
+            <App />
+        </ThemeProvider>
     </React.StrictMode>,
 );
 

@@ -1,10 +1,18 @@
-import { AppBar, Typography } from '@mui/material';
-import packageJson from '../../package.json';
+import { AppBar, Box, Typography } from '@mui/material';
+import React from 'react';
+import packageJson from '../../package.json'; // TODO probably replace this wit a call to electron's app.getVersion()
+import { NetworkIndicator } from './NetworkIndicator';
 
-export const Footer = () => {
+export interface FooterProps {
+    lastSyncTime?: string;
+}
+
+export const Footer: React.FC<FooterProps> = ({ lastSyncTime }) => {
     return (
-        <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
-            <Typography align="center">{`BAHIS Desk Version ${packageJson.version}`}</Typography>
+        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, justifyContent: 'space-evenly', flexDirection: 'row' }}>
+            <Typography sx={{ marginLeft: 3 }}>Time of last synchronisation: {lastSyncTime}</Typography>
+            <Typography>{`BAHIS Desk Version ${packageJson.version}`}</Typography>
+            <NetworkIndicator />
         </AppBar>
     );
 };
