@@ -4,11 +4,13 @@ export const initialiseDBTables = (db) => {
     initialiseDBModulesTable(db);
     initialiseDBWorkflowsTable(db);
     initialiseDBFormsTable(db);
+    initialiseDBFormLocalDraftsTable(db);
+    initialiseDBFormCloudSubmissionsTable(db);
     initialiseDBTaxonomiesTable(db);
     initialiseDBAdministrativeRegionsTable(db);
 };
 
-export const initialiseDBModulesTable = (db) => {
+const initialiseDBModulesTable = (db) => {
     log.info('Creating module table');
     db.prepare(
         'CREATE TABLE module (\
@@ -25,7 +27,7 @@ export const initialiseDBModulesTable = (db) => {
     ).run();
 };
 
-export const initialiseDBWorkflowsTable = (db) => {
+const initialiseDBWorkflowsTable = (db) => {
     log.info('Creating workflow table');
     db.prepare(
         'CREATE TABLE workflow (\
@@ -38,7 +40,7 @@ export const initialiseDBWorkflowsTable = (db) => {
     ).run();
 };
 
-export const initialiseDBFormsTable = (db) => {
+const initialiseDBFormsTable = (db) => {
     log.info('Creating form table');
     db.prepare(
         'CREATE TABLE form (\
@@ -50,7 +52,29 @@ export const initialiseDBFormsTable = (db) => {
     ).run();
 };
 
-export const initialiseDBTaxonomiesTable = (db) => {
+const initialiseDBFormLocalDraftsTable = (db) => {
+    log.info('Creating formlocaldraft table');
+    db.prepare(
+        'CREATE TABLE formlocaldraft (\
+        uuid TEXT NOT NULL PRIMARY KEY,\
+        form_uid TEXT NOT NULL,\
+        xml TEXT NULL\
+    );',
+    ).run();
+};
+
+const initialiseDBFormCloudSubmissionsTable = (db) => {
+    log.info('Creating formcloudsubmission table');
+    db.prepare(
+        'CREATE TABLE formcloudsubmission (\
+        uuid TEXT NOT NULL PRIMARY KEY,\
+        form_uid TEXT NOT NULL,\
+        xml TEXT NOT NULL\
+    );',
+    ).run();
+};
+
+const initialiseDBTaxonomiesTable = (db) => {
     log.info('Creating taxonomy table');
     db.prepare(
         'CREATE TABLE taxonomy (\
@@ -60,7 +84,7 @@ export const initialiseDBTaxonomiesTable = (db) => {
     ).run();
 };
 
-export const initialiseDBAdministrativeRegionsTable = (db) => {
+const initialiseDBAdministrativeRegionsTable = (db) => {
     log.info('Creating administrativeregionlevel table');
     db.prepare(
         'CREATE TABLE administrativeregionlevel (\
