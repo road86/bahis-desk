@@ -327,7 +327,7 @@ const fetchFormDefinition = (event, formId) => {
 const fetchFormChoices = (event, formId) => {
     try {
         log.info(`fetchFormChoices  ${formId}`);
-        const formchoices = db.prepare(`SELECT * from form_choices where xform_id = ? `).all(formId);
+        const formchoices = db.prepare(`SELECT * from form_choices2 where xform_id = ? `).all(formId);
         event.returnValue = formchoices;
     } catch (error) {
         log.error('fetchFormChoices FAILED with:');

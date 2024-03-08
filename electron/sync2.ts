@@ -445,11 +445,11 @@ export const getFormChoices2 = async (username, time, db) => {
         if (formChoice.data) {
             log.info(`  formChoice data (time: ${time}; total: ${formChoice.data.length}) `);
             const previousFormChoices = db.prepare(
-                'DELETE FROM form_choices WHERE value_text = ? and field_name = ? and xform_id = ? ',
+                'DELETE FROM form_choices2 WHERE value_text = ? and field_name = ? and xform_id = ? ',
             );
 
             const insertQuery = db.prepare(
-                'INSERT INTO form_choices( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
+                'INSERT INTO form_choices2 ( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
             );
 
             log.info('total form choice data');
