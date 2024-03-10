@@ -176,7 +176,6 @@ export const getFormCloudSubmissions = async (db) => {
             Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
         },
     };
-    // FIXME this API endpoint needs to take care of auth in a dynamic fashion
 
     log.info('Using Form UIDs from local database');
     const formList = db.prepare('SELECT uid FROM form').all();
@@ -239,10 +238,9 @@ export const postFormCloudSubmissions = async (db) => {
     const axios_config = {
         headers: {
             Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
-            'Content-Type': 'text/xml',
+            'Content-Type': 'multipart/form-data',
         },
     };
-    // FIXME this API endpoint needs to take care of auth in a dynamic fashion
 
     log.info('Using Form Submitted to local database');
     const formcloudsubmissionList = db.prepare('SELECT * FROM formlocaldraft').all();
@@ -251,11 +249,15 @@ export const postFormCloudSubmissions = async (db) => {
 
     for (const form of formcloudsubmissionList) {
         log.info(`POST form ${form.uuid} submissions from KoboToolbox`);
-        const file = new Blob([form.xml], { type: 'text/xml' });
+        const selectedFile = new Blob([form.xml], { type: 'text/xml' });
+        const formData = new FormData();
+        formData.append('xml_submission_file', selectedFile, '@submission.xml');
         await axios
-            .post(BAHIS_KOBOTOOLBOX_KC_API_URL + 'submissions', file, axios_config)
+            .post(BAHIS_KOBOTOOLBOX_KC_API_URL + 'submissions', formData, axios_config)
             .then((response) => {
-                if (response.status === 200) {
+                // check response is in the 201 (created) or 202 (accepted)
+                // the latter seems to mean "the server already has this record"
+                if (response.status === 201 || response.status === 202) {
                     deleteQuery.run([form.uuid]);
                     log.info(`POST form ${form.uid} submissions SUCCESS`);
                 } else {
