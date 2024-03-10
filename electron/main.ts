@@ -175,7 +175,7 @@ const template: Electron.MenuItemConstructorOptions[] = [
         label: 'File',
         submenu: [
             {
-                label: 'Reset Database',
+                label: 'Reset database',
                 click: () => {
                     const browserWindow = BrowserWindow.getFocusedWindow();
                     if (browserWindow) {
@@ -189,6 +189,33 @@ const template: Electron.MenuItemConstructorOptions[] = [
                         });
                         if (status === 0) {
                             mainWindow?.webContents.send('init-refresh-database');
+                        }
+                    }
+                },
+            },
+            {
+                label: 'Sync app data',
+                click: () => {
+                    getAppData({
+                        type: 'manual-sync',
+                    });
+                },
+            },
+            {
+                label: 'Manually update app',
+                click: () => {
+                    try {
+                        autoUpdater.quitAndInstall();
+                    } catch (error) {
+                        log.error('Manual update app FAILED with:');
+                        log.error(error);
+                        const browserWindow = BrowserWindow.getFocusedWindow();
+                        if (browserWindow) {
+                            dialog.showMessageBox(browserWindow, {
+                                title: 'Update failed',
+                                message: `Update failed with ${error}`,
+                                type: 'warning',
+                            });
                         }
                     }
                 },
@@ -797,7 +824,7 @@ ipcMain.on('user-db-info', getUserDBInfo);
 // refactored & new
 ipcMain.handle('sign-in', signIn); // still uses BAHIS 2 for Auth
 ipcMain.handle('request-app-data-sync', getAppData); // still both BAHIS 2 and BAHIS 3
-ipcMain.on('request-user-data-sync', postGetUserData); // still both BAHIS 2 and BAHIS 3
+ipcMain.handle('request-user-data-sync', postGetUserData); // still both BAHIS 2 and BAHIS 3
 ipcMain.handle('refresh-database', refreshDatabase); // still both BAHIS 2 and BAHIS 3 tables
 
 ipcMain.handle('get-local-db', getLocalDB);
