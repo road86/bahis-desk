@@ -1,95 +1,76 @@
-import { Button, Alert, AppBar, Toolbar, Typography, Snackbar, Badge, CircularProgress, Box } from '@mui/material';
+import PreviewIcon from '@mui/icons-material/Preview';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HomeIcon from '@mui/icons-material/Home';
 import SyncIcon from '@mui/icons-material/Sync';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import React, { useEffect, useState } from 'react';
-import { ipcRenderer } from '../services/ipcRenderer';
-import { log } from '../helpers/log';
-import { theme } from '../theme';
+import { Alert, AppBar, Badge, Box, Button, CircularProgress, Snackbar, Toolbar } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { log } from '../helpers/log';
+import { ipcRenderer } from '../services/ipcRenderer';
 
-export interface HeaderProps {
-    pathName?: string;
-}
-
-const getUnsyncCount = async () => {
-    log.info('update Unsync Count');
-    return ipcRenderer.invoke('get-local-db', 'select count(*) as cnt from data2 where status != 1').then((response) => {
-        return response[0].cnt;
+const getDraftCount = async () => {
+    log.info('GET local draft Count');
+    return ipcRenderer.invoke('get-local-db', 'select count(*) as count from formlocaldraft').then((response) => {
+        return response[0].count;
     });
 };
 
-export const Header = (props: HeaderProps) => {
-    const [appConfigSyncComplete, setAppConfigSyncComplete] = useState<boolean>(false);
-    const [unsyncCount, setUnsyncCount] = useState<number>(0);
-
-    const [isWaitingForFormSync, setWaitingForFormSync] = useState(false);
+export const Header = () => {
+    const [draftCount, setDraftCount] = useState<number>(0);
     const [isWaitingForDataSync, setWaitingForDataSync] = useState(false);
 
     const navigate = useNavigate();
 
-    log.debug(`Current path: ${props.pathName}`);
-
     useEffect(() => {
-        getUnsyncCount().then((unsyncCount) => setUnsyncCount(unsyncCount));
-    }, []);
+        const timer = setTimeout(
+            () =>
+                getDraftCount().then((unsyncCount) => {
+                    setDraftCount(unsyncCount);
+                    log.info(`Draft count: ${unsyncCount}`);
+                }),
+            1000,
+        );
+        return () => clearTimeout(timer);
+    }, [isWaitingForDataSync]);
 
     const handleClose = () => {
-        setWaitingForFormSync(false);
         setWaitingForDataSync(false);
     };
 
-    const handleAppSync = async () => {
-        setWaitingForFormSync(true);
+    const handleDraftSync = async () => {
         setWaitingForDataSync(true);
 
-        await ipcRenderer.send('request-user-data-sync');
-        await ipcRenderer.invoke('request-app-data-sync');
-
-        ipcRenderer.on('formSyncComplete', async function (_event: any, _args: any) {
-            log.info(` Finished form sync with message: ${_args}`);
-            if (!appConfigSyncComplete) {
-                setAppConfigSyncComplete(true);
-            }
-            setWaitingForFormSync(false);
-        });
-
-        ipcRenderer.on('dataSyncComplete', async function (_event: any, _args: any) {
-            log.info(` Finished data sync with message: ${_args} `);
-            setAppConfigSyncComplete(false);
-            getUnsyncCount().then((unsyncCount) => setUnsyncCount(unsyncCount));
-            getLastSyncTime().then((time) => setLastSyncTime(time));
-            setWaitingForDataSync(false);
-            setTimeout(() => {
+        await ipcRenderer
+            .invoke('request-user-data-sync')
+            .then(() => {
+                log.info('Drafts successfully synced');
                 setWaitingForDataSync(false);
-                setWaitingForFormSync(false);
-            }, 1000);
-        });
+            })
+            .catch((error) => {
+                log.error(`Error syncing drafts: ${error}`);
+                setWaitingForDataSync(false);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    setWaitingForDataSync(false);
+                }, 1000);
+            });
     };
 
-    const onBackHandler = (_event: React.MouseEvent<HTMLElement>) => {
+    const onBackHandler = () => {
         navigate(-1);
-        // allow re-sync after clicking back button for now. It will however wait for the sync to complete, not sure how that works
-        setWaitingForDataSync(false);
     };
 
-    const onHomeHandler = (_event: React.MouseEvent<HTMLElement>) => {
+    const onHomeHandler = () => {
         navigate('/menu/0');
     };
 
-    const getButtonColor = (): any => {
-        log.info('Getting button colour');
-        //check unsync count on load the application
-        log.info(' unsyncCount ', getUnsyncCount());
-        return unsyncCount === 0 ? theme.palette.primary.main : theme.palette.secondary.main;
+    const getButtonColor = () => {
+        return draftCount === 0 ? 'primary' : 'secondary';
     };
 
     const Toast = () => (
-        <Snackbar
-            open={isWaitingForFormSync || isWaitingForDataSync}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            key={'topcenter'}
-        >
+        <Snackbar open={isWaitingForDataSync} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} key={'topcenter'}>
             <Alert severity="info" onClose={handleClose} icon={false}>
                 <CircularProgress size={'1rem'} /> Synchronising data.
             </Alert>
@@ -98,23 +79,27 @@ export const Header = (props: HeaderProps) => {
 
     return (
         <AppBar position="static">
-            {(isWaitingForFormSync || isWaitingForDataSync) && <Toast />}
+            {isWaitingForDataSync && <Toast />}
             <Toolbar sx={{ justifyContent: 'space-between' }}>
                 <Button color="inherit" onClick={onHomeHandler} startIcon={<HomeIcon />}>
                     Home
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Badge badgeContent={unsyncCount} color="secondary" overlap="rectangular">
-                        <Button
-                            variant="contained"
-                            style={{ backgroundColor: getButtonColor() }}
-                            onClick={handleAppSync}
-                            disabled={isWaitingForFormSync || isWaitingForDataSync}
-                        >
-                            <SyncIcon />
-                            Sync Now
+                    <Badge badgeContent={draftCount} color="warning">
+                        <Button variant="contained" onClick={() => navigate('list/drafts')} disabled={isWaitingForDataSync}>
+                            <PreviewIcon />
+                            Review Drafts
                         </Button>
                     </Badge>
+                    <Button
+                        variant="contained"
+                        color={getButtonColor()}
+                        onClick={handleDraftSync}
+                        disabled={isWaitingForDataSync}
+                    >
+                        <SyncIcon />
+                        Submit Drafts
+                    </Button>
                 </Box>
                 <Button color="inherit" onClick={onBackHandler} startIcon={<ArrowBackIcon />}>
                     Back
