@@ -232,8 +232,14 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
     useEffect(() => {
         if (form_uid && tableName && instance_id) {
             log.info(`Reading data for form: ${form_uid} (${tableName}) and instance: ${instance_id}`);
-            const data = readFormData(tableName, form_uid, instance_id)[0]['xml'] as string;
-            setFormData(data);
+            readFormData(tableName, form_uid, instance_id)
+                .then((response) => {
+                    setFormData(response[0]['xml'] as string);
+                })
+                .catch((error) => {
+                    log.error('Error reading form data');
+                    log.error(error);
+                });
         }
     }, [form_uid, tableName, instance_id]);
 
