@@ -216,13 +216,17 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                 log.info('This appears to be a fresh form, replacing deskUser and deskTaxonomy tags.');
                 replaceUserValues(formXML);
                 insertTaxonomyChoices(formXML);
-            } else {
+            } else if (editable) {
                 log.info('This appears to be an editable but filled-in form, only replacing deskTaxonomy tags.');
                 setIsDeskUserReplaced(true);
                 insertTaxonomyChoices(formXML);
+            } else {
+                log.info('This appears to be a filled-in form, not replacing any tags.');
+                setIsDeskUserReplaced(true);
+                setIsDeskTaxonomyInserted(true);
             }
         }
-    }, [formXML, instance_id]);
+    }, [formXML, instance_id, editable]);
 
     // if the form has been filled out previously, read the data
     useEffect(() => {
