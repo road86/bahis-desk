@@ -2,7 +2,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import { ErrorPage } from './components/ErrorPage';
 import { Form } from './components/Form';
-import { FormDetails } from './components/FormDetails';
+import { DraftList } from './components/DraftList';
 import { IFrame } from './components/IFrame';
 import { Layout } from './components/Layout';
 import { List } from './components/List';
@@ -51,8 +51,8 @@ export const App = () => {
                     errorElement: <ErrorPage />,
                 },
                 {
-                    path: 'list/draft/:form_uid/',
-                    element: <List draft={true} />,
+                    path: 'list/drafts',
+                    element: <DraftList />,
                     errorElement: <ErrorPage />,
                 },
                 {

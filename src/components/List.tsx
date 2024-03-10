@@ -9,6 +9,24 @@ import { readFormData } from '../helpers/form';
 const GROUPS_TO_SHOW = ['basic_info'];
 const FIELDS_TO_HIDE = ['division', 'district', 'upazila']; // TODO move out to some sort of config
 
+const readFormData = async (form_uid: string, instance_id?: string) => {
+    log.info(`reading data from formcloudsubmission table...`);
+    log.info(`  for form_uid: ${form_uid}...`);
+    if (instance_id) log.info(`  for instance_id: ${instance_id}...`);
+    let query = `SELECT * FROM formcloudsubmission WHERE form_uid IS '${form_uid}'`;
+    if (instance_id) query += ` AND uuid IS '${instance_id}'`;
+    return ipcRenderer
+        .invoke('get-local-db', query)
+        .then((response) => {
+            log.info(`  read ${response.length} records`);
+            return response;
+        })
+        .catch((error) => {
+            log.error(`Error reading form data: ${error}`);
+            return [];
+        });
+};
+
 const parseSubmissionsAsRows = (submission) => {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(submission.xml, 'text/xml');
@@ -129,16 +147,7 @@ export const List: React.FC<ListProps> = ({ draft }) => {
             });
     };
 
-    // decide which data table to read from, e.g. local or cloud submissions
-    useEffect(() => {
-        if (draft) {
-            setTableName('formlocaldraft');
-        } else {
-            setTableName('formcloudsubmission');
-        }
-    }, [draft]);
-
-    // read form defintion
+    // read form definition
     useEffect(() => {
         if (form_uid) {
             readForm(form_uid);
@@ -156,20 +165,21 @@ export const List: React.FC<ListProps> = ({ draft }) => {
 
     // parse data as rows
     useEffect(() => {
-        if (form_uid && tableName) {
-            const data = readFormData(tableName, form_uid);
-            const jsonData = data.map((datum) => parseSubmissionsAsRows(datum));
-            setRows(jsonData);
+        if (form_uid) {
+            readFormData(form_uid)
+                .then((data) => {
+                    const jsonData = data.map((datum) => parseSubmissionsAsRows(datum));
+                    setRows(jsonData);
+                })
+                .catch((error) => {
+                    log.error(`Error reading form data: ${error}`);
+                });
         }
-    }, [form_uid, tableName]);
+    }, [form_uid]);
 
     const onRowClick = (event) => {
         log.debug(`row clicked: ${event.row.id}`);
-        if (draft) {
-            navigate(`/form/draft/${form_uid}/${event.row.id}`);
-        } else {
-            navigate(`/form/details/${form_uid}/${event.row.id}`);
-        }
+        navigate(`/form/details/${form_uid}/${event.row.id}`);
     };
 
     return (
@@ -191,8 +201,4 @@ export const List: React.FC<ListProps> = ({ draft }) => {
             )}
         </>
     );
-};
-
-List.defaultProps = {
-    draft: false,
 };
