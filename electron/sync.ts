@@ -8,7 +8,7 @@ import { log } from './log';
 export const APP_VERSION = app.getVersion();
 export const BAHIS_SERVER_URL = import.meta.env.VITE_BAHIS_SERVER_URL || 'http://localhost:3001';
 const BAHIS_KOBOTOOLBOX_KF_API_URL = import.meta.env.VITE_BAHIS_KOBOTOOLBOX_KF_API_URL || 'http://kf.localhost:80/api/v2/';
-const BAHIS_KOBOTOOLBOX_KC_API_URL = import.meta.env.VITE_BAHIS_KOBOTOOLBOX_K_API_URL || 'http://kc.localhost:80/api/v1/';
+const BAHIS_KOBOTOOLBOX_KC_API_URL = import.meta.env.VITE_BAHIS_KOBOTOOLBOX_KC_API_URL || 'http://kc.localhost:80/api/v1/';
 log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL} (BAHIS 3)`);
 
 const _url = (url, time?) => {
