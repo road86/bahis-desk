@@ -4,32 +4,46 @@ import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
 import { ipcRenderer } from '../services/ipcRenderer';
 import { useNavigate, useParams } from 'react-router-dom';
-import { readFormData } from '../helpers/form';
 
 const GROUPS_TO_SHOW = ['basic_info'];
-const FIELDS_TO_HIDE = ['division', 'district', 'upazila']; // TODO move out to some sort of config
+
+const readFormDefinition = async (form_uid: string) => {
+    log.info(`reading XML definition from form for form: ${form_uid}`);
+    const query = `SELECT xml FROM form WHERE uid IS '${form_uid}'`;
+    const parser = new DOMParser();
+    return ipcRenderer
+        .invoke('get-local-db', query)
+        .then((response) => {
+            return parser.parseFromString(response[0]?.xml, 'application/xml');
+        })
+        .catch((error) => {
+            log.error(`Error reading form definition: ${error}`);
+            return undefined;
+        });
+};
 
 const readFormData = async (form_uid: string, instance_id?: string) => {
-    log.info(`reading data from formcloudsubmission table...`);
-    log.info(`  for form_uid: ${form_uid}...`);
+    log.info(`reading data from formcloudsubmission table for form_uid: ${form_uid}`);
     if (instance_id) log.info(`  for instance_id: ${instance_id}...`);
     let query = `SELECT * FROM formcloudsubmission WHERE form_uid IS '${form_uid}'`;
     if (instance_id) query += ` AND uuid IS '${instance_id}'`;
     return ipcRenderer
         .invoke('get-local-db', query)
         .then((response) => {
-            log.info(`  read ${response.length} records`);
+            log.info(`Succesfully read ${response.length} records`);
             return response;
         })
         .catch((error) => {
-            log.error(`Error reading form data: ${error}`);
-            return [];
+            log.error(`Error reading form data from DB: ${error}`);
+            return undefined;
         });
 };
 
+
 const parseSubmissionsAsRows = (submission) => {
+    log.info('Parsing form data submissions as datagrid rows');
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(submission.xml, 'text/xml');
+    const xmlDoc = parser.parseFromString(submission.xml, 'application/xml');
 
     const form = xmlDoc.documentElement.children;
 
@@ -72,7 +86,7 @@ const parseSubmissionsAsRows = (submission) => {
 };
 
 const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
-    log.info('parsing form definition as datagrid columns');
+    log.info('Parsing form definition as datagrid columns');
 
     const form = xmlDoc.body.children;
 
@@ -103,7 +117,7 @@ const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
     });
 
     // Map fields to column definition objects
-    const parsedColumns = fields.map((element) => {
+    const parsedColumns: GridColDef[] = fields.map((element) => {
         const ref = element.getAttribute('ref');
         const parent_name = ref?.split('/')[2] || '';
         const name = ref?.split('/')[3] || '';
@@ -118,12 +132,7 @@ const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
     return { parsedColumns, columnVisibilityInitial };
 };
 
-interface ListProps {
-    draft?: boolean;
-}
-
-export const List: React.FC<ListProps> = ({ draft }) => {
-    const [tableName, setTableName] = useState<string>();
+export const List = () => {
     const [form, setForm] = useState<Document>();
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>();
@@ -132,25 +141,12 @@ export const List: React.FC<ListProps> = ({ draft }) => {
     const { form_uid } = useParams();
     const navigate = useNavigate();
 
-    const readForm = (form_uid: string) => {
-        log.info(`reading XML definition from form for form: ${form_uid}`);
-        const query = `SELECT xml FROM form WHERE uid IS '${form_uid}'`;
-        const parser = new DOMParser();
-        ipcRenderer
-            .invoke('get-local-db', query)
-            .then((response) => {
-                const xmlDoc = parser.parseFromString(response[0]?.xml, 'text/xml');
-                setForm(xmlDoc);
-            })
-            .catch((error) => {
-                log.error(`Error reading form definition: ${error}`);
-            });
-    };
-
     // read form definition
     useEffect(() => {
         if (form_uid) {
-            readForm(form_uid);
+            readFormDefinition(form_uid).then((xmlDoc) => {
+                setForm(xmlDoc);
+            });
         }
     }, [form_uid]);
 
