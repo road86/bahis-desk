@@ -57,7 +57,7 @@ export const App = () => {
                 },
                 {
                     path: 'iframe',
-                    element: <IFrame external_url={'http://localhost:3001/'} />,
+                    element: <IFrame />,
                     errorElement: <ErrorPage />,
                 },
             ],
