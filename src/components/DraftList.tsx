@@ -20,38 +20,50 @@ const readDraftTableData = async () => {
         });
 };
 
-const parseSubmissionsAsRows = (submissions) => {
+interface Row {
+    id: string;
+    form_uid: string;
+    form_name: string;
+    instance_start: Date;
+}
+
+const parseSubmissionsAsRows = async (submissions) => {
     const parser = new DOMParser();
 
-    const rows: any[] = [];
+    const rows: Row[] = [];
 
     for (const submission of submissions) {
         const xmlDoc = parser.parseFromString(submission.xml, 'text/xml');
 
-        const uuid = xmlDoc.documentElement.getElementsByTagName('uuid')[0].textContent;
+        const uuid = xmlDoc.documentElement.getElementsByTagName('instanceID')[0].textContent;
 
         const instance_start = new Date(xmlDoc.documentElement.getElementsByTagName('start')[0].textContent as string);
 
-        const query = `SELECT name FROM form WHERE uid='${xmlDoc.documentElement.tagName}'`;
-        const { form_uid, form_name } = ipcRenderer.invoke('get-local-db', query).then((response) => {
-            ({ form_uid: response[0].uid, form_name: response[0].name });
-        });
+        const query = `SELECT uid, name FROM form WHERE uid='${xmlDoc.documentElement.tagName}'`;
 
-        const row = {
-            id: uuid,
-            form_uid: form_uid,
-            form_name: form_name,
-            instance_start: instance_start,
-        };
-
-        rows.push(row);
+        try {
+            const response = await ipcRenderer.invoke('get-local-db', query);
+            if (uuid && instance_start && response[0].uid && response[0].name) {
+                const row: Row = {
+                    id: uuid,
+                    form_uid: response[0].uid,
+                    form_name: response[0].name,
+                    instance_start: instance_start,
+                };
+                rows.push(row);
+            } else {
+                log.error('Error reading form data - incomplete row');
+            }
+        } catch (error) {
+            log.error('Error reading form data:');
+            log.error(error);
+        }
     }
-
     return rows;
 };
 
 export const DraftList = () => {
-    const [rows, setRows] = useState<any[]>();
+    const [rows, setRows] = useState<Row[]>();
 
     const navigate = useNavigate();
 
@@ -64,14 +76,21 @@ export const DraftList = () => {
         {
             field: 'instance_start',
             headerName: 'Created at',
-            width: 200,
+            width: 300,
         },
     ];
 
     // read form defintion
     useEffect(() => {
         readDraftTableData().then((response) => {
-            setRows(parseSubmissionsAsRows(response));
+            parseSubmissionsAsRows(response)
+                .then((parsedResponse) => {
+                    setRows(parsedResponse);
+                })
+                .catch((error) => {
+                    log.error('Error parsing submissions as rows:');
+                    log.error(error);
+                });
         });
     }, []);
 
