@@ -13,13 +13,6 @@ export const BAHIS2_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http
 
 const BAHIS2_APP_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const BAHIS2_CATCHMENT_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/catchment-list/`;
-const BAHIS2_FORMS_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/form-list/`;
-const BAHIS2_LISTS_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/list-def/`;
-const BAHIS2_FORM_CHOICE_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/form-choices/`;
-const BAHIS2_SUBMISSION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/submission/`;
-const BAHIS2_DATA_SYNC_COUNT = `${BAHIS2_SERVER_URL}/bhmodule/form/core_admin/data-sync-count/`;
-const BAHIS2_DATA_SYNC_PAGINATED = `${BAHIS2_SERVER_URL}/bhmodule/form/core_admin/data-sync-paginated/`;
-const PAGE_LENGTH = 100;
 const BAHIS2_CSV_DATA_FETCH_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
 
 // helper functions
@@ -196,50 +189,6 @@ export const getFormConfig2 = async (username, time, db) => {
                 }
             });
             log.info('formConfigRes SUCCESS');
-        }
-    });
-};
-
-// form choice definitions
-export const getFormChoices2 = async (username, time, db) => {
-    log.info(`Synchronising forms (time: ${time})`);
-    log.info(`api url: ${_url(BAHIS2_FORM_CHOICE_ENDPOINT, username, time)}`);
-
-    await axios.get(_url(BAHIS2_FORM_CHOICE_ENDPOINT, username, time)).then((formChoice) => {
-        if (formChoice.data) {
-            log.info(`  formChoice data (time: ${time}; total: ${formChoice.data.length}) `);
-            const previousFormChoices = db.prepare(
-                'DELETE FROM form_choices2 WHERE value_text = ? and field_name = ? and xform_id = ? ',
-            );
-
-            const insertQuery = db.prepare(
-                'INSERT INTO form_choices2 ( value_text, xform_id, value_label, field_name, field_type) VALUES(?,?,?,?,?)',
-            );
-
-            log.info('total form choice data');
-            log.info(formChoice.data.length);
-
-            formChoice.data.forEach(async (formObj) => {
-                try {
-                    previousFormChoices.run(formObj.value_text, formObj.field_name, formObj.xform_id);
-                } catch (error) {
-                    log.error('db form_choice deletion FAILED with:');
-                    log.error(error);
-                }
-
-                try {
-                    insertQuery.run(
-                        formObj.value_text,
-                        String(formObj.xform_id),
-                        formObj.value_label,
-                        formObj.field_name,
-                        formObj.field_type,
-                    );
-                } catch (error) {
-                    log.error('db form_choice insertion FAILED with:');
-                    log.error(error);
-                }
-            });
         }
     });
 };

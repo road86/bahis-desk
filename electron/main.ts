@@ -259,17 +259,6 @@ const template: Electron.MenuItemConstructorOptions[] = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
-const fetchFormChoices = (event, formId) => {
-    try {
-        log.info(`fetchFormChoices  ${formId}`);
-        const formchoices = db.prepare(`SELECT * from form_choices2 where xform_id = ? `).all(formId);
-        event.returnValue = formchoices;
-    } catch (error) {
-        log.error('fetchFormChoices FAILED with:');
-        log.error(error);
-    }
-};
-
 /** DEVNOTE
  * There are five scenarios in sign in process
  * 1. First, we check if the user exists in the local database with the correct password

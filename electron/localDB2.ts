@@ -13,8 +13,7 @@ import { log } from './log';
 // variables
 const queries = `CREATE TABLE users2 ( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);
 CREATE TABLE app2 ( app_id INTEGER PRIMARY KEY, app_name TEXT NOT NULL, definition TEXT NOT NULL);
-CREATE TABLE app_log2 ( time TEXT);
-CREATE TABLE form_choices2 ( id INTEGER PRIMARY KEY AUTOINCREMENT, value_text TEXT, xform_id TEXT , value_label TEXT, field_name TEXT, field_type TEXT);`;
+CREATE TABLE app_log2 ( time TEXT);`;
 
 // 2023-08-21 the following options are a fix for using rollup (within vite) with better-sqlite3
 const requireMe = createRequire(pathToFileURL(__filename).href);
