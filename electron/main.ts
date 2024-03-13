@@ -481,26 +481,7 @@ const getAppData = async (event) => {
     log.info('GET app data from server');
     log.debug(`due to ${event.type}`);
 
-    const readAppLastSyncTime = () => {
-        const logged_time = db.prepare('SELECT * from app_log2 order by time desc limit 1').get() as any;
-        return logged_time === undefined ? 0 : Math.round(logged_time.time);
-    };
-
-    const updateAppLastSyncTime = () => {
-        const newLayoutQuery = db.prepare('INSERT INTO app_log2(time) VALUES(?)');
-        newLayoutQuery.run(Date.now());
-    };
-
-    const username = db.prepare('SELECT username from users2 limit 1').get().username;
-
-    const last_sync_time = readAppLastSyncTime();
-    log.info(`Last Sync Time: ${last_sync_time}`);
-
     await Promise.all([
-        getFormChoices2(username, last_sync_time, db),
-        getModuleDefinitions2(username, last_sync_time, db),
-        getFormConfig2(username, 0, db),
-        getCatchments2(username, 0, db),
         getModules(db),
         getWorkflows(db),
         getForms(db).then(() => getFormCloudSubmissions(db)),
@@ -508,7 +489,6 @@ const getAppData = async (event) => {
         getAdministrativeRegions(db),
     ])
         .then(() => {
-            updateAppLastSyncTime();
             log.info('GET app data SUCCESS');
         })
         .catch((error) => {
