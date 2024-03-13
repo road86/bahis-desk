@@ -1,11 +1,13 @@
-import { Typography } from '@mui/material';
-import { DataGrid, GridColDef, GridColumnVisibilityModel, GridToolbar } from '@mui/x-data-grid';
+import { Tooltip, Typography } from '@mui/material';
+import { DataGrid, GridActionsCellItem, GridColDef, GridColumnVisibilityModel, GridToolbar } from '@mui/x-data-grid';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const GROUPS_TO_SHOW = ['basic_info'];
+const FIELDS_TO_HIDE = ['division', 'district', 'upazila']; // FIXME move out to some sort of config}
 
 const readFormDefinition = async (form_uid: string) => {
     log.info(`reading XML definition from form for form: ${form_uid}`);
@@ -39,6 +41,20 @@ const readFormData = async (form_uid: string, instance_id?: string) => {
         });
 };
 
+const readFormWorkflows = async (form_uid: string) => {
+    log.info(`reading workflows from workflow table for form_uid: ${form_uid}`);
+    const query = `SELECT * FROM workflow WHERE source_form IS '${form_uid}'`;
+    return ipcRenderer
+        .invoke('get-local-db', query)
+        .then((response) => {
+            log.info(`Succesfully read ${response.length} workflows for this form`);
+            return response;
+        })
+        .catch((error) => {
+            log.error(`Error reading form workflows: ${error}`);
+            return [];
+        });
+};
 
 const parseSubmissionsAsRows = (submission) => {
     log.info('Parsing form data submissions as datagrid rows');
@@ -85,7 +101,7 @@ const parseSubmissionsAsRows = (submission) => {
     return row;
 };
 
-const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
+const parseFormDefinitionAsColumns = (xmlDoc: Document, workflows: []) => {
     log.info('Parsing form definition as datagrid columns');
 
     const form = xmlDoc.body.children;
@@ -129,17 +145,45 @@ const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
         };
     });
 
+    // add workflow actions
+    if (workflows.length > 0) {
+        parsedColumns.push({
+            field: 'actions',
+            type: 'actions',
+            width: 50,
+            getActions: () => {
+                return [
+                    <GridActionsCellItem
+                        label="Unpin"
+                        icon={<Tooltip title="Unpin">{<ArrowUpwardIcon />}</Tooltip>}
+                        onClick={() => {
+                            log.info('Clicked!');
+                        }}
+                    />,
+                ];
+            },
+        });
+    }
+
     return { parsedColumns, columnVisibilityInitial };
 };
 
 export const List = () => {
     const [form, setForm] = useState<Document>();
+    const [workflows, setWorkflows] = useState<[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>();
     const [rows, setRows] = useState<[]>([]);
 
     const { form_uid } = useParams();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        log.debug('mounted');
+        return () => {
+            log.debug('unmounted');
+        };
+    });
 
     // read form definition
     useEffect(() => {
@@ -150,14 +194,21 @@ export const List = () => {
         }
     }, [form_uid]);
 
+    // read workflow definitions
+    useEffect(() => {
+        if (form_uid) {
+            readFormWorkflows(form_uid).then((workflows) => setWorkflows(workflows));
+        }
+    }, [form_uid]);
+
     // parse form definition into columns
     useEffect(() => {
         if (form) {
-            const { parsedColumns, columnVisibilityInitial } = parseFormDefinitionAsColumns(form);
+            const { parsedColumns, columnVisibilityInitial } = parseFormDefinitionAsColumns(form, workflows || []);
             setColumns(parsedColumns);
             setColumnVisibility(columnVisibilityInitial);
         }
-    }, [form]);
+    }, [form, workflows]);
 
     // parse data as rows
     useEffect(() => {
