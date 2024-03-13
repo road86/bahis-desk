@@ -1,9 +1,11 @@
+import { Button } from '@mui/material';
+import { Form, FormModel } from 'enketo-core';
+import { transform } from 'enketo-transformer/web';
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
 import './theme-kobo.css';
-import { useNavigate } from 'react-router-dom';
-import { ipcRenderer } from '../services/ipcRenderer';
 
 interface EnketoFormProps {
     formUID: string; // The unique identifier for the form
@@ -62,7 +64,7 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
 
             // convert all elements to read-only
             const elements = doc.querySelectorAll(
-                '.question input:not([readonly]), .question textarea:not([readonly]), .question select:not([readonly])',
+                '.question input:not([readonly]), .question textarea:not([readonly]), .question select:not([readonly]), .question fieldset:not([readonly])',
             );
             for (let i = 0; i < elements.length; i++) {
                 elements[i].setAttribute('readonly', 'readonly');
@@ -111,27 +113,28 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
         formEl.current.innerHTML = formEnketoHTML;
     }, [formEl, formEnketoHTML]);
 
-    // when the Enketo HTML and XML are generated, create the Enketo Form object
+    // when the Enketo XML and existing form data are generated, create the Enketo Form object
     useEffect(() => {
-        if (!formEnketoHTML) return;
         if (!formEnketoXML) return;
+
+        log.debug(formEnketoXML);
+        log.debug(formData);
 
         const data = {
             modelStr: formEnketoXML,
-            instanceStr: formData || null,
+            instanceStr: formData || null, // FIXME - instanceStr _does not work_ with an electron app due to the downstream mergeXML library (instead we inject form data into the modelStr as "default values")
             submitted: instanceID !== undefined,
-            session: {
-                username: 'ghatail', // FIXME make not hardcoded
-            },
         };
 
         const options = {};
 
         setForm(new Form(formEl.current?.children[0], data, options));
-    }, [formEnketoHTML, formEnketoXML, formData, instanceID]);
+    }, [formEl, formEnketoXML, formData, instanceID]);
 
     // when the Enketo Form object is created, init the form
     useEffect(() => {
+        if (!form) return;
+
         try {
             const loadErrors = form.init();
             log.info('Enketo form initialized successfully');
@@ -153,7 +156,7 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
                         // log.debug(data);
                         if (data) {
                             createDraft(data);
-                            navigate(-1);
+                            navigate('/list/drafts');
                         }
                     } else {
                         log.error('Enketo form validation failed');
@@ -173,11 +176,16 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
         }
     };
 
+    const onCancel = () => {
+        navigate(`/list/${formUID}`);
+    };
+
     return (
         <>
             <div ref={formEl}></div>
             {editable && (
                 <>
+                    <Button onClick={onCancel}>Cancel</Button>
                     <Button onClick={onReset}>Reset</Button>
                     <Button onClick={onSubmit}>Submit</Button>
                 </>
