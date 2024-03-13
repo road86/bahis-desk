@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { log } from '../helpers/log';
 import { Loading } from './Loading';
+import { ipcRenderer } from 'electron';
 
 const encodeAdministrativeRegion = (administrativeRegionID) => {
     const encodedAdministrativeRegionID = administrativeRegionID * 42;
@@ -20,8 +21,15 @@ export const IFrame = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
-        const administrativeRegion = 309328; // FIXME make not hardcoded
-        setEncodedAdministrativeRegion(encodeAdministrativeRegion(administrativeRegion));
+        ipcRenderer
+            .invoke('read-administrative-region')
+            .then((response) => {
+                log.info(`Administrative region: ${JSON.stringify(response)}`);
+                setEncodedAdministrativeRegion(encodeAdministrativeRegion(response['3'])); // FIXME this is hardcoded to the 3rd administrative region
+            })
+            .catch((error) => {
+                log.error(`Error getting administrative region: ${error}`);
+            });
     }, []);
 
     useEffect(() => {

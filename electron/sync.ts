@@ -359,12 +359,14 @@ export const getAdministrativeRegions = async (db) => {
 
     log.info(`GET getAdministrativeRegions Definitions`);
 
-    const BAHIS_ADMINISTRATIVE_REGIONS_ENDPOINT = (user_region_id) =>
-        `${BAHIS_SERVER_URL}/api/taxonomy/administrative-regions-catchment/?id=${user_region_id}`;
-    const api_url = _url(BAHIS_ADMINISTRATIVE_REGIONS_ENDPOINT(309328));
+    const userAdministrativeRegionQuery = `SELECT upazila FROM users2`;
+    const administrativeRegionID = db.prepare(userAdministrativeRegionQuery).get().upazila; // FIXME replace when moving to BAHIS 3 user systems
+
+    const BAHIS_ADMINISTRATIVE_REGIONS_ENDPOINT = (administrativeRegionID) =>
+        `${BAHIS_SERVER_URL}/api/taxonomy/administrative-regions-catchment/?id=${administrativeRegionID}`;
+    const api_url = _url(BAHIS_ADMINISTRATIVE_REGIONS_ENDPOINT(administrativeRegionID));
     log.info(`API URL: ${api_url}`);
     // FIXME this API endpoint needs to take care of auth
-    // FIXME we currently hard code ghatails geocode
 
     axios
         .get(api_url)

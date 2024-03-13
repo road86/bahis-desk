@@ -577,35 +577,49 @@ const fetchUsername = (event, infowhere) => {
     }
 };
 
-const getUserDBInfo = (event) => {
-    // FIXME this function is actually about user location and is badly named
-    try {
-        const query_to_get_upazila = `select upazila from users2`;
-        const upazila_id = (db.prepare(query_to_get_upazila).get() as any).upazila;
-        const query_to_get_district = `select parent from geo_cluster where value in (${upazila_id})`;
-        const district_id = (db.prepare(query_to_get_district).get() as any).parent;
-        const query_to_get_division = `select parent from geo_cluster where value in (${district_id})`;
-        const division_id = (db.prepare(query_to_get_division).get() as any).parent;
-        const geoInfo = { division: division_id, district: district_id, upazila: upazila_id.toString() };
-
-        if (geoInfo !== undefined) {
-            log.info(`userDB SUCCESS ${JSON.stringify(geoInfo)}`);
-            event.returnValue = geoInfo;
-        } else {
-            log.warn('userDB FAILED - undefined');
-        }
-    } catch (error) {
-        log.error('userDBInfo FAILED with:');
-        log.error(error);
-    }
-};
-
 const deleteData = (event, instanceId, formId) => {
     log.info(instanceId, formId);
     deleteDataWithInstanceId2(db, instanceId, formId);
     event.returnValue = {
         status: 'successful',
     };
+};
+
+const readUserAdministrativeRegion = async (event) => {
+    log.info('GET user administrative region from local DB');
+    log.debug(`due to ${event.type}`);
+
+    return new Promise<object>((resolve, reject) => {
+        try {
+            const userAdministrativeRegionQuery = `SELECT upazila FROM users2`;
+            let administrativeRegionID = db.prepare(userAdministrativeRegionQuery).get().upazila; // FIXME replace when moving to BAHIS 3 user systems
+            const queryForLevel = db.prepare('SELECT administrative_region_level FROM administrativeregion WHERE id IS ?');
+            const queryForNextLevelUp = db.prepare(
+                'SELECT parent_administrative_region FROM administrativeregion WHERE id IS ?',
+            );
+
+            const currentLevel = queryForLevel.get(administrativeRegionID).administrative_region_level;
+
+            const userAdministrativeRegionInfo = {};
+            userAdministrativeRegionInfo[currentLevel] = administrativeRegionID;
+
+            for (let i = currentLevel - 1; i > 0; i--) {
+                administrativeRegionID = queryForNextLevelUp.get(administrativeRegionID).parent_administrative_region;
+                userAdministrativeRegionInfo[i] = administrativeRegionID;
+            }
+
+            if (userAdministrativeRegionInfo !== undefined) {
+                log.info(`GET user administrative region SUCCESS ${JSON.stringify(userAdministrativeRegionInfo)}`);
+                resolve(userAdministrativeRegionInfo);
+            } else {
+                log.warn('GET user administrative region FAILED - undefined');
+            }
+        } catch (error) {
+            log.error('GET user administrative region FAILED with:');
+            log.error(error);
+            reject(error);
+        }
+    });
 };
 
 const getLocalDB = async (event, query) => {
@@ -836,3 +850,4 @@ ipcMain.handle('request-taxonomy-sync', getTaxonomies);
 ipcMain.handle('request-administrative-region-sync', getAdministrativeRegions);
 ipcMain.handle('read-taxonomy-data', readTaxonomy);
 ipcMain.handle('read-administrative-region-data', readAdministrativeRegions);
+ipcMain.handle('read-administrative-region', readUserAdministrativeRegion);

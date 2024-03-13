@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { log } from '../helpers/log';
-import { ipcRenderer } from '../services/ipcRenderer';
+import { ipcRenderer } from 'electron';
 import { EnketoForm } from './EnketoForm';
 import { Footer } from './EnketoFooter';
 import { Loading } from './Loading';
@@ -95,36 +95,44 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
             const elements = doc.getElementsByTagName('*');
 
             let hasReplacements = false;
-            for (let i = 0; i < elements.length; i++) {
-                if (elements[i].textContent?.startsWith('deskUser')) {
-                    switch (elements[i].textContent) {
-                        case 'deskUser.administrative_region_1':
-                            elements[i].textContent = 'Dhaka';
-                            hasReplacements = true;
-                            break;
-                        case 'deskUser.administrative_region_2':
-                            elements[i].textContent = 'Tangail';
-                            hasReplacements = true;
-                            break;
-                        case 'deskUser.administrative_region_3':
-                            elements[i].textContent = 'Ghatail';
-                            hasReplacements = true;
-                            break;
-                        default:
-                            // FIXME make this dynamic based on the user
-                            break;
+            ipcRenderer
+                .invoke('read-administrative-region')
+                .then((response) => {
+                    log.info(`Administrative region: ${JSON.stringify(response)}`);
+                    for (let i = 0; i < elements.length; i++) {
+                        if (elements[i].textContent?.startsWith('deskUser')) {
+                            switch (elements[i].textContent) {
+                                case 'deskUser.administrative_region_1':
+                                    elements[i].textContent = response['1'];
+                                    hasReplacements = true;
+                                    break;
+                                case 'deskUser.administrative_region_2':
+                                    elements[i].textContent = response['2'];
+                                    hasReplacements = true;
+                                    break;
+                                case 'deskUser.administrative_region_3':
+                                    elements[i].textContent = response['3'];
+                                    hasReplacements = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
-                }
-            }
-
-            if (hasReplacements) {
-                setFormXML(serializer.serializeToString(doc));
-                log.info('deskUser tags replaced successfully');
-            } else {
-                log.info('No deskUser tags found');
-                setIsDeskUserReplaced(true);
-                return;
-            }
+                })
+                .finally(() => {
+                    if (hasReplacements) {
+                        setFormXML(serializer.serializeToString(doc));
+                        log.info('deskUser tags replaced successfully');
+                    } else {
+                        log.info('No deskUser tags found');
+                        setIsDeskUserReplaced(true);
+                        return;
+                    }
+                })
+                .catch((error) => {
+                    log.error(`Error getting administrative region: ${error}`);
+                });
         };
 
         const readTaxonomyChoices = (taxonomySlug: string) => {
@@ -180,8 +188,6 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                     }
 
                     if (choiceOptions) {
-                        log.debug(taxonomySlug);
-                        log.debug(JSON.stringify(choiceOptions));
                         elements[i].replaceChildren(choiceOptions.documentElement);
                         elements[i].setAttribute('id', taxonomySlug);
 
