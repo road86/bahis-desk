@@ -4,14 +4,12 @@
 
 import axios from 'axios';
 import { app } from 'electron';
-import { random } from 'lodash';
 import { log } from './log';
 
 // variables
 export const APP_VERSION = app.getVersion();
 export const BAHIS2_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost:80';
 
-const BAHIS2_APP_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/module-list/`;
 const BAHIS2_CATCHMENT_DEFINITION_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/core_admin/get-api/catchment-list/`;
 const BAHIS2_CSV_DATA_FETCH_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/system-data-sync/core_admin/`;
 
