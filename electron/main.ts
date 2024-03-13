@@ -26,7 +26,6 @@ import {
     getFormChoices2,
     getFormConfig2,
     getFormSubmissions2,
-    getForms2,
     getLists2,
     getModuleDefinitions2,
     parseAndSaveToFlatTables2,
@@ -317,38 +316,6 @@ const submitFormResponse = (event, response) => {
     insert.run(response.formId, response.data, fetchedUsername, date, JSON.parse(response.data)['meta/instanceID']);
     parseAndSaveToFlatTables2(db, response.formId, response.data, null);
     log.info('submitFormResponse COMPLETE');
-};
-
-const fetchFormDefinition = (event, formId) => {
-    // fetches the form definition
-    log.info(`fetchFormDefinition ${event.type} ${formId}`);
-    try {
-        const formDefinitionObj = db.prepare('SELECT * from forms2 where id = ? limit 1').get(formId) as any;
-        if (formDefinitionObj != undefined) {
-            const choiceDefinition = formDefinitionObj.choice_definition
-                ? JSON.parse(formDefinitionObj.choice_definition)
-                : {};
-            const choices = {};
-            Object.keys(choiceDefinition).forEach((key) => {
-                try {
-                    const { query } = choiceDefinition[key];
-                    choices[`${key}.csv`] = db.prepare(query).all();
-                } catch (error) {
-                    log.error('Choice Definition Error:');
-                    log.error(error);
-                }
-            });
-
-            log.info(`Choices for form ${formId}:  ${choices}`);
-            event.returnValue = { ...formDefinitionObj, formChoices: JSON.stringify(choices) };
-        } else {
-            event.returnValue = null;
-            log.warn(`fetchFormDefinition problem, no such form with ${formId}`);
-        }
-    } catch (error) {
-        log.error('fetchFormDefinition Error:');
-        log.error(error);
-    }
 };
 
 const fetchFormChoices = (event, formId) => {
@@ -676,7 +643,6 @@ const getAppData = async (event) => {
     log.info(`Last Sync Time: ${last_sync_time}`);
 
     await Promise.all([
-        getForms2(username, last_sync_time, db),
         getLists2(username, last_sync_time, db),
         getFormChoices2(username, last_sync_time, db),
         getModuleDefinitions2(username, last_sync_time, db),
@@ -836,7 +802,6 @@ const readAppVersion = async (event) => {
 // subscribes the listeners to channels
 //original
 ipcMain.on('submit-form-response', submitFormResponse);
-ipcMain.on('fetch-form-definition', fetchFormDefinition);
 ipcMain.on('fetch-form-choices', fetchFormChoices);
 ipcMain.on('fetch-list-definition', fetchListDefinition);
 ipcMain.on('submitted-form-definition', fetchFormListDefinition);
