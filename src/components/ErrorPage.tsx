@@ -17,12 +17,11 @@ export const ErrorPage = () => {
         errorMessage = 'Unknown error';
     }
 
-    // TODO make this more useful (i.e. a refresh link or a link to home page)
-
     return (
         <div id="error-page">
             <h1>Oops!</h1>
             <p>Sorry, an unexpected error has occurred.</p>
+            <p>Please close the app and try again. If you keep seeing this message, please contact support.</p>
             <p>
                 <i>{errorMessage}</i>
             </p>
