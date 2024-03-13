@@ -11,7 +11,7 @@ import { initialiseDBTables } from './localDB';
 import { log } from './log';
 
 // variables
-const queries = `CREATE TABLE users2 ( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, lastlogin TEXT NOT NULL, upazila INTEGER , role Text NOT NULL, branch  TEXT NOT NULL, organization  TEXT NOT NULL, name  TEXT NOT NULL, email  TEXT NOT NULL);`;
+const queries = `CREATE TABLE users2 ( user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, password TEXT NOT NULL, upazila INTEGER, role Text NOT NULL, name  TEXT NOT NULL);`;
 
 // 2023-08-21 the following options are a fix for using rollup (within vite) with better-sqlite3
 const requireMe = createRequire(pathToFileURL(__filename).href);
@@ -54,20 +54,8 @@ export const createOrReadLocalDatabase2 = (MODE) => {
 };
 
 export const updateFreshLocalDatabase2 = async (data, userData, db) => {
-    const insertStmt = db.prepare(
-        `INSERT INTO users2 (username, password, lastlogin, name, role, organization, branch, email, upazila) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-    insertStmt.run(
-        data.user_name,
-        userData.password,
-        new Date().toISOString(),
-        data.name,
-        data.role,
-        data.organization,
-        data.branch,
-        data.email,
-        data.upazila,
-    );
+    const insertStmt = db.prepare(`INSERT INTO users2 (username, password, name, role, upazila) VALUES (?, ?, ?, ?, ?)`);
+    insertStmt.run(data.user_name, userData.password, data.name, data.role, data.upazila);
 
     log.info(`Created db with user details for ${data.user_name}`);
 };

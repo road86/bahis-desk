@@ -385,7 +385,7 @@ const exportExcel = (event, excelData) => {
 const fetchUsername = (event, infowhere) => {
     log.info(`fetchUsername: ${infowhere}`);
     try {
-        const fetchedUsername = db.prepare('SELECT username from users2 order by lastlogin desc limit 1').get() as any;
+        const fetchedUsername = db.prepare('SELECT username from users2 limit 1').get() as any;
 
         log.info('XIM2, we fetched', JSON.stringify(fetchedUsername));
         event.returnValue = {
