@@ -20,16 +20,12 @@ import {
 } from './sync';
 import {
     BAHIS2_SERVER_URL,
-    deleteDataWithInstanceId2,
     getCSVData2,
     getCatchments2,
     getFormChoices2,
     getFormConfig2,
     getFormSubmissions2,
-    getLists2,
     getModuleDefinitions2,
-    parseAndSaveToFlatTables2,
-    postFormSubmissions2,
 } from './sync2';
 
 // SETUP
@@ -264,60 +260,6 @@ const template: Electron.MenuItemConstructorOptions[] = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
-// listeners
-
-const fetchFilterDataset = (event, listId, filterColumns) => {
-    // fetches the filter dataset needed to render single select and multiple select options
-    log.info(`fetchFilterDataset ${event.type} ${listId} ${filterColumns}`);
-    try {
-        const listDefinition = db.prepare('SELECT * from lists2 where list_id = ? limit 1').get(listId) as any;
-        const datasource = JSON.parse(listDefinition.datasource);
-        const datasourceQuery = datasource.type === '0' ? `select * from ${datasource.query}` : datasource.query;
-        const randomTableName = `tab${Math.random().toString(36).substring(2, 12)}`;
-        const a = filterColumns.toString();
-
-        const sqliteplaceholder = ', ?'.repeat(filterColumns - 1);
-        const filterDatasetQueryTxt = 'with '.concat(
-            randomTableName,
-            ' as (',
-            datasourceQuery,
-            ' ) select ?',
-            sqliteplaceholder,
-            ' from ',
-            randomTableName,
-            ' group by ?',
-            sqliteplaceholder,
-        );
-
-        const filterDatasetQuery = db.prepare(filterDatasetQueryTxt);
-        const returnedRows = filterDatasetQuery.all(a, a);
-
-        event.returnValue = returnedRows;
-    } catch (error) {
-        log.error('fetchFilterDataset Error');
-        log.error(error);
-
-        event.returnValue = [];
-    }
-};
-
-const submitFormResponse = (event, response) => {
-    log.info('submitFormResponse');
-    //The following deletes a record when editing an existing entry and replacing it with a new one
-    deleteDataWithInstanceId2(db, JSON.parse(response.data)['meta/instanceID'], response.formId);
-    const fetchedUsername = getCurrentUser();
-    event.returnValue = {
-        username: fetchedUsername,
-    };
-    const date = new Date().toISOString();
-    const insert = db.prepare(
-        'INSERT INTO data2 (form_id, data, status,  submitted_by, submission_date, instanceid) VALUES (?, ?, 0, ?, ?, ?)',
-    );
-    insert.run(response.formId, response.data, fetchedUsername, date, JSON.parse(response.data)['meta/instanceID']);
-    parseAndSaveToFlatTables2(db, response.formId, response.data, null);
-    log.info('submitFormResponse COMPLETE');
-};
-
 const fetchFormChoices = (event, formId) => {
     try {
         log.info(`fetchFormChoices  ${formId}`);
@@ -342,28 +284,6 @@ const fetchFormDetails = (event, listId, column = 'data_id') => {
     } catch (error) {
         log.error('fetchFormDetails FAILED with:');
         log.error(error);
-    }
-};
-
-const fetchListDefinition = (event, listId) => {
-    // fetches the list definition
-    log.info(`fetchListDefinition, listId: ${listId}`);
-    try {
-        const fetchedRows = db.prepare('SELECT * from lists2 where list_id = ? limit 1').get(listId) as any;
-
-        if (fetchedRows) {
-            event.returnValue = {
-                filterDefinition: fetchedRows.filter_definition,
-                columnDefinition: fetchedRows.column_definition,
-                datasource: fetchedRows.datasource,
-                listName: fetchedRows.list_name,
-                listHeader: fetchedRows.list_header,
-            };
-        } else {
-            event.returnValue = null;
-        }
-    } catch (error) {
-        log.error(`fethcListDefinition Error, listId: ${listId}`);
     }
 };
 
@@ -643,7 +563,6 @@ const getAppData = async (event) => {
     log.info(`Last Sync Time: ${last_sync_time}`);
 
     await Promise.all([
-        getLists2(username, last_sync_time, db),
         getFormChoices2(username, last_sync_time, db),
         getModuleDefinitions2(username, last_sync_time, db),
         getFormConfig2(username, 0, db),

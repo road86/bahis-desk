@@ -200,42 +200,6 @@ export const getFormConfig2 = async (username, time, db) => {
     });
 };
 
-// list definitions
-export const getLists2 = async (username, time, db) => {
-    log.info(`Synchronising Forms (time: ${time})`);
-    log.info(`api url: ${_url(BAHIS2_LISTS_ENDPOINT, username, time)}`);
-
-    await axios.get(_url(BAHIS2_LISTS_ENDPOINT, username, time)).then((listRes) => {
-        if (listRes.data) {
-            log.info(` ListRes data (time: ${time}; total: ${listRes.data.length}) `);
-            const previousListDeletionQuery = db.prepare('DELETE FROM lists2 WHERE list_id = ?');
-            const newListInsertQuery = db.prepare(
-                'INSERT INTO lists2 (list_id, list_name, list_header, datasource, filter_definition, column_definition) VALUES(?,?,?,?,?,?)',
-            );
-            listRes.data.forEach((listObj) => {
-                try {
-                    previousListDeletionQuery.run(listObj.id);
-                } catch (error) {
-                    log.info('Deletion Failed ! Previous list not exists!!');
-                }
-                try {
-                    newListInsertQuery.run(
-                        listObj.id,
-                        listObj.list_name,
-                        JSON.stringify(listObj.list_header),
-                        JSON.stringify(listObj.datasource),
-                        JSON.stringify(listObj.filter_definition),
-                        JSON.stringify(listObj.column_definition),
-                    );
-                } catch (error) {
-                    log.error('db list insertion FAILED with:');
-                    log.error(error);
-                }
-            });
-        }
-    });
-};
-
 // form choice definitions
 export const getFormChoices2 = async (username, time, db) => {
     log.info(`Synchronising forms (time: ${time})`);
