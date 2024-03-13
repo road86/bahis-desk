@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ipcRenderer } from '../services/ipcRenderer'; // FIXME this can probably be replaced with a native electron import
+import { ipcRenderer } from 'electron';
 import { useNavigate } from 'react-router-dom';
 import { Alert } from '@mui/material';
 import { log } from '../helpers/log';

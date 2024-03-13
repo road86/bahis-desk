@@ -2,7 +2,7 @@ import { Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
-import { ipcRenderer } from '../services/ipcRenderer';
+import { ipcRenderer } from 'electron';
 import { useNavigate } from 'react-router-dom';
 
 const readDraftTableData = async () => {

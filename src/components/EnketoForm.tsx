@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { log } from '../helpers/log';
-import { Form } from 'enketo-core';
-import { transform } from 'enketo-transformer/web';
-import { Button } from '@mui/material';
+import { ipcRenderer } from 'electron';
 import './theme-kobo.css';
 import { useNavigate } from 'react-router-dom';
 import { ipcRenderer } from '../services/ipcRenderer';

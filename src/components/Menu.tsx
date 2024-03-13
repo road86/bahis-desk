@@ -13,7 +13,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
-import { ipcRenderer } from '../services/ipcRenderer';
+import { ipcRenderer } from 'electron';
 import { Link, useParams } from 'react-router-dom';
 
 export enum MenuItemTypes {

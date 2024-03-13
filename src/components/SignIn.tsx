@@ -13,7 +13,7 @@ import {
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { log } from '../helpers/log';
-import { ipcRenderer } from '../services/ipcRenderer';
+import { ipcRenderer } from 'electron';
 import { AlertContent } from './SystemAlerts';
 
 interface userData {
