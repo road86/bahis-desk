@@ -639,7 +639,7 @@ const getLocalDB = async (event, query) => {
     });
 };
 
-const postLocalDB = (event, query) => {
+const postLocalDB = async (event, query) => {
     log.info(`POST to local DB with query: ${query}`);
     log.debug(`due to ${event.type}`);
 
@@ -690,7 +690,6 @@ const getAppData = async (event) => {
     ])
         .then(() => {
             updateAppLastSyncTime();
-            mainWindow?.webContents.send('formSyncComplete', 'done'); // done is a keyword checked later // TODO check actually used or needed?
             log.info('GET app data SUCCESS');
         })
         .catch((error) => {
@@ -730,8 +729,6 @@ const postGetUserData = async (event) => {
         })
         .then(() => {
             updateDataLastSyncTime();
-            event.returnValue = msg;
-            mainWindow?.webContents.send('dataSyncComplete', 'synchronised'); // FIXME combine with app data sync message?
             log.info('POST local data SUCCESS');
         })
         .catch((error) => {
@@ -820,6 +817,22 @@ const refreshDatabase = async () => {
     }
 };
 
+const readAppVersion = async (event) => {
+    log.info(`READ app version`);
+    log.debug(`due to ${event.type}`);
+
+    return new Promise<string>((resolve, reject) => {
+        try {
+            log.info(`READ app version SUCCESS`);
+            resolve(APP_VERSION);
+        } catch (error) {
+            log.error('READ app version FAILED with:');
+            log.error(error);
+            reject(error);
+        }
+    });
+}
+
 // subscribes the listeners to channels
 //original
 ipcMain.on('submit-form-response', submitFormResponse);
@@ -833,7 +846,6 @@ ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData);
 ipcMain.on('form-details', fetchFormDetails);
-ipcMain.on('user-db-info', getUserDBInfo);
 
 // refactored & new
 ipcMain.handle('sign-in', signIn); // still uses BAHIS 2 for Auth
@@ -851,3 +863,4 @@ ipcMain.handle('request-administrative-region-sync', getAdministrativeRegions);
 ipcMain.handle('read-taxonomy-data', readTaxonomy);
 ipcMain.handle('read-administrative-region-data', readAdministrativeRegions);
 ipcMain.handle('read-administrative-region', readUserAdministrativeRegion);
+ipcMain.handle('read-app-version', readAppVersion);

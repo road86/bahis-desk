@@ -122,7 +122,6 @@ export const getForms = async (db) => {
             Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
         },
     };
-    // FIXME this API endpoint needs to take care of auth in a dynamic fashion
 
     log.info('GET Form UIDs from KoboToolbox');
     const formList = await axios
@@ -189,7 +188,7 @@ export const getFormCloudSubmissions = async (db) => {
         log.info(`GET form ${form.uid} submissions from KoboToolbox`);
         await axios
             .get(BAHIS_KOBOTOOLBOX_KF_API_URL + 'assets/' + form.uid + '/data/?format=xml', axios_config)
-            // TODO add something like ?query={"_submission_time": {"$gt": "2019-09-01T01:02:03"}}' based on last sync time
+            // FIXME add something like ?query={"_submission_time": {"$gt": "2019-09-01T01:02:03"}}' based on last sync time
             .then((response) => {
                 const doc = new DOMParser().parseFromString(response.data, 'text/xml');
 
