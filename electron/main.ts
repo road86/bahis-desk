@@ -20,7 +20,6 @@ import {
 } from './sync';
 import {
     BAHIS2_SERVER_URL,
-    getCSVData2,
     getCatchments2,
     getFormChoices2,
     getFormConfig2,
@@ -268,60 +267,6 @@ const fetchFormChoices = (event, formId) => {
     } catch (error) {
         log.error('fetchFormChoices FAILED with:');
         log.error(error);
-    }
-};
-
-const fetchFormDetails = (event, listId, column = 'data_id') => {
-    log.info(`fetchFormDetails  ${event.type} ${listId}`);
-    try {
-        const formData = db.prepare(`SELECT * from data2 where ${column} = ? limit 1`).get(listId);
-        log.info(formData);
-        if (formData != undefined) {
-            event.returnValue = { formDetails: formData };
-        } else {
-            event.returnValue = null;
-        }
-    } catch (error) {
-        log.error('fetchFormDetails FAILED with:');
-        log.error(error);
-    }
-};
-
-const getCurrentUser = () => {
-    const query = 'SELECT username from users2 LIMIT 1';
-    const fetchedRow = db.prepare(query).get() as any;
-    return fetchedRow.username;
-};
-
-const fetchFormListDefinition = (event, formId) => {
-    log.info(`fetchFormListDefinition, listId: ${formId}`);
-    try {
-        const userName = getCurrentUser();
-        const query = 'SELECT * from data2 where form_id = ? and submitted_by = ?';
-        const fetchedRows = db.prepare(query).all(formId, userName);
-
-        event.returnValue = { fetchedRows };
-    } catch (error) {
-        log.error(`fetchFormListDefinition, listId: ${formId}`);
-    }
-};
-
-const fetchFollowupFormData = (event, formId, detailsPk, pkValue, constraint) => {
-    log.info(`fetchFollowupFormData, formId: ${formId} ${detailsPk}, ${pkValue}, ${constraint}`);
-    try {
-        let query;
-        if (constraint == 'equal') {
-            query =
-                "SELECT data_id, submitted_by, submission_date, data from data2 where form_id = ? and json_extract(data, '$.?') = ?";
-        } else {
-            query =
-                "SELECT data_id, submitted_by, submission_date, data from data2 where form_id = ? and json_extract(data, '$.?') LIKE '%?%'";
-        }
-        const fetchedRows = db.prepare(query).all(formId, detailsPk, pkValue);
-
-        event.returnValue = { fetchedRows };
-    } catch (error) {
-        log.info(`fetchFollowupFormData, formId: ${formId}`);
     }
 };
 
@@ -586,40 +531,6 @@ const getAppData = async (event) => {
 const postGetUserData = async (event) => {
     log.info('POST local data to server');
     log.debug(`due to ${event.type}`);
-
-    const readDataLastSyncTime = () => {
-        const logged_time = db.prepare('SELECT last_updated from data2 order by last_updated desc limit 1').get() as any;
-        return logged_time == undefined || logged_time.last_updated == null ? 0 : new Date(logged_time.last_updated).valueOf();
-    };
-
-    const updateDataLastSyncTime = () => {
-        const newLayoutQuery = db.prepare('INSERT INTO csv_sync_log(time) VALUES(?)');
-        newLayoutQuery.run(Date.now());
-    };
-
-    const username = db.prepare('SELECT username from users2 limit 1').get().username;
-
-    const last_sync_time = readDataLastSyncTime();
-    log.info(`Last Sync Time: ${last_sync_time}`);
-
-    // BAHIS 2 data
-    let msg: any;
-    await postFormSubmissions2(username, last_sync_time, db)
-        .then(async (r) => {
-            msg = r;
-            await getFormSubmissions2(username, last_sync_time, db);
-        })
-        .then(async () => {
-            await getCSVData2(username, last_sync_time, db);
-        })
-        .then(() => {
-            updateDataLastSyncTime();
-            log.info('POST local data SUCCESS');
-        })
-        .catch((error) => {
-            log.error('POST local data FAILED with:');
-            log.error(error);
-        });
 
     // BAHIS 3 data
     await postFormCloudSubmissions(db).then(() => getFormCloudSubmissions(db));
