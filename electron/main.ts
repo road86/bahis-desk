@@ -6,7 +6,7 @@ import { autoUpdater } from 'electron-updater';
 import { cp, createReadStream, existsSync, writeFile } from 'fs';
 import path from 'node:path';
 import { create } from 'xmlbuilder2';
-import { createLocalDatabase2, createOrReadLocalDatabase2, deleteLocalDatabase2, updateFreshLocalDatabase2 } from './localDB2';
+import { createLocalDatabase, createOrReadLocalDatabase, createUserInLocalDatabase, deleteLocalDatabase } from './localDB';
 import { log } from './log';
 import {
     BAHIS_SERVER_URL,
@@ -18,20 +18,13 @@ import {
     getWorkflows,
     postFormCloudSubmissions,
 } from './sync';
-import {
-    BAHIS2_SERVER_URL,
-    getCatchments2,
-    getFormChoices2,
-    getFormConfig2,
-    getFormSubmissions2,
-    getModuleDefinitions2,
-} from './sync2';
 
 // SETUP
 process.env.DIST = path.join(__dirname, '../dist');
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public');
 
 const APP_VERSION = app.getVersion();
+const BAHIS2_SERVER_URL = import.meta.env.VITE_BAHIS2_SERVER_URL || 'http://localhost:80';
 
 // default environment variables, i.e. for local development
 export const MODE = import.meta.env.MODE || 'development';
@@ -93,7 +86,7 @@ log.info(`BAHIS2_SERVER_URL=${BAHIS2_SERVER_URL}`);
 log.info(`BAHIS_SERVER_URL=${BAHIS_SERVER_URL} (BAHIS 3)`);
 
 // Initialise local DB
-let db = createOrReadLocalDatabase2(MODE);
+let db = createOrReadLocalDatabase(MODE);
 
 let mainWindow: BrowserWindow | null;
 
@@ -316,7 +309,7 @@ const signIn = async (event, userData) => {
                 if (response.status === 200 && response.data.user_name === userData.username) {
                     log.info('BAHIS server sign in received a 200 response');
 
-                    updateFreshLocalDatabase2(response.data, userData, db);
+                    createUserInLocalDatabase(response.data, userData, db);
                     log.info('Local db configured');
 
                     return 'fresh-user-success';
@@ -573,8 +566,8 @@ const readTaxonomy = async (event, taxonomySlug: string) => {
 const refreshDatabase = async () => {
     log.info('Refreshing database');
     try {
-        deleteLocalDatabase2(MODE, db);
-        db = createLocalDatabase2(MODE);
+        deleteLocalDatabase(MODE, db);
+        db = createLocalDatabase(MODE);
         return 'success';
     } catch (e) {
         console.log(e);
@@ -596,20 +589,13 @@ const readAppVersion = async (event) => {
             reject(error);
         }
     });
-}
+};
 
 // subscribes the listeners to channels
 //original
-ipcMain.on('submit-form-response', submitFormResponse);
-ipcMain.on('fetch-form-choices', fetchFormChoices);
-ipcMain.on('fetch-list-definition', fetchListDefinition);
-ipcMain.on('submitted-form-definition', fetchFormListDefinition);
-ipcMain.on('fetch-list-followup', fetchFollowupFormData);
-ipcMain.on('fetch-filter-dataset', fetchFilterDataset);
 ipcMain.on('fetch-username', fetchUsername);
 ipcMain.on('export-xlsx', exportExcel);
 ipcMain.on('delete-instance', deleteData);
-ipcMain.on('form-details', fetchFormDetails);
 
 // refactored & new
 ipcMain.handle('sign-in', signIn); // still uses BAHIS 2 for Auth

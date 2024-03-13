@@ -1,4 +1,61 @@
+import Database from 'better-sqlite3';
+import { app } from 'electron';
+import { existsSync, unlinkSync } from 'fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { log } from './log';
+
+// 2023-08-21 the following options are a fix for using rollup (within vite) with better-sqlite3
+const requireMe = createRequire(pathToFileURL(__filename).href);
+const addon = requireMe(
+    path.resolve('./node_modules/better-sqlite3/build/Release/better_sqlite3.node').replace(/(\.node)?$/, '.node'),
+);
+
+const DB_PATH = (MODE) => path.join(app.getPath('userData'), `bahis_${MODE}.db`);
+
+export const createLocalDatabase = (MODE) => {
+    log.info(`CREATE clean local database at ${DB_PATH(MODE)}`);
+    const db = new Database(DB_PATH(MODE), { nativeBinding: addon });
+
+    log.info('Running initialisation');
+    try {
+        initialiseDBTables(db);
+        log.info('Running initialisation SUCCESS');
+    } catch (error) {
+        log.error('Running initialisation FAILED');
+        log.error(error);
+    }
+
+    log.info('CREATE clean local database FINSIHED');
+    return db;
+};
+
+export const createOrReadLocalDatabase = (MODE) => {
+    log.info(`Checking if local database exists at ${DB_PATH(MODE)}`);
+    let db;
+    if (!existsSync(DB_PATH(MODE))) {
+        db = createLocalDatabase(MODE);
+    } else {
+        log.info(`Using existing local database at ${DB_PATH(MODE)}`);
+        db = new Database(DB_PATH(MODE), { nativeBinding: addon });
+    }
+
+    return db;
+};
+
+export const createUserInLocalDatabase = async (data, userData, db) => {
+    const insertStmt = db.prepare(`INSERT INTO user (username, password, name, role, upazila) VALUES (?, ?, ?, ?, ?)`);
+    insertStmt.run(data.user_name, userData.password, data.name, data.role, data.upazila);
+
+    log.info(`Created db with user details for ${data.user_name}`);
+};
+
+export const deleteLocalDatabase = (MODE, db) => {
+    log.info(`Deleting local database at ${DB_PATH(MODE)}`);
+    db.close();
+    unlinkSync(DB_PATH(MODE));
+};
 
 export const initialiseDBTables = (db) => {
     initialiseDBModulesTable(db);
@@ -8,6 +65,7 @@ export const initialiseDBTables = (db) => {
     initialiseDBFormCloudSubmissionsTable(db);
     initialiseDBTaxonomiesTable(db);
     initialiseDBAdministrativeRegionsTable(db);
+    intialiseUserTable(db);
 };
 
 const initialiseDBModulesTable = (db) => {
@@ -100,6 +158,18 @@ const initialiseDBAdministrativeRegionsTable = (db) => {
         title TEXT NOT NULL,\
         parent_administrative_region INTEGER,\
         administrative_region_level INTEGER NOT NULL\
+    );',
+    ).run();
+};
+
+const intialiseUserTable = (db) => {
+    log.info('Creating user table');
+    db.prepare(
+        'CREATE TABLE users (\
+        username TEXT PRIMARY KEY,\
+        password TEXT NOT NULL,\
+        upazila INTEGER,\
+        role Text NOT NULL\
     );',
     ).run();
 };
