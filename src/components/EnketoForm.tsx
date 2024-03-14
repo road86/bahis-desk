@@ -5,7 +5,7 @@ import { transform } from 'enketo-transformer/web';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { log } from '../helpers/log';
-import './theme-kobo.css';
+
 interface EnketoFormProps {
     formUID: string; // The unique identifier for the form
     formODKXML: string; // The XML string of the form
