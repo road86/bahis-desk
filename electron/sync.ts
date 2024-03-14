@@ -236,7 +236,7 @@ export const postFormCloudSubmissions = async (db) => {
     log.info(`KOBOTOOLBOX KC API URL: ${BAHIS_KOBOTOOLBOX_KC_API_URL}`);
     const axios_config = {
         headers: {
-            Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
+            Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`, // FIXME is this token needed?
             'Content-Type': 'multipart/form-data',
         },
     };

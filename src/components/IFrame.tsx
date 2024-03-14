@@ -22,7 +22,7 @@ export const IFrame = () => {
 
     useEffect(() => {
         ipcRenderer
-            .invoke('read-administrative-region')
+            .invoke('read-user-administrative-region')
             .then((response) => {
                 log.info(`Administrative region: ${JSON.stringify(response)}`);
                 setEncodedAdministrativeRegion(encodeAdministrativeRegion(response['3'])); // FIXME this is hardcoded to the 3rd administrative region

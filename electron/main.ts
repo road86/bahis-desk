@@ -399,9 +399,10 @@ const deleteData = (event, instanceId, formId) => {
     };
 };
 
-const readUserAdministrativeRegion = async (event) => {
-    log.info('GET user administrative region from local DB');
+const readUserAdministrativeRegion = async (event, args) => {
+    log.info('READ user administrative region from local DB');
     log.debug(`due to ${event.type}`);
+    log.debug(`with args: ${args}`);
 
     return new Promise<object>((resolve, reject) => {
         try {
@@ -411,25 +412,36 @@ const readUserAdministrativeRegion = async (event) => {
             const queryForNextLevelUp = db.prepare(
                 'SELECT parent_administrative_region FROM administrativeregion WHERE id IS ?',
             );
+            const queryForName = db.prepare('SELECT title FROM administrativeregion WHERE id IS ?');
 
             const currentLevel = queryForLevel.get(administrativeRegionID).administrative_region_level;
 
             const userAdministrativeRegionInfo = {};
-            userAdministrativeRegionInfo[currentLevel] = administrativeRegionID;
+            if (args === 'asName') {
+                const administrativeRegionName = queryForName.get(administrativeRegionID).title;
+                userAdministrativeRegionInfo[currentLevel] = administrativeRegionName;
+            } else {
+                userAdministrativeRegionInfo[currentLevel] = administrativeRegionID;
+            }
 
             for (let i = currentLevel - 1; i > 0; i--) {
                 administrativeRegionID = queryForNextLevelUp.get(administrativeRegionID).parent_administrative_region;
-                userAdministrativeRegionInfo[i] = administrativeRegionID;
+                if (args === 'asName') {
+                    const administrativeRegionName = queryForName.get(administrativeRegionID).title;
+                    userAdministrativeRegionInfo[i] = administrativeRegionName;
+                } else {
+                    userAdministrativeRegionInfo[i] = administrativeRegionID;
+                }
             }
 
             if (userAdministrativeRegionInfo !== undefined) {
-                log.info(`GET user administrative region SUCCESS ${JSON.stringify(userAdministrativeRegionInfo)}`);
+                log.info(`READ user administrative region SUCCESS ${JSON.stringify(userAdministrativeRegionInfo)}`);
                 resolve(userAdministrativeRegionInfo);
             } else {
-                log.warn('GET user administrative region FAILED - undefined');
+                log.warn('READ user administrative region FAILED - undefined');
             }
         } catch (error) {
-            log.error('GET user administrative region FAILED with:');
+            log.error('READ user administrative region FAILED with:');
             log.error(error);
             reject(error);
         }
@@ -612,5 +624,5 @@ ipcMain.handle('request-taxonomy-sync', getTaxonomies);
 ipcMain.handle('request-administrative-region-sync', getAdministrativeRegions);
 ipcMain.handle('read-taxonomy-data', readTaxonomy);
 ipcMain.handle('read-administrative-region-data', readAdministrativeRegions);
-ipcMain.handle('read-administrative-region', readUserAdministrativeRegion);
+ipcMain.handle('read-user-administrative-region', readUserAdministrativeRegion);
 ipcMain.handle('read-app-version', readAppVersion);

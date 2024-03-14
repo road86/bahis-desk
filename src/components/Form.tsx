@@ -98,7 +98,7 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
 
             let hasReplacements = false;
             ipcRenderer
-                .invoke('read-administrative-region')
+                .invoke('read-user-administrative-region', 'asName')
                 .then((response) => {
                     log.info(`Administrative region: ${JSON.stringify(response)}`);
                     for (let i = 0; i < elements.length; i++) {
