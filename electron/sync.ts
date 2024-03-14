@@ -233,7 +233,7 @@ export const getFormCloudSubmissions = async (db) => {
 export const postFormCloudSubmissions = async (db) => {
     log.info(`POST KoboToolbox Form Submissions`);
 
-    log.info(`KOBOTOOLBOX KF API URL: ${BAHIS_KOBOTOOLBOX_KC_API_URL}`);
+    log.info(`KOBOTOOLBOX KC API URL: ${BAHIS_KOBOTOOLBOX_KC_API_URL}`);
     const axios_config = {
         headers: {
             Authorization: `Token ${import.meta.env.VITE_BAHIS_KOBOTOOLBOX_API_TOKEN}`,
@@ -250,7 +250,7 @@ export const postFormCloudSubmissions = async (db) => {
         log.info(`POST form ${form.uuid} submissions from KoboToolbox`);
         const selectedFile = new Blob([form.xml], { type: 'text/xml' });
         const formData = new FormData();
-        formData.append('xml_submission_file', selectedFile, '@submission.xml');
+        formData.append('xml_submission_file', selectedFile, '@/submission.xml');
         await axios
             .post(BAHIS_KOBOTOOLBOX_KC_API_URL + 'submissions', formData, axios_config)
             .then((response) => {

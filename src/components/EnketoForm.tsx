@@ -1,12 +1,11 @@
 import { Button } from '@mui/material';
-import { Form, FormModel } from 'enketo-core';
+import { ipcRenderer } from 'electron';
+import { Form } from 'enketo-core';
 import { transform } from 'enketo-transformer/web';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { log } from '../helpers/log';
-import { ipcRenderer } from 'electron';
 import './theme-kobo.css';
-
 interface EnketoFormProps {
     formUID: string; // The unique identifier for the form
     formODKXML: string; // The XML string of the form
@@ -16,14 +15,7 @@ interface EnketoFormProps {
     editable?: boolean; // Whether the form should be editable
 }
 
-export const EnketoForm: React.FC<EnketoFormProps> = ({
-    formUID,
-    formODKXML,
-    formData,
-    setFormData,
-    instanceID,
-    editable,
-}) => {
+export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, setFormData, instanceID, editable }) => {
     const formEl = useRef<HTMLDivElement>(null);
     const [formEnketoXML, setFormEnketoXML] = useState<string>('');
     const [formEnketoHTML, setFormEnketoHTML] = useState<string>('');
@@ -31,11 +23,11 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
 
     const navigate = useNavigate();
 
-    const createDraft = (data) => {
+    const createOrUpdateDraft = (data) => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(data, 'application/xml');
         const uuid = doc.getElementsByTagName('instanceID')[0].textContent;
-        const query = `INSERT INTO formlocaldraft (uuid, form_uid, xml) VALUES ('${uuid}', '${formUID}', '${data}')`;
+        const query = `INSERT INTO formlocaldraft (uuid, form_uid, xml) VALUES ('${uuid}', '${formUID}', '${data}') ON CONFLICT (uuid) DO UPDATE SET xml = excluded.xml;`;
         ipcRenderer
             .invoke('post-local-db', query)
             .then((response) => {
@@ -117,19 +109,16 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
     useEffect(() => {
         if (!formEnketoXML) return;
 
-        log.debug(formEnketoXML);
-        log.debug(formData);
-
         const data = {
             modelStr: formEnketoXML,
-            instanceStr: formData || null, // FIXME - instanceStr _does not work_ with an electron app due to the downstream mergeXML library (instead we inject form data into the modelStr as "default values")
+            instanceStr: null, // FIXME - instanceStr does not work so we have hacked a solution at the parent Form component level
             submitted: instanceID !== undefined,
         };
 
         const options = {};
 
         setForm(new Form(formEl.current?.children[0], data, options));
-    }, [formEl, formEnketoXML, formData, instanceID]);
+    }, [formEl, formEnketoXML, instanceID]);
 
     // when the Enketo Form object is created, init the form
     useEffect(() => {
@@ -153,9 +142,8 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({
                     if (valid) {
                         log.info('Enketo form validation successful');
                         const data = form.getDataStr();
-                        // log.debug(data);
                         if (data) {
-                            createDraft(data);
+                            createOrUpdateDraft(data);
                             navigate('/list/drafts');
                         }
                     } else {

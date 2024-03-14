@@ -30,12 +30,14 @@ interface FormProps {
 
 export const Form: React.FC<FormProps> = ({ draft }) => {
     const [formXML, setFormXML] = useState<string>('');
+    const [prefilledFormXML, setPrefilledFormXML] = useState<string>('');
+    const [formData, setFormData] = useState<string>('');
     const [tableName, setTableName] = useState<string>('');
-    const [formData, setFormData] = useState<string>();
     const [editable, setEditable] = useState<boolean>(true);
 
     const [isDeskUserReplaced, setIsDeskUserReplaced] = useState<boolean>(false);
     const [isDeskTaxonomyInserted, setIsDeskTaxonomyInserted] = useState<boolean>(false);
+    const [isPrefilled, setIsPrefilled] = useState<boolean>(false);
 
     const { form_uid, instance_id } = useParams();
 
@@ -235,27 +237,64 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
     }, [formXML, instance_id, editable]);
 
     // if the form has been filled out previously, read the data
+    // FIXME and then force it into the form as "default" data
+    // because we couldn't get the instanceStr to work in the EnketoForm component
     useEffect(() => {
+        const replacePrefilledValues = (formXML: string, formData: string) => {
+            log.info('Replacing prefilled values in form definition');
+            const parser = new DOMParser();
+            const serializer = new XMLSerializer();
+
+            const doc = parser.parseFromString(formXML, 'application/xml');
+            const prefilledDoc = parser.parseFromString(formData, 'application/xml');
+
+            const elements = prefilledDoc.getElementsByTagName('*');
+
+            let hasReplacements = false;
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i].childNodes.length === 1 && elements[i].firstChild?.nodeType === elements[i].TEXT_NODE) {
+                    // find the corresponding element in the form definition
+                    const formElement = doc.getElementsByTagName(elements[i].tagName)[0];
+                    if (formElement) {
+                        formElement.textContent = elements[i].textContent;
+                        hasReplacements = true;
+                    }
+                }
+            }
+
+            if (hasReplacements) {
+                setPrefilledFormXML(serializer.serializeToString(doc));
+                log.info('Prefilled values replaced successfully');
+            } else {
+                log.info('No prefilled values found');
+                setIsPrefilled(true);
+            }
+        };
+
         if (form_uid && tableName && instance_id) {
             log.info(`Reading data for form: ${form_uid} (${tableName}) and instance: ${instance_id}`);
             readFormData(tableName, form_uid, instance_id)
                 .then((response) => {
-                    setFormData(response[0]['xml'] as string);
+                    const formData = response[0]['xml'] as string;
+                    setFormData(formData);
+                    replacePrefilledValues(formXML, formData);
                 })
                 .catch((error) => {
                     log.error('Error reading form data');
                     log.error(error);
                 });
+        } else {
+            setPrefilledFormXML(formXML);
+            setIsPrefilled(true);
         }
-    }, [form_uid, tableName, instance_id]);
+    }, [form_uid, formXML, tableName, instance_id]);
 
     return (
         <>
-            {form_uid && formXML && isDeskUserReplaced && isDeskTaxonomyInserted ? (
+            {form_uid && prefilledFormXML && isDeskUserReplaced && isDeskTaxonomyInserted && isPrefilled ? (
                 <EnketoForm
                     formUID={form_uid}
-                    formODKXML={formXML}
-                    formData={formData}
+                    formODKXML={prefilledFormXML}
                     setFormData={setFormData}
                     instanceID={instance_id}
                     editable={editable}

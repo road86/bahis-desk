@@ -33,7 +33,7 @@ const parseSubmissionsAsRows = async (submissions) => {
     const rows: Row[] = [];
 
     for (const submission of submissions) {
-        const xmlDoc = parser.parseFromString(submission.xml, 'text/xml');
+        const xmlDoc = parser.parseFromString(submission.xml, 'application/xml');
 
         const uuid = xmlDoc.documentElement.getElementsByTagName('instanceID')[0].textContent;
 
