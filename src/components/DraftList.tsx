@@ -69,14 +69,15 @@ export const DraftList = () => {
 
     const columns: GridColDef[] = [
         {
+            field: 'instance_start',
+            headerName: 'Created at',
+            type: 'date',
+            width: 100,
+        },
+        {
             field: 'form_name',
             headerName: 'Form name',
             width: 200,
-        },
-        {
-            field: 'instance_start',
-            headerName: 'Created at',
-            width: 300,
         },
     ];
 

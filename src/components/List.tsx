@@ -94,10 +94,21 @@ const parseSubmissionsAsRows = (submission) => {
             const name = element.nodeName || '';
             const field_name = `${parent_name}_${name}`;
             const value = element.textContent || '';
-            row[field_name] = value;
+            if (name.toLowerCase().includes('date')) {
+                try {
+                    row[field_name] = new Date(value);
+                } catch (error) {
+                    log.error('Error parsing date:');
+                    log.error(error);
+                }
+                row[field_name] = new Date(value);
+            } else {
+                row[field_name] = value;
+            }
         });
 
     row['id'] = submission.uuid;
+    row['submission_date'] = new Date(xmlDoc.documentElement.getElementsByTagName('end')[0].textContent as string);
     return row;
 };
 
@@ -138,11 +149,28 @@ const parseFormDefinitionAsColumns = (xmlDoc: Document, workflows: []) => {
         const parent_name = ref?.split('/')[2] || '';
         const name = ref?.split('/')[3] || '';
         const headerName = element.getElementsByTagName('label')[0].textContent;
-        return {
-            field: `${parent_name}_${name}`,
-            headerName: headerName || name,
-            width: 200,
-        };
+        if (name.toLowerCase().includes('date')) {
+            return {
+                field: `${parent_name}_${name}`,
+                headerName: headerName || name,
+                type: 'date',
+                width: 100,
+            };
+        } else {
+            return {
+                field: `${parent_name}_${name}`,
+                headerName: headerName || name,
+                width: 200,
+            };
+        }
+    });
+
+    // add submission date as first column
+    parsedColumns.unshift({
+        field: 'submission_date',
+        headerName: 'Submission Date',
+        type: 'date',
+        width: 100,
     });
 
     // add workflow actions

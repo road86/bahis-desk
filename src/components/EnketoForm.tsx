@@ -115,7 +115,7 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, set
             submitted: instanceID !== undefined,
         };
 
-        const options = {};
+        const options = {}; // FIXME how to provide username?
 
         setForm(new Form(formEl.current?.children[0], data, options));
     }, [formEl, formEnketoXML, instanceID]);
