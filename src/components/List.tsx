@@ -1,6 +1,6 @@
 import { Tooltip, Typography } from '@mui/material';
 import { DataGrid, GridActionsCellItem, GridColDef, GridColumnVisibilityModel, GridToolbar } from '@mui/x-data-grid';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
@@ -8,6 +8,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const GROUPS_TO_SHOW = ['basic_info'];
 const FIELDS_TO_HIDE = ['division', 'district', 'upazila']; // FIXME move out to some sort of config}
+
+interface Workflow {
+    title: string;
+    source_form: string;
+    destination_form: string;
+    definition: string;
+}
 
 const readFormDefinition = async (form_uid: string) => {
     log.info(`reading XML definition from form for form: ${form_uid}`);
@@ -48,12 +55,51 @@ const readFormWorkflows = async (form_uid: string) => {
         .invoke('get-local-db', query)
         .then((response) => {
             log.info(`Succesfully read ${response.length} workflows for this form`);
-            return response;
+            return response as Workflow[];
         })
         .catch((error) => {
             log.error(`Error reading form workflows: ${error}`);
             return [];
         });
+};
+
+const mapWorkflow = (workflow: Workflow, row) => {
+    log.info(`Mapping data of ${row.id} through ${workflow.title} workflow`);
+    const mapping = JSON.parse(workflow.definition);
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(row.raw_xml, 'application/xml');
+
+    const form = xmlDoc.documentElement.children;
+
+    const recurseXML = (collection: HTMLCollection, fields: Element[]) => {
+        for (const element of collection) {
+            if (element.childElementCount > 0) {
+                recurseXML(element.children, fields);
+            } else {
+                fields.push(element);
+            }
+        }
+    };
+
+    // Get list of all fields in the form (recursing through groups and repeats)
+    const fields: Element[] = [];
+    recurseXML(form, fields);
+
+    fields.map((element) => {
+        const parent_name = element.parentElement?.nodeName || '';
+        const name = element.nodeName || '';
+        const field_name = `${parent_name}/${name}`; // same format as definitions
+        if (mapping[field_name]) {
+            // replace element with identical element with new tag name
+            const newElement = xmlDoc.createElement(mapping[field_name].split('/').at(-1));
+            newElement.textContent = element.textContent;
+            element.replaceWith(newElement, element);
+        } else {
+            element.remove();
+        }
+    });
+
+    return new XMLSerializer().serializeToString(xmlDoc);
 };
 
 const parseSubmissionsAsRows = (submission) => {
@@ -109,96 +155,13 @@ const parseSubmissionsAsRows = (submission) => {
 
     row['id'] = submission.uuid;
     row['submission_date'] = new Date(xmlDoc.documentElement.getElementsByTagName('end')[0].textContent as string);
+    row['raw_xml'] = submission.xml;
     return row;
-};
-
-const parseFormDefinitionAsColumns = (xmlDoc: Document, workflows: []) => {
-    log.info('Parsing form definition as datagrid columns');
-
-    const form = xmlDoc.body.children;
-
-    const recurseXML = (collection: HTMLCollection, fields: Element[]) => {
-        for (const element of collection) {
-            if (element.nodeName === 'group' || element.nodeName === 'repeat') {
-                recurseXML(element.children, fields);
-            } else if (element.nodeName === 'input') {
-                fields.push(element);
-            }
-        }
-    };
-
-    // Get list of all fields in the form (recursing through groups and repeats)
-    const fields: Element[] = [];
-    recurseXML(form, fields);
-
-    const columnVisibilityInitial = {};
-    fields.filter((element) => {
-        const ref = element.getAttribute('ref');
-        const parent_name = ref?.split('/')[2] || '';
-        const name = ref?.split('/')[3] || '';
-        if (GROUPS_TO_SHOW.includes(parent_name) && !FIELDS_TO_HIDE.includes(name)) {
-            columnVisibilityInitial[`${parent_name}_${name}`] = true;
-        } else {
-            columnVisibilityInitial[`${parent_name}_${name}`] = false;
-        }
-    });
-
-    // Map fields to column definition objects
-    const parsedColumns: GridColDef[] = fields.map((element) => {
-        const ref = element.getAttribute('ref');
-        const parent_name = ref?.split('/')[2] || '';
-        const name = ref?.split('/')[3] || '';
-        const headerName = element.getElementsByTagName('label')[0].textContent;
-        if (name.toLowerCase().includes('date')) {
-            return {
-                field: `${parent_name}_${name}`,
-                headerName: headerName || name,
-                type: 'date',
-                width: 100,
-            };
-        } else {
-            return {
-                field: `${parent_name}_${name}`,
-                headerName: headerName || name,
-                width: 200,
-            };
-        }
-    });
-
-    // add submission date as first column
-    parsedColumns.unshift({
-        field: 'submission_date',
-        headerName: 'Submission Date',
-        type: 'date',
-        width: 100,
-    });
-
-    // add workflow actions
-    if (workflows.length > 0) {
-        parsedColumns.push({
-            field: 'actions',
-            type: 'actions',
-            width: 50,
-            getActions: () => {
-                return [
-                    <GridActionsCellItem
-                        label="Unpin"
-                        icon={<Tooltip title="Unpin">{<ArrowUpwardIcon />}</Tooltip>}
-                        onClick={() => {
-                            log.info('Clicked!');
-                        }}
-                    />,
-                ];
-            },
-        });
-    }
-
-    return { parsedColumns, columnVisibilityInitial };
 };
 
 export const List = () => {
     const [form, setForm] = useState<Document>();
-    const [workflows, setWorkflows] = useState<[]>([]);
+    const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [columnVisibility, setColumnVisibility] = useState<GridColumnVisibilityModel>();
     const [rows, setRows] = useState<[]>([]);
@@ -225,18 +188,106 @@ export const List = () => {
     // read workflow definitions
     useEffect(() => {
         if (form_uid) {
-            readFormWorkflows(form_uid).then((workflows) => setWorkflows(workflows));
+            readFormWorkflows(form_uid).then((workflows) => setWorkflows(workflows as Workflow[]));
         }
     }, [form_uid]);
 
     // parse form definition into columns
     useEffect(() => {
+        const parseFormDefinitionAsColumns = (xmlDoc: Document) => {
+            log.info('Parsing form definition as datagrid columns');
+
+            const form = xmlDoc.body.children;
+
+            const recurseXML = (collection: HTMLCollection, fields: Element[]) => {
+                for (const element of collection) {
+                    if (element.nodeName === 'group' || element.nodeName === 'repeat') {
+                        recurseXML(element.children, fields);
+                    } else if (element.nodeName === 'input') {
+                        fields.push(element);
+                    }
+                }
+            };
+
+            // Get list of all fields in the form (recursing through groups and repeats)
+            const fields: Element[] = [];
+            recurseXML(form, fields);
+
+            const columnVisibilityInitial = {};
+            fields.filter((element) => {
+                const ref = element.getAttribute('ref');
+                const parent_name = ref?.split('/')[2] || '';
+                const name = ref?.split('/')[3] || '';
+                if (GROUPS_TO_SHOW.includes(parent_name) && !FIELDS_TO_HIDE.includes(name)) {
+                    columnVisibilityInitial[`${parent_name}_${name}`] = true;
+                } else {
+                    columnVisibilityInitial[`${parent_name}_${name}`] = false;
+                }
+            });
+
+            // Map fields to column definition objects
+            const parsedColumns: GridColDef[] = fields.map((element) => {
+                const ref = element.getAttribute('ref');
+                const parent_name = ref?.split('/')[2] || '';
+                const name = ref?.split('/')[3] || '';
+                const headerName = element.getElementsByTagName('label')[0].textContent;
+                if (name.toLowerCase().includes('date')) {
+                    return {
+                        field: `${parent_name}_${name}`,
+                        headerName: headerName || name,
+                        type: 'date',
+                        width: 100,
+                    };
+                } else {
+                    return {
+                        field: `${parent_name}_${name}`,
+                        headerName: headerName || name,
+                        width: 200,
+                    };
+                }
+            });
+
+            // add submission date as first column
+            parsedColumns.unshift({
+                field: 'submission_date',
+                headerName: 'Submission Date',
+                type: 'date',
+                width: 100,
+            });
+
+            // add workflow actions
+            if (workflows.length > 0) {
+                log.info('Adding workflow actions column');
+                parsedColumns.push({
+                    field: 'actions',
+                    type: 'actions',
+                    width: 50,
+                    getActions: (params) => {
+                        return workflows.map((workflow) => {
+                            return (
+                                <GridActionsCellItem
+                                    label={workflow.title}
+                                    icon={<Tooltip title={workflow.title}>{<PostAddIcon />}</Tooltip>}
+                                    onClick={() => {
+                                        const formData = mapWorkflow(workflow, params.row);
+                                        navigate(`/form/${form_uid}`, { state: { injectedData: formData } });
+                                    }}
+                                />
+                            );
+                        });
+                    },
+                });
+            }
+
+            return { parsedColumns, columnVisibilityInitial };
+        };
+
         if (form) {
-            const { parsedColumns, columnVisibilityInitial } = parseFormDefinitionAsColumns(form, workflows || []);
+            const { parsedColumns, columnVisibilityInitial } = parseFormDefinitionAsColumns(form);
             setColumns(parsedColumns);
             setColumnVisibility(columnVisibilityInitial);
         }
-    }, [form, workflows]);
+    }, [form_uid, form, workflows, navigate]);
 
     // parse data as rows
     useEffect(() => {

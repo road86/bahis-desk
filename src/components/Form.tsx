@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
 import { EnketoForm } from './EnketoForm';
@@ -30,16 +30,26 @@ interface FormProps {
 
 export const Form: React.FC<FormProps> = ({ draft }) => {
     const [formXML, setFormXML] = useState<string>('');
+    const [injectedData, setInjectedData] = useState<string>();
+    const [formData, setFormData] = useState<string>();
     const [prefilledFormXML, setPrefilledFormXML] = useState<string>('');
-    const [formData, setFormData] = useState<string>('');
     const [tableName, setTableName] = useState<string>('');
     const [editable, setEditable] = useState<boolean>(true);
-
     const [isDeskUserReplaced, setIsDeskUserReplaced] = useState<boolean>(false);
     const [isDeskTaxonomyInserted, setIsDeskTaxonomyInserted] = useState<boolean>(false);
     const [isPrefilled, setIsPrefilled] = useState<boolean>(false);
 
+    const { state } = useLocation();
+
     const { form_uid, instance_id } = useParams();
+
+    // catch changing location state for injected data via workflow
+    useEffect(() => {
+        if (state?.injectedData) {
+            log.info('Injecting data via workflow');
+            setInjectedData(state.injectedData);
+        }
+    }, [state]);
 
     // decide which data table to read from, e.g. submitted or cloud
     useEffect(() => {
@@ -105,6 +115,8 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                         if (elements[i].textContent?.startsWith('deskUser')) {
                             switch (elements[i].textContent) {
                                 case 'deskUser.administrative_region_1':
+                                    log.debug(elements[i].textContent);
+                                    log.debug(response['1']);
                                     elements[i].textContent = response['1'];
                                     hasReplacements = true;
                                     break;
@@ -222,7 +234,7 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
         };
 
         if (formXML) {
-            if (!instance_id) {
+            if (!instance_id && !injectedData) {
                 log.info('This appears to be a fresh form, replacing deskUser and deskTaxonomy tags.');
                 replaceUserValues(formXML);
                 insertTaxonomyChoices(formXML);
@@ -236,11 +248,12 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                 setIsDeskTaxonomyInserted(true);
             }
         }
-    }, [formXML, instance_id, editable]);
+    }, [formXML, instance_id, editable, injectedData]);
 
     // if the form has been filled out previously, read the data
     // FIXME and then force it into the form as "default" data
     // because we couldn't get the instanceStr to work in the EnketoForm component
+    // but we also use this for injecting data via a workflow
     useEffect(() => {
         const replacePrefilledValues = (formXML: string, formData: string) => {
             log.info('Replacing prefilled values in form definition');
@@ -254,10 +267,10 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
 
             let hasReplacements = false;
             for (let i = 0; i < elements.length; i++) {
-                if (elements[i].childNodes.length === 1 && elements[i].firstChild?.nodeType === elements[i].TEXT_NODE) {
+                if (elements[i].children.length === 0 && elements[i].textContent) {
                     // find the corresponding element in the form definition
                     const formElement = doc.getElementsByTagName(elements[i].tagName)[0];
-                    if (formElement) {
+                    if (formElement && formElement.children.length === 0) {
                         formElement.textContent = elements[i].textContent;
                         hasReplacements = true;
                     }
@@ -285,11 +298,15 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                     log.error('Error reading form data');
                     log.error(error);
                 });
+        } else if (injectedData) {
+            log.info('Prefilling form with injected data (probably a workflow)');
+            setFormData(injectedData);
+            replacePrefilledValues(formXML, injectedData);
         } else {
             setPrefilledFormXML(formXML);
             setIsPrefilled(true);
         }
-    }, [form_uid, formXML, tableName, instance_id]);
+    }, [form_uid, formXML, tableName, instance_id, injectedData]);
 
     return (
         <>
