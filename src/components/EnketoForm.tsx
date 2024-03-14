@@ -41,6 +41,21 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, set
             });
     };
 
+    const deleteDraft = (uuid) => {
+        const query = `DELETE FROM formlocaldraft WHERE uuid = '${uuid}';`;
+        ipcRenderer
+            .invoke('post-local-db', query)
+            .then((response) => {
+                if (response) {
+                    log.info('Form draft deleted from local database successfully');
+                }
+            })
+            .catch((error) => {
+                log.error('Error deleting form draft from local database:');
+                log.error(error);
+            });
+    };
+
     // when the component mounts, transform the form ODK XML to enketo XML and HTML
     // checking whether or not the form should be editable
     // and converting the form to read-only if necessary
@@ -168,6 +183,13 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, set
         navigate(`/list/${formUID}`);
     };
 
+    const onDelete = () => {
+        if (form && instanceID) {
+            deleteDraft(instanceID);
+        }
+        navigate(`/list/drafts`);
+    };
+
     return (
         <>
             <div ref={formEl}></div>
@@ -176,6 +198,7 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, set
                     <Button onClick={onCancel}>Cancel</Button>
                     <Button onClick={onReset}>Reset</Button>
                     <Button onClick={onSubmit}>Submit</Button>
+                    {instanceID && <Button onClick={onDelete}>Delete Draft</Button>}
                 </>
             )}
         </>

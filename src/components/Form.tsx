@@ -150,6 +150,7 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                     .catch((error) => {
                         log.error('Error reading administrative region data data');
                         log.error(error);
+                        return null;
                     });
             } else {
                 return ipcRenderer
@@ -160,6 +161,7 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                     .catch((error) => {
                         log.error('Error reading taxonomy data');
                         log.error(error);
+                        return null;
                     });
             }
         };

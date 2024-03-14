@@ -3,7 +3,7 @@ import csv from 'csv-parser';
 import { BrowserWindow, Menu, app, dialog, ipcMain } from 'electron';
 import firstRun from 'electron-first-run'; // could this eventually be removed too?
 import { autoUpdater } from 'electron-updater';
-import { cp, createReadStream, existsSync, writeFile } from 'fs';
+import { cp, createReadStream, existsSync } from 'fs';
 import path from 'node:path';
 import { create } from 'xmlbuilder2';
 import { createLocalDatabase, createOrReadLocalDatabase, createUserInLocalDatabase, deleteLocalDatabase } from './localDB';
@@ -326,56 +326,8 @@ const signIn = async (event, userData) => {
     }
 };
 
-const exportExcel = (event, excelData) => {
-    log.debug(`exporting Excel due to ${event.type}`);
-    let filename: string | undefined;
-    dialog
-        .showSaveDialog({
-            filters: [
-                {
-                    name: 'Bahis',
-                    extensions: ['xls'],
-                },
-            ],
-        })
-        .then((result) => {
-            filename = result.filePath;
-            if (filename === undefined) {
-                log.info(filename);
-                dialog.showMessageBox({
-                    title: 'Download Updates',
-                    message: "couldn't create a file.",
-                });
-                return;
-            }
-
-            writeFile(filename, new Buffer(excelData), (error) => {
-                if (error) {
-                    log.error('an error occured with file creation:');
-                    log.error(error);
-                    dialog.showMessageBox({
-                        title: 'Download Updates',
-                        message: `an error ocurred with file creation ${error?.message}`,
-                    });
-                    return;
-                }
-                dialog.showMessageBox({
-                    title: 'Download Updates',
-                    message: 'File Downloaded Successfully',
-                });
-            });
-        })
-        .catch((error) => {
-            dialog.showMessageBox({
-                title: 'Download Updates',
-                message: `${error?.message}`,
-            });
-            log.error('export excel error:');
-            log.error(error);
-        });
-};
-
 const fetchUsername = (event, infowhere) => {
+    // TODO refactor / write this for new BAHIS 3 auth
     log.info(`fetchUsername: ${infowhere}`);
     try {
         const fetchedUsername = db.prepare('SELECT username from users2 limit 1').get() as any;
@@ -389,14 +341,6 @@ const fetchUsername = (event, infowhere) => {
         log.error('fetchUsername FAILED with:');
         log.error(error);
     }
-};
-
-const deleteData = (event, instanceId, formId) => {
-    log.info(instanceId, formId);
-    deleteDataWithInstanceId2(db, instanceId, formId);
-    event.returnValue = {
-        status: 'successful',
-    };
 };
 
 const readUserAdministrativeRegion = async (event, args) => {
@@ -606,8 +550,6 @@ const readAppVersion = async (event) => {
 // subscribes the listeners to channels
 //original
 ipcMain.on('fetch-username', fetchUsername);
-ipcMain.on('export-xlsx', exportExcel);
-ipcMain.on('delete-instance', deleteData);
 
 // refactored & new
 ipcMain.handle('sign-in', signIn); // still uses BAHIS 2 for Auth

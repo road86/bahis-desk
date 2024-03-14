@@ -1,5 +1,6 @@
-import { Typography } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Tooltip, Typography } from '@mui/material';
+import { DataGrid, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useState } from 'react';
 import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
@@ -65,6 +66,21 @@ const parseSubmissionsAsRows = async (submissions) => {
 export const DraftList = () => {
     const [rows, setRows] = useState<Row[]>();
 
+    const deleteDraft = (uuid) => {
+        const query = `DELETE FROM formlocaldraft WHERE uuid = '${uuid}';`;
+        ipcRenderer
+            .invoke('post-local-db', query)
+            .then((response) => {
+                if (response) {
+                    log.info('Form draft deleted from local database successfully');
+                }
+            })
+            .catch((error) => {
+                log.error('Error deleting form draft from local database:');
+                log.error(error);
+            });
+    };
+
     const navigate = useNavigate();
 
     const columns: GridColDef[] = [
@@ -78,6 +94,25 @@ export const DraftList = () => {
             field: 'form_name',
             headerName: 'Form name',
             width: 200,
+        },
+        {
+            field: 'actions',
+            type: 'actions',
+            width: 50,
+            getActions: (params) => {
+                return [
+                    <GridActionsCellItem
+                        label="Delete"
+                        icon={<Tooltip title="Delete">{<DeleteIcon />}</Tooltip>}
+                        onClick={() => {
+                            if (params.row.id) {
+                                deleteDraft(params.row.id);
+                            }
+                            navigate('/list/draft');
+                        }}
+                    />,
+                ];
+            },
         },
     ];
 
