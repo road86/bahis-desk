@@ -18,7 +18,7 @@ export const IFrame = () => {
     const [externalUrl, setExternalURL] = useState<string | null>();
     const [encodedAdministrativeRegion, setEncodedAdministrativeRegion] = useState<string>();
     const [completeURL, setCompleteURL] = useState<string>();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const searchParams = useSearchParams()[0];
 
     useEffect(() => {
         ipcRenderer

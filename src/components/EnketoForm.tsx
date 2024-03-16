@@ -9,13 +9,11 @@ import { log } from '../helpers/log';
 interface EnketoFormProps {
     formUID: string; // The unique identifier for the form
     formODKXML: string; // The XML string of the form
-    formData?: string; // Optional initial data for the form in XML format
-    setFormData?: (data) => void; // Callback to set the form data on submission
     instanceID?: string; // The instance ID for a previously submitted form
     editable?: boolean; // Whether the form should be editable
 }
 
-export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, setFormData, instanceID, editable }) => {
+export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, instanceID, editable }) => {
     const formEl = useRef<HTMLDivElement>(null);
     const [formEnketoXML, setFormEnketoXML] = useState<string>('');
     const [formEnketoHTML, setFormEnketoHTML] = useState<string>('');
@@ -175,7 +173,6 @@ export const EnketoForm: React.FC<EnketoFormProps> = ({ formUID, formODKXML, set
     const onReset = () => {
         if (form) {
             form.resetView();
-            if (setFormData) setFormData(null);
         }
     };
 

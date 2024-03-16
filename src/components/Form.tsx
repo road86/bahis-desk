@@ -31,7 +31,6 @@ interface FormProps {
 export const Form: React.FC<FormProps> = ({ draft }) => {
     const [formXML, setFormXML] = useState<string>('');
     const [injectedData, setInjectedData] = useState<string>();
-    const [formData, setFormData] = useState<string>();
     const [prefilledFormXML, setPrefilledFormXML] = useState<string>('');
     const [tableName, setTableName] = useState<string>('');
     const [editable, setEditable] = useState<boolean>(true);
@@ -291,7 +290,6 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
             readFormData(tableName, form_uid, instance_id)
                 .then((response) => {
                     const formData = response[0]['xml'] as string;
-                    setFormData(formData);
                     replacePrefilledValues(formXML, formData);
                 })
                 .catch((error) => {
@@ -300,7 +298,6 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
                 });
         } else if (injectedData) {
             log.info('Prefilling form with injected data (probably a workflow)');
-            setFormData(injectedData);
             replacePrefilledValues(formXML, injectedData);
         } else {
             setPrefilledFormXML(formXML);
@@ -311,13 +308,7 @@ export const Form: React.FC<FormProps> = ({ draft }) => {
     return (
         <>
             {form_uid && prefilledFormXML && isDeskUserReplaced && isDeskTaxonomyInserted && isPrefilled ? (
-                <EnketoForm
-                    formUID={form_uid}
-                    formODKXML={prefilledFormXML}
-                    setFormData={setFormData}
-                    instanceID={instance_id}
-                    editable={editable}
-                />
+                <EnketoForm formUID={form_uid} formODKXML={prefilledFormXML} instanceID={instance_id} editable={editable} />
             ) : (
                 <Loading />
             )}
