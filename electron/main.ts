@@ -326,11 +326,15 @@ const signIn = async (event, userData) => {
     }
 };
 
+interface usernameObject {
+    username: string;
+}
+
 const fetchUsername = (event, infowhere) => {
     // TODO refactor / write this for new BAHIS 3 auth
     log.info(`fetchUsername: ${infowhere}`);
     try {
-        const fetchedUsername = db.prepare('SELECT username from users2 limit 1').get() as any;
+        const fetchedUsername = db.prepare('SELECT username from users2 limit 1').get() as usernameObject;
 
         log.info('XIM2, we fetched', JSON.stringify(fetchedUsername));
         event.returnValue = {
@@ -492,11 +496,11 @@ const readTaxonomy = async (event, taxonomySlug: string) => {
     const filePath = response.csv_file;
 
     log.info(`Reading taxonomy CSV at ${filePath}`);
-    const data: any[] = [];
+    const data: object[] = [];
     return new Promise<string>((resolve, reject) => {
         createReadStream(filePath)
             .pipe(csv())
-            .on('data', (row) => data.push(row))
+            .on('data', (row: object) => data.push(row))
             .on('end', () => {
                 const doc = create({ version: '1.0' }).ele('root');
 
