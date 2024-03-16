@@ -16,7 +16,7 @@ import { log } from '../helpers/log';
 import { ipcRenderer } from 'electron';
 import { Link, useParams } from 'react-router-dom';
 
-export enum MenuItemTypes {
+enum MenuItemTypes {
     form = 1,
     list,
     module,
@@ -24,7 +24,7 @@ export enum MenuItemTypes {
     submitted,
 }
 
-export interface MenuItem {
+interface MenuItem {
     id: number;
     title: string;
     icon: string;
