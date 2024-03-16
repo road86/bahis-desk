@@ -9,7 +9,7 @@
     "lint-electron": "eslint electron --ext ts,tsx --report-unused-disable-directives",
     "lint-react": "eslint src --ext ts,tsx --report-unused-disable-directives",
     "fix-better-sqlite-build-error": "electron-builder install-app-deps",
-    "format": "prettier --write ./**/*.{ts,tsx}"
+    "format": "prettier --write './**/*.{ts,tsx}'"
   },
   "dependencies": {
     "@date-io/date-fns": "^2.17.0",
