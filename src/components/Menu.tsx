@@ -68,7 +68,7 @@ export default function MenuButton(props: MenuButtonProps) {
                 }}
             >
                 <CardContent>
-                    <Typography variant="h4" color={'primary'}>
+                    <Typography variant="h6" color={'primary'}>
                         {props.menuItem.title}
                     </Typography>
                     <Icon fontSize="large" color={'primary'} sx={{ margin: 1 }}>

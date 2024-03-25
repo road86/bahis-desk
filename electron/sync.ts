@@ -358,7 +358,7 @@ export const getAdministrativeRegions = async (db) => {
 
     log.info(`GET getAdministrativeRegions Definitions`);
 
-    const userAdministrativeRegionQuery = `SELECT upazila FROM users2`;
+    const userAdministrativeRegionQuery = `SELECT upazila FROM users`;
     const administrativeRegionID = db.prepare(userAdministrativeRegionQuery).get().upazila; // FIXME replace when moving to BAHIS 3 user systems
 
     const BAHIS_ADMINISTRATIVE_REGIONS_ENDPOINT = (administrativeRegionID) =>
