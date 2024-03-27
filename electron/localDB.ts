@@ -45,7 +45,7 @@ export const createOrReadLocalDatabase = (MODE) => {
 };
 
 export const createUserInLocalDatabase = async (data, userData, db) => {
-    const insertStmt = db.prepare(`INSERT INTO user (username, password, name, role, upazila) VALUES (?, ?, ?, ?, ?)`);
+    const insertStmt = db.prepare(`INSERT INTO users (username, password, name, role, upazila) VALUES (?, ?, ?, ?, ?)`);
     insertStmt.run(data.user_name, userData.password, data.name, data.role, data.upazila);
 
     log.info(`Created db with user details for ${data.user_name}`);
@@ -168,6 +168,7 @@ const intialiseUserTable = (db) => {
         'CREATE TABLE users (\
         username TEXT PRIMARY KEY,\
         password TEXT NOT NULL,\
+        name TEXT,\
         upazila INTEGER,\
         role Text NOT NULL\
     );',

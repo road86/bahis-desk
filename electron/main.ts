@@ -270,7 +270,7 @@ const signIn = async (event, userData) => {
     log.debug(event);
 
     const SIGN_IN_ENDPOINT = `${BAHIS2_SERVER_URL}/bhmodule/app-user-verify/`;
-    const current_user = db.prepare('SELECT * from users2 limit 1').get();
+    const current_user = db.prepare('SELECT * from users limit 1').get();
 
     if (current_user) {
         log.info(`User exists in the current database - ${current_user.username}`);
@@ -334,7 +334,7 @@ const fetchUsername = (event, infowhere) => {
     // TODO refactor / write this for new BAHIS 3 auth
     log.info(`fetchUsername: ${infowhere}`);
     try {
-        const fetchedUsername = db.prepare('SELECT username from users2 limit 1').get() as usernameObject;
+        const fetchedUsername = db.prepare('SELECT username from users limit 1').get() as usernameObject;
 
         log.info('XIM2, we fetched', JSON.stringify(fetchedUsername));
         event.returnValue = {
@@ -354,7 +354,7 @@ const readUserAdministrativeRegion = async (event, args) => {
 
     return new Promise<object>((resolve, reject) => {
         try {
-            const userAdministrativeRegionQuery = `SELECT upazila FROM users2`;
+            const userAdministrativeRegionQuery = `SELECT upazila FROM users`;
             let administrativeRegionID = db.prepare(userAdministrativeRegionQuery).get().upazila; // FIXME replace when moving to BAHIS 3 user systems
             const queryForLevel = db.prepare('SELECT administrative_region_level FROM administrativeregion WHERE id IS ?');
             const queryForNextLevelUp = db.prepare(
